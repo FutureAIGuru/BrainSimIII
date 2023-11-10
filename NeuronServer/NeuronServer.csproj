@@ -18,10 +18,6 @@
     <Content Include="favicon.ico" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\NeuronEngineWrapper\NeuronEngineWrapper.vcxproj" />
-  </ItemGroup>
-
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="copy $(SolutionDir)neuronserver\bin\$(Configuration)\net6.0 $(SolutionDir)brainsimulator\bin\$(Configuration)\net6.0-windows\" />
   </Target>

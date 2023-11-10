@@ -14,7 +14,7 @@ using System.Xml.Serialization;
 
 namespace BrainSimulator
 {
-    public partial class NeuronArray : NeuronHandler
+    public partial class NeuronArray
     {
         public string networkNotes = "";
         public bool hideNotes = false;
@@ -99,12 +99,6 @@ namespace BrainSimulator
             rows = inRows;
             arraySize = count;
             ClearLabelCache();
-            if (!MainWindow.useServers || clipBoard)
-                ; // base.Initialize(count);
-            else
-            {
-                NeuronClient.InitServers(0, count);
-            }
 
             if(MainWindow.pauseTheNeuronArray)
                 EngineIsPaused = true;
@@ -114,75 +108,16 @@ namespace BrainSimulator
         {
         }
 
-        public Neuron GetNeuron(int id, bool fromClipboard = false)
-        {
-            Neuron n = null; //  GetCompleteNeuron(id, fromClipboard);
-            return n;
-        }
-        public Neuron GetNeuron(string label)
-        {
-            if (labelCache.ContainsValue(label))
-            {
-                int nID = labelCache.FirstOrDefault(x => x.Value == label).Key;
-                return GetNeuron(nID);
-            }
-            else
-            {
-                string searchKey = label + Neuron.toolTipSeparator;
-                int nID = labelCache.FirstOrDefault(x => x.Value.StartsWith(searchKey)).Key;
-                if (nID != 0)
-                    return GetNeuron(nID);
-            }
-            return null;
-        }
-
-
         public void GetCounts(out long synapseCount, out int useCount)
         {
-            if (MainWindow.useServers)
-            {
-                useCount = NeuronClient.serverList.Sum(x => x.neuronsInUse);
-                synapseCount = NeuronClient.serverList.Sum(x => x.totalSynapses);
-            }
-            else
-            {
-                synapseCount = 0; //  GetTotalSynapses();
-                useCount = 0; //  GetTotalNeuronsInUse();
-            }
+            synapseCount = 0; //  GetTotalSynapses();
+            useCount = 0; //  GetTotalNeuronsInUse();
         }
 
         public new void Fire()
         {
-            if (MainWindow.useServers)
-            {
-                NeuronClient.Fire();
-                lastFireCount = 0;
-                for (int i = 0; i < NeuronClient.serverList.Count; i++)
-                    lastFireCount += NeuronClient.serverList[i].firedCount;
-                Generation = NeuronClient.serverList[0].generation;
-            }
-            else
-            {
-                // base.Fire();
-                Generation = 0; // GetGeneration();
-                lastFireCount = 0; // GetFiredCount();
-            }
-            HandleProgrammedActions();
-            FiringHistory.UpdateFiringHistory();
-        }
-        public void AddSynapse(int src, int dest, float weight, Synapse.modelType model, bool noBackPtr)
-        {
-            if (MainWindow.useServers && this == MainWindow.theNeuronArray)
-                NeuronClient.AddSynapse(src, dest, weight, model, noBackPtr);
-            // else
-                // base.AddSynapse(src, dest, weight, (int)model, noBackPtr);
-        }
-        new public void DeleteSynapse(int src, int dest)
-        {
-            if (MainWindow.useServers && this == MainWindow.theNeuronArray)
-                NeuronClient.DeleteSynapse(src, dest);
-            // else
-                // base.DeleteSynapse(src, dest);
+            Generation = 0; // GetGeneration();
+            lastFireCount = 0; // GetFiredCount();
         }
 
         //fires all the modules
@@ -269,28 +204,5 @@ namespace BrainSimulator
             }
             return moduleView;
         }
-
-        public void SetNeuron(int i, Neuron n)
-        {
-            // SetCompleteNeuron(n);
-        }
-
-
-        public int GetNeuronIndex(int x, int y)
-        {
-            return x * rows + y;
-        }
-
-        public Neuron GetNeuron(int x, int y)
-        {
-            return GetNeuron(GetNeuronIndex(x, y));
-        }
-
-        public void GetNeuronLocation(int index, out int x, out int y)
-        {
-            x = index / rows;
-            y = index % rows;
-        }
-
     }
 }

@@ -148,8 +148,8 @@ namespace BrainSimulator
                     theCanvas.Children.Add(pl);
                     //theCanvas.Children.Add(thePath);
                     string label = "#" + FiringHistory.history[i].NeuronID.ToString();
-                    if (MainWindow.theNeuronArray.GetNeuron(FiringHistory.history[i].NeuronID).Label != "")
-                        label = MainWindow.theNeuronArray.GetNeuron(FiringHistory.history[i].NeuronID).Label;
+                    // if (MainWindow.theNeuronArray.GetNeuron(FiringHistory.history[i].NeuronID).Label != "")
+                    //     label = MainWindow.theNeuronArray.GetNeuron(FiringHistory.history[i].NeuronID).Label;
 
                     Label l = new Label
                     {

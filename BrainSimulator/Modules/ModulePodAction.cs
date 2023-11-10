@@ -66,7 +66,7 @@ namespace BrainSimulator.Modules
             set
             {
                 actions.Clear();
-                for (int i = 1; i < mv.NeuronCount; i++) mv.GetNeuronAt(i).Label = "";
+                // for (int i = 1; i < mv.NeuronCount; i++) mv.GetNeuronAt(i).Label = "";
                 string[] theLines = value.Split(new char[] { '\n' });
                 Action theNewAction = new Action();
                 foreach (string line in theLines)
@@ -89,7 +89,7 @@ namespace BrainSimulator.Modules
                         if (theNewAction.name != "")
                         {
                             actions.Add(theNewAction);
-                            mv.GetNeuronAt(actions.Count).Label = theNewAction.name;
+                            // mv.GetNeuronAt(actions.Count).Label = theNewAction.name;
                         }
                         theNewAction = new Action();
                     }
@@ -107,6 +107,7 @@ namespace BrainSimulator.Modules
             ModuleView modulePod = MainWindow.theNeuronArray.FindModuleByLabel("Pod");
             if (modulePod == null) return;
 
+            /*
             Neuron nRecStop = mv.GetNeuronAt(0, 0);
             if (nRecStop.Fired())
             {
@@ -128,17 +129,18 @@ namespace BrainSimulator.Modules
                     MainWindow.Update();
                 }
             }
+            */
 
             if (recording)
             {
                 for (int i = 1; i < modulePodPose.NeuronCount; i++)
                 {
-                    Neuron n = modulePodPose.GetNeuronAt(i);
-                    if (n == null || n.Label == "") break;
-                    if (n.Fired())
-                    {
-                        currentAction.motions.Add(n.Label);
-                    }
+                    // Neuron n = modulePodPose.GetNeuronAt(i);
+                    // if (n == null || n.Label == "") break;
+                    // if (n.Fired())
+                    // {
+                    //     currentAction.motions.Add(n.Label);
+                    // }
                 }
             }
             else
@@ -147,6 +149,7 @@ namespace BrainSimulator.Modules
                 {
                     for (int i = 1; i < mv.NeuronCount && i < actions.Count + 1; i++)
                     {
+                        /*
                         Neuron n = mv.GetNeuronAt(i);
                         if (n == null || n.Label == "") break;
                         actions[i - 1].name = n.label;
@@ -155,15 +158,17 @@ namespace BrainSimulator.Modules
                             currentAction = actions[i - 1];
                             currentAction.playPosition = 0;
                         }
+                        */
                     }
                 }
                 else //already playing an action
                 {
-                    if (modulePod.GetNeuronAt("Busy").LastCharge != 0) return;
+                    // if (modulePod.GetNeuronAt("Busy").LastCharge != 0) return;
 
                     string currentActionStep = currentAction.motions[currentAction.playPosition++];
                     if (currentAction.playPosition >= currentAction.motions.Count)
                         currentAction = null;
+                    /*
                     Neuron n = modulePodPose.GetNeuronAt(currentActionStep);
                     if (n == null)
                     {
@@ -175,6 +180,7 @@ namespace BrainSimulator.Modules
                         n.SetValue(1);
                         Debug.WriteLine("Taking Action: " + currentActionStep);
                     }
+                    */
                 }
             }
         }
@@ -183,7 +189,7 @@ namespace BrainSimulator.Modules
         {
             Init();
             if (mv == null) return;
-            mv.GetNeuronAt(0, 0).Label = "Record";
+            // mv.GetNeuronAt(0, 0).Label = "Record";
         }
 
         //the following can be used to massage public data to be different in the xml file

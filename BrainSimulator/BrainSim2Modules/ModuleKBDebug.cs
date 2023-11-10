@@ -26,12 +26,13 @@ namespace BrainSimulator.Modules
             for (int x = 0; x < naKB.Width; x+= 2)
                 for (int y = 0; y < naKB.Height; y++)
                 {
+                    /*
                     Neuron n = naKB.GetNeuronAt(x,y);
                     if (n.Fired())
                     {
                         tempString += " " + n.Label;
                     }
-
+                    */
                 }
             if (tempString != "" && tempString != history.LastOrDefault())
             {
@@ -41,6 +42,7 @@ namespace BrainSimulator.Modules
                 }
             }
             tempString = ">>>>";
+            /*
             for (int x = 1; x < naKB.Width; x += 2)
                 for (int y = 0; y < naKB.Height; y++)
                 {
@@ -52,6 +54,7 @@ namespace BrainSimulator.Modules
                     }
 
                 }
+            */
             if (tempString != ">>>>")
             {
                 lock (history)

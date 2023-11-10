@@ -45,6 +45,7 @@ namespace BrainSimulator.Modules
             {
                 for (int j = 0; j < 6; j++)
                 {
+                    /*
                     if (base.mv.GetNeuronAt(j, i).Fired())
                     {
                         Neuron nTarget = mv.GetNeuronAt(0, i);
@@ -61,6 +62,7 @@ namespace BrainSimulator.Modules
                             case 5: nTarget.SetValue(nTarget.LastCharge + 0.1f); break;
                         }
                     }
+                    */
                 }
             }
 
@@ -79,6 +81,7 @@ namespace BrainSimulator.Modules
             {
                 for (int i = 0; i < mv.Height; i++)
                 {
+                    /*
                     base.mv.GetNeuronAt(0, i).Label = mv.GetNeuronAt(0, i).Label;
                     if (base.mv.GetNeuronAt(0, i).Label != ".")
                     {
@@ -88,6 +91,7 @@ namespace BrainSimulator.Modules
                         base.mv.GetNeuronAt(4, i).Label = "   >";
                         base.mv.GetNeuronAt(5, i).Label = "  >>";
                     }
+                    */
                 }
             }
             MainWindow.Update();

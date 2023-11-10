@@ -65,10 +65,12 @@ namespace BrainSimulator
             for (int i = 0; i < history.Count; i++)
             {
                 NeuronHistory active = history[i];
+                /*
                 float lastCharge = MainWindow.theNeuronArray.GetNeuron(active.NeuronID).lastCharge;
                 if (active.Samples.Count > maxSamples)
                     active.Samples.RemoveAt(0);
                 active.Samples.Add(new Sample { generation = MainWindow.theNeuronArray.Generation, value = lastCharge });
+                */
             }
         }
 

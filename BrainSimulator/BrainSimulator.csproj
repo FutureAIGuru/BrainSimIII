@@ -102,7 +102,6 @@
 		<Compile Remove="Modules\ModulePremiseDlg.xaml.cs" />
 		<Compile Remove="Modules\ModuleQueryResolution.cs" />
 		<Compile Remove="Modules\ModuleTurn.cs" />
-		<Compile Remove="python-3.10.8\Program.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -861,9 +860,6 @@
 	<ItemGroup>
 		<Page Update="Modules\ModuleSpeechInPlusDlg.xaml">
 			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-		</Page>
-		<Page Update="Modules\ModuleNLPDlg.xaml">
-		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 		</Page>
 		<Page Update="Modules\ModuleUI_MotionDlg - Copy.xaml">
 		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>

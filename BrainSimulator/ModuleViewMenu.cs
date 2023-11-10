@@ -205,7 +205,8 @@ namespace BrainSimulator
                             {
                                 int i = (int)cm.GetValue(AreaNumberProperty);
                                 ModuleView theModuleView = MainWindow.theNeuronArray.modules[i];
-                                MainWindow.theNeuronArray.GetNeuronLocation(MainWindow.theNeuronArray.modules[i].firstNeuron, out int col, out int row);
+                                // MainWindow.theNeuronArray.GetNeuronLocation(MainWindow.theNeuronArray.modules[i].firstNeuron, out int col, out int row);
+                                /*
                                 if (!float.TryParse(tb.Text, out float width))
                                     tb.Background = new SolidColorBrush(Colors.Pink);
                                 else
@@ -213,7 +214,7 @@ namespace BrainSimulator
                                     if (width < theModuleView.TheModule.MinWidth)
                                         tb.Background = new SolidColorBrush(Colors.Pink);
                                     else
-                                    {
+                                    {                                        
                                         if (width + col > MainWindow.theNeuronArray.Cols)
                                             tb.Background = new SolidColorBrush(Colors.Pink);
                                         else
@@ -221,12 +222,13 @@ namespace BrainSimulator
 
                                     }
                                 }
+                                */
                             }
                             if (tb.Name == "AreaHeight")
                             {
                                 int i = (int)cm.GetValue(AreaNumberProperty);
                                 ModuleView theModuleView = MainWindow.theNeuronArray.modules[i];
-                                MainWindow.theNeuronArray.GetNeuronLocation(MainWindow.theNeuronArray.modules[i].firstNeuron, out int col, out int row);
+                                // MainWindow.theNeuronArray.GetNeuronLocation(MainWindow.theNeuronArray.modules[i].firstNeuron, out int col, out int row);
                                 if (!float.TryParse(tb.Text, out float height))
                                     tb.Background = new SolidColorBrush(Colors.Pink);
                                 else
@@ -235,11 +237,12 @@ namespace BrainSimulator
                                         tb.Background = new SolidColorBrush(Colors.Pink);
                                     else
                                     {
+                                        /*
                                         if (height + row > MainWindow.theNeuronArray.rows)
                                             tb.Background = new SolidColorBrush(Colors.Pink);
                                         else
                                             tb.Background = new SolidColorBrush(Colors.LightGreen);
-
+                                        */
                                     }
                                 }
                             }
@@ -319,8 +322,8 @@ namespace BrainSimulator
                 if (label == "" && theModuleTypeStr == "") return;
 
                 ModuleView theModuleView = MainWindow.theNeuronArray.modules[i];
-                MainWindow.theNeuronArray.SetUndoPoint();
-                MainWindow.theNeuronArray.AddModuleUndo(i, theModuleView);
+                // MainWindow.theNeuronArray.SetUndoPoint();
+                // MainWindow.theNeuronArray.AddModuleUndo(i, theModuleView);
                 //update the existing module
                 theModuleView.Label = label;
                 theModuleView.ModuleTypeStr = theModuleTypeStr;
@@ -335,12 +338,13 @@ namespace BrainSimulator
                     MainWindow.theNeuronArray.modules[i].label = theModuleTypeStr;
                 }
 
-                MainWindow.theNeuronArray.GetNeuronLocation(MainWindow.theNeuronArray.modules[i].firstNeuron, out int col, out int row);
+                // MainWindow.theNeuronArray.GetNeuronLocation(MainWindow.theNeuronArray.modules[i].firstNeuron, out int col, out int row);
                 if (width < theModuleView.TheModule.MinWidth) width = theModuleView.TheModule.MinWidth;
                 if (height < theModuleView.TheModule.MinHeight) height = theModuleView.TheModule.MinHeight;
 
                 bool dimsChanged = false;
 
+                /*
                 if (width + col > MainWindow.theNeuronArray.Cols)
                 {
                     width = MainWindow.theNeuronArray.Cols - col;
@@ -353,6 +357,7 @@ namespace BrainSimulator
                 }
                 if (dimsChanged)
                     MessageBox.Show("Dimensions reduced to stay within neuron array bondary.", "Warning", MessageBoxButton.OK);
+                */
                 theModuleView.Width = width;
                 theModuleView.Height = height;
             }
@@ -387,7 +392,7 @@ namespace BrainSimulator
                     {
                         if (int.TryParse(tb0.Text, out int count))
                         {
-                            MainWindow.arrayView.CreateRandomSynapses(count);
+                            // MainWindow.arrayView.CreateRandomSynapses(count);
                             MainWindow.theNeuronArray.ShowSynapses = true;
                             MainWindow.thisWindow.SetShowSynapsesCheckBox(true);
                             MainWindow.Update();
@@ -397,21 +402,21 @@ namespace BrainSimulator
                 }
                 if ((string)mi.Header == "Cut")
                 {
-                    MainWindow.arrayView.CutNeurons();
+                    // MainWindow.arrayView.CutNeurons();
                     MainWindow.Update();
                 }
                 if ((string)mi.Header == "Copy")
                 {
-                    MainWindow.arrayView.CopyNeurons();
+                    // MainWindow.arrayView.CopyNeurons();
                 }
                 if ((string)mi.Header == "Clear Selection")
                 {
-                    MainWindow.arrayView.ClearSelection();
+                    // MainWindow.arrayView.ClearSelection();
                     MainWindow.Update();
                 }
                 if ((string)mi.Header == "Mutual Suppression")
                 {
-                    MainWindow.arrayView.MutualSuppression();
+                    // MainWindow.arrayView.MutualSuppression();
                     MainWindow.theNeuronArray.ShowSynapses = true;
                     MainWindow.thisWindow.SetShowSynapsesCheckBox(true);
                     MainWindow.Update();
@@ -442,12 +447,12 @@ namespace BrainSimulator
                     int i = (int)mi.Parent.GetValue(AreaNumberProperty);
                     if (i < 0)
                     {
-                        MainWindow.arrayView.DeleteSelection();
+                        // MainWindow.arrayView.DeleteSelection();
                     }
                     else
                     {
-                        MainWindow.theNeuronArray.SetUndoPoint();
-                        MainWindow.theNeuronArray.AddModuleUndo(-1, MainWindow.theNeuronArray.modules[i]);
+                        // MainWindow.theNeuronArray.SetUndoPoint();
+                        // MainWindow.theNeuronArray.AddModuleUndo(-1, MainWindow.theNeuronArray.modules[i]);
                         DeleteModule(i);
                         deleted = true;
                     }
@@ -512,7 +517,7 @@ namespace BrainSimulator
                 }
                 if ((string)mi.Header == "Reset Hebbian Weights")
                 {
-                    MainWindow.theNeuronArray.SetUndoPoint();
+                    // MainWindow.theNeuronArray.SetUndoPoint();
                     /*
                     foreach (SelectionRectangle sr in MainWindow.arrayView.theSelection.selectedRectangles)
                     {
@@ -549,11 +554,13 @@ namespace BrainSimulator
             ModuleView mv = MainWindow.theNeuronArray.Modules[i];
             mv.theModule.CloseDlg();
             mv.theModule.Closing();
+            /*
             foreach (Neuron n in mv.Neurons)
             {
                 n.Reset();
                 n.DeleteAllSynapes();
             }
+            */
             MainWindow.theNeuronArray.Modules.RemoveAt(i);
 
             MainWindow.ReloadLoadedModules();

@@ -33,7 +33,7 @@ namespace BrainSimulator
             {
                 Debug.WriteLine("Left Shift Pressed in display timer");
                 shiftPressed = true;
-                theNeuronArrayView.theCanvas.Cursor = Cursors.Hand;
+                // theNeuronArrayView.theCanvas.Cursor = Cursors.Hand;
                 //Activate();
             }
             else if ((Keyboard.IsKeyUp(Key.LeftShift) && Keyboard.IsKeyUp(Key.RightShift)) && shiftPressed && mouseInWindow)
@@ -54,8 +54,8 @@ namespace BrainSimulator
             if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
             {
                 shiftPressed = false;
-                if (Mouse.LeftButton != MouseButtonState.Pressed)
-                    theNeuronArrayView.theCanvas.Cursor = Cursors.Cross;
+                // if (Mouse.LeftButton != MouseButtonState.Pressed)
+                //     theNeuronArrayView.theCanvas.Cursor = Cursors.Cross;
             }
             SetKBStatus();
         }
@@ -82,7 +82,7 @@ namespace BrainSimulator
             if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
             {
                 shiftPressed = true;
-                theNeuronArrayView.theCanvas.Cursor = Cursors.Hand;
+                // theNeuronArrayView.theCanvas.Cursor = Cursors.Hand;
             }
             if (e.Key == Key.Escape)
             {
@@ -93,7 +93,7 @@ namespace BrainSimulator
                     Update();
                 }
                 */
-                NeuronArrayView.StopInsertingModule();
+                // NeuronArrayView.StopInsertingModule();
             }
             if (e.Key == Key.F1)
             {
@@ -111,6 +111,7 @@ namespace BrainSimulator
             {
                 buttonSave_Click(null, null);
             }
+            /*
             if (ctrlPressed && e.Key == Key.C)
             {
                 theNeuronArrayView.CopyNeurons();
@@ -131,12 +132,13 @@ namespace BrainSimulator
             {
                 theNeuronArrayView.MoveNeurons();
             }
+            */
             if (ctrlPressed && e.Key == Key.Z)
             {
                 if (theNeuronArray != null)
                 {
-                    theNeuronArray.Undo();
-                    theNeuronArrayView.Update();
+                    // theNeuronArray.Undo();
+                    // theNeuronArrayView.Update();
                 }
             }
             SetKBStatus();
@@ -190,8 +192,8 @@ namespace BrainSimulator
                 id = id.Substring(0, id.Length - 1);
                 if (int.TryParse(id, out int nID))
                 {
-                    theNeuronArrayView.targetNeuronIndex = nID;
-                    theNeuronArrayView.PanToNeuron(nID);
+                    // theNeuronArrayView.targetNeuronIndex = nID;
+                    // theNeuronArrayView.PanToNeuron(nID);
                 }
             }
         }
@@ -204,7 +206,7 @@ namespace BrainSimulator
                 {
                     if (theNeuronArray.modules[i].Label == id)
                     {
-                        theNeuronArrayView.PanToNeuron(theNeuronArray.modules[i].FirstNeuron);
+                        // theNeuronArrayView.PanToNeuron(theNeuronArray.modules[i].FirstNeuron);
                         break;
                     }
                 }
@@ -351,10 +353,10 @@ namespace BrainSimulator
             {
                 LoadClipBoardFromFile(openFileDialog1.FileName);
             }
-            if (theNeuronArrayView.targetNeuronIndex < 0) return;
+            // if (theNeuronArrayView.targetNeuronIndex < 0) return;
 
-            theNeuronArrayView.PasteNeurons();
-            theNeuronArrayView.Update();
+            // theNeuronArrayView.PasteNeurons();
+            // theNeuronArrayView.Update();
         }
         //engine Refractory up/dn  buttons on the menu
         private void Button_RefractoryUpClick(object sender, RoutedEventArgs e)
@@ -475,34 +477,34 @@ namespace BrainSimulator
         }
         private void MenuItem_MoveNeurons(object sender, RoutedEventArgs e)
         {
-            theNeuronArrayView.MoveNeurons();
+            // theNeuronArrayView.MoveNeurons();
         }
         private void MenuItem_Undo(object sender, RoutedEventArgs e)
         {
-            theNeuronArray.Undo();
-            theNeuronArrayView.Update();
+            // theNeuronArray.Undo();
+            // theNeuronArrayView.Update();
         }
 
         private void MenuItem_CutNeurons(object sender, RoutedEventArgs e)
         {
-            theNeuronArrayView.CutNeurons();
+            // theNeuronArrayView.CutNeurons();
         }
         private void MenuItem_CopyNeurons(object sender, RoutedEventArgs e)
         {
-            theNeuronArrayView.CopyNeurons();
+            // theNeuronArrayView.CopyNeurons();
         }
         private void MenuItem_PasteNeurons(object sender, RoutedEventArgs e)
         {
-            theNeuronArrayView.PasteNeurons();
+            // theNeuronArrayView.PasteNeurons();
         }
         private void MenuItem_DeleteNeurons(object sender, RoutedEventArgs e)
         {
-            theNeuronArrayView.DeleteSelection();
+            // theNeuronArrayView.DeleteSelection();
             Update();
         }
         private void MenuItem_ClearSelection(object sender, RoutedEventArgs e)
         {
-            theNeuronArrayView.ClearSelection();
+            // theNeuronArrayView.ClearSelection();
             Update();
         }
         private void Button_HelpAbout_Click(object sender, RoutedEventArgs e)
@@ -541,7 +543,7 @@ namespace BrainSimulator
                     if (fileName != "")
                     {
                         LoadFile(fileName);
-                        NeuronView.OpenHistoryWindow();
+                        // NeuronView.OpenHistoryWindow();
                     }
                     else //force a new file creation on startup if no file name set
                     {
@@ -563,7 +565,7 @@ namespace BrainSimulator
             {
                 SetPlayPauseButtonImage(true);
                 SuspendEngine();
-                theNeuronArrayView.UpdateNeuronColors();
+                // theNeuronArrayView.UpdateNeuronColors();
                 engineIsPaused = true;
                 //pause the neuron array when it is initialized
                 pauseTheNeuronArray = true;
@@ -589,7 +591,7 @@ namespace BrainSimulator
             //TODO: doing this messes up because LastFired is not reset
             //            theNeuronArray.Generation = 0;
             //            theNeuronArray.SetGeneration(0);
-            theNeuronArrayView.Update();
+            // theNeuronArrayView.Update();
             ResumeEngine();
         }
 
@@ -605,7 +607,7 @@ namespace BrainSimulator
                 {
                     SetPlayPauseButtonImage(true);
                     SuspendEngine();
-                    theNeuronArrayView.UpdateNeuronColors();
+                    // theNeuronArrayView.UpdateNeuronColors();
                     engineIsPaused = true;
                     theNeuronArray.EngineIsPaused = true;
                 }
@@ -640,29 +642,29 @@ namespace BrainSimulator
                     SetPlayPauseButtonImage(true);
                     theNeuronArray.EngineIsPaused = true;
                     SuspendEngine();
-                    theNeuronArrayView.UpdateNeuronColors();
+                    // theNeuronArrayView.UpdateNeuronColors();
                 }
                 else
                 {
                     SetPlayPauseButtonImage(true);
                     theNeuronArray.Fire();
-                    theNeuronArrayView.UpdateNeuronColors();
+                    // theNeuronArrayView.UpdateNeuronColors();
                 }
             }
         }
         private void ButtonPan_Click(object sender, RoutedEventArgs e)
         {
-            theNeuronArrayView.theCanvas.Cursor = Cursors.Hand;
+            // theNeuronArrayView.theCanvas.Cursor = Cursors.Hand;
         }
 
         private void ButtonZoomIn_Click(object sender, RoutedEventArgs e)
         {
-            theNeuronArrayView.Zoom(1);
+            // theNeuronArrayView.Zoom(1);
         }
 
         private void ButtonZoomOut_Click(object sender, RoutedEventArgs e)
         {
-            theNeuronArrayView.Zoom(-1);
+            // theNeuronArrayView.Zoom(-1);
         }
 
         private void ButtonZoomToOrigin_Click(object sender, RoutedEventArgs e)
@@ -670,12 +672,15 @@ namespace BrainSimulator
             //both menu items come here as the button is a toggler
             if (sender is MenuItem mi)
             {
+                /*
                 if (mi.Header.ToString() == "Show all")
                     theNeuronArrayView.Dp.NeuronDisplaySize = 62;
                 else
                     theNeuronArrayView.Dp.NeuronDisplaySize = 63;
+                */
             }
 
+            /*
             theNeuronArrayView.Dp.DisplayOffset = new Point(0, 0);
             if (theNeuronArrayView.Dp.NeuronDisplaySize != 62)
                 theNeuronArrayView.Dp.NeuronDisplaySize = 62;
@@ -684,6 +689,7 @@ namespace BrainSimulator
                 double size = Math.Min(theNeuronArrayView.ActualHeight() / (double)(theNeuronArray.rows), theNeuronArrayView.ActualWidth() / (double)(theNeuronArray.Cols));
                 theNeuronArrayView.Dp.NeuronDisplaySize = (float)size;
             }
+            */
             Update();
         }
 
@@ -902,7 +908,7 @@ namespace BrainSimulator
 
         private void MenuItem_SelectAll(object sender, RoutedEventArgs e)
         {
-            arrayView.ClearSelection();
+            // arrayView.ClearSelection();
             // SelectionRectangle rr = new SelectionRectangle(0, theNeuronArray.Cols, theNeuronArray.rows);
             // arrayView.theSelection.selectedRectangles.Add(rr);
             Update();
@@ -916,8 +922,8 @@ namespace BrainSimulator
 
         private void InsertModule_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is MenuItem mi)
-                NeuronArrayView.StartInsertingModule(mi.Header.ToString());
+            // if (sender is MenuItem mi)
+            //    NeuronArrayView.StartInsertingModule(mi.Header.ToString());
         }
         private void ModuleList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -927,7 +933,7 @@ namespace BrainSimulator
                 {
                     string moduleName = ((Label)cb.SelectedItem).Content.ToString();
                     cb.SelectedIndex = -1;
-                    NeuronArrayView.StartInsertingModule(moduleName);
+                    // NeuronArrayView.StartInsertingModule(moduleName);
                 }
             }
         }

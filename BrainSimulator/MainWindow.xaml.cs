@@ -47,7 +47,7 @@ namespace BrainSimulator
     public partial class MainWindow : Window
     {
         //Globals
-        public static NeuronArrayView arrayView = null;
+        // public static NeuronArrayView arrayView = null;
         public static NeuronArray theNeuronArray = null;
         //for cut-copy-paste
         public static NeuronArray myClipBoard = null; //refactor back to private
@@ -120,7 +120,7 @@ namespace BrainSimulator
             displayUpdateTimer.Interval = TimeSpan.FromMilliseconds(100);
             displayUpdateTimer.Start();
 
-            arrayView = theNeuronArrayView;
+            // arrayView = theNeuronArrayView;
             Width = 1100;
             Height = 600;
             slider_ValueChanged(slider, null);
@@ -176,7 +176,7 @@ namespace BrainSimulator
             prevTop = Top;
             prevLeft = Left;
 
-            NeuronView.OpenHistoryWindow();
+            // NeuronView.OpenHistoryWindow();
         }
 
         public static void CloseHistoryWindow()
@@ -204,7 +204,7 @@ namespace BrainSimulator
                 {
                     MenuItemNotes_Click(null, null);
                 });
-            NeuronView.OpenHistoryWindow();
+            // NeuronView.OpenHistoryWindow();
         }
 
         private void LoadMRUMenu()
@@ -515,6 +515,7 @@ namespace BrainSimulator
                 EnableMenuItem(MainMenu.Items, " Paste", true);
             }
             */
+            /*
             if (theNeuronArray != null && theNeuronArray.GetUndoCount() > 0)
             {
                 EnableMenuItem(MainMenu.Items, " Undo", true);
@@ -524,7 +525,7 @@ namespace BrainSimulator
                 EnableMenuItem(MainMenu.Items, " Undo", false);
 
             }
-
+            */
             if (myClipBoard == null)
             {
                 EnableMenuItem(MainMenu.Items, "Save Clipboard", false);
@@ -563,7 +564,7 @@ namespace BrainSimulator
             {
                 Application.Current.Dispatcher.Invoke((Action)delegate
                 {
-                    arrayView.Update();
+                    // arrayView.Update();
                 });
             }
             else
@@ -618,8 +619,8 @@ namespace BrainSimulator
         public void CreateEmptyNetwork()
         {
             theNeuronArray = new NeuronArray();
-            arrayView.Dp.NeuronDisplaySize = 62;
-            arrayView.Dp.DisplayOffset = new Point(0, 0);
+            // arrayView.Dp.NeuronDisplaySize = 62;
+            // arrayView.Dp.DisplayOffset = new Point(0, 0);
             theNeuronArray.Initialize(450, 15);
             theNeuronArray.LoadComplete = true;
             Update();

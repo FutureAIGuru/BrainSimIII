@@ -25,7 +25,6 @@ namespace ModuleTester
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static NeuronArrayView arrayView = null;
         public static NeuronArray theNeuronArray = null;
 
         public MainWindow()

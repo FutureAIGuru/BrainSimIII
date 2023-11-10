@@ -319,7 +319,6 @@
                     </StackPanel>
                 </ScrollViewer>
             </Border>
-            <local:NeuronArrayView ClipToBounds="True" Grid.Column="1" Grid.Row="1" x:Name="theNeuronArrayView"/>
 
             <!--The Toolbar-->
             <DockPanel Grid.Row="0" Grid.Column="0" x:Name="MainToolBar" Grid.ColumnSpan="3" Height="30" Margin="7,5,0,0" VerticalAlignment="Top">

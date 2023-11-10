@@ -118,8 +118,8 @@ namespace BrainSimulator.Modules
         public override void Initialize()
         {
             if (mv == null) return; //this is called the first time before the module actually exists
-            foreach (Neuron n in mv.Neurons)
-                n.Model = Neuron.modelType.Color;            
+            // foreach (Neuron n in mv.Neurons)
+            //     n.Model = Neuron.modelType.Color;            
 
             initialized = true;
         }
@@ -289,7 +289,7 @@ namespace BrainSimulator.Modules
                 FailureCheckWrapper(mpc);
                 if (debugMsgCount++ < 5)
                     Debug.WriteLine("ModulePodCamera:GetCameraImage encountered exception: " + e.Message);
-                mv.GetNeuronAt(0, 0).SetValueInt(0xff0000);
+                // mv.GetNeuronAt(0, 0).SetValueInt(0xff0000);
                 Network.theHttpClient.CancelPendingRequests();
             }
             Network.httpClientBusy = false;
@@ -356,10 +356,12 @@ namespace BrainSimulator.Modules
         public override void SizeChanged()
         {
             if (mv == null) return; //this is called the first time before the module actually exists
+            /*
             foreach (Neuron n in mv.Neurons)
             {
                 n.Model = Neuron.modelType.Color;
             }
+            */
         }
         public void CameraSwapMode(string modeNum)
         {

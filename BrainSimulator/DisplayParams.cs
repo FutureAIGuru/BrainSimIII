@@ -39,8 +39,8 @@ namespace BrainSimulator
             set
             {
                 neuronDisplaySize = value;
-                SynapseView.dp = this;
-                NeuronView.dp = this;
+                // SynapseView.dp = this;
+                // NeuronView.dp = this;
             }
         }
 
@@ -54,8 +54,8 @@ namespace BrainSimulator
             set
             {
                 displayOffset = value;
-                SynapseView.dp = this;
-                NeuronView.dp = this;
+                // SynapseView.dp = this;
+                // NeuronView.dp = this;
             }
         }
 
@@ -69,8 +69,8 @@ namespace BrainSimulator
             set
             {
                 neuronRows = value;
-                SynapseView.dp = this;
-                NeuronView.dp = this;
+                // SynapseView.dp = this;
+                // NeuronView.dp = this;
             }
         }
 

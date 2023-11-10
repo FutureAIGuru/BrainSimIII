@@ -67,8 +67,8 @@ namespace BrainSimulator
             ReloadLoadedModules();
             theNeuronArray.LoadComplete = true;
 
-            if (theNeuronArray.displayParams != null)
-                theNeuronArrayView.Dp = theNeuronArray.displayParams;
+            // if (theNeuronArray.displayParams != null)
+            //     theNeuronArrayView.Dp = theNeuronArray.displayParams;
 
             AddFileToMRUList(currentFileName);
             Properties.Settings.Default["CurrentFile"] = currentFileName;
@@ -182,7 +182,7 @@ namespace BrainSimulator
                 }
             }
 
-            theNeuronArray.displayParams = theNeuronArrayView.Dp;
+            // theNeuronArray.displayParams = theNeuronArrayView.Dp;
             /*
             if (XmlFile.Save(theNeuronArray, fileName))
             {
@@ -238,7 +238,7 @@ namespace BrainSimulator
         private bool PromptToSaveChanges()
         {
             if (IsArrayEmpty()) return false;
-            if (theNeuronArray.GetUndoCount() == undoCountAtLastSave) return false; //no changes have been made
+            // if (theNeuronArray.GetUndoCount() == undoCountAtLastSave) return false; //no changes have been made
 
             bool canWrite = XmlFile.CanWriteTo(currentFileName, out string message);
 
@@ -251,8 +251,8 @@ namespace BrainSimulator
             {
                 if (currentFileName != "" && canWrite)
                 {
-                    if (SaveFile(currentFileName))
-                        undoCountAtLastSave = theNeuronArray.GetUndoCount();
+                    // if (SaveFile(currentFileName))
+                    //     undoCountAtLastSave = theNeuronArray.GetUndoCount();
                 }
                 else
                 {
