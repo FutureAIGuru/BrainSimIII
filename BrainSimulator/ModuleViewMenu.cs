@@ -362,7 +362,6 @@ namespace BrainSimulator
                 theModuleView.Height = height;
             }
             MainWindow.Update();
-            MainWindow.ReloadLoadedModules();
         }
 
         public static void CreateModule(string label, string commandLine, Color color, int firstNeuron, int width, int height)
@@ -562,8 +561,6 @@ namespace BrainSimulator
             }
             */
             MainWindow.theNeuronArray.Modules.RemoveAt(i);
-
-            MainWindow.ReloadLoadedModules();
         }
     }
 }

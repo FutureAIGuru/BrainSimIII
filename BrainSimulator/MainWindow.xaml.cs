@@ -79,8 +79,6 @@ namespace BrainSimulator
         public static MainWindow thisWindow;
         readonly Window splashScreen = new SplashScreeen();
 
-        public ProgressDialog progressDialog;
-
         public MainWindow()
         {
             //this puts up a dialog on unhandled exceptions
@@ -358,14 +356,12 @@ namespace BrainSimulator
             prevValue = value;
             if (Application.Current.Dispatcher.CheckAccess())
             {
-                retVal = progressDialog.SetProgress(value, label);
                 AllowUIToUpdate();
             }
             else
             {
                 Application.Current.Dispatcher.Invoke((Action)delegate
                 {
-                    retVal = progressDialog.SetProgress(value, label);
                 });
             }
             return retVal;
@@ -389,8 +385,6 @@ namespace BrainSimulator
         public static bool Busy()
         {
             if (thisWindow == null) return true;
-            if (thisWindow.progressDialog == null) return true;
-            if (thisWindow.progressDialog.Visibility == Visibility.Visible) return true;
             return false;
         }
 

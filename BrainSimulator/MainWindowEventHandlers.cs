@@ -146,40 +146,15 @@ namespace BrainSimulator
 
         private void buttonSave_Click(object sender, RoutedEventArgs e)
         {
-            if (currentFileName == "")
-            {
-                buttonSaveAs_Click(null, null);
-            }
-            else
-            {
-                SaveFile(currentFileName);
-            }
         }
 
 
         private void buttonSaveAs_Click(object sender, RoutedEventArgs e)
         {
-            if (SaveAs())
-            {
-                SaveButton.IsEnabled = true;
-                Reload_network.IsEnabled = true;
-                ReloadNetwork.IsEnabled = true;
-            }
         }
 
         private void buttonReloadNetwork_click(object sender, RoutedEventArgs e)
         {
-
-            if (PromptToSaveChanges())
-                return;
-            else
-            {
-                if (currentFileName != "")
-                {
-                    LoadCurrentFile();
-                    Modules.Sallie.VideoQueue.Clear();
-                }
-            }
         }
 
         private void NeuronMenu_Click(object sender, RoutedEventArgs e)
@@ -231,106 +206,20 @@ namespace BrainSimulator
 
         private void MRUListItem_Click(object sender, RoutedEventArgs e)
         {
-            if (PromptToSaveChanges())
-            { }
-            else
-            {
-                currentFileName = (string)(sender as MenuItem).ToolTip;
-                LoadCurrentFile();
-            }
         }
 
         private void buttonLoad_Click(object sender, RoutedEventArgs e)
         {
-            if (PromptToSaveChanges())
-                return;
-            string fileName = "_Open";
-            if (sender is MenuItem mainMenu)
-                fileName = (string)mainMenu.Header;
-
-            if (fileName == "_Open")
-            {
-                OpenFileDialog openFileDialog1 = new OpenFileDialog
-                {
-                    Filter = Utils.FilterXMLs,
-                    Title = Utils.TitleBrainSimLoad,
-                };
-                // Show the Dialog.  
-                // If the user clicked OK in the dialog and  
-                Nullable<bool> result = openFileDialog1.ShowDialog();
-                if (result ?? false)
-                {
-                    currentFileName = openFileDialog1.FileName;
-                    LoadCurrentFile();
-
-                }
-            }
-            else
-            {
-                //this is a file name from the File menu
-                currentFileName = Path.GetFullPath("./Networks/" + fileName + ".xml");
-                LoadCurrentFile();
-            }
         }
-
 
         private void button_ClipboardSave_Click(object sender, RoutedEventArgs e)
         {
-            if (myClipBoard == null) return;
-            // if (theNeuronArrayView.theSelection.GetSelectedNeuronCount() < 1)
-            return;
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog
-            {
-                Filter = Utils.FilterXMLs,
-                Title = Utils.TitleBrainSimSave,
-            };
-
-            // Show the Dialog.  
-            // If the user clicked OK in the dialog and  
-            Nullable<bool> result = saveFileDialog1.ShowDialog();
-            if (result ?? false)// System.Windows.Forms.DialogResult.OK)
-            {
-                //Save the data from the NeuronArray to the file
-                SaveClipboardToFile(saveFileDialog1.FileName);
-            }
         }
+
         private void button_FileNew_Click(object sender, RoutedEventArgs e)
         {
-            if (PromptToSaveChanges())
-            { } //cancel the operation
-            else
-            {
-                SuspendEngine();
-                //TODO: the following line unconditionally clobbers the current network
-                //so the cancel button in the dialog won't work properly
-                //CreateEmptyNetwork(); // to avoid keeping too many bytes occupied...
-
-                //Set buttons
-                ReloadNetwork.IsEnabled = false;
-                Reload_network.IsEnabled = false;
-                // and make sure we have maximum memory free...
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                UpdateFreeMem();
-                /*
-                NewArrayDlg dlg = new NewArrayDlg();
-                dlg.ShowDialog();
-                if (dlg.returnValue)
-                {
-                    arrayView.Dp.NeuronDisplaySize = 62;
-                    ButtonZoomToOrigin_Click(null, null);
-                    currentFileName = "";
-                    SetCurrentFileNameToProperties();
-                    SetTitleBar();
-                    if (theNeuronArray.networkNotes != "")
-                        MenuItemNotes_Click(null, null);
-                }
-                */
-                Update();
-                Modules.Sallie.VideoQueue.Clear();
-                ResumeEngine();
-            }
         }
+
         private void button_Exit_Click(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.Save();
@@ -340,24 +229,8 @@ namespace BrainSimulator
 
         private void button_LoadClipboard_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog1 = new OpenFileDialog
-            {
-                Filter = Utils.FilterXMLs,
-                Title = Utils.TitleBrainSimLoad,
-            };
-
-            // Show the Dialog.  
-            // If the user clicked OK in the dialog and  
-            Nullable<bool> result = openFileDialog1.ShowDialog();
-            if (result ?? false)
-            {
-                LoadClipBoardFromFile(openFileDialog1.FileName);
-            }
-            // if (theNeuronArrayView.targetNeuronIndex < 0) return;
-
-            // theNeuronArrayView.PasteNeurons();
-            // theNeuronArrayView.Update();
         }
+
         //engine Refractory up/dn  buttons on the menu
         private void Button_RefractoryUpClick(object sender, RoutedEventArgs e)
         {
@@ -458,11 +331,6 @@ namespace BrainSimulator
 
             if (theNeuronArray != null)
             {
-                if (PromptToSaveChanges())
-                {
-                    e.Cancel = true;
-                }
-                else
                 {
                     SuspendEngine();
 
@@ -520,15 +388,6 @@ namespace BrainSimulator
         //or creates a new one
         private void Window_ContentRendered(object sender, EventArgs e)
         {
-            progressDialog = new ProgressDialog();
-            progressDialog.Visibility = Visibility.Collapsed;
-            progressDialog.Top = 100;
-            progressDialog.Left = 100;
-            progressDialog.Owner = this;
-            progressDialog.Show();
-            progressDialog.Hide();
-            progressDialog.SetProgress(100, "");
-
 #if DEBUG
             //if the left shift key is pressed, don't load the file
             if (Keyboard.IsKeyUp(Key.LeftShift))
@@ -542,7 +401,7 @@ namespace BrainSimulator
                         fileName = (string)Properties.Settings.Default["CurrentFile"];
                     if (fileName != "")
                     {
-                        LoadFile(fileName);
+                        // LoadFile(fileName);
                         // NeuronView.OpenHistoryWindow();
                     }
                     else //force a new file creation on startup if no file name set
