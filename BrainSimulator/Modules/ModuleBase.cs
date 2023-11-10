@@ -18,7 +18,7 @@ namespace BrainSimulator.Modules
 {
     abstract public class ModuleBase
     {
-        protected NeuronArray theNeuronArray { get => MainWindow.theNeuronArray; }
+        private NeuronArray theArray;
         protected ModuleView mv = null;
 
         //this is public so it will be included in the saved xml file.  That way
@@ -42,7 +42,23 @@ namespace BrainSimulator.Modules
         protected bool allowMultipleDialogs = false;
         private List<ModuleBaseDlg> dlgList = null;
 
-        public ModuleBase() { }
+        public ModuleBase() 
+        {
+        }
+
+        public void SetNeuronArray(NeuronArray theArray)
+        {
+            this.theArray = theArray;
+        }
+
+        public NeuronArray GetNeuronArray()
+        {
+            if (this.theArray == null)
+            {
+                throw new Exception("No NeuronArray set on module");
+            }
+            return this.theArray;
+        }
 
         abstract public void Fire();
 
@@ -57,7 +73,7 @@ namespace BrainSimulator.Modules
 
         public void UKSInitialized()
         {
-            foreach (ModuleView na1 in theNeuronArray.modules)
+            foreach (ModuleView na1 in GetNeuronArray().modules)
             {
                 if (na1.TheModule.isEnabled)
                     na1.TheModule.UKSInitializedNotification();
@@ -70,7 +86,7 @@ namespace BrainSimulator.Modules
 
         public void UKSReloaded()
         {
-            foreach (ModuleView na1 in theNeuronArray.modules)
+            foreach (ModuleView na1 in GetNeuronArray().modules)
             {
                 if (na1.TheModule.isEnabled)
                     na1.TheModule.UKSReloadedNotification();
@@ -151,11 +167,7 @@ namespace BrainSimulator.Modules
             if (mv == null)
             {
                 // this fails for ModuleTester because theNeuronArray is null!
-                if (theNeuronArray == null)
-                {                    
-                    return;
-                }
-                foreach (ModuleView na1 in theNeuronArray.modules)
+                foreach (ModuleView na1 in GetNeuronArray().modules)
                 {
                     if (na1.TheModule == this)
                     {
@@ -390,8 +402,8 @@ namespace BrainSimulator.Modules
 
         public ModuleBase FindModule(Type t, bool suppressWarning = true)
         {
-            if (theNeuronArray == null) return null;
-            foreach (ModuleView na1 in theNeuronArray.modules)
+            if (GetNeuronArray() == null) return null;
+            foreach (ModuleView na1 in GetNeuronArray().modules)
             {
                 if (na1.TheModule != null && na1.TheModule.GetType() == t)
                 {
@@ -405,7 +417,7 @@ namespace BrainSimulator.Modules
 
         public ModuleBase FindModule(string name, bool suppressWarning = true)
         {
-            foreach (ModuleView na1 in theNeuronArray.modules)
+            foreach (ModuleView na1 in GetNeuronArray().modules)
             {
                 if (na1.Label == name)
                 {

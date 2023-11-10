@@ -202,20 +202,6 @@ namespace BrainSimulator.Modules
             }
         }
 
-        public void HandleApparentMotion(ModuleMentalModel theMentalModel)
-        {
-            if (theMentalModel == null) return;
-            if (Math.Abs(theMentalModel.LastMove.X) > 0.1f)
-            {
-                //TODO handle change in Z
-                foreach (var delta in deltaList)
-                {
-                 //   delta.UpdateDistances(theMentalModel);
-                }
-                theMentalModel.LastMove = new();
-            }
-        }
-
         // This method determines the average horizontal movement between two inputs
         // in the list of matched objects. It looks at all five Point3DPlus's for the objects.
         public Angle EstimateHorizontalAngularMotion()

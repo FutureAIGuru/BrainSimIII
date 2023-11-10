@@ -359,9 +359,9 @@ namespace BrainSimulator.Modules
                     //hack to force the MM dialog to update to make things disappear
                     if (r.target?.Label.StartsWith("io") == true)
                     {
-                        ModuleMentalModel mm = (ModuleMentalModel)MainWindow.theNeuronArray.modules.Find(x => x.Label == "MentalModel")?.TheModule;
-                        if (mm != null)
-                            mm.MentalModelChanged = true;
+                        // ModuleMentalModel mm = (ModuleMentalModel)MainWindow.theNeuronArray.modules.Find(x => x.Label == "MentalModel")?.TheModule;
+                        // if (mm != null)
+                        //     mm.MentalModelChanged = true;
                     }
                     r.source.RemoveRelationship(r);
                     //if this leaves an orphan thing, delete the thing

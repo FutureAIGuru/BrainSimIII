@@ -94,54 +94,6 @@ namespace BrainSimulator.Modules
             return inList.OrderBy(x => DistFromCenter(x)).ToList();
         }
 
-        //Return only the visible members of a list
-        public IList<Thing> VisibleOnly(IList<Thing> inList)
-        {
-            IList<Thing> retVal = new List<Thing>();
-            ModuleMentalModel mm = (ModuleMentalModel)FindModule("MentalModel");
-            if (mm == null) return retVal;
-            foreach (Thing t in inList)
-            {
-                if (mm.PhysObjectIsVisible(t)) retVal.Add(t);
-            }
-            return retVal;
-        }
-        
-        public IList<Thing> SearchByAngle(IList<Thing> inList, Angle a, float marginOfError = 30)
-        {
-            float Distance(Thing t)
-            {
-                Dictionary<string, object> properties = t.GetRelationshipsAsDictionary();
-                if (!properties.ContainsKey("cen")) return float.MaxValue;
-                if (properties.GetValueOrDefault("cen") is Point3DPlus p)
-                {
-                    float ret = Abs((float)(Abs((p.Theta - a).Degrees)));
-                    if (ret > 180) ret = 360 - ret;
-                    return ret;
-                }
-                    
-                return float.MaxValue;
-            }
-            return inList.FindAll(x => Distance(x) <= marginOfError  ).OrderBy(x => Distance(x)).ToList();
-        }
-
-        public IList<Thing> OrderByDistance(IList<Thing> inList)
-        {
-            float Distance(Thing t)
-            {
-                Dictionary<string, object> props = t.GetRelationshipsAsDictionary();
-                if (props.ContainsKey("cen"))
-                {
-                    if (props["cen"] is Point3DPlus pp)
-                        return pp.R;
-                }
-                return float.MaxValue;
-            };
-
-            return inList.OrderBy(x => Distance(x)).ToList();
-        }
-
-
         private class Counts
         {
             public Thing t; public int count = 1;

@@ -153,6 +153,7 @@ namespace BrainSimulator
             
             //this is here because the file can be loaded before the mainwindow displays so
             //module dialogs may open before their owner so this happens a few seconds later
+            /*
             if (theNeuronArray != null)
             {
                 lock (theNeuronArray.Modules)
@@ -166,6 +167,7 @@ namespace BrainSimulator
                     }
                 }
             }
+            */
             prevTop = Top;
             prevLeft = Left;
 

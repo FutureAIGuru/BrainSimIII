@@ -26,11 +26,7 @@ namespace BrainSimulator
                 list.Add(listOfBs[i]);
             // Add classes so XML saving works
             list.Add(typeof(Angle));
-            list.Add(typeof(Cone));
             list.Add(typeof(CornerTwoD));
-            list.Add(typeof(Cube));
-            list.Add(typeof(Cylinder));
-            list.Add(typeof(EnvironmentObject));
             list.Add(typeof(HSLColor));
             list.Add(typeof(KnownArea));
             list.Add(typeof(Point3DPlus));
@@ -38,11 +34,7 @@ namespace BrainSimulator
             list.Add(typeof(PointTwoD));
             list.Add(typeof(Polar));
             list.Add(typeof(SegmentTwoD));
-            list.Add(typeof(Sphere));
             list.Add(typeof(UnknownArea));
-            list.Add(typeof(Wall));
-            list.Add(typeof(Triangle2D));
-            list.Add(typeof(ModuleOnlineInfo.KidsWord));
             return list.ToArray();
         }
 

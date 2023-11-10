@@ -858,9 +858,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Page Update="Modules\ModuleSpeechInPlusDlg.xaml">
-			<XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-		</Page>
 		<Page Update="Modules\ModuleUI_MotionDlg - Copy.xaml">
 		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 		  <SubType>Designer</SubType>

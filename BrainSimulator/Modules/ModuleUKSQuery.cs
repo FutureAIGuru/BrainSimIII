@@ -173,6 +173,7 @@ namespace BrainSimulator.Modules
                 if (query.target.Label == "this" || query.target.Label == "that")
                 {
                     Thing physicalObject = null;
+                    /*
                     if (FindModule("MentalModel") is ModuleMentalModel mm)
                     {
                         Angle a = (Angle)(Labeled("CameraPan").V);
@@ -184,6 +185,7 @@ namespace BrainSimulator.Modules
                         query.target = physicalObject;
                         mm.MentalModelChanged = true;
                     }
+                    */
                 }
             }
             return handled;

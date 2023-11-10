@@ -307,11 +307,7 @@ namespace BrainSimulator.Modules
             List<Type> extraTypes = new List<Type>();
             // Add classes so XML saving works
             extraTypes.Add(typeof(Angle));
-            extraTypes.Add(typeof(Cone));
             extraTypes.Add(typeof(CornerTwoD));
-            extraTypes.Add(typeof(Cube));
-            extraTypes.Add(typeof(Cylinder));
-            extraTypes.Add(typeof(EnvironmentObject));
             extraTypes.Add(typeof(HSLColor));
             extraTypes.Add(typeof(KnownArea));
             extraTypes.Add(typeof(Point3DPlus));
@@ -320,8 +316,6 @@ namespace BrainSimulator.Modules
             extraTypes.Add(typeof(PointTwoD));
             extraTypes.Add(typeof(Polar));
             extraTypes.Add(typeof(SegmentTwoD));
-            extraTypes.Add(typeof(Sphere));
-            extraTypes.Add(typeof(Wall));
             //extraTypes.Add(typeof(SentenceType));
             //the following are needed to handle the new nested graphic representation
             extraTypes.Add(typeof(System.Windows.Media.Color));

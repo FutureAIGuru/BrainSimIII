@@ -185,7 +185,7 @@ namespace BrainSimulator
                 if (mbr == MessageBoxResult.Yes)
                 {
                     ModuleView.DeleteModule(badModule);
-                    MainWindow.Update();
+                    // MainWindow.Update();
                 }
             }
         }

@@ -88,7 +88,7 @@ namespace ModuleTester
             ModuleView mv = new ModuleView(0, 1, 1, label, commandLine, Utils.ColorToInt(new Color() { A = 64, R = 192, G = 192, B = 192 }));
             if (mv.Width < mv.theModule.MinWidth) mv.Width = mv.theModule.MinWidth;
             if (mv.Height < mv.theModule.MinHeight) mv.Height = mv.theModule.MinHeight;
-
+            mv.theModule.SetNeuronArray(MainWindow.theNeuronArray);
             MainWindow.theNeuronArray.Modules.Add(mv);
             string[] Params = commandLine.Split(' ');
             Type t1x = Type.GetType("BrainSimulator.Modules." + Params[0]);

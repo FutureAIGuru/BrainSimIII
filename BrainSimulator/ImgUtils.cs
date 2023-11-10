@@ -224,16 +224,6 @@ namespace BrainSimulator
             return value[0];
         }
 
-        public static Pixel GetPixel(Mat img, int row, int col)
-        {
-            if (img == null) return new Pixel(0, 0, 0);
-            var value = new byte[4];
-            int safeRow = Math.Clamp(row, 0, img.Rows - 1);
-            int safeCol = Math.Clamp(col, 0, img.Cols - 1);
-            Marshal.Copy(img.DataPointer + (safeRow * img.Cols + safeCol) * img.ElementSize, value, 0, 4);
-            return new Pixel(value);
-        }
-
         // SetPixelValue() allows for setting of a single pixel in a Mat regardless of the numer of planes
         // It checks whether row, col and plane are within range, and img is indeed not a null pointer.
         // If any of these tests fail, img is not modified, or else the byte value of the given coordinates

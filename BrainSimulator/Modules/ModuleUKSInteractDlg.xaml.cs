@@ -79,7 +79,7 @@ namespace BrainSimulator.Modules
                     return;
                 }
 
-                if (checkIsParentValid() == false)
+                if (validParent == false)
                 {
                     errorText.Text = "Parent does not exist.";
                     return;
@@ -332,22 +332,15 @@ namespace BrainSimulator.Modules
         {
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
 
-            if (!checkIsParentValid()) return;
-
-            validParent = true;
-            parentText.ClearValue(Control.BackgroundProperty);
-        }
-
-        private bool checkIsParentValid()
-        {
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
             if (uksInteract.SearchLabelUKS(parentText.Text) == null)
             {
                 validParent = false;
                 parentText.Background = new SolidColorBrush(Colors.Pink);
-                return false;
+                return;
             }
-            return true;
+
+            validParent = true;
+            parentText.ClearValue(Control.BackgroundProperty);
         }
 
         private void referenceText_TextChanged(object sender, TextChangedEventArgs e)
