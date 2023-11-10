@@ -296,7 +296,6 @@ namespace BrainSimulator.Modules
                     MessageBox.Show("Xml file write failed because: " + e.InnerException.Message);
                 else
                     MessageBox.Show("Xml file write failed because: " + e.Message);
-                MainWindow.thisWindow.SetProgress(100, "");
                 file.Close();
                 return;
             }
@@ -312,7 +311,6 @@ namespace BrainSimulator.Modules
             extraTypes.Add(typeof(CornerTwoD));
             extraTypes.Add(typeof(Cube));
             extraTypes.Add(typeof(Cylinder));
-            extraTypes.Add(typeof(DisplayParams));
             extraTypes.Add(typeof(EnvironmentObject));
             extraTypes.Add(typeof(HSLColor));
             extraTypes.Add(typeof(KnownArea));

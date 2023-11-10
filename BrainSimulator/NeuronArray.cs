@@ -26,7 +26,6 @@ namespace BrainSimulator
 
         public int lastFireCount = 0;
         internal List<ModuleView> modules = new List<ModuleView>();
-        public DisplayParams displayParams;
 
         //these have nothing to do with the NeuronArray but are here so it will be saved and restored with the network
         private bool showSynapses = false;

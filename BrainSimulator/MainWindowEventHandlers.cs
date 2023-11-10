@@ -57,24 +57,10 @@ namespace BrainSimulator
                 // if (Mouse.LeftButton != MouseButtonState.Pressed)
                 //     theNeuronArrayView.theCanvas.Cursor = Cursors.Cross;
             }
-            SetKBStatus();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            //Debug.WriteLine("Window_KeyDown");
-            if (e.Key == Key.Delete)
-            {
-                /*
-                if (theNeuronArrayView.theSelection.selectedRectangles.Count > 0)
-                {
-                    theNeuronArrayView.DeleteSelection();
-                    theNeuronArrayView.ClearSelection();
-                    Update();
-                }
-                */
-                //TODO here is where we'd add deleting the last-clicked module (issue #160) should we choose to implement it
-            }
             if (e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl)
             {
                 ctrlPressed = true;
@@ -83,17 +69,6 @@ namespace BrainSimulator
             {
                 shiftPressed = true;
                 // theNeuronArrayView.theCanvas.Cursor = Cursors.Hand;
-            }
-            if (e.Key == Key.Escape)
-            {
-                /*
-                if (theNeuronArrayView.theSelection.selectedRectangles.Count > 0)
-                {
-                    theNeuronArrayView.ClearSelection();
-                    Update();
-                }
-                */
-                // NeuronArrayView.StopInsertingModule();
             }
             if (e.Key == Key.F1)
             {
@@ -111,37 +86,6 @@ namespace BrainSimulator
             {
                 buttonSave_Click(null, null);
             }
-            /*
-            if (ctrlPressed && e.Key == Key.C)
-            {
-                theNeuronArrayView.CopyNeurons();
-            }
-            if (ctrlPressed && e.Key == Key.V)
-            {
-                theNeuronArrayView.PasteNeurons();
-            }
-            if (ctrlPressed && e.Key == Key.X)
-            {
-                theNeuronArrayView.CutNeurons();
-            }
-            if (ctrlPressed && e.Key == Key.A)
-            {
-                MenuItem_SelectAll(null, null);
-            }
-            if (ctrlPressed && e.Key == Key.M)
-            {
-                theNeuronArrayView.MoveNeurons();
-            }
-            */
-            if (ctrlPressed && e.Key == Key.Z)
-            {
-                if (theNeuronArray != null)
-                {
-                    // theNeuronArray.Undo();
-                    // theNeuronArrayView.Update();
-                }
-            }
-            SetKBStatus();
         }
 
         private void buttonSave_Click(object sender, RoutedEventArgs e)
@@ -227,53 +171,6 @@ namespace BrainSimulator
             this.Close();
         }
 
-        private void button_LoadClipboard_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
-        //engine Refractory up/dn  buttons on the menu
-        private void Button_RefractoryUpClick(object sender, RoutedEventArgs e)
-        {
-            theNeuronArray.RefractoryDelay++;
-            Refractory.Text = theNeuronArray.RefractoryDelay.ToString();
-        }
-
-        private void Button_RefractoryDnClick(object sender, RoutedEventArgs e)
-        {
-            theNeuronArray.RefractoryDelay--;
-            if (theNeuronArray.RefractoryDelay < 0) theNeuronArray.RefractoryDelay = 0;
-            Refractory.Text = theNeuronArray.RefractoryDelay.ToString();
-        }
-        //engine speed up/dn  buttons on the menu
-        private void Button_EngineSpeedUpClick(object sender, RoutedEventArgs e)
-        {
-            slider.Value += 1;
-            slider_ValueChanged(slider, null);
-        }
-
-        private void Button_EngineSpeedDnClick(object sender, RoutedEventArgs e)
-        {
-            slider.Value -= 1;
-            slider_ValueChanged(slider, null);
-        }
-
-        private void SetSliderPosition(int interval)
-        {
-            if (interval == 0) slider.Value = 10;
-            else if (interval <= 1) slider.Value = 9;
-            else if (interval <= 2) slider.Value = 8;
-            else if (interval <= 5) slider.Value = 7;
-            else if (interval <= 10) slider.Value = 6;
-            else if (interval <= 50) slider.Value = 5;
-            else if (interval <= 100) slider.Value = 4;
-            else if (interval <= 250) slider.Value = 3;
-            else if (interval <= 500) slider.Value = 2;
-            else if (interval <= 1000) slider.Value = 1;
-            else slider.Value = 0;
-            EngineSpeed.Text = slider.Value.ToString();
-        }
-
-
         //Set the engine speed
         private void slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -297,7 +194,6 @@ namespace BrainSimulator
                 theNeuronArray.EngineSpeed = interval;
             if (!engineThread.IsAlive)
                 engineThread.Start();
-            EngineSpeed.Text = slider.Value.ToString();
             displayUpdateTimer.Start();
             if (engineSpeedStack.Count > 0)
             {//if there is a stack entry, the engine is paused...put the new value on the stack
@@ -407,7 +303,6 @@ namespace BrainSimulator
                     else //force a new file creation on startup if no file name set
                     {
                         CreateEmptyNetwork();
-                        SetPlayPauseButtonImage(false);
                     }
                 }
                 //various errors might have happened so we'll just ignore them all and start with a fresh file 
@@ -422,7 +317,6 @@ namespace BrainSimulator
             //if control is pressed, dont start the engine
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
             {
-                SetPlayPauseButtonImage(true);
                 SuspendEngine();
                 // theNeuronArrayView.UpdateNeuronColors();
                 engineIsPaused = true;
@@ -454,103 +348,6 @@ namespace BrainSimulator
             ResumeEngine();
         }
 
-        //this is two buttons on one event handler for historical reasons
-        private void PlayPause_Click(object sender, RoutedEventArgs e)
-        {
-            if (theNeuronArray == null)
-                return;
-
-            Modules.Sallie.VideoQueue.Clear();
-            if (sender is Button playOrPause)
-                if (playOrPause.Name == "buttonPause")
-                {
-                    SetPlayPauseButtonImage(true);
-                    SuspendEngine();
-                    // theNeuronArrayView.UpdateNeuronColors();
-                    engineIsPaused = true;
-                    theNeuronArray.EngineIsPaused = true;
-                }
-                else
-                {
-                    SetPlayPauseButtonImage(false);
-                    theNeuronArray.EngineIsPaused = false;
-                    engineIsPaused = false;
-                    ResumeEngine();
-                }
-        }
-        public void SetPlayPauseButtonImage(bool paused)
-        {
-            if (paused)
-            {
-                buttonPlay.IsEnabled = true;
-                buttonPause.IsEnabled = false;
-            }
-            else
-            {
-                buttonPlay.IsEnabled = false;
-                buttonPause.IsEnabled = true;
-            }
-        }
-
-        private void ButtonSingle_Click(object sender, RoutedEventArgs e)
-        {
-            if (theNeuronArray != null)
-            {
-                if (!theNeuronArray.EngineIsPaused)
-                {
-                    SetPlayPauseButtonImage(true);
-                    theNeuronArray.EngineIsPaused = true;
-                    SuspendEngine();
-                    // theNeuronArrayView.UpdateNeuronColors();
-                }
-                else
-                {
-                    SetPlayPauseButtonImage(true);
-                    theNeuronArray.Fire();
-                    // theNeuronArrayView.UpdateNeuronColors();
-                }
-            }
-        }
-        private void ButtonPan_Click(object sender, RoutedEventArgs e)
-        {
-            // theNeuronArrayView.theCanvas.Cursor = Cursors.Hand;
-        }
-
-        private void ButtonZoomIn_Click(object sender, RoutedEventArgs e)
-        {
-            // theNeuronArrayView.Zoom(1);
-        }
-
-        private void ButtonZoomOut_Click(object sender, RoutedEventArgs e)
-        {
-            // theNeuronArrayView.Zoom(-1);
-        }
-
-        private void ButtonZoomToOrigin_Click(object sender, RoutedEventArgs e)
-        {
-            //both menu items come here as the button is a toggler
-            if (sender is MenuItem mi)
-            {
-                /*
-                if (mi.Header.ToString() == "Show all")
-                    theNeuronArrayView.Dp.NeuronDisplaySize = 62;
-                else
-                    theNeuronArrayView.Dp.NeuronDisplaySize = 63;
-                */
-            }
-
-            /*
-            theNeuronArrayView.Dp.DisplayOffset = new Point(0, 0);
-            if (theNeuronArrayView.Dp.NeuronDisplaySize != 62)
-                theNeuronArrayView.Dp.NeuronDisplaySize = 62;
-            else
-            {
-                double size = Math.Min(theNeuronArrayView.ActualHeight() / (double)(theNeuronArray.rows), theNeuronArrayView.ActualWidth() / (double)(theNeuronArray.Cols));
-                theNeuronArrayView.Dp.NeuronDisplaySize = (float)size;
-            }
-            */
-            Update();
-        }
 
         //This is here so we can capture the shift key to do a pan whenever the mouse in in the window
         bool mouseInWindow = false;
@@ -568,36 +365,6 @@ namespace BrainSimulator
             mouseInWindow = false;
         }
 
-        private void Menu_ShowSynapses(object sender, RoutedEventArgs e)
-        {
-            if (IsArrayEmpty()) return;
-            if (sender is MenuItem mi)
-            {
-                //single menu item comes here so must be toggled
-                theNeuronArray.ShowSynapses = !theNeuronArray.ShowSynapses;
-                SetShowSynapsesCheckBox(theNeuronArray.ShowSynapses);
-            }
-            Update();
-        }
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            if (IsArrayEmpty()) return;
-            theNeuronArray.ShowSynapses = true;
-            Update();
-        }
-
-        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (IsArrayEmpty()) return;
-            theNeuronArray.ShowSynapses = false;
-            Update();
-        }
-
-        public void SetShowSynapsesCheckBox(bool showSynapses)
-        {
-            checkBox.IsChecked = showSynapses;
-        }
-
         private void MenuItemProperties_Click(object sender, RoutedEventArgs e)
         {
             /*
@@ -611,32 +378,6 @@ namespace BrainSimulator
                 MessageBox.Show("Properties could not be displayed");
             }
             */
-        }
-
-        public static void CloseNotesWindow()
-        {
-            if (notesWindow != null)
-            {
-                notesWindow.Close();
-                notesWindow = null;
-            }
-        }
-        private void MenuItemNotes_Click(object sender, RoutedEventArgs e)
-        {
-            if (notesWindow != null) notesWindow.Close();
-            bool showTools = false;
-            if (sender != null) showTools = true;
-            notesWindow = new NotesDialog(showTools);
-            try
-            {
-                notesWindow.Top = 200;
-                notesWindow.Left = 500;
-                notesWindow.Show();
-            }
-            catch
-            {
-                MessageBox.Show("Notes could not be displayed");
-            }
         }
 
         [DllImport("user32.dll", SetLastError = true)]

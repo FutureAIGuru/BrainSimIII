@@ -57,11 +57,11 @@ namespace BrainSimulator.Modules
 
         public void UKSInitialized()
         {
-            //foreach (ModuleView na1 in theNeuronArray.modules)
-            //{
-            //    if (na1.TheModule.isEnabled)
-            //        na1.TheModule.UKSInitializedNotification();
-            //}
+            foreach (ModuleView na1 in theNeuronArray.modules)
+            {
+                if (na1.TheModule.isEnabled)
+                    na1.TheModule.UKSInitializedNotification();
+            }
         }
 
         public virtual void UKSReloadedNotification()

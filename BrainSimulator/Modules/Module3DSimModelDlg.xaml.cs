@@ -607,7 +607,6 @@ namespace BrainSimulator.Modules
                 file.Close();
                 MessageBox.Show("file load failed \r\n\r\n" + e.InnerException, "File Load Error",
                     MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-                MainWindow.thisWindow.SetProgress(100, "");
                 return false;
             }
 

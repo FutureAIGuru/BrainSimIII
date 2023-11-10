@@ -74,19 +74,5 @@ namespace BrainSimulator
         public int NeuronCount { get { return Width * Height; } }
         public Modules.ModuleBase TheModule { get => theModule; set => theModule = value; }
         public int LastNeuron { get { return firstNeuron + (height - 1) + Rows * (Width - 1); } }
-
-        public Rectangle GetRectangle(DisplayParams dp)
-        {
-            Rectangle r = new Rectangle();
-            Point p1 = dp.pointFromNeuron(firstNeuron);
-            Point p2 = dp.pointFromNeuron(LastNeuron);
-            p2.X += dp.NeuronDisplaySize;
-            p2.Y += dp.NeuronDisplaySize;
-            r.Width = Math.Abs(p2.X - p1.X);
-            r.Height = Math.Abs(p2.Y - p1.Y);
-            Canvas.SetTop(r, p1.Y);
-            Canvas.SetLeft(r, p1.X);
-            return r;
-        }
     }
 }
