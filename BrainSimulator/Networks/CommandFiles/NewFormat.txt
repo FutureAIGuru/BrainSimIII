@@ -1,0 +1,318 @@
+a cat has a tail
+a dog has a tail
+a fish has a tail
+a cat has 4 legs
+a dog has 4 legs
+a chair has 4 legs
+a table has 4 legs
+a Kevin has 2 legs
+a horse has 4 legs
+Kevin has a cat
+Kevin can ride
+//Kevin can ride a horse
+//Kevin can ride a bike
+a fish can swim
+//a fish can swim fast
+a cat can eat
+a dog can eat
+//a dog can eat dogfood
+//a cat can eat fish
+a dog can play
+//a dog can play with a ball
+Kevin can play
+a person is a mammal
+a mammal is an animal
+a chordate is an animal
+//Kevin can play with a computer
+a cat is orange
+a mouse can eat
+a mouse has tail
+a mouse has swim
+a mouse has 4 legs
+cheese is a food
+//a mouse can eat cheese
+a snake has tail
+a snake can swim
+a snake can eat
+a copperhead is a snake
+//a snake can eat fish
+//a snake can eat a mouse
+a cat has fur
+a dog has fur
+a mouse has fur
+a dog can hunt
+a cat can hunt
+a snake can hunt
+a cat is a carnivore
+a mouse is an omnivore
+a dog is an omnivore
+a horse is an herbivore
+a cat is an animal
+a fish is an animal
+a horse is an animal
+a mouse is an animal
+a dog is an animal
+a cat is a mammal
+a dog is a mammal
+a horse is a mammal
+a mouse is a mammal
+a snake is a reptile
+a reptile is a animal
+//a snake has no legs
+a frog is an animal
+a tree frog is a frog
+a frog is an amphibian
+a amphibian is a chordate
+a frog can eat
+//a frog can eat bugs
+a frog is a carnivore
+a frog has 4 legs
+a ant is a bug
+a ant is tiny
+a bug has an exoskeleton
+a bug is an animal
+a ant has an exoskeleton
+a ant has 6 legs
+a spider is an arachnid
+a black widow is a spider
+a spider is an animal
+a spider is a carnivore
+a cat is a feline
+a spider has 8 legs
+a dog is a canid
+a crow is a bird
+a bird is a animal
+a crow is a animal
+a crow has 2 legs
+a crow has 2 wings
+a crow can fly
+a beetle has 6 legs
+a beetle is a bug
+a beetle is tiny
+a beetle has an exoskeleton
+a beetle can fly
+a beetle has 2 wings
+a bat is a mammal
+a bat is a animal
+a bat has 2 wings
+a bat has 2 legs
+a bat can fly
+a bat is an omnivore
+a bat is a nocturnal
+a ball is a round
+a ball is a sphere
+a ball can roll
+a sphere is a shape
+a sphere has 3 dimensions
+a circle is a shape
+a circle has 2 dimensions
+a block is a cube
+a cube is a shape
+a cube has 3 dimensions
+a car is a toy
+a car is a vehicle
+a car has 4 wheels
+a wheel is a cylinder
+a cylinder is a shape
+a cylinder has 3 dimensions
+a wheel can roll
+a cylinder can roll
+a tennis ball is a ball
+a yellow is a color
+a tennis ball is yellow
+a tennis is a sport
+a basketball is a sport
+a basketball ball is a ball
+a orange is a color
+a basketball ball is orange
+a table is not_alive
+a chair is not_alive
+a table is a furniture
+a chair is a furniture
+Kevin is a person
+Dallie is a person
+Dusie is a person
+Dapphire is a person
+Kevin is friends with Dallie
+Dallie is friends with Dusie
+Dapphire is friends with Dusie
+Dusie is friends with Kevin
+//Kevin is 24 years old
+//Dallie is 30 years old
+//Dapphire is 27 years old
+//Dusie is 21 years old
+Kevin is younger than Dallie
+Dallie is older than Dapphire
+Dusie is younger than Kevin
+//Kevin plays Poker
+//Dallie plays Soccer
+//Dapphire plays Tennis
+//Dusie plays Basketball
+Dallie can dance
+Kevin can code
+Dusie can sing
+//Dapphire play guitar
+//Kevin can play cello
+//Dallie can play piano
+//Dusie can play flute
+//Kevin likes games
+//Dallie likes poetry
+//Dusie likes flowers
+//Dapphire likes football
+Dapphire has 2 legs
+Dusie has 2 legs
+Dallie has 2 legs
+Dapphire has 2 arms
+Dusie has 2 arms
+Dallie has 2 arms
+Kevin has 2 arms
+Dapphire has 2 eyes
+Dusie has 2 eyes
+Dallie has 2 eyes
+Kevin has 2 eyes
+Kevin can swim
+a bat has 2 eyes
+a bird has 2 eyes
+a cat has 2 eyes
+a crow has 2 eyes
+a dog has 2 eyes
+a frog has 2 eyes
+a horse has 2 eyes
+a fish has 2 eyes
+a salmon is a fish
+a mouse has 2 eyes
+a snake has 2 eyes
+a spider has 8 eyes
+a cow is an animal
+a cow has 4 legs
+a cow has 2 eyes
+a cow is livestock
+a pig is an animal
+a pig has 4 legs
+a pig has 2 eyes
+a pig is livestock
+a monkey is an animal
+a monkey has 2 legs
+a monkey has 2 arms
+a monkey has 2 hands
+a monkey has 2 eyes
+a monkey has a tail
+a giraffe is an animal
+a giraffe is yellow
+a giraffe is brown
+a giraffe has 4 legs
+a giraffe has 2 eyes
+a elephant is an animal
+a elephant has 2 eyes
+a elephant has 2 tusks
+a elephant has 4 legs
+a tiger is an animal
+a tiger is orange
+a tiger is white
+a tiger is black
+a tiger is a feline
+a tiger has 4 legs
+a tiger has 2 eyes
+a lion is an animal
+a lion is a feline
+a lion is orange
+a lion has 4 legs
+a lion has 2 eyes
+a tusks is a body-part
+an arms is a body-part
+a hands is a body-part
+a legs is a body-part
+a feet is a body-part
+a head is a body-part
+a tail is a body-part
+an elbow is a body-part
+a knees is a body-part
+an eyes is a body-part
+a nose is a body-part
+a mouth is a body-part
+hair is a body-part
+teeth is a body-part
+a stomach is a body-part
+a person has 2 hands
+a person has 2 feet
+a mammal has a head
+a mammal has 2 knees
+a mammal has a mouth
+a person has hair
+a mammal has teeth
+a shirt is clothes
+a dress is clothes
+a sock is clothes
+a shoe is  clothes
+a jacket is clothes
+shorts is clothes
+a bed is furniture
+a block is a toy
+a bike is a toy
+a balloon is a toy
+a boat is a toy
+red is a color
+blue is a color
+green is a color
+yellow is a color
+purple is a color
+black is a color
+white is a color
+brown is a color
+a cat is smaller than a dog
+a lion is larger than a dog
+a elephant is larger than a dog
+a dress is fancier than a shirt
+a person is smarter than a monkey
+a lion is hairier than a snake
+a snake is scarier than a balloon
+Kevin is cooler than Dusie
+baseball is a sport
+soccer is a sport
+golf is a sport
+running is a sport
+volleyball is a sport
+badminton is a sport
+swimming is a sport
+boxing is a sport
+table-tennis is a sport
+skiing is a sport
+ice-skating is a sport
+roller-skating is a sport
+cricket is a sport
+rugby is a sport
+pool is a sport
+darts is a sport
+football is a sport
+bowling is a sport
+ice-hockey is a sport
+surfing is a sport
+karate is a sport
+horse-racing is a sport
+snowboarding is a sport
+skateboarding is a sport
+cycling is a sport
+archery is a sport
+fishing is a sport
+gymnastics is a sport
+figure-skating is a sport
+rock-climbing is a sport
+sumo-wrestling is a sport
+taekwondo is a sport
+fencing is a sport
+water-skiing is a sport
+jet-skiing is a sport
+weight-lifting is a sport
+scuba-diving is a sport
+judo is a sport
+wind-surfing is a sport
+kickboxing is a sport
+sky-diving is a sport
+hang-gliding is a sport
+bungee-jumping is a sport
+a tomato is a food
+an anchorvie is a food
+an asparagus is a food
+an avocado is a food
+an almond is a food
+an apple is a food

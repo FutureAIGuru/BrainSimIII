@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<IntegratedVisionSettings>
+  <SaveDebugImages>false</SaveDebugImages>
+  <MaskLON>true</MaskLON>
+  <MaskAON>false</MaskAON>
+  <MaskBON>true</MaskBON>
+  <MaskLitON>true</MaskLitON>
+  <MaskSatON>true</MaskSatON>
+  <MaskHueON>false</MaskHueON>
+  <MaskLValue>76</MaskLValue>
+  <MaskAValue>0</MaskAValue>
+  <MaskBValue>156</MaskBValue>
+  <MaskLitValue>50</MaskLitValue>
+  <MaskSatValue>44</MaskSatValue>
+  <MaskHueValue>0</MaskHueValue>
+  <MaskLType>1</MaskLType>
+  <MaskAType>0</MaskAType>
+  <MaskBType>0</MaskBType>
+  <MaskLitType>1</MaskLitType>
+  <MaskSatType>0</MaskSatType>
+  <MaskHueType>0</MaskHueType>
+</IntegratedVisionSettings>

@@ -1,0 +1,347 @@
+	an ant has an exoskeleton
+	a beetle has an exoskeleton
+wings is a body_part
+	a bat has 2 wings
+	a bird has 2 wings
+	a beetle has 2 wings
+a tail is a body_part
+	a cat has a tail
+	a dog has a tail
+	a horse has a tail
+	a mouse has tail
+	a cow has a tail
+	a pig has a tail
+	a monkey has a tail
+	a giraffe has a tail	
+	a elephant has a tail
+	a tiger has a tail
+	a lion has a tail
+	a fish has a tail
+eyes is a body_part
+	a cat has 2 eyes 
+		a siamese cat is a cat	
+	a snake has 2 eyes
+		a copperhead is a snake
+	a dog has 2 eyes
+		a husky is a dog
+		Kevin has a dog
+	a horse has 2 eyes
+		an arabian horse is a horse
+	a mouse has 2 eyes
+		a house mouse is a mouse
+	a bat has 2 eyes
+		a microbat is a bat
+	a frog has 2 eyes
+		a tree frog is a frog
+	a cow has 2 eyes
+		a belgian blue is a cow
+	a pig has 2 eyes
+		a duroc pig is a pig
+	a monkey has 2 eyes
+		a mandrill is a monkey
+	a giraffe has 2 eyes
+		a northern giraffe is a giraffe
+	an elephant has 2 eyes
+		an indian elephant is an elephant
+	a tiger has 2 eyes
+		a siberian tiger is a tiger
+	a lion has 2 eyes
+		a barbary lion is a lion
+	a spider has 8 eyes
+		a black widow is a spider
+	a bird has 2 eyes
+		a crow is a bird
+	a fish has 2 eyes
+		a barracuda is a fish
+	an ant has 2 eyes
+		a ghost has is an ant
+	a beetle has 2 eyes
+		a bread beetle is a beetle
+	a human has 2 eyes
+		a Dallie is a human
+		a Dusie is a human 
+		a Dapphire is a human
+		a Bob is a human
+		a Kevin is a human
+legs is a body_part
+	a cat has 4 legs
+	a dog has 4 legs
+	a horse has 4 legs
+	a mouse has 4 legs
+	a frog has 4 legs
+	a bat has 2 legs
+	a cow has 4 legs
+	a pig has 4 legs
+	a monkey has 2 legs
+	a giraffe has 4 legs
+	a elephant has 4 legs
+	a tiger has 4 legs
+	a lion has 4 legs
+	a spider has 8 legs
+	a bird has 2 legs
+	an ant has 6 legs
+	a beetle has 6 legs 
+	a human has 2 legs
+arms is a body_part
+	a human has 2 arms
+	a monkey has 2 arms
+hooves is a body_part
+	a horse has 2 hooves
+tusks is a body_part
+	an elephant has 2 tusks	
+hands is a body_part
+legs is a body_part
+feet is a body_part
+knees is a body_part
+teeth is a body_part
+hair is a body_part
+stomach is a body_part
+a head is a body_part
+a tail is a body_part
+	a snake has a tail
+an elbow is a body_part
+a nose is a body_part
+a mouth is a body_part
+
+
+	livestock is an animal
+		a cow is a livestock	
+		a pig is a livestock
+	an amphibian is an animal
+		a frog is an amphibian
+
+
+	an arachnid is an animal
+		a spider is an arachnid
+
+
+		a cat is a mammal
+		a dog is a mammal
+		a horse is a mammal
+
+	
+		a cow is a mammal
+		a pig is a mammal
+		a monkey is a mammal
+		a giraffe is a mammal
+		a elephant is a mammal
+		a tiger his a mammal
+		a lion is a mammal
+
+	a cylinder can roll
+	a ball can roll
+	a wheel can roll
+
+
+
+	a car has 4 wheels
+
+an engine is a mechanical_part
+	a car has an engine
+
+
+
+
+
+	math is a subject
+		addition is math
+		subtraction is math
+		multiplication is math
+		division is math
+	biology is a subject
+	history is a subject
+	art is a subject
+	english is a subject
+language is an abstract_part
+	english is a language 
+	spanish is a language
+	french is a language 
+sides is an abstract_part
+	a circle has 1 sides
+	a square has 4 sides
+	a triangle has 3 sides
+	a pentagon has 5 sides
+shape is an abstract_part
+	a square is a shape
+	a circle is a shape
+	a sphere is a shape
+		a ball is a sphere
+	a triangle is a shape
+	a pentagon is a shape
+	a cylinder is a shape
+		a wheel is a cylinder
+	a cube is a shape
+		a block is a cube
+
+
+
+dimensions is a property
+
+
+a sphere has 3 dimensions
+
+a circle has 2 dimensions
+a square has 2 dimensions
+a triangle has 2 dimensions
+a pentagon has 2 dimensions
+a cube has 3 dimensions
+a cylinder has 3 dimensions
+
+size is a property
+
+tiny is a size
+	a beetle is tiny
+large is a size
+	jumbo is a size
+
+color is a property
+
+yellow is a color
+	a giraffe is yellow
+	a tennis ball is yellow
+orange is a color
+	a tiger is orange
+	a lion is orange
+	a basketball ball is orange
+blue is a color
+red is a color 
+black is a color
+	a tiger is black
+	a soccer ball is black
+white is a color
+	a tiger is white
+	a baseball ball is white
+	a soccer ball is white
+	a golf ball is white
+	a volleyball ball is white
+purple is a color
+green is a color
+grey is a color
+	an elephant is grey
+brown is a color 
+	a giraffe is brown
+
+a vehicle is a property
+	a car is a vehicle
+a toy is a property
+	a car is a toy
+
+carnivore is a property
+
+a frog is a carnivore
+a tiger is a carnivore
+a lion is a carnivore
+a spider is a carnivore	
+a fish is a carnivore
+a feline is a carnivore
+	a cat is a feline
+	a tiger is a feline
+	a lion is a feline
+
+nocturnal is a property
+
+a bat is nocturnal
+
+omnivore is a property
+
+a human is an omnivore
+a mouse is an omnivore
+a bat is an omnivore
+a monkey is an omnivore
+a pig is an omnivore
+a canine is an omnivore
+	a dog is a canine
+
+herbivore is a property
+
+a horse is a herbivore
+a cow is a herbivore
+a giraffe is an herbivore
+an elephant is an herbivore
+
+slimy is a property 
+
+a frog is slimy
+
+fur is a property
+
+a cat has fur
+a dog has fur
+a horse has fur
+a mouse has fur
+a cow has fur
+a pig has fur
+a monkey has fur
+a giraffe has fur
+a tiger has fur
+a lion has fur
+
+sound is a property
+
+noise is a sound
+
+meow is a noise
+	a cat can meow
+	moo is a noise
+		a cow can moo
+	nay is a noise
+		a horse can nay
+	oink is a noise
+		a pig can oink
+	bark is a noise
+		a dog can bark
+
+dairy is a property 
+
+cheese has dairy
+grain is a property
+protein is a property
+	an egg has protein
+	meat has protein
+
+sense is a property
+
+sight is a sense
+feel is a sense
+hear is a sense
+smell is a sense
+taste is a sense
+	edible has taste
+		a food is edible
+			an egg is a food
+			a nut is a food
+				an almond is a nut
+			a vegetable is a food
+				broccoli is a vegetable 
+				kale is a vegetable
+				lettuce is a vegetable
+				a potato is a vegetable
+				a fry is a vegetable
+				a asparagus is a vegetable
+			a fruit is a food
+				a blueberry is a fruit
+				a tomato is a fruit
+				a avocado is a fruit
+				an apple is a fruit
+			a fish is a food
+				a anchorvie is a fish
+			cheese is a food
+			meat is a food
+	drinkable has taste
+		a drink is drinkable
+			juice is a drink
+			orange_juice is a drink
+			apple_juice is a drink
+			milk is a drink
+			beer is a drink
+
+round is a property
+	a ball is round
+
+a ball is a thing
+	a tennis ball is a ball
+	a basketball ball is a ball
+	a baseball ball is a ball
+	a soccer ball is a ball
+	a golf ball is a ball
+	a volleyball is a ball

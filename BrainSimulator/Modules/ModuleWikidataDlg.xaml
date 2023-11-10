@@ -1,0 +1,29 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleWikidataDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="ModuleWikidataDlg Module Dialog" Height="350" Width="405" Background="Gray" ShowInTaskbar="False">
+    <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" Margin="0,0,10,0" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="UpdateTextBox" Content="Retrieve properties " HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="50" Width="105" Click="Button_Click" Foreground="#FFF3D5D5" OpacityMask="Black" Background="#FF757CF7">
+            <Button.BorderBrush>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="Black"/>
+                    <GradientStop Color="#FFF7D6D6" Offset="1"/>
+                </LinearGradientBrush>
+            </Button.BorderBrush>
+        </Button>
+        <TextBox x:Name="TextBoxWiki" HorizontalAlignment="Left" Height="230" Margin="10,94,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="385" TextChanged="TextBox_TextChanged"/>
+        <TextBox x:Name="ItemSearchBox" HorizontalAlignment="Left" Margin="120,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Height="18"/>
+        <TextBox x:Name="PropertySearchBox" HorizontalAlignment="Left" Margin="285,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="110" Height="18"/>
+        <Label x:Name="ItemSearch" Content="Thing" HorizontalAlignment="Left" Height="32" Margin="120,17,0,0" VerticalAlignment="Top" Width="100"/>
+        <Label x:Name="PropertyFind" Content="Property" HorizontalAlignment="Left" Height="32" Margin="285,17,0,0" VerticalAlignment="Top" Width="95"/>
+        <Label Content="Propoerties" HorizontalAlignment="Left" Margin="10,68,0,0" VerticalAlignment="Top" Width="75"/>
+
+    </Grid>
+</local:ModuleBaseDlg>

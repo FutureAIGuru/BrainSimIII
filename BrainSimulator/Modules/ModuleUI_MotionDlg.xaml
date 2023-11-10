@@ -1,0 +1,137 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleUI_MotionDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        mc:Ignorable="d"
+        PreviewKeyDown="Dlg_PreviewKeyDown" PreviewKeyUp="Dlg_PreviewKeyUp" Deactivated="Dlg_Deactivated"
+        Title="ModuleUI_MotionDlg Module Dialog" Height="436" Width="309" ShowInTaskbar="False" PreviewMouseDown="ModuleBaseDlg_PreviewMouseDown">
+    <WindowChrome.WindowChrome>
+        <WindowChrome x:Name="theChrome" CaptionHeight="0" ResizeBorderThickness="0"/>
+    </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <Style x:Key="SliderRepeatButton" TargetType="RepeatButton">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border Background="#999999" Height="8" CornerRadius="0,4,4,0"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SliderRepeatButton1" TargetType="RepeatButton">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border SnapsToDevicePixels="True" Background="#7946c8" Height="8" CornerRadius="4,0,0,4"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SliderThumb" TargetType="Thumb">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Ellipse Height="25" Width="25" Fill="#7946c8"></Ellipse>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <ControlTemplate x:Key="Slider"  TargetType="Slider">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Track Grid.Row="1" x:Name="PART_Track"   >
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource SliderRepeatButton1}"  Command="Slider.DecreaseLarge" />
+                    </Track.DecreaseRepeatButton>
+                    <Track.Thumb>
+                        <Thumb Style="{StaticResource SliderThumb}"  />
+                    </Track.Thumb>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource SliderRepeatButton}" Command="Slider.IncreaseLarge" />
+                    </Track.IncreaseRepeatButton>
+                </Track>
+            </Grid>
+        </ControlTemplate>
+
+        <Style x:Key="Horizontal_Slider" TargetType="Slider">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="MinHeight" Value="21" />
+                    <Setter Property="MinWidth" Value="104" />
+                    <Setter Property="Template" Value="{StaticResource Slider}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Border CornerRadius="5" Background="#FF361871" BorderBrush="#655882" BorderThickness="1">
+        <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" >
+            <Image x:Name="ExpandButton" WindowChrome.IsHitTestVisibleInChrome="True" Height="20" Width="20" Margin="0,10,25,0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                   MouseLeftButtonDown="ExpandCollapseButton_Click" Source="/Resources/UserInterface/MainWindow/WINDOWS-ICON-Expand.png"/>
+            <Image x:Name="CollapseButton" WindowChrome.IsHitTestVisibleInChrome="True" Height="20" Width="20" Visibility="Collapsed" Margin="0,10,25,0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                   MouseLeftButtonDown="ExpandCollapseButton_Click" Source="/Resources/UserInterface/MainWindow/WINDOWS-ICON-Compress.png"/>
+            <Label FontFamily="{StaticResource OpenSans-Bold}" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Foreground="#ebebeb" Margin="10,5,0,0" FontSize="14" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left" Width="49">
+                Drive
+            </Label>
+            <Border CornerRadius="0,0,5,5" Background="#e0e0e0" BorderThickness="1" BorderBrush="Black" Margin="0,40,0,0">
+                <Grid>
+                    <Grid HorizontalAlignment="Center" Width="306">
+                        <Image Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Background-Circle.png" HorizontalAlignment="Left" Width="242" Height="250" VerticalAlignment="Top" Margin="32,38,0,0" />
+                        <Image  x:Name="Forward1Button" HorizontalAlignment="Left" Height="30" Margin="138,102,0,0" VerticalAlignment="Top" Width="30" MouseLeftButtonDown="Forward1Button_Click" MouseLeftButtonUp="Forward1Button_MouseUp" MouseLeave="Forward1Button_MouseUp"
+                                Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Up-Small-Disabled.png"></Image>
+                        <Image x:Name="Forward2Button" HorizontalAlignment="Left" Height="30" Margin="138,67,0,0" VerticalAlignment="Top" Width="30" MouseLeftButtonDown="Forward2Button_Click" MouseLeftButtonUp="Forward2Button_MouseUp" MouseLeave="Forward2Button_MouseUp"
+                               Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Up-Med-Disabled.png"></Image>
+                        <Image  x:Name="Forward3Button" HorizontalAlignment="Left" Height="45" Margin="131,17,0,0" VerticalAlignment="Top" Width="44" MouseLeftButtonDown="Forward3Button_Click" MouseLeftButtonUp="Forward3Button_MouseUp" MouseLeave="Forward3Button_MouseUp"
+                                Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Up-Big-Disabled.png"></Image>
+                        <Image x:Name="StopButton" HorizontalAlignment="Left" Height="16" Width="16" Margin="145,150,0,0" VerticalAlignment="Top" MouseLeftButtonDown="StopButton_Click" MouseLeftButtonUp="StopButton_MouseUp" MouseLeave="StopButton_MouseUp"
+                               Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Stop-Disabled.png"></Image>
+                        <Image x:Name="Back1Button" HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="30" MouseLeftButtonDown="Back1Button_Click" Margin="138,184,0,0" MouseLeftButtonUp="Back1Button_MouseUp" MouseLeave="Back1Button_MouseUp"
+                               Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Down-Small-Disabled.png"></Image>
+                        <Image x:Name="Back2Button" HorizontalAlignment="Left" Height="30" VerticalAlignment="Top" Width="30" MouseLeftButtonDown="Back2Button_Click" Margin="138,219,0,0" MouseLeftButtonUp="Back2Button_MouseUp" MouseLeave="Back2Button_MouseUp"
+                               Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Down-Med-Disabled.png"></Image>
+                        <Image  x:Name="Back3Button" HorizontalAlignment="Left" Margin="131,254,0,0" Width="44" MouseLeftButtonDown="Back3Button_Click" Height="45" VerticalAlignment="Top" MouseLeftButtonUp="Back3Button_MouseUp" MouseLeave="Back3Button_MouseUp"
+                                Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Down-Big-Disabled.png"></Image>
+                        <Image x:Name="Left1Button" Height="30" Margin="96,143,0,0" VerticalAlignment="Top" MouseLeftButtonDown="Left1Button_Click" HorizontalAlignment="Left" Width="30" MouseLeftButtonUp="Left1Button_MouseUp" MouseLeave="Left1Button_MouseUp"
+                               Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Left-Small-Disabled.png"></Image>
+                        <Image x:Name="Left2Button" Height="30" Margin="62,143,0,0" VerticalAlignment="Top" MouseLeftButtonDown="Left2Button_Click" HorizontalAlignment="Left" Width="30" MouseLeftButtonUp="Left2Button_MouseUp" MouseLeave="Left2Button_MouseUp"
+                               Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Left-Med-Disabled.png"></Image>
+                        <Image x:Name="Left3Button" Height="44" Width="46" Margin="10,136,0,0" VerticalAlignment="Top" MouseLeftButtonDown="Left3Button_Click" HorizontalAlignment="Left" MouseLeftButtonUp="Left3Button_MouseUp" MouseLeave="Left3Button_MouseUp"
+                               Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Left-Big-Disabled.png"></Image>
+                        <Image x:Name="Right1Button" Height="30" Width="30" Margin="178,143,0,0" VerticalAlignment="Top" MouseLeftButtonDown="Right1Button_Click" HorizontalAlignment="Left" MouseLeftButtonUp="Right1Button_MouseUp" MouseLeave="Right1Button_MouseUp"
+                               Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Right-Small-Disabled.png"></Image>
+                        <Image  x:Name="Right2Button" HorizontalAlignment="Left" Height="30" Margin="214,143,0,0" VerticalAlignment="Top" Width="30" MouseLeftButtonDown="Right2Button_Click" MouseLeftButtonUp="Right2Button_MouseUp" MouseLeave="Right2Button_MouseUp"
+                                Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Right-Med-Disabled.png"></Image>
+                        <Image x:Name="Right3Button" HorizontalAlignment="Left" Height="45" Margin="248,136,0,0" VerticalAlignment="Top" Width="46" MouseLeftButtonDown="Right3Button_Click" MouseLeftButtonUp="Right3Button_MouseUp" MouseLeave="Right3Button_MouseUp"
+                               Source="/Resources/UserInterface/Motion/DRIVE-CONTROLS-Right-Big-Disabled.png"></Image>
+                    </Grid>
+                    <TextBlock FontFamily="{StaticResource OpenSans-SemiBold}" TextWrapping="Wrap" Text="Speed"  Margin="10,0,0,34" FontSize="16" Height="24" VerticalAlignment="Bottom" Foreground="#FF666666" HorizontalAlignment="Left" Width="54"/>
+                    <Slider Margin="10,0,55,10" VerticalAlignment="Bottom" Style="{StaticResource Horizontal_Slider}" x:Name="SpeedSlider" DockPanel.Dock="Left"  Value="60" ValueChanged="SpeedSlider_ValueChanged" TickFrequency="1" IsSnapToTickEnabled="True" Height="25"/>
+                    <!--<TextBlock Text="{Binding ElementName=SpeedSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Left" TextAlignment="Right" Width="40" FontSize="14" HorizontalAlignment="Left"/>-->
+                    <Image Source="/Resources/UserInterface/ICON-Sallie-Grey.png" Width="25" Height="25" Margin="0,0,13,10" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+                 </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</local:ModuleBaseDlg>

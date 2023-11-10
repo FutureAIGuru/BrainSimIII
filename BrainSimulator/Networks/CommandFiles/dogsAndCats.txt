@@ -1,0 +1,60 @@
+legs are body parts
+a dog is an animal
+fido is a dog
+rover is a dog
+spot is a dog
+fido has 4 legs
+spot has 4 legs
+rover has 4 legs
+patchy has 3 legs
+patchy is a dog
+buddy has 4 legs
+yes
+what is buddy? (buddy is a dog)
+
+fifi is a cat
+fifi has 4 legs
+lilly is a cat
+a kitten is a young cat
+a puppy is a young dog
+snowball is a kitten
+
+a cat is an animal
+a dog is an animal
+an animal has 2 eyes
+eyes are body parts
+a dog has 4 legs
+a cat has 4 legs
+
+//check for suggested parent
+kittens are fluffy
+kitty is fluffy (is kitty a kitten)
+yes
+what is kitty? (kitty is a kitten)
+kittens are playful
+puppies are playful
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

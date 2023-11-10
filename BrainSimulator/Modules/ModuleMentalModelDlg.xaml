@@ -1,0 +1,21 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleMentalModelDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:h="http://helix-toolkit.org/wpf"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="MentalModel Dialog" Height="450" Width="800" Background="LightGray" ShowInTaskbar="False" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch">
+    <Grid x:Name="theCanvas" SizeChanged="TheCanvas_SizeChanged" Margin="0,0,0,-16">
+        <h:HelixViewport3D x:Name="HelixPort" Margin="0,25,0,0" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" MouseMove="HelixPort_MouseMove" MouseLeave="HelixPort_MouseLeave">
+            <h:DefaultLights/>
+            <h:ThreePointLights></h:ThreePointLights>
+
+            <ModelVisual3D x:Name="ourObjects">
+            </ModelVisual3D>
+        </h:HelixViewport3D>
+        <CheckBox x:Name="SalliesViewCheckBox" Content="Sallie's View" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="177" Unchecked="SalliesViewCheckBox_Unchecked" Checked="SalliesViewCheckBox_Checked"/>
+        <Button Content="Reset Mental Model" Margin="0,3,10,0" VerticalAlignment="Top" Click="Button_Click" HorizontalAlignment="Right" Width="119"/>
+    </Grid>
+</local:ModuleBaseDlg>

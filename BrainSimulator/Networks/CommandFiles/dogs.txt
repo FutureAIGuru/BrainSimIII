@@ -1,0 +1,19 @@
+a dog is an animal
+a dog has 2 eyes.
+eyes are a body part
+legs are a body part
+tell me about a dog. (a dog is a animal that has 2 eyes)
+rover has 4 legs
+rover is a dog.
+tell me about a dog. (a dog is a animal that has 4 legs and 2 eyes)
+tell me about rover (rover is a dog that has 2 eyes and 4 legs)
+how many eyes does rover have? (rover has 2 eyes)
+how many legs does rover have? (rover has 4 legs)
+spot has 4 legs
+spot is a dog
+tell me about a dog
+fido is a dog.
+fido has 3 legs.
+how many legs does fido have? (fido has 3 legs)
+how many legs does a dog have? (I think a dog has 4 legs)
+

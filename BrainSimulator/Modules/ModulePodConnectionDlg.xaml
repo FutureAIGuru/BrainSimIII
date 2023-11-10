@@ -1,0 +1,37 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModulePodConnectionDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="ModulePodConnectionDlg Module Dialog" MinHeight="310" MinWidth="210" Background="Gray" ShowInTaskbar="False">
+    <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" Margin="0,0,0,5">
+        <StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Pod List" Height="25" Width="90" Margin="10,0,0,0" HorizontalAlignment="Left" />
+                <CheckBox x:Name="AutoConnect" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="-5,0,0,0" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked">Auto Connect</CheckBox>
+            </StackPanel>
+            <ComboBox x:Name="IPPodListComboBox" Height="25" Width="143" Margin="10,0,0,5" HorizontalAlignment="Left" SelectionChanged="IPListComboBox_SelectionChanged" DropDownOpened="IPPodListComboBox_DropDownOpened"/>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="PairButton" Content="PairPod" Height="27" Width="80" Margin="10,0,0,0" Click="PairPod_Button_Click" HorizontalAlignment="Left"/>
+                <Button x:Name="DisconnectButton" Content="Disconnect" IsEnabled="False" Height="27" Width="80" Margin="10,0,0,0" Click="DisconnectPod_Button_Click" HorizontalAlignment="Left"/>
+            </StackPanel>
+            <Label Content="Pod Name" Height="25" Width="90" Margin="10,0,0,0" HorizontalAlignment="Left"/>
+            <TextBox x:Name="renamePodTextBox" Height="25" Width="143" Margin="10,0,0,5" HorizontalAlignment="Left" TextWrapping="Wrap" Text=""/>
+            <Button Content="Rename Pod"  Height="25" Width="100" Margin="10,0,0,5" HorizontalAlignment="Left" Click="renameButton_Click"/>
+            <GroupBox HorizontalAlignment="Center" Width="150">
+                <GroupBox.Header>
+                    <Label>OTA Mode</Label>
+                </GroupBox.Header>
+                <StackPanel>
+                    <Button x:Name="PodOTA" Content="Pod OTA" HorizontalAlignment="Center" Margin="0,0,0,5" VerticalAlignment="Top" Height="25" Width="120" Click="SendPodOTACommand"></Button>
+                    <Button x:Name="CameraOTA" Content="Camera OTA" HorizontalAlignment="Center" Margin="0,0,0,5" VerticalAlignment="Top" Height="25" Width="120" Click="SendCameraOTACommand"></Button>
+                </StackPanel>
+            </GroupBox>
+            <CheckBox x:Name="micEnabledToggle" Content="MicEnabled" IsChecked="True" Click="micEnabledToggle_Click"/>
+            <CheckBox x:Name="speakerEnabledToggle" Content="SpeakerEnabled" IsChecked="True" Click="speakerEnabledToggle_Click"/>
+
+        </StackPanel>
+    </Grid>
+</local:ModuleBaseDlg>

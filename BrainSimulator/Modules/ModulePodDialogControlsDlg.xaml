@@ -1,0 +1,20 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModulePodDialogControlsDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="ModulePodDialogControlsDlg Module Dialog" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
+    <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="107*"/>
+            <ColumnDefinition Width="293*"/>
+        </Grid.ColumnDefinitions>
+        <ComboBox x:Name="ComPort" Width="230" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.ColumnSpan="2"/>
+
+        <ScrollViewer Grid.Column="1">
+            <TextBox x:Name="TerminalOutput" Margin="100,0,0,0" TextWrapping="NoWrap" Text="Incoming Transmission" RenderTransformOrigin="0.505,0.395" IsReadOnly="True" Grid.Column="1" FontSize="16" Background="#FF484848" Foreground="White"/>
+        </ScrollViewer>
+    </Grid>
+</local:ModuleBaseDlg>

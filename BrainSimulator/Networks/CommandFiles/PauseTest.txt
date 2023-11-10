@@ -1,0 +1,6 @@
+pause 10
+move forward 10
+pause 3
+move back 10
+pause 3
+move forward 10

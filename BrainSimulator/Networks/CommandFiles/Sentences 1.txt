@@ -1,0 +1,157 @@
+eat is an action
+code is an action
+dance is an action 
+fly is an action
+hunt is an action
+play is an action
+ride is an action
+sing is an action 
+swim is an action
+drink is an action
+drive is an action
+talk is an action
+bark is an action
+slither is an action
+roll is an action
+_
+an item_part is a part
+legs is an item_part
+
+a chair has 4 legs
+a table has 4 legs
+_
+an abstract_part is a part
+a subject is an abstract_part
+_
+a mechanical_part is a part
+wheels is a mechanical_part
+_
+a body_part is a part
+an exoskeleton is a body_part
+_
+a life_part is a part
+an animal is a life_part
+_
+a mammal is an animal
+a human is a mammal
+a bat is a mammal
+a mouse is a mammal
+
+an animal can eat
+an animal can hunt
+an animal can play
+a human can code
+a human can dance
+a human can ride
+a human can sing
+a human can swim
+a human can drive
+a bat can fly
+a mouse can swim
+_
+an insect is an animal
+a bug is an insect
+
+a beetle is a bug
+an ant is a bug
+
+a beetle can fly
+_
+an ave is an animal
+a bird is an ave
+
+a bird can fly
+_
+a reptile is an animal
+a snake is a reptile
+
+a snake can swim
+a snake can slither
+-
+a chordata is an animal
+a fish is a chordata
+
+a fish can swim
+-
+a bacteria is a life_part
+-
+a plant is a life_part
+-
+income is a concept
+age is a concept
+
+a time is a concept
+
+a second is a time
+a minute is a time
+an hour is a time
+a day is a time
+a week is a time
+a month is a time
+a year is a time
+_
+a number is a concept
+
+one is a number
+two is a number
+three is a number
+four is a number
+five is a number
+six is a number
+seven is a number
+eight is a number
+nine is a number
+ten is a number
+_
+sport is a concept
+
+tennis is a sport
+basketball is a sport
+baseball is a sport
+soccer is a sport
+golf is a sport
+running is a sport
+volleyball is a sport
+badminton is a sport
+swimming is a sport
+boxing is a sport
+table_tennis is a sport
+skiing is a sport
+ice_skating is a sport
+roller_skating is a sport
+cricket is a sport
+rugby is a sport
+pool is a sport
+darts is a sport
+football is a sport
+bowling is a sport
+ice_hockey is a sport
+surfing is a sport
+karate is a sport
+horse_racing is a sport
+snowboarding is a sport
+skateboarding is a sport
+cycling is a sport
+archery is a sport
+fishing is a sport
+gymnastics is a sport
+figure_skating is a sport
+rock_climbing is a sport
+sumo_wrestling is a sport
+taekwondo is a sport
+fencing is a sport
+water_skiing is a sport
+jet_skiing is a sport
+weight_lifting is a sport
+scuba_diving is a sport
+judo is a sport
+wind_surfing is a sport
+kickboxing is a sport
+sky_diving is a sport
+hang_gliding is a sport
+bungee_jumping is a sport
+_
+a furniture is a property
+a chair is a  furniture
+a table is a furniture
+_

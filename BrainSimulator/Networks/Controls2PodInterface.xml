@@ -1,0 +1,896 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NeuronArray xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <networkNotes />
+  <hideNotes>false</hideNotes>
+  <Generation>144</Generation>
+  <EngineSpeed>250</EngineSpeed>
+  <EngineIsPaused>false</EngineIsPaused>
+  <arraySize>450</arraySize>
+  <rows>15</rows>
+  <lastFireCount>0</lastFireCount>
+  <displayParams>
+    <NeuronDisplaySize>60.536</NeuronDisplaySize>
+    <DisplayOffset>
+      <X>12.655065434536596</X>
+      <Y>32.14812768582546</Y>
+    </DisplayOffset>
+    <NeuronRows>15</NeuronRows>
+  </displayParams>
+  <ShowSynapses>true</ShowSynapses>
+  <Modules>
+    <ModuleView>
+      <Label>3DSimView</Label>
+      <FirstNeuron>3</FirstNeuron>
+      <Height>2</Height>
+      <Width>2</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>Module3DSimView</ModuleTypeStr>
+      <TheModule xsi:type="Module3DSimView">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>1528</X>
+          <Y>133</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>375</X>
+          <Y>402</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <SaveFolder>E:\DEVELOPMENT\_FUTUREAI_GURU\images\autosave</SaveFolder>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>3DSimModel</Label>
+      <FirstNeuron>0</FirstNeuron>
+      <Height>2</Height>
+      <Width>2</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>Module3DSimModel</ModuleTypeStr>
+      <TheModule xsi:type="Module3DSimModel">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>160</X>
+          <Y>102</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>397</X>
+          <Y>396</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+        <ourThings>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>3</size>
+            <position>
+              <X>15</X>
+              <Y>-10</Y>
+              <Z>1.5</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Orange</color>
+            <rotation>45</rotation>
+          </EnvironmentObject>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>2</size>
+            <position>
+              <X>20</X>
+              <Y>20</Y>
+              <Z>1</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Green</color>
+            <rotation>17</rotation>
+          </EnvironmentObject>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>2</size>
+            <position>
+              <X>11</X>
+              <Y>-21</Y>
+              <Z>1</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Cyan</color>
+            <rotation>2</rotation>
+          </EnvironmentObject>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>3</size>
+            <position>
+              <X>-25</X>
+              <Y>20</Y>
+              <Z>1.5</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Blue</color>
+            <rotation>22</rotation>
+          </EnvironmentObject>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>3</size>
+            <position>
+              <X>-20</X>
+              <Y>-5</Y>
+              <Z>1.5</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Magenta</color>
+            <rotation>45</rotation>
+          </EnvironmentObject>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>2</size>
+            <position>
+              <X>25</X>
+              <Y>10</Y>
+              <Z>1</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Yellow</color>
+            <rotation>45</rotation>
+          </EnvironmentObject>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>3</size>
+            <position>
+              <X>40</X>
+              <Y>40</Y>
+              <Z>1.5</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Blue</color>
+            <rotation>0</rotation>
+          </EnvironmentObject>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>3</size>
+            <position>
+              <X>-40</X>
+              <Y>40</Y>
+              <Z>1.5</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Yellow</color>
+            <rotation>0</rotation>
+          </EnvironmentObject>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>3</size>
+            <position>
+              <X>-40</X>
+              <Y>-40</Y>
+              <Z>1.5</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Cyan</color>
+            <rotation>0</rotation>
+          </EnvironmentObject>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>3</size>
+            <position>
+              <X>-40</X>
+              <Y>0</Y>
+              <Z>1.5</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Magenta</color>
+            <rotation>0</rotation>
+          </EnvironmentObject>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>3</size>
+            <position>
+              <X>0</X>
+              <Y>40</Y>
+              <Z>1.5</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Magenta</color>
+            <rotation>0</rotation>
+          </EnvironmentObject>
+        </ourThings>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>UKS</Label>
+      <FirstNeuron>54</FirstNeuron>
+      <Height>2</Height>
+      <Width>2</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleUKS</ModuleTypeStr>
+      <TheModule xsi:type="ModuleUKS">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>711</X>
+          <Y>92</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>474</X>
+          <Y>856</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+        <UKSTemp>
+          <SThing>
+            <label>Thing</label>
+            <parents />
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Action</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>NoAction</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Stop</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Utterance</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>SpeakPhn</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Vowel</label>
+            <parents>
+              <int>5</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Consonant</label>
+            <parents>
+              <int>5</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>End</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Go</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>RTurn</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>LTurn</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>UTurn</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Say</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>SayRnd</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Sense</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Visual</label>
+            <parents>
+              <int>15</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Touch</label>
+            <parents>
+              <int>15</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Color</label>
+            <parents>
+              <int>16</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Shape</label>
+            <parents>
+              <int>16</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Landmark</label>
+            <parents>
+              <int>16</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Motion</label>
+            <parents>
+              <int>16</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>SSegment</label>
+            <parents>
+              <int>19</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Point</label>
+            <parents>
+              <int>19</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Segment</label>
+            <parents>
+              <int>19</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Audible</label>
+            <parents>
+              <int>15</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Word</label>
+            <parents>
+              <int>25</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Phoneme</label>
+            <parents>
+              <int>25</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Phrase</label>
+            <parents>
+              <int>25</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>ShortTerm</label>
+            <parents>
+              <int>28</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>phTemp</label>
+            <parents>
+              <int>29</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Event</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Outcome</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Positive</label>
+            <parents>
+              <int>32</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Negative</label>
+            <parents>
+              <int>32</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>ModelThing</label>
+            <parents />
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>CurrentlyVisible</label>
+            <parents>
+              <int>16</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>MentalModel</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>CurrentlyVisible</label>
+            <parents>
+              <int>37</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Property</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>po0</label>
+            <parents>
+              <int>37</int>
+              <int>38</int>
+            </parents>
+            <references>
+              <Point>
+                <X>42</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>44</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>46</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>48</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>50</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>52</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>54</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>58</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>60</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>62</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>tpl</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>tpl0</label>
+            <parents>
+              <int>41</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Point3DPlus">
+              <X>14.924618</X>
+              <Y>0.55372685</Y>
+              <Z>-1.3961266</Z>
+              <Conf>0</Conf>
+            </V>
+          </SThing>
+          <SThing>
+            <label>btl</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>btl0</label>
+            <parents>
+              <int>43</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Point3DPlus">
+              <X>14.797917</X>
+              <Y>0.5490261</Y>
+              <Z>-2.3916986</Z>
+              <Conf>0</Conf>
+            </V>
+          </SThing>
+          <SThing>
+            <label>tpr</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>tpr0</label>
+            <parents>
+              <int>45</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Point3DPlus">
+              <X>14.924618</X>
+              <Y>-0.55372685</Y>
+              <Z>-1.3961266</Z>
+              <Conf>0</Conf>
+            </V>
+          </SThing>
+          <SThing>
+            <label>btr</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>btr0</label>
+            <parents>
+              <int>47</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Point3DPlus">
+              <X>14.797917</X>
+              <Y>-0.5490261</Y>
+              <Z>-2.3916986</Z>
+              <Conf>0</Conf>
+            </V>
+          </SThing>
+          <SThing>
+            <label>cen</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>cen0</label>
+            <parents>
+              <int>49</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Point3DPlus">
+              <X>14.879821</X>
+              <Y>0</Y>
+              <Z>-1.8949732</Z>
+              <Conf>0</Conf>
+            </V>
+          </SThing>
+          <SThing>
+            <label>wid</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>wid0</label>
+            <parents>
+              <int>51</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:double">56</V>
+          </SThing>
+          <SThing>
+            <label>hig</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>hig0</label>
+            <parents>
+              <int>53</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:double">56</V>
+          </SThing>
+          <SThing>
+            <label>vsb</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>vsb0</label>
+            <parents>
+              <int>55</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">Visible</V>
+          </SThing>
+          <SThing>
+            <label>shp</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>shp0</label>
+            <parents>
+              <int>57</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">Sphere</V>
+          </SThing>
+          <SThing>
+            <label>col</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>col0</label>
+            <parents>
+              <int>59</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">Magenta</V>
+          </SThing>
+          <SThing>
+            <label>app</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>app0</label>
+            <parents>
+              <int>61</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">Known</V>
+          </SThing>
+        </UKSTemp>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>3DSimControl</Label>
+      <FirstNeuron>6</FirstNeuron>
+      <Height>2</Height>
+      <Width>2</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="Module3DSimControl">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>1468</X>
+          <Y>532</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>435</X>
+          <Y>459</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>MentalModel</Label>
+      <FirstNeuron>45</FirstNeuron>
+      <Height>2</Height>
+      <Width>2</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleMentalModel</ModuleTypeStr>
+      <TheModule xsi:type="ModuleMentalModel">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+        <LastMove>
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+          <Conf>0</Conf>
+        </LastMove>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>MentalModelUpdater</Label>
+      <FirstNeuron>48</FirstNeuron>
+      <Height>2</Height>
+      <Width>2</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleMentalModelUpdater</ModuleTypeStr>
+      <TheModule xsi:type="ModuleMentalModelUpdater">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>PodInterface</Label>
+      <FirstNeuron>51</FirstNeuron>
+      <Height>2</Height>
+      <Width>2</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModulePodInterface</ModuleTypeStr>
+      <TheModule xsi:type="ModulePodInterface">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>1196</X>
+          <Y>520</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>283</X>
+          <Y>471</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+  </Modules>
+  <RefractoryDelay>0</RefractoryDelay>
+  <Neurons />
+</NeuronArray>

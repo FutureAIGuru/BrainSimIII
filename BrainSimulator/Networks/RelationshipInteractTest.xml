@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NeuronArray xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <networkNotes />
+  <hideNotes>false</hideNotes>
+  <Generation>0</Generation>
+  <EngineSpeed>250</EngineSpeed>
+  <EngineIsPaused>false</EngineIsPaused>
+  <arraySize>450</arraySize>
+  <rows>15</rows>
+  <lastFireCount>0</lastFireCount>
+  <displayParams>
+    <NeuronDisplaySize>62</NeuronDisplaySize>
+    <DisplayOffset>
+      <X>0</X>
+      <Y>0</Y>
+    </DisplayOffset>
+    <NeuronRows>15</NeuronRows>
+  </displayParams>
+  <ShowSynapses>false</ShowSynapses>
+  <Modules>
+    <ModuleView>
+      <Label>UKS</Label>
+      <FirstNeuron>199</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleUKS</ModuleTypeStr>
+      <TheModule xsi:type="ModuleUKS">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>1073.6000000000001</X>
+          <Y>201.60000000000002</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>800</X>
+          <Y>450.40000000000003</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <fileName />
+        <UKSTemp />
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>UKSInteract</Label>
+      <FirstNeuron>139</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleUKSInteract</ModuleTypeStr>
+      <TheModule xsi:type="ModuleUKSInteract">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>250.4</X>
+          <Y>250.4</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>306.40000000000003</X>
+          <Y>290.40000000000003</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+  </Modules>
+  <RefractoryDelay>0</RefractoryDelay>
+  <Neurons />
+</NeuronArray>

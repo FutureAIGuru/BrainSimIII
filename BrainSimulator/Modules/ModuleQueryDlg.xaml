@@ -1,0 +1,52 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleQueryDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="ModuleQueryDlg Module Dialog" Background="Gray" ShowInTaskbar="False">
+    <Grid Name="theCanvas" SizeChanged="TheCanvas_SizeChanged" >
+        <StackPanel>
+            <StackPanel Margin="0 5 0 0" Orientation="Horizontal">
+                <Label Width="100">Object Selection</Label>
+                <ComboBox x:Name="ObjectSelectionComboBox" VerticalAlignment="Top" HorizontalAlignment="Right" Width="234" Height="25" DropDownOpened="Source_DropDownOpened"/>
+            </StackPanel>
+            <GroupBox Margin="5 5 5 0" HorizontalAlignment="Center">
+                <GroupBox.Header>
+                    <Label>Relationship Selection</Label>
+                </GroupBox.Header>
+                <StackPanel Margin="5 5 5 0">
+                    <StackPanel  Orientation="Horizontal">
+                        <Label Width="95" HorizontalAlignment="Left">Type</Label>
+                        <ComboBox x:Name="RelationshipComboBox" VerticalAlignment="Top" Width="220" Height="25" DropDownOpened="RelationshipType_DropDownOpened"/>
+                    </StackPanel>
+                    <StackPanel Margin="0 5 0 0" Orientation="Horizontal">
+                        <Label Width="95" HorizontalAlignment="Left">Target</Label>
+                        <ComboBox x:Name="TargetComboBox" Width="220" Height="25" DropDownOpened="Target_DropDownOpened"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="0 5 0 5" Orientation="Horizontal">
+                        <Label>Count</Label>
+                        <TextBox x:Name="CountTextBox" Margin="0 0 17 0" Width="36" HorizontalAlignment="Center"/>
+                        <Label>Exclude</Label>
+                        <CheckBox x:Name="NegateCheckbox" Margin="0 0 5 0" VerticalAlignment="Center"></CheckBox>
+                        <Button Content="Add Relation" Width="150" Height="25" Click="AddRelation_Button_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="5 5 5 0" HorizontalAlignment="Stretch">
+                <GroupBox.Header>
+                    <Label>Relationship List</Label>
+                </GroupBox.Header>
+                <StackPanel Margin="5 5 5 0">
+                    <ListBox x:Name="RelationshipListBox" Margin="0 5 0 0" Height="125" ></ListBox>
+                    <Button Margin="0 5 0 0" Content="Delete Relation" Height="25" Click="DeleteRelation_Button_Click"/>
+                    <Button Margin="0 5 0 5" Content="Clear Relations" Height="25" Click="ClearRelations_Button_Click"/>
+                </StackPanel>
+            </GroupBox>
+            <Button Content="Search" Margin="5 5 5 5" Height="25" Click="Search_Button_Click"/>
+        </StackPanel>
+
+    </Grid>
+</local:ModuleBaseDlg>

@@ -1,0 +1,30 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleEventArithmeticDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="ModuleEventArithmeticDlg Module Dialog" Height="195" Width="297" Background="Gray" ShowInTaskbar="False">
+    <Grid Name="theCanvas" SizeChanged="TheCanvas_SizeChanged" >
+        <Label x:Name="firstNumberLabel" Content="First Number" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Height="27" Margin="-10,1,0,0" VerticalAlignment="Top" Width="102"/>
+        <Label x:Name="secondNumberLabel" Content="Second Number" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Height="27" Margin="91,1,0,0" VerticalAlignment="Top" Width="100"/>
+        <TextBox x:Name="firstNumberText" HorizontalAlignment="Left" Height="19" Margin="13,27,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="55"/>
+        <TextBox x:Name="secondNumberText" HorizontalAlignment="Left" Height="18" Margin="120,27,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="54"/>
+        <Label x:Name="plusLabel" Content="+" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Height="34" Margin="74,18,0,0" VerticalAlignment="Top" Width="38" RenderTransformOrigin="0.592,0.227" FontSize="18"/>
+        <Label x:Name="equalsLabel" Content="=" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Height="34" Margin="176,17,0,0" VerticalAlignment="Top" Width="38" RenderTransformOrigin="0.592,0.227" FontSize="18"/>
+        <TextBlock x:Name="additionResultText" HorizontalAlignment="Left" Height="18" Margin="217,27,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="55"/>
+        <Label x:Name="additionResultLabel" Content="Result" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Height="27" Margin="194,1,0,0" VerticalAlignment="Top" Width="100"/>
+        <Button x:Name="learnButton" Content="Learn" HorizontalAlignment="Left" Height="19" Margin="217,73,0,0" VerticalAlignment="Top" Width="55" Click="LearnButton_Click"/>
+        <Button x:Name="populateButton" Content="Populate" HorizontalAlignment="Left" Height="19" Margin="144,126,0,0" VerticalAlignment="Top" Width="55" Click="populateButton_Click" MouseDoubleClick="populateButton_Click"/>
+        <Label x:Name="plusLabel_Copy" Content="*" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Height="34" Margin="74,46,0,0" VerticalAlignment="Top" Width="38" RenderTransformOrigin="0.592,0.227" FontSize="18"/>
+        <Label x:Name="equalsLabel_Copy" Content="=" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Height="34" Margin="176,42,0,0" VerticalAlignment="Top" Width="38" RenderTransformOrigin="0.592,0.227" FontSize="18"/>
+        <TextBlock x:Name="multiplyResult" HorizontalAlignment="Left" Height="18" Margin="217,52,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="55"/>
+        <TextBox x:Name="minTextBox" HorizontalAlignment="Left" Height="19" Margin="13,126,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="55"/>
+        <TextBlock x:Name="firstNumLabel" HorizontalAlignment="Left" Height="18" Margin="14,52,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="55"/>
+        <TextBlock x:Name="secondNumLabel" HorizontalAlignment="Left" Height="18" Margin="120,52,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="55"/>
+        <TextBox x:Name="maxTextBox" HorizontalAlignment="Left" Height="19" Margin="79,126,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="55"/>
+        <Label x:Name="firstNumberLabel_Copy" Content="Min" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Height="27" Margin="21,99,0,0" VerticalAlignment="Top" Width="39"/>
+        <Label x:Name="firstNumberLabel_Copy1" Content="Max" HorizontalAlignment="Left" HorizontalContentAlignment="Center" Height="27" Margin="87,99,0,0" VerticalAlignment="Top" Width="39"/>
+    </Grid>
+</local:ModuleBaseDlg>

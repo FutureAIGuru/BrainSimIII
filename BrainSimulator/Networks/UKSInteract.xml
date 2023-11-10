@@ -1,0 +1,573 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NeuronArray xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <networkNotes />
+  <hideNotes>false</hideNotes>
+  <Generation>163</Generation>
+  <EngineSpeed>250</EngineSpeed>
+  <EngineIsPaused>false</EngineIsPaused>
+  <arraySize>450</arraySize>
+  <rows>15</rows>
+  <lastFireCount>0</lastFireCount>
+  <displayParams>
+    <NeuronDisplaySize>62</NeuronDisplaySize>
+    <DisplayOffset>
+      <X>0</X>
+      <Y>0</Y>
+    </DisplayOffset>
+    <NeuronRows>15</NeuronRows>
+  </displayParams>
+  <ShowSynapses>false</ShowSynapses>
+  <Modules>
+    <ModuleView>
+      <Label>UKSInteract</Label>
+      <FirstNeuron>61</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleUKSInteract</ModuleTypeStr>
+      <TheModule xsi:type="ModuleUKSInteract">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>40</X>
+          <Y>247</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>301</X>
+          <Y>195</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>UKS</Label>
+      <FirstNeuron>16</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleUKS</ModuleTypeStr>
+      <TheModule xsi:type="ModuleUKS">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>364</X>
+          <Y>248</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>402</X>
+          <Y>331</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <UKSTemp>
+          <SThing>
+            <label>Thing</label>
+            <parents />
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Sense</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Audible</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Word</label>
+            <parents>
+              <int>2</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>wThis</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>wIs</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>wRed</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>wTurn</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>wRight</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>wStop</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Phrase</label>
+            <parents>
+              <int>2</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>ph0</label>
+            <parents>
+              <int>10</int>
+            </parents>
+            <references>
+              <Point>
+                <X>4</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>5</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>6</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>ph1</label>
+            <parents>
+              <int>10</int>
+            </parents>
+            <references>
+              <Point>
+                <X>7</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>8</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Visual</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Color</label>
+            <parents>
+              <int>13</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>White</label>
+            <parents>
+              <int>14</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Yellow</label>
+            <parents>
+              <int>14</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Blue</label>
+            <parents>
+              <int>14</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Shape</label>
+            <parents>
+              <int>13</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Cube</label>
+            <parents>
+              <int>18</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Sphere</label>
+            <parents>
+              <int>18</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Rectangle</label>
+            <parents>
+              <int>18</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Self</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Motion</label>
+            <parents>
+              <int>22</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Rotation</label>
+            <parents>
+              <int>22</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>EyePan</label>
+            <parents>
+              <int>22</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>EyeTilt</label>
+            <parents>
+              <int>22</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Object</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Property</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Size</label>
+            <parents>
+              <int>28</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>siz0</label>
+            <parents>
+              <int>29</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:int">2</V>
+          </SThing>
+          <SThing>
+            <label>Weight</label>
+            <parents>
+              <int>28</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Shape</label>
+            <parents>
+              <int>28</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Relationship</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Hasa</label>
+            <parents>
+              <int>33</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Can</label>
+            <parents>
+              <int>33</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>ObjectAction</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Roll</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Slide</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Ball</label>
+            <parents>
+              <int>27</int>
+            </parents>
+            <references>
+              <Point>
+                <X>37</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>20</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>TennisBall</label>
+            <parents>
+              <int>39</int>
+            </parents>
+            <references>
+              <Point>
+                <X>15</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>30</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Attention</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>VisualAttention</label>
+            <parents>
+              <int>41</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>CurrentPhrase</label>
+            <parents>
+              <int>41</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>MentalModel</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Situation</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>s0</label>
+            <parents>
+              <int>45</int>
+            </parents>
+            <references>
+              <Point>
+                <X>11</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>ActionTaken</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>TurnRight</label>
+            <parents>
+              <int>47</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>TurnLeft</label>
+            <parents>
+              <int>47</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Move</label>
+            <parents>
+              <int>47</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Outcome</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Positive</label>
+            <parents>
+              <int>51</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Negative</label>
+            <parents>
+              <int>51</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Event</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>e0</label>
+            <parents>
+              <int>54</int>
+            </parents>
+            <references>
+              <Point>
+                <X>46</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>48</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>52</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+        </UKSTemp>
+      </TheModule>
+    </ModuleView>
+  </Modules>
+  <RefractoryDelay>0</RefractoryDelay>
+  <Neurons />
+</NeuronArray>

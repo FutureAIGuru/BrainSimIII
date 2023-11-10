@@ -1,0 +1,55 @@
+//basic single-level inheritance
+fido is a dog
+what is fido?
+a dog has a tail
+does a dog have a tail?
+does fido have a tail?
+how many tails does fido have
+describe fido
+
+dogs have 2 ears
+does fido have ears?
+how many ears does fido have?
+
+a dog can play fetch
+can fido play?
+can fido play fetch?
+what can fido play?
+what can play fetch?
+what can fido do?
+
+//multi-level
+a dog is a mammal
+a mammal breathes air
+describe fido
+a mammal has a head
+does fido have a head?
+describe fido
+
+//have inheritance
+a head has a face
+a face has 2 eyes
+describe a mammal
+a face has a nose
+describe a mammal
+
+//multi-path
+//Exception (not)
+//Exception (numeric)
+
+spot is a dog
+spot has no tail
+describe  spot
+how many tails does spot have?
+a dog has 4 legs
+how many legs does a dog have?
+how many legs does spot have?
+how many legs does fido have?
+spot has 3 legs
+how many legs does spot have?
+describe spot
+describe fido
+
+spot can play fetch
+what can fido play?
+can fido play fecth?

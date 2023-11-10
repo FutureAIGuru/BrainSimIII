@@ -1,0 +1,2403 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NeuronArray xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <networkNotes />
+  <hideNotes>false</hideNotes>
+  <Generation>4290</Generation>
+  <EngineSpeed>0</EngineSpeed>
+  <EngineIsPaused>false</EngineIsPaused>
+  <arraySize>1890</arraySize>
+  <rows>30</rows>
+  <lastFireCount>1</lastFireCount>
+  <displayParams>
+    <NeuronDisplaySize>37.937458</NeuronDisplaySize>
+    <DisplayOffset>
+      <X>7.496211577152508</X>
+      <Y>8.318955176000657</Y>
+    </DisplayOffset>
+    <NeuronRows>30</NeuronRows>
+  </displayParams>
+  <ShowSynapses>false</ShowSynapses>
+  <Modules>
+    <ModuleView>
+      <Label>PodCamera</Label>
+      <FirstNeuron>123</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModulePodCamera">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>288</X>
+          <Y>716</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>257</X>
+          <Y>278</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+        <saveImagesToDisk>false</saveImagesToDisk>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>SpeechOut</Label>
+      <FirstNeuron>1331</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleSpeechOut">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>1182</X>
+          <Y>854</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>242</X>
+          <Y>140</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+        <speak>false</speak>
+        <toSpeak>this is Cyan Partial </toSpeak>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>UKS</Label>
+      <FirstNeuron>931</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleUKS</ModuleTypeStr>
+      <TheModule xsi:type="ModuleUKS">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>1307</X>
+          <Y>87</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>597</X>
+          <Y>455</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <UKSTemp>
+          <SThing>
+            <label>Thing</label>
+            <parents />
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Sense</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Audible</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Word</label>
+            <parents>
+              <int>2</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Phrase</label>
+            <parents>
+              <int>2</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Visual</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Self</label>
+            <parents>
+              <int>1</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Relationship</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Attention</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>VisualAttention</label>
+            <parents>
+              <int>8</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>CurrentPhrase</label>
+            <parents>
+              <int>8</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>CurrentQuery</label>
+            <parents>
+              <int>8</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>MentalModel</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Situation</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>CurrentVerbalResponse</label>
+            <parents>
+              <int>8</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Property</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>CurrentLandmark</label>
+            <parents>
+              <int>13</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>ActionTaken</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Turn Right</label>
+            <parents>
+              <int>17</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Turn Left</label>
+            <parents>
+              <int>17</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Move</label>
+            <parents>
+              <int>17</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Outcomes</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Positive</label>
+            <parents>
+              <int>21</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Neutral</label>
+            <parents>
+              <int>21</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Negative</label>
+            <parents>
+              <int>21</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Object</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Happiness</label>
+            <parents>
+              <int>6</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Event</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>BodyPosition</label>
+            <parents>
+              <int>6</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Point3DPlus">
+              <X>0</X>
+              <Y>0</Y>
+              <Z>0</Z>
+              <Conf>0</Conf>
+            </V>
+          </SThing>
+          <SThing>
+            <label>BodyAngle</label>
+            <parents>
+              <int>6</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Angle">
+              <Degrees>0</Degrees>
+            </V>
+          </SThing>
+          <SThing>
+            <label>CameraPan</label>
+            <parents>
+              <int>6</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Angle">
+              <Degrees>0</Degrees>
+            </V>
+          </SThing>
+          <SThing>
+            <label>CameraTilt</label>
+            <parents>
+              <int>6</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Angle">
+              <Degrees>0</Degrees>
+            </V>
+          </SThing>
+          <SThing>
+            <label>ArmAngle</label>
+            <parents>
+              <int>6</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Angle">
+              <Degrees>0</Degrees>
+            </V>
+          </SThing>
+          <SThing>
+            <label>HandDistance</label>
+            <parents>
+              <int>6</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:double">4</V>
+          </SThing>
+          <SThing>
+            <label>ArmLength</label>
+            <parents>
+              <int>6</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:double">7.5</V>
+          </SThing>
+          <SThing>
+            <label>ArmLift</label>
+            <parents>
+              <int>6</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="Angle">
+              <Degrees>0</Degrees>
+            </V>
+          </SThing>
+          <SThing>
+            <label>Collision</label>
+            <parents>
+              <int>0</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Best Direction</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>North</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>North East</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>East</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>South East</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>South</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>South West</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>West</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>North West</label>
+            <parents>
+              <int>36</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>GoTo</label>
+            <parents>
+              <int>8</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Wall</label>
+            <parents>
+              <int>25</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>wGo</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">go</V>
+          </SThing>
+          <SThing>
+            <label>wTo</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">to</V>
+          </SThing>
+          <SThing>
+            <label>wLook</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">look</V>
+          </SThing>
+          <SThing>
+            <label>wAt</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">at</V>
+          </SThing>
+          <SThing>
+            <label>wPoint</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">point</V>
+          </SThing>
+          <SThing>
+            <label>wGood</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">good</V>
+          </SThing>
+          <SThing>
+            <label>wNo</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">no</V>
+          </SThing>
+          <SThing>
+            <label>wWhat</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">what</V>
+          </SThing>
+          <SThing>
+            <label>wIs</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">is</V>
+          </SThing>
+          <SThing>
+            <label>wA</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">a</V>
+          </SThing>
+          <SThing>
+            <label>wCan</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">can</V>
+          </SThing>
+          <SThing>
+            <label>wBehind</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">behind</V>
+          </SThing>
+          <SThing>
+            <label>wYou</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">you</V>
+          </SThing>
+          <SThing>
+            <label>wDo</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">do</V>
+          </SThing>
+          <SThing>
+            <label>wFeel</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">feel</V>
+          </SThing>
+          <SThing>
+            <label>wHow</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">how</V>
+          </SThing>
+          <SThing>
+            <label>wMany</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">many</V>
+          </SThing>
+          <SThing>
+            <label>wI</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">i</V>
+          </SThing>
+          <SThing>
+            <label>wNot</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">not</V>
+          </SThing>
+          <SThing>
+            <label>wUnderstand</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">understand</V>
+          </SThing>
+          <SThing>
+            <label>wThere</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">there</V>
+          </SThing>
+          <SThing>
+            <label>wMe</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">me</V>
+          </SThing>
+          <SThing>
+            <label>wNothing</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">nothing</V>
+          </SThing>
+          <SThing>
+            <label>wKnow</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">know</V>
+          </SThing>
+          <SThing>
+            <label>wAbout</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">about</V>
+          </SThing>
+          <SThing>
+            <label>wOK</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">ok</V>
+          </SThing>
+          <SThing>
+            <label>wLeft</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">left</V>
+          </SThing>
+          <SThing>
+            <label>wRight</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">right</V>
+          </SThing>
+          <SThing>
+            <label>wAbove</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">above</V>
+          </SThing>
+          <SThing>
+            <label>wBelow</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">below</V>
+          </SThing>
+          <SThing>
+            <label>wOf</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">of</V>
+          </SThing>
+          <SThing>
+            <label>wSee</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">see</V>
+          </SThing>
+          <SThing>
+            <label>wAnything</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">anything</V>
+          </SThing>
+          <SThing>
+            <label>wStop</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">stop</V>
+          </SThing>
+          <SThing>
+            <label>wDont</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">dont</V>
+          </SThing>
+          <SThing>
+            <label>wThat</label>
+            <parents>
+              <int>3</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+            <V xsi:type="xsd:string">that</V>
+          </SThing>
+          <SThing>
+            <label>Directive</label>
+            <parents>
+              <int>4</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>dirGoTo</label>
+            <parents>
+              <int>84</int>
+            </parents>
+            <references>
+              <Point>
+                <X>48</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>49</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>dirLookAt</label>
+            <parents>
+              <int>84</int>
+            </parents>
+            <references>
+              <Point>
+                <X>50</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>51</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>dirPointAt</label>
+            <parents>
+              <int>84</int>
+            </parents>
+            <references>
+              <Point>
+                <X>52</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>51</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>dirGood</label>
+            <parents>
+              <int>84</int>
+            </parents>
+            <references>
+              <Point>
+                <X>53</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>dirNo</label>
+            <parents>
+              <int>84</int>
+            </parents>
+            <references>
+              <Point>
+                <X>54</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>dirStop</label>
+            <parents>
+              <int>84</int>
+            </parents>
+            <references>
+              <Point>
+                <X>81</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>dirDontDoThat</label>
+            <parents>
+              <int>84</int>
+            </parents>
+            <references>
+              <Point>
+                <X>82</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>61</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>83</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Declaration</label>
+            <parents>
+              <int>4</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>decThisIs</label>
+            <parents>
+              <int>92</int>
+            </parents>
+            <references>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>decIsA</label>
+            <parents>
+              <int>92</int>
+            </parents>
+            <references>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>57</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>decCan</label>
+            <parents>
+              <int>92</int>
+            </parents>
+            <references>
+              <Point>
+                <X>58</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Query</label>
+            <parents>
+              <int>4</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>qyWhatIsThis</label>
+            <parents>
+              <int>96</int>
+            </parents>
+            <references>
+              <Point>
+                <X>55</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>qyWhatIsBehindYou</label>
+            <parents>
+              <int>96</int>
+            </parents>
+            <references>
+              <Point>
+                <X>55</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>59</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>60</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>qyWhatIsLeftOfYou</label>
+            <parents>
+              <int>96</int>
+            </parents>
+            <references>
+              <Point>
+                <X>55</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>74</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>78</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>60</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>qyWhatIsRightOfYou</label>
+            <parents>
+              <int>96</int>
+            </parents>
+            <references>
+              <Point>
+                <X>55</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>75</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>78</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>60</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>qyWhatIsRelation</label>
+            <parents>
+              <int>96</int>
+            </parents>
+            <references>
+              <Point>
+                <X>55</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>qyHowMany</label>
+            <parents>
+              <int>96</int>
+            </parents>
+            <references>
+              <Point>
+                <X>63</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>64</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>qyHowDoYouFeel</label>
+            <parents>
+              <int>96</int>
+            </parents>
+            <references>
+              <Point>
+                <X>63</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>61</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>60</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>62</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>Response</label>
+            <parents>
+              <int>4</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>resIDoNotUnderstand</label>
+            <parents>
+              <int>104</int>
+            </parents>
+            <references>
+              <Point>
+                <X>65</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>61</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>66</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>67</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>resThisIs</label>
+            <parents>
+              <int>104</int>
+            </parents>
+            <references>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>resThereIs</label>
+            <parents>
+              <int>104</int>
+            </parents>
+            <references>
+              <Point>
+                <X>68</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>resNothingIsBehindMe</label>
+            <parents>
+              <int>104</int>
+            </parents>
+            <references>
+              <Point>
+                <X>70</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>59</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>69</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>resBehindMeIs</label>
+            <parents>
+              <int>104</int>
+            </parents>
+            <references>
+              <Point>
+                <X>59</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>69</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>56</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>57</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>resIFeel</label>
+            <parents>
+              <int>104</int>
+            </parents>
+            <references>
+              <Point>
+                <X>65</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>62</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>resOK</label>
+            <parents>
+              <int>104</int>
+            </parents>
+            <references>
+              <Point>
+                <X>73</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>resIDoNotKnowAbout</label>
+            <parents>
+              <int>104</int>
+            </parents>
+            <references>
+              <Point>
+                <X>65</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>61</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>66</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>71</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>72</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>resRelation</label>
+            <parents>
+              <int>104</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>resIDontSeeAnything</label>
+            <parents>
+              <int>104</int>
+            </parents>
+            <references>
+              <Point>
+                <X>65</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>61</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>66</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>79</X>
+                <Y>1</Y>
+              </Point>
+              <Point>
+                <X>80</X>
+                <Y>1</Y>
+              </Point>
+            </references>
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>CurrentWord</label>
+            <parents>
+              <int>8</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+          <SThing>
+            <label>CurrentQueryResult</label>
+            <parents>
+              <int>8</int>
+            </parents>
+            <references />
+            <useCount>0</useCount>
+          </SThing>
+        </UKSTemp>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>MentalModel</Label>
+      <FirstNeuron>755</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleMentalModel</ModuleTypeStr>
+      <TheModule xsi:type="ModuleMentalModel">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>589</X>
+          <Y>344</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>662</X>
+          <Y>628</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <MentalModelChanged>false</MentalModelChanged>
+        <SalliesView>true</SalliesView>
+        <LastMove>
+          <X>0</X>
+          <Y>0</Y>
+          <Z>0</Z>
+          <Conf>0</Conf>
+        </LastMove>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>MentalModelUpdater</Label>
+      <FirstNeuron>694</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleMentalModelUpdater</ModuleTypeStr>
+      <TheModule xsi:type="ModuleMentalModelUpdater">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Pod</Label>
+      <FirstNeuron>130</FirstNeuron>
+      <Height>18</Height>
+      <Width>3</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModulePod">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>250</X>
+          <Y>250</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>758</X>
+          <Y>647</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+        <configString>
+                    //Here's a sample configuration file
+                    //This is what you'll get when you first instantiate this module
+
+                    //Left Motor
+                    Actuator Left x0 p2 t0 c3 T90 e1
+                    Sensor LPos x2 p0 m0 M10000 e1 t10 T200
+                    Sensor LRate x3 PLPos m1 M10000 e1 t10 T200
+
+                    //Right Motor
+                    Actuator . .
+                    Actuator Right x0 p3 t0 c3 T90 e1
+                    Actuator . .
+                    Sensor RPos x2 p1 m1 M10000 e1 t10 T200
+                    Sensor RRate x3 PRPos m1 M10000 e1 t10 T200
+
+                    //Eyes
+                    Actuator EyeH x1 p6 t0 T90 e1 t100
+                    Actuator EyeV x1 p7 t0 T90 e1 m90 t100
+                    Sensor EyeH x1 PEyeH m1 e1 t100 T200
+                    Sensor EyeV x1 PEyeV m1 e1 t100 T200
+
+                    //Shoulder Lift
+                    Actuator Lift x1 p9 t0 T160 e1 t3000
+                    Sensor Rot x1 PLift m1 e1 t100 T200
+
+                    //Elbow
+                    Actuator Elbow x1 p10 t0 T135 e1 t3000
+                    Sensor Rot x1 PElbow m1 e1 t100 T200
+
+                    //Shoulder Rotation
+                    Actuator Rot x1 p8 t0 T60 e1 t3000
+                    Sensor Rot x1 PRot m1 e1 t100 T200
+
+                    //Wrist
+                    Actuator Wrist x1 p11 t0 T90 e1 t3000
+                    Sensor Rot x1 PWrist m1 e1 t100 T200
+
+                    //WRot
+                    Actuator WRot x1 p12 t 0 T90 e1 t3000
+                    Sensor Rot x1 PWRot m1 e1 t100 T200
+
+                    //Grip
+                    Actuator Grip x1 p13 t 0 T90 e1 t3000
+                    Sensor Rot x1 PGrip  m1 e1 t100 T200
+
+                    //Turning sensor (z-axis rotation)
+                    Sensor Yaw x4 p5 t100 T200 e1 m1
+
+                    //Pitch sensor (x-axis rotation)
+                    Sensor Pitch x4 p3 t100 T200 e1 m1
+                </configString>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>3DSimModel</Label>
+      <FirstNeuron>363</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="Module3DSimModel">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>1244</X>
+          <Y>599</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>385</X>
+          <Y>375</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <ourThings>
+          <EnvironmentObject xsi:type="Sphere">
+            <shape>Sphere</shape>
+            <size>3</size>
+            <position>
+              <X>0</X>
+              <Y>50</Y>
+              <Z>1.5</Z>
+              <Conf>0</Conf>
+            </position>
+            <color>Orange</color>
+            <rotation>0</rotation>
+            <handle>29125</handle>
+          </EnvironmentObject>
+        </ourThings>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>3DSimView</Label>
+      <FirstNeuron>453</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="Module3DSimView">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>3</X>
+          <Y>345</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>599</X>
+          <Y>629</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <SaveBitmaps>true</SaveBitmaps>
+        <FPSDelay>1000</FPSDelay>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Attention</Label>
+      <FirstNeuron>645</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleAttention">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>943</X>
+          <Y>884</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>249</X>
+          <Y>110</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Association</Label>
+      <FirstNeuron>369</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleAssociation">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>531</X>
+          <Y>716</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>424</X>
+          <Y>280</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>UKS Debug</Label>
+      <FirstNeuron>843</FirstNeuron>
+      <Height>2</Height>
+      <Width>2</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleKBDebug">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>SpeechParser</Label>
+      <FirstNeuron>187</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleSpeechParser">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Situation</Label>
+      <FirstNeuron>1083</FirstNeuron>
+      <Height>2</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleSituation">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Action</Label>
+      <FirstNeuron>1086</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleAction">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Outcome</Label>
+      <FirstNeuron>1089</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleOutcome">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Object</Label>
+      <FirstNeuron>938</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleObject">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Happy</Label>
+      <FirstNeuron>825</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleHappy">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+        <happiness>0</happiness>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>PodAction</Label>
+      <FirstNeuron>1336</FirstNeuron>
+      <Height>4</Height>
+      <Width>3</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModulePodAction">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+        <actions />
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>GoToDest</Label>
+      <FirstNeuron>1186</FirstNeuron>
+      <Height>2</Height>
+      <Width>3</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleNull">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>PodArm</Label>
+      <FirstNeuron>1189</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModulePodArm">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>3DSimControl</Label>
+      <FirstNeuron>543</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="Module3DSimControl">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>932</X>
+          <Y>170</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>436</X>
+          <Y>458</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>PodEye</Label>
+      <FirstNeuron>1191</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModulePodEye">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Query</Label>
+      <FirstNeuron>437</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleQuery">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>128.66666666666666</X>
+          <Y>359.3333333333333</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>340</X>
+          <Y>390</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Relationship</Label>
+      <FirstNeuron>735</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleRelationship">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Event</Label>
+      <FirstNeuron>1179</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleEvent">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>PodInterface</Label>
+      <FirstNeuron>253</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModulePodInterface">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>1625</X>
+          <Y>537</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>280</X>
+          <Y>460</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <amtToTurn>0.5</amtToTurn>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Safety</Label>
+      <FirstNeuron>1174</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleSafety">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>UKSInteract</Label>
+      <FirstNeuron>1183</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleUKSInteract">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>440</X>
+          <Y>530</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>306</X>
+          <Y>190</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Explore</Label>
+      <FirstNeuron>1296</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleExplore">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>PhraseRecognizer</Label>
+      <FirstNeuron>250</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModulePhraseRecognizer">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>SpeechInPlus</Label>
+      <FirstNeuron>126</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleSpeechInPlus">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>4</X>
+          <Y>887</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>297</X>
+          <Y>104</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+        <speechEnabled>false</speechEnabled>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>QueryResolution</Label>
+      <FirstNeuron>248</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleQueryResolution">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>WakeUp</Label>
+      <FirstNeuron>639</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleWakeUp">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+  </Modules>
+  <RefractoryDelay>0</RefractoryDelay>
+  <Neurons>
+    <Neuron>
+      <Id>121</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Sensory Inputs</Label>
+    </Neuron>
+    <Neuron>
+      <Id>123</Id>
+      <Model>Color</Model>
+      <LastCharge>16711680</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>128</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Pod Input/Output</Label>
+    </Neuron>
+    <Neuron>
+      <Id>130</Id>
+      <Label>Timing</Label>
+    </Neuron>
+    <Neuron>
+      <Id>131</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Left</Label>
+    </Neuron>
+    <Neuron>
+      <Id>132</Id>
+      <Model>FloatValue</Model>
+      <Label>.</Label>
+    </Neuron>
+    <Neuron>
+      <Id>133</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Right</Label>
+    </Neuron>
+    <Neuron>
+      <Id>134</Id>
+      <Model>FloatValue</Model>
+      <Label>.</Label>
+    </Neuron>
+    <Neuron>
+      <Id>135</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>EyeH</Label>
+    </Neuron>
+    <Neuron>
+      <Id>136</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>EyeV</Label>
+    </Neuron>
+    <Neuron>
+      <Id>137</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Lift</Label>
+    </Neuron>
+    <Neuron>
+      <Id>138</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Elbow</Label>
+    </Neuron>
+    <Neuron>
+      <Id>139</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Rot</Label>
+    </Neuron>
+    <Neuron>
+      <Id>140</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Wrist</Label>
+    </Neuron>
+    <Neuron>
+      <Id>141</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>WRot</Label>
+    </Neuron>
+    <Neuron>
+      <Id>142</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Grip</Label>
+    </Neuron>
+    <Neuron>
+      <Id>160</Id>
+      <Label>Busy</Label>
+    </Neuron>
+    <Neuron>
+      <Id>161</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>162</Id>
+      <Model>FloatValue</Model>
+    </Neuron>
+    <Neuron>
+      <Id>163</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>164</Id>
+      <Model>FloatValue</Model>
+    </Neuron>
+    <Neuron>
+      <Id>165</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>166</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>167</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>168</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>169</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>170</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>171</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>172</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+    </Neuron>
+    <Neuron>
+      <Id>190</Id>
+      <Label>Sensor</Label>
+    </Neuron>
+    <Neuron>
+      <Id>191</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.73333335</LastCharge>
+      <Label>LPos</Label>
+    </Neuron>
+    <Neuron>
+      <Id>192</Id>
+      <Model>FloatValue</Model>
+      <Label>LRate</Label>
+    </Neuron>
+    <Neuron>
+      <Id>193</Id>
+      <Model>FloatValue</Model>
+      <Label>RPos</Label>
+    </Neuron>
+    <Neuron>
+      <Id>194</Id>
+      <Model>FloatValue</Model>
+      <Label>RRate</Label>
+    </Neuron>
+    <Neuron>
+      <Id>195</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>EyeH</Label>
+    </Neuron>
+    <Neuron>
+      <Id>196</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>EyeV</Label>
+    </Neuron>
+    <Neuron>
+      <Id>197</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Rot</Label>
+    </Neuron>
+    <Neuron>
+      <Id>198</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Rot</Label>
+    </Neuron>
+    <Neuron>
+      <Id>199</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Rot</Label>
+    </Neuron>
+    <Neuron>
+      <Id>200</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Rot</Label>
+    </Neuron>
+    <Neuron>
+      <Id>201</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Rot</Label>
+    </Neuron>
+    <Neuron>
+      <Id>202</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.5</LastCharge>
+      <Label>Rot</Label>
+    </Neuron>
+    <Neuron>
+      <Id>203</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>58</LastCharge>
+      <Label>Yaw</Label>
+    </Neuron>
+    <Neuron>
+      <Id>204</Id>
+      <Model>FloatValue</Model>
+      <LastCharge>0.05</LastCharge>
+      <Label>Pitch</Label>
+    </Neuron>
+    <Neuron>
+      <Id>361</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Simulator</Label>
+    </Neuron>
+    <Neuron>
+      <Id>367</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Associate words with Vision</Label>
+    </Neuron>
+    <Neuron>
+      <Id>371</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Pod Controls</Label>
+    </Neuron>
+    <Neuron>
+      <Id>576</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Vision Processing</Label>
+      <ShowSynapses>True</ShowSynapses>
+    </Neuron>
+    <Neuron>
+      <Id>643</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Attention</Label>
+    </Neuron>
+    <Neuron>
+      <Id>781</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Knowledge Graph</Label>
+    </Neuron>
+    <Neuron>
+      <Id>972</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Complex Learned Behaviors</Label>
+    </Neuron>
+    <Neuron>
+      <Id>1081</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Planning &amp; Imagination</Label>
+    </Neuron>
+    <Neuron>
+      <Id>1083</Id>
+      <Label>Save</Label>
+    </Neuron>
+    <Neuron>
+      <Id>1084</Id>
+      <Label>Match</Label>
+    </Neuron>
+    <Neuron>
+      <Id>1186</Id>
+      <Label>Go</Label>
+    </Neuron>
+    <Neuron>
+      <Id>1216</Id>
+      <Model>FloatValue</Model>
+      <Label>Theta</Label>
+    </Neuron>
+    <Neuron>
+      <Id>1246</Id>
+      <Model>FloatValue</Model>
+      <Label>R</Label>
+    </Neuron>
+    <Neuron>
+      <Id>1329</Id>
+      <LeakRate>0</LeakRate>
+      <Label>Speech Behavior (Pod controlled via input)</Label>
+    </Neuron>
+    <Neuron>
+      <Id>1336</Id>
+      <Label>Record</Label>
+    </Neuron>
+  </Neurons>
+</NeuronArray>

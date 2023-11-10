@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<IntegratedVisionSettings>
+  <Sensitivity>777</Sensitivity>
+  <Threshold>111</Threshold>
+  <Resolution>0</Resolution>
+</IntegratedVisionSettings>

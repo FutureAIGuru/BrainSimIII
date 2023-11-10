@@ -1,0 +1,82 @@
+an arm is a body_part
+a leg is a body_part
+a foot is a body_part
+a head is a body_part
+an elbow is a body_part
+an eye is a body_part
+a nose is a body_part
+hair is a body_part
+teeth is a body_part
+a head is a body_part
+a chest is a body_part
+a jaw is a body_part
+a pelvis is a body_part
+a skull is a body_part
+a tooth is a body_part
+a rib cage is a body_part
+//arm and shoulder
+a phalange is a body_part
+a metacarpus is a body_part
+a carpus is a body_part
+a radius is a body_part
+a ulna is a body_part
+a humerus is a body_part
+a scapula is a body_part
+a clavicle is a body_part
+a fibula is a body_part
+a tibia is a body_part
+a patella is a body_part
+a femur is a body_part
+a spine is a body_part
+// arm connections
+a phalange is connected with a metacarpus
+a metacarpus is connected with a carpus
+a carpus has 5 metacarpus
+a carpus is connected with a radius
+a carpus is connected with a ulna
+a radius is connected with a humerus
+a ulna is connected with a humerus
+a humerus is connected with a scapula
+a scapula is connected with a clavicle
+a rib cage has 2 clavicle
+a rib cage is connected with a spine
+an arm has 5 phalange
+an arm has 5 metacarpus
+an arm has a carpus
+an arm has a radius
+an arm has a ulna
+an arm has a humerus
+an arm has an elbow
+a body has 2 arm
+//legs next
+a foot is connected with a fibula
+a foot is connected with a tibia
+a fibula is connected with a tibia
+a tibia is connected with a patella
+a patella is connected with a femur
+a femur is connected with a pelvis
+a pelvis has 2 femur
+a pelvis is connected with a spine 
+a leg has a foot
+a leg has a fibula
+a leg has a tibia
+a leg has a patella
+a leg has a femur
+a body has 2 leg
+//head
+a tooth is connected with a jaw
+a jaw has 32 tooth
+a jaw is connected with a skull
+a skull is connected with a spine
+a head has 32 tooth
+a head has a skull
+a head has a jaw
+a head has 2 eye
+a head has a nose
+a head has hair
+a body has a head
+//chest
+a chest has a rib cage
+a chest has a spine
+a chest has a pelvis
+a body has a chest

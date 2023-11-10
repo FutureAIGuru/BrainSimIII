@@ -1,0 +1,19 @@
+﻿<Application x:Class="BrainSimulator.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:BrainSimulator"
+             Startup="Application_Startup">
+             <!--StartupUri="MainWindow.xaml"-->
+    <Application.Resources>
+        <FontFamily x:Key="OpenSans-Bold">/Resources/Fonts/OpenSans-Bold.ttf#Open Sans</FontFamily>
+        <FontFamily x:Key="OpenSans-BoldItalic">/Resources/Fonts/OpenSans-BoldItalic.ttf#Open Sans</FontFamily>
+        <FontFamily x:Key="OpenSans-ExtraBold">/Resources/Fonts/OpenSans-ExtraBold.ttf#Open Sans ExtraBold</FontFamily>
+        <FontFamily x:Key="OpenSans-ExtraBoldItalic">/Resources/Fonts/OpenSans-ExtraBoldItalic.ttf#Open Sans ExtraBold</FontFamily>
+        <FontFamily x:Key="OpenSans-Italic">/Resources/Fonts/OpenSans-Italic.ttf#Open Sans</FontFamily>
+        <FontFamily x:Key="OpenSans-Light">/Resources/Fonts/OpenSans-Light.ttf#Open Sans Light</FontFamily>
+        <FontFamily x:Key="OpenSans-LightItalic">/Resources/Fonts/OpenSans-LightItalic.ttf#Open Sans Light</FontFamily>
+        <FontFamily x:Key="OpenSans-Regular">/Resources/Fonts/OpenSans-Regular.ttf#Open Sans</FontFamily>
+        <FontFamily x:Key="OpenSans-SemiBold">/Resources/Fonts/OpenSans-SemiBold.ttf#Open Sans SemiBold</FontFamily>
+        <FontFamily x:Key="OpenSans-SemiBoldItalic">/Resources/Fonts/OpenSans-SemiBoldItalic.ttf#Open Sans SemiBold</FontFamily>
+    </Application.Resources>
+</Application>

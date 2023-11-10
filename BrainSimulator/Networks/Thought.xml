@@ -1,0 +1,1042 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NeuronArray xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <networkNotes />
+  <hideNotes>false</hideNotes>
+  <Generation>21184</Generation>
+  <EngineSpeed>250</EngineSpeed>
+  <EngineIsPaused>false</EngineIsPaused>
+  <arraySize>450</arraySize>
+  <rows>15</rows>
+  <lastFireCount>0</lastFireCount>
+  <displayParams>
+    <NeuronDisplaySize>87.57734</NeuronDisplaySize>
+    <DisplayOffset>
+      <X>-759.4838171792712</X>
+      <Y>-367.1453617038601</Y>
+    </DisplayOffset>
+    <NeuronRows>15</NeuronRows>
+  </displayParams>
+  <ShowSynapses>false</ShowSynapses>
+  <Modules>
+    <ModuleView>
+      <Label>UKS</Label>
+      <FirstNeuron>138</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleUKS</ModuleTypeStr>
+      <TheModule xsi:type="ModuleUKS">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>1103</X>
+          <Y>89</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>1056</X>
+          <Y>605</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <UKSTemp />
+        <fileName>C:\Users\c_sim\source\repos\BrainSim3\BrainSimulator\Networks\KnowledgeFiles\Test1.xml</fileName>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Thought</Label>
+      <FirstNeuron>169</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr />
+      <TheModule xsi:type="ModuleThought">
+        <initialized>true</initialized>
+        <isEnabled>false</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>NLP</Label>
+      <FirstNeuron>33</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleNLP</ModuleTypeStr>
+      <TheModule xsi:type="ModuleNLP">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>269</X>
+          <Y>826</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>901</X>
+          <Y>528</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>SpeechInPlus</Label>
+      <FirstNeuron>31</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleSpeechInPlus</ModuleTypeStr>
+      <TheModule xsi:type="ModuleSpeechInPlus">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>447</X>
+          <Y>401</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>654</X>
+          <Y>220</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <speechEnabled>false</speechEnabled>
+        <remoteMicEnabled>false</remoteMicEnabled>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>SpeechOut</Label>
+      <FirstNeuron>166</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleSpeechOut</ModuleTypeStr>
+      <TheModule xsi:type="ModuleSpeechOut">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>448</X>
+          <Y>611</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>652</X>
+          <Y>178</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <speak>true</speak>
+        <remoteSpeakerEnabled>false</remoteSpeakerEnabled>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Object</Label>
+      <FirstNeuron>171</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleObject</ModuleTypeStr>
+      <TheModule xsi:type="ModuleObject">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>OnlineInfo</Label>
+      <FirstNeuron>311</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleOnlineInfo</ModuleTypeStr>
+      <TheModule xsi:type="ModuleOnlineInfo">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>1520</X>
+          <Y>635</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>800</X>
+          <Y>673</Y>
+        </dlgSize>
+        <dlgIsOpen>true</dlgIsOpen>
+        <Output>animal
+noun: one of a large group of living things that can move around by themselves to find food. Animals eat plants, funguses, or other animals. Birds, reptiles, fish, amphibians, mammals, insects, snails, and worms are some of the major kinds of animals.
+noun: such a creature other than humans.
+</Output>
+        <kids>
+          <KidsWord>
+            <word>dog</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a furry animal with four legs, a pointed nose, and a tail.  Their sharp teeth and claws are good for hunting small animals as food, but they also sometimes eat plant food.  Dogs are mammals, closely related to coyotes, foxes, and wolves. There are many kinds or breeds of dogs, with a wide range of sizes and appearances.  Some dogs are bred for special jobs, such as herding sheep.  Dogs are often kept as pets.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/000801_0008_0001_tsls.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/expectation_CMYK_H_copy.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wldt/mini/image/dog_1275.gif</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/dog.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to follow closely or track.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>pet</related>
+            <similar>hound</similar>
+            <phrase>lead a dog's life</phrase>
+          </KidsWord>
+          <KidsWord>
+            <word>cat</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a small, furry mammal with whiskers, short ears, and a long tail. Cats, also called house cats, are often kept as pets or to catch mice and rats.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/intent_CMYK_WS_copy.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wldt/mini/image/cat1_670.gif</string>
+                  <string>https://kids.wordsmyth.net/media/wldt/mini/image/cat2_670.gif</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/cat_1.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: any of the larger wild animals related to the kind of cat kept as a pet. Tigers, lions, and bobcats are all cats. Cats are carnivorous mammals.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/mountainLion.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/cat_2.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>pet</related>
+            <similar>bobcat</similar>
+            <phrase>let the cat out of the bag</phrase>
+          </KidsWord>
+          <KidsWord>
+            <word>fish</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: an animal that lives in water and has fins for swimming and gills for breathing. Fish are cold-blooded animals with skeletons inside their bodies. Most fish have scales on their skin. There are many kinds of fish, including salmon, goldfish, tuna, and sharks.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/fish_CMYK_H_copy.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/p0102010.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wldt/mini/image/fish_1652.gif</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/Fish_Collection.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: the meat of fish eaten as food.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wild/image/fish_v9.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to catch or try to catch fish.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/fishing0069_nsls.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/fish_v4.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to pull or draw out (often followed by "up" or "out").</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to search for or try to find out about something, often in a way that is not direct.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>quest</related>
+            <similar>grope</similar>
+            <phrase>fish out of water</phrase>
+          </KidsWord>
+          <KidsWord>
+            <word>mammal</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a warm-blooded animal with fur or hair on its skin and a skeleton inside its body. Mammal mothers produce milk to feed their babies.  Most mammals have four legs or two arms and two legs.  Dogs, cows, elephants, mice, whales, and humans are all mammals.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/mammalCat.hpi.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/mammalZebra.hpi.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/mammal.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>animal</related>
+            <similar />
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>kitten</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a very young cat.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/aKitten.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/kitten01_AE.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/kitten_v2.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related />
+            <similar>cat</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>puppy</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a young dog, usually less than one year old</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/puppy_CMYK_H_copy.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/puppy.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related />
+            <similar />
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>german shepherd</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a breed of dog. German shepherds are large dogs that resemble wolves and have a thick brown or black coat. They are used as guard dogs and as guide dogs for blind people.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related />
+            <similar />
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>cocker spaniel</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a breed of dog. Cocker spaniels are small dogs with short legs, a long, soft coat, and long ears.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related />
+            <similar />
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>person</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a human being.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wild/image/person_1.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: the qualities a particular person has; personality; self.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: one of three groups of personal pronouns that show who the subject of the verb is.  The first person, ("I" or "we") is used for the person who speaks or writes. The second person, ("you") is used for the person who reads or listens.  The third person ("he," "she," "it," or "they") is used for the person or thing the speaker is talking about.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>body</related>
+            <similar>creature</similar>
+            <phrase>in person</phrase>
+          </KidsWord>
+          <KidsWord>
+            <word>boy</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a male child or teenager.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/boySoccer.hpi.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/boy_v3.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>interjection: used to express surprise.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>baby</related>
+            <similar>lad</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>girl</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a female child or teenager.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/friend_CMYK_H_copy.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/girl_4.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a close female friend; girlfriend.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>child</related>
+            <similar>female</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>baby</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a very young girl or boy; infant.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/crawl_CMYK_H_copy.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/baby.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: the youngest person in a family or group.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a person who behaves in a childish or immature way.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: very young.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: for or used by a baby.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to treat like a baby or child; spoil.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>hover</related>
+            <similar>child</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>fur</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: the soft thick hair that covers the bodies of certain animals such as the mink, cat, or fox.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/tabbcat2.hpi.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/fur.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: the skin of an animal that has such hair, used in the making of clothing or other items.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: clothing made of fur.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related />
+            <similar>coat</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>furry</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>adjective: having a coat of fur.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/furry.jpg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: like fur.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>fuzzy</related>
+            <similar />
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>red</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: the color of blood; the first color on the color spectrum.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wild/image/red.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: having the color red.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>blush</related>
+            <similar />
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>yellow</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: the color of an egg yolk or ripe lemon; the color between orange and green on the color spectrum.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wild/image/yellow.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: having the color yellow.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/canary_CMYK_H_copy.jpg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: cowardly.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related />
+            <similar>buff</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>blue</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: the color of a clear sky; the color between green and violet on the color spectrum.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wild/image/blue.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: having the color blue.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: sad; unhappy.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>heaven</related>
+            <similar>hyacinth</similar>
+            <phrase>out of the blue</phrase>
+          </KidsWord>
+          <KidsWord>
+            <word>green</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: the color of grass or of young, growing leaves; the color between yellow and blue on the color spectrum.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wild/image/green.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: an area with plenty of grass.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: (plural) leaves of lettuce or other plants; vegetables.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/spinach_CMYK_H_copy.jpg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: having the color green.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: full of or covered with living plants, trees, or grass.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: not completely grown; not ripe.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: without experience; in need of training.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: sick looking; pale.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: of a company or industry, producing products that do little damage to the environment and producing them in a way that conserves energy from sources like coal and oil.  A green company or industry does not pollute the air or water in making its products, or does so as little as possible.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: of an institution or business, conserving as much energy as possible and contributing little to environmental pollution.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: of a product, having been made with little use of coal or oil and without causing much pollution to the environment.  Also, a product that is called "green" can usually be recycled.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>lawn</related>
+            <similar>aqua</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>orange</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a round fruit with a reddish yellow peel. It is sweet and juicy on the inside.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wldt/mini/image/orange_2922.gif</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/orange.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a citrus tree that bears such a fruit.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: the color of this fruit when ripe; the color between red and yellow on the color spectrum.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wild/image/orange_v3.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: having the color orange.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related />
+            <similar />
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>bird</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: an animal with two wings, two feet, and a body covered with feathers. Most birds can fly. Birds are warm-blooded animals with skeletons inside their bodies. Birds lay eggs with hard shells. Robins, eagles, chickens, and ostriches are a few of the many kinds of birds.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/bird3.hpi.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/birdSmall.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/WILD_Bird_Collage.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>cardinal</related>
+            <similar />
+            <phrase>birds of a feather</phrase>
+          </KidsWord>
+          <KidsWord>
+            <word>animal</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: one of a large group of living things that can move around by themselves to find food. Animals eat plants, funguses, or other animals. Birds, reptiles, fish, amphibians, mammals, insects, snails, and worms are some of the major kinds of animals.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/p0102047.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/Animal.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: such a creature other than humans.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>beast</related>
+            <similar>mammal</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>body part</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a part or section of the human body, such as the arm, chest, nose, neck, or knee.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a piece of the human body that has been detached, as by surgery or violence.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related />
+            <similar />
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>place</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a certain area of space that is taken up by something.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a space used for a specific purpose.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a duty or job.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a particular point or position among things having a certain order or arrangement.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: situation or position.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: one's home.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a rank in a series.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a proper position.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to put in a certain spot or position.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to recognize from the past.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to put in a rank or order.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to finish a race or contest in a particular position.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>apartment</related>
+            <similar>area</similar>
+            <phrase>take place</phrase>
+          </KidsWord>
+          <KidsWord>
+            <word>color</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a quality of light as our eyes see it. Light is made up of waves, which hit objects and are reflected from their surfaces. The colors we see, such as red, blue, and yellow, depend on how these light waves are reflected. Objects of different colors reflect different kinds of light waves.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/colorBlocks_tsls.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/color_v3.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: something used to give color, such as dye or paint.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: the complexion of the skin, especially of the face.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: skin color that is not white.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to give color to.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wild/image/color.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>distort</related>
+            <similar>cast</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>sport</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: an athletic event or game played according to rules. Sports often require certain skills and involve two people or teams on opposite sides.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/sportSocc.hpi.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/sport.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: something done for fun or amusement.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a person who has a good attitude about difficult situations.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: of or having to do with sports.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>adjective: suited for sports or for somewhat casual wear.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>verb: to amuse oneself through activity; play.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>amusement</related>
+            <similar>competition</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>size</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: the physical dimensions of anything.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: a measure of largeness or smallness according to a numbered scale.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: amount, quantity, or dimension.</definition>
+                <pharses />
+                <imageURLs />
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>bulk</related>
+            <similar>magnitude</similar>
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>clothing</word>
+            <definitions />
+            <related />
+            <similar />
+            <phrase />
+          </KidsWord>
+          <KidsWord>
+            <word>instrument</word>
+            <definitions>
+              <KidsDefinition>
+                <definition>noun: a tool or mechanical device used for special work.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/stethoscope_CMYK_H_copy.jpg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+              <KidsDefinition>
+                <definition>noun: any of various devices for making music, such as a trumpet or piano.</definition>
+                <pharses />
+                <imageURLs>
+                  <string>https://kids.wordsmyth.net/media/wcdt/mini/image/musicians2.hpi.jpg</string>
+                  <string>https://kids.wordsmyth.net/media/wild/image/instrument_5.svg</string>
+                </imageURLs>
+                <inflections />
+              </KidsDefinition>
+            </definitions>
+            <related>control</related>
+            <similar>apparatus</similar>
+            <phrase />
+          </KidsWord>
+        </kids>
+      </TheModule>
+    </ModuleView>
+    <ModuleView>
+      <Label>Words</Label>
+      <FirstNeuron>313</FirstNeuron>
+      <Height>1</Height>
+      <Width>1</Width>
+      <Color>11393254</Color>
+      <ModuleTypeStr>ModuleWords</ModuleTypeStr>
+      <TheModule xsi:type="ModuleWords">
+        <initialized>true</initialized>
+        <isEnabled>true</isEnabled>
+        <dlgPos>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgPos>
+        <dlgSize>
+          <X>0</X>
+          <Y>0</Y>
+        </dlgSize>
+        <dlgIsOpen>false</dlgIsOpen>
+      </TheModule>
+    </ModuleView>
+  </Modules>
+  <RefractoryDelay>0</RefractoryDelay>
+  <Neurons />
+</NeuronArray>

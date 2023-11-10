@@ -1,0 +1,19 @@
+a furniture item is a household item
+an appliance is a household item
+electronic-items are household items
+kitchenware are household items
+decor items are household items
+clothing items are household items
+cleaning supplies are household items
+personal-care-items are household items
+tools are household items
+toys are household items
+a musical-instrument is a household item
+an animal is a living thing
+a plant is a living thing
+a person is a living thing
+a human-body is a living thing
+a human-body is a grouping
+a child is a young person
+a boy is a masculine child
+a girl is a feminine child

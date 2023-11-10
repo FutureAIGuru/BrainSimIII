@@ -1,0 +1,10 @@
+def: a cat is a furry animal that meows and purrs.
+def: a dog is a furry animal that barks and wags tail.
+def: a boy is a male child.
+def: a girl is a female human.
+def: a child is a young person who is growing up.
+def: someone who is getting bigger and learning new things.
+def: a human is a person like mommy or daddy.
+def: a person is a human being who can think and feel.
+def: a mommy is someone who loves and takes care of you.
+def: a daddy is a special person who loves and cares for you.

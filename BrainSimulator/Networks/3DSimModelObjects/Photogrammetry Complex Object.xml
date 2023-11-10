@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfEnvironmentObject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <EnvironmentObject xsi:type="Cube">
+    <shape>Cube</shape>
+    <size>8</size>
+    <position>
+      <X>0</X>
+      <Y>50</Y>
+      <Z>4</Z>
+      <Conf>0</Conf>
+    </position>
+    <color>Orange</color>
+    <rotation>45</rotation>
+    <handle>23949</handle>
+  </EnvironmentObject>
+  <EnvironmentObject xsi:type="Cone">
+    <shape>Cone</shape>
+    <size>12</size>
+    <position>
+      <X>0</X>
+      <Y>50</Y>
+      <Z>6</Z>
+      <Conf>0</Conf>
+    </position>
+    <color>Yellow</color>
+    <rotation>45</rotation>
+    <handle>18101</handle>
+  </EnvironmentObject>
+  <EnvironmentObject xsi:type="Sphere">
+    <shape>Sphere</shape>
+    <size>4</size>
+    <position>
+      <X>0</X>
+      <Y>45</Y>
+      <Z>2</Z>
+      <Conf>0</Conf>
+    </position>
+    <color>Purple</color>
+    <rotation>45</rotation>
+    <handle>81450</handle>
+  </EnvironmentObject>
+  <EnvironmentObject xsi:type="Sphere">
+    <shape>Sphere</shape>
+    <size>4</size>
+    <position>
+      <X>0</X>
+      <Y>55</Y>
+      <Z>2</Z>
+      <Conf>0</Conf>
+    </position>
+    <color>Purple</color>
+    <rotation>45</rotation>
+    <handle>26323</handle>
+  </EnvironmentObject>
+  <EnvironmentObject xsi:type="Cube">
+    <shape>Cube</shape>
+    <size>4</size>
+    <position>
+      <X>0</X>
+      <Y>50</Y>
+      <Z>14</Z>
+      <Conf>0</Conf>
+    </position>
+    <color>Cyan</color>
+    <rotation>45</rotation>
+    <handle>55779</handle>
+  </EnvironmentObject>
+</ArrayOfEnvironmentObject>

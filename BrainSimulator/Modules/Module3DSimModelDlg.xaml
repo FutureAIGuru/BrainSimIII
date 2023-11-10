@@ -1,0 +1,37 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.Module3DSimModelDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="3DSimModel Dialog" Height="900" Width="800" Background="Gray" ShowInTaskbar="False">
+    <Canvas Name="theCanvas" SizeChanged="TheCanvas_SizeChanged" Margin="0,0,0,0">
+        <ListBox x:Name="ShapeCollection" TabIndex="8" Height="290" Width="175" d:ItemsSource="{d:SampleData ItemCount=5}" Canvas.Top="36" Canvas.Left="10" SelectionChanged="ShapeCollection_SelectionChanged" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <TextBlock x:Name="ListTitle" Focusable="False" Canvas.Left="10" TextWrapping="Wrap" Text="Objects:" Canvas.Top="10"/>
+        <TextBox x:Name="SizeBox" TabIndex="2" Canvas.Left="271" TextWrapping="Wrap" Canvas.Top="86" Width="90" ToolTip="Size is a decimal positive value" TextChanged="SizeBox_TextChanged" HorizontalContentAlignment="Right"/>
+        <TextBox x:Name="X_Box" TabIndex="3" Canvas.Left="271" TextWrapping="Wrap" Canvas.Top="109" Width="90" ToolTip="X is a decimal value" TextChanged="X_Box_TextChanged" HorizontalContentAlignment="Right"/>
+        <TextBox x:Name="Y_Box" TabIndex="4" Canvas.Left="271" TextWrapping="Wrap" Canvas.Top="132" Width="90" ToolTip="Y is a decimal value" TextChanged="Y_Box_TextChanged" HorizontalContentAlignment="Right"/>
+        <TextBox x:Name="Z_Box" Canvas.Left="271" TextWrapping="Wrap" Canvas.Top="155" Width="90" RenderTransformOrigin="1.062,0.559" ToolTip="Z is a decimal value, usually size / 2" TextChanged="Z_Box_TextChanged" HorizontalContentAlignment="Right"/>
+        <Label Content="Color" Focusable="False" Canvas.Left="216" Canvas.Top="59" Width="50" HorizontalContentAlignment="Right"/>
+        <Label Content="Size / Length" Focusable="False" Canvas.Left="185" Canvas.Top="82" Width="81" HorizontalContentAlignment="Right" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Label Content="X" Focusable="False" Canvas.Left="216" Canvas.Top="105" Width="50" HorizontalContentAlignment="Right"/>
+        <Label Content="Y" Focusable="False" Canvas.Left="216" Canvas.Top="128" Width="50" HorizontalContentAlignment="Right"/>
+        <Label Content="Z / Height" Focusable="False" Canvas.Left="190" Canvas.Top="151" Width="76" HorizontalContentAlignment="Right" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <Button x:Name="AddButton" TabIndex="6" Content="Add" Canvas.Left="216" Canvas.Top="203" Width="145" Height="21" ToolTip="Click to add a new Shape set by the above" Click="AddButton_Click" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Button x:Name="RemoveButton" TabIndex="7" Content="Remove" Canvas.Left="216" Canvas.Top="255" Width="145" Height="21" ToolTip="Click to remove a selected shape from the list" Click="RemoveButton_Click" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <TextBlock x:Name="ListEdit" Focusable="False" Canvas.Left="216" TextWrapping="Wrap" Text="Set values to add:" Canvas.Top="10" Width="163" Height="20"/>
+        <Label Content="Shape" Focusable="False" Canvas.Left="216" Canvas.Top="36" HorizontalContentAlignment="Right" Width="50"/>
+        <TextBox x:Name="RotateBox" TabIndex="5" Canvas.Left="271" TextWrapping="Wrap" Canvas.Top="178" Width="90" RenderTransformOrigin="1.062,0.559" ToolTip="Rotation is between -90 and 90" TextChanged="RotateBox_TextChanged" HorizontalContentAlignment="Right"/>
+        <Label Content="Rotate" Focusable="False" Canvas.Left="216" Canvas.Top="174" Width="55" HorizontalContentAlignment="Right"/>
+        <ComboBox x:Name="ColorBox" Canvas.Left="271" Canvas.Top="61" Width="90">
+        </ComboBox>
+        <ComboBox x:Name="ShapeBox" Canvas.Left="271" Canvas.Top="36" Width="90" SelectedIndex="1">
+        </ComboBox>
+        <Button x:Name="EditButton" Content="Update" Canvas.Left="216" Canvas.Top="229" Width="145" Height="21" Click="EditButton_Click" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+        <Button x:Name="Set_in_UKS" TabIndex="7" Content="Set in UKS" Canvas.Left="216" Canvas.Top="306" Width="145" Height="21" ToolTip="Click to insert all objects in the UKS directly" HorizontalAlignment="Center" VerticalAlignment="Top" Click="Set_in_UKS_Click"/>
+        <Button x:Name="ClearAllButton" Content="Clear ALL" Canvas.Left="216" Canvas.Top="281" HorizontalAlignment="Center" VerticalAlignment="Top" Width="145" Click="ClearAllButton_Click"/>
+        <Button x:Name="LoadButton" Content="Load Objects" Canvas.Left="10" Canvas.Top="356" HorizontalAlignment="Center" VerticalAlignment="Top" Width="175" Click="LoadButton_Click"/>
+        <Button x:Name="SaveButton" Content="Save Objects" Canvas.Left="10" Canvas.Top="331" HorizontalAlignment="Left" VerticalAlignment="Center" Width="175" Click="SaveButton_Click"/>
+    </Canvas>
+</local:ModuleBaseDlg>

@@ -1,0 +1,17 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleWordSequencingDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="ModuleWordSequencingDlg Module Dialog" Height="310" Width="170" Background="Gray" ShowInTaskbar="False">
+    <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" >
+        <Label VerticalAlignment="Top" HorizontalAlignment="Left">Sequence start</Label>
+        <TextBox Name="sequenceStartTextBox" VerticalAlignment="Top" HorizontalAlignment="Left" Width="150" Margin="10,30,0,0" KeyUp="sequenceStartTextBox_KeyUp"></TextBox>
+        <Button Name="findMatchButton" Width="100" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,60,0,0" Click="findMatchButton_Click">Find Match</Button>
+        <ScrollViewer Height="200" VerticalAlignment="Top" Margin="10,90,10,0">
+            <TextBlock Name="resultTextBlock" Margin="0,0,10,0" TextWrapping="Wrap"/>
+        </ScrollViewer>
+    </Grid>
+</local:ModuleBaseDlg>
