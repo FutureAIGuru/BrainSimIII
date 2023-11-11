@@ -16,56 +16,6 @@ namespace BrainSimulator
     /// </summary>
     public partial class NotesDialog : Window
     {
-        public NotesDialog(bool showToolBar = false)
-        {
-            InitializeComponent();
-            if (MainWindow.theNeuronArray.networkNotes == "")
-                MainWindow.theNeuronArray.networkNotes = "Purpose:\n\rThings to try:\n\rCurrent state of development:\n\rNotes:\n\r";
-            string theNotes = MainWindow.theNeuronArray.networkNotes;
-            if (theNotes.IndexOf("<") != 0) //for backward compatibility from before these were RTF
-            {
-                mainRTB.AppendText(theNotes);
-                mainRTB.IsReadOnly = false;
-            }
-            else
-            {
-                if (!showToolBar)
-                {
-                    mainToolBar.Visibility = Visibility.Collapsed;
-                    mainRTB.IsReadOnly = true;
-                    CancelButton.Visibility = Visibility.Collapsed;
-                }
-                else
-                    mainRTB.IsReadOnly = false;
-
-                //reformat so all hyperlinks in text are converted to hot links
-                int beg = Math.Min(theNotes.Length - 1, 1000);
-                while (theNotes.IndexOf("http", beg) != -1)
-                {
-                    beg = theNotes.IndexOf("http", beg);
-                    int end = theNotes.IndexOfAny(new char[] { ' ', '<' }, beg);
-                    string url = theNotes.Substring(beg, end - beg);
-                    if (url[url.Length - 1] == '.') url = url.Remove(url.Length - 1);
-                    string newString = "</Run><Hyperlink NavigateUri='" + url + "' >" + url + "</Hyperlink><Run>";
-                    theNotes = theNotes.Remove(beg, end - beg);
-                    theNotes = theNotes.Insert(beg, newString);
-                    beg = beg + newString.Length;
-                }
-                StringReader stringReader = new StringReader(theNotes);
-                XmlReader xmlReader = XmlReader.Create(stringReader);
-                Section sec = XamlReader.Load(xmlReader) as Section;
-
-                FlowDocument doc = new FlowDocument();
-                while (sec.Blocks.Count > 0)
-                    doc.Blocks.Add(sec.Blocks.FirstBlock);
-                mainRTB.Document = doc;
-                checkBox.IsChecked = false;
-            }
-            Owner = MainWindow.thisWindow;
-            ShowInTaskbar = false;
-
-        }
-
         private void OKbutton_Click(object sender, RoutedEventArgs e)
         {
             if (!mainRTB.IsReadOnly)
@@ -87,9 +37,9 @@ namespace BrainSimulator
                 }
                 xamlText = xamlText.Replace("</Hyperlink>", "");
 
-                MainWindow.theNeuronArray.networkNotes = xamlText;
+                // MainWindow.theNeuronArray.networkNotes = xamlText;
             }
-            MainWindow.theNeuronArray.hideNotes = (bool)checkBox.IsChecked;
+            // MainWindow.theNeuronArray.hideNotes = (bool)checkBox.IsChecked;
             Close();
         }
 

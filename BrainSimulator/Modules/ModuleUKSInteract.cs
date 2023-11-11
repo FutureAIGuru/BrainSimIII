@@ -27,10 +27,6 @@ namespace BrainSimulator.Modules
         //set max to be -1 if unlimited
         public ModuleUKSInteract()
         {
-            minHeight = 1;
-            maxHeight = 500;
-            minWidth = 1;
-            maxWidth = 500;
         }
 
 
@@ -69,7 +65,7 @@ namespace BrainSimulator.Modules
         //delete if not needed
         public override void SizeChanged()
         {
-            if (mv == null) return; //this is called the first time before the module actually exists
+            
         }
 
         //return true if thing was added

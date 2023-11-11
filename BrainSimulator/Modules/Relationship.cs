@@ -364,10 +364,11 @@ namespace BrainSimulator.Modules
                         //     mm.MentalModelChanged = true;
                     }
                     r.source.RemoveRelationship(r);
+                    /*
                     //if this leaves an orphan thing, delete the thing
                     if (r.reltype.Label == "has-child" && r.target?.Parents.Count == 0)
                     {
-                        ModuleUKS uks = (ModuleUKS)MainWindow.theNeuronArray.modules.Find(x => x.Label == "UKS").TheModule;
+                        ModuleBase uks = MainWindow.GetUKS();
                         if (uks != null)
                         {
                             uks.DeleteAllChildren(r.target);
@@ -375,6 +376,7 @@ namespace BrainSimulator.Modules
                         }
                     }
                     transientRelationships.Remove(r);
+                    */
                 }
             }
         }

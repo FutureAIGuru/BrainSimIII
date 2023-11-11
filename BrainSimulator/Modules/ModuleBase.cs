@@ -12,28 +12,21 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using Emgu.CV;
 using System.Windows.Threading;
-using System.Diagnostics;
+using System.Windows.Media;
 
 namespace BrainSimulator.Modules
 {
     abstract public class ModuleBase
     {
-        private NeuronArray theArray;
-        protected ModuleView mv = null;
+        protected NeuronArray theNeuronArray;
+        // protected ModuleView mv = null;
 
         //this is public so it will be included in the saved xml file.  That way
         //initialized data content can be preserved from run to run and only reinitialized when requested.
         public bool initialized = false;
 
-        protected int minWidth = 2;
-        protected int maxWidth = 100;
-        protected int minHeight = 2;
-        protected int maxHeight = 100;
-        public int MinWidth => minWidth;
-        public int MinHeight => minHeight;
-        public int MaxWidth => maxWidth;
-        public int MaxHeight => maxHeight;
         public bool isEnabled = true;
+        public string Label = "";
 
         protected ModuleBaseDlg dlg = null;
         public Point dlgPos;
@@ -44,20 +37,11 @@ namespace BrainSimulator.Modules
 
         public ModuleBase() 
         {
-        }
-
-        public void SetNeuronArray(NeuronArray theArray)
-        {
-            this.theArray = theArray;
-        }
-
-        public NeuronArray GetNeuronArray()
-        {
-            if (this.theArray == null)
+            string moduleName = this.GetType().Name;
+            if (moduleName.StartsWith("BrainSimulator.Modules.Module"))
             {
-                throw new Exception("No NeuronArray set on module");
+                Label = moduleName[29..];
             }
-            return this.theArray;
         }
 
         abstract public void Fire();
@@ -73,10 +57,10 @@ namespace BrainSimulator.Modules
 
         public void UKSInitialized()
         {
-            foreach (ModuleView na1 in GetNeuronArray().modules)
+            foreach (ModuleBase na1 in MainWindow.modules)
             {
-                if (na1.TheModule.isEnabled)
-                    na1.TheModule.UKSInitializedNotification();
+                if (na1.isEnabled)
+                    na1.UKSInitializedNotification();
             }
         }
 
@@ -86,10 +70,10 @@ namespace BrainSimulator.Modules
 
         public void UKSReloaded()
         {
-            foreach (ModuleView na1 in GetNeuronArray().modules)
+            foreach (ModuleBase na1 in MainWindow.modules)
             {
-                if (na1.TheModule.isEnabled)
-                    na1.TheModule.UKSReloadedNotification();
+                if (na1.isEnabled)
+                    na1.UKSReloadedNotification();
             }
         }
 
@@ -130,23 +114,9 @@ namespace BrainSimulator.Modules
             }
         }
 
-        public void ClearMissingModules()
-        {
-            notFoundModules.Clear();
-        }
-        
-        public bool IsEnabled(bool silent=true)
-        {
-            if (!silent && !isEnabled)
-            {
-                MessageBox.Show(this.GetType().Name + " is not enabled", "Module Not Enabled", MessageBoxButton.OK,
-                    MessageBoxImage.None, MessageBoxResult.None, MessageBoxOptions.DefaultDesktopOnly);
-            }
-            return isEnabled;
-        }
         protected void Init(bool forceInit = false)
         {
-            SetModuleView();
+            // SetModuleView();
 
             if (initialized && !forceInit) return;
             initialized = true;
@@ -159,22 +129,6 @@ namespace BrainSimulator.Modules
             {
                 ShowDialog();
                 dlgIsOpen = true;
-            }
-        }
-
-        public void SetModuleView()
-        {
-            if (mv == null)
-            {
-                // this fails for ModuleTester because theNeuronArray is null!
-                foreach (ModuleView na1 in GetNeuronArray().modules)
-                {
-                    if (na1.TheModule == this)
-                    {
-                        mv = na1;
-                        break;
-                    }
-                }
             }
         }
 
@@ -195,18 +149,6 @@ namespace BrainSimulator.Modules
                     dlg.Close();
                 });
             }
-        }
-
-        //used by mainwindow to determine whether or not activation is needed
-        public void Activate()
-        {
-            if (dlg == null) return;
-            dlg.Activate();
-        }
-        public bool IsActive()
-        {
-            if (dlg == null) return false;
-            return dlg.IsActive;
         }
 
         public virtual void ShowDialog()
@@ -238,14 +180,14 @@ namespace BrainSimulator.Modules
             dlg.LocationChanged += Dlg_LocationChanged;
             dlg.SizeChanged += Dlg_SizeChanged;
 
-            //we need to set the dialog owner so it will display properly
-            //this hack is here because a file might load and create dialogs prior to the mainwindow opening
-            //so the same functionality is called from within FileLoad
-            Window mainWindow = Application.Current.MainWindow;
-            if (mainWindow.GetType() == typeof(MainWindow))
-                dlg.Owner = Application.Current.MainWindow;
-            else
-                Utils.Noop();
+            // we need to set the dialog owner so it will display properly
+            // this hack is here because a file might load and create dialogs prior to the mainwindow opening
+            // so the same functionality is called from within FileLoad
+            // Window mainWindow = Application.Current.MainWindow;
+            // if (mainWindow.GetType() == typeof(MainWindow))
+            //     dlg.Owner = Application.Current.MainWindow;
+            // else
+            //     Utils.Noop();
 
             //restore the size and position
             if (dlgPos != new Point(0, 0))
@@ -264,13 +206,13 @@ namespace BrainSimulator.Modules
                 dlg.Height = dlgSize.Y;
             }
 
-            if (mainWindow.ActualWidth > 800) //try to keep dialogs on the screen
-            {
-                if (dlg.Width + dlg.Left > mainWindow.ActualWidth)
-                    dlg.Left = mainWindow.ActualWidth - dlg.Width;
-                if (dlg.Height + dlg.Top > mainWindow.ActualHeight)
-                    dlg.Top = mainWindow.ActualHeight - dlg.Height;
-            }
+            // if (mainWindow.ActualWidth > 800) //try to keep dialogs on the screen
+            // {
+            //     if (dlg.Width + dlg.Left > mainWindow.ActualWidth)
+            //         dlg.Left = mainWindow.ActualWidth - dlg.Width;
+            //     if (dlg.Height + dlg.Top > mainWindow.ActualHeight)
+            //         dlg.Top = mainWindow.ActualHeight - dlg.Height;
+            //}
 
 
 #if !DEBUG
@@ -287,29 +229,6 @@ namespace BrainSimulator.Modules
 #endif
         }
 
-        //this hack is here because a file can load and create dialogs prior to the mainwindow opening
-        public void SetDlgOwner(Window MainWindow)
-        {
-            if (dlg != null)
-                dlg.Owner = MainWindow;
-        }
-
-        public void MoveDialog(double x, double y)
-        {
-            if (dlg != null)
-            {
-                dlg.Top += y;
-                dlg.Left += x;
-            }
-            if (dlgList != null)
-            {
-                foreach (var d in dlgList)
-                {
-                    d.Top += y;
-                    d.Left += x;
-                }
-            }
-        }
         private void Dlg_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             dlgSize = new Point()
@@ -402,30 +321,15 @@ namespace BrainSimulator.Modules
 
         public ModuleBase FindModule(Type t, bool suppressWarning = true)
         {
-            if (GetNeuronArray() == null) return null;
-            foreach (ModuleView na1 in GetNeuronArray().modules)
+            foreach (ModuleBase na1 in MainWindow.modules)
             {
-                if (na1.TheModule != null && na1.TheModule.GetType() == t)
+                if (na1 != null && na1.GetType() == t)
                 {
-                    return na1.TheModule;
+                    return na1;
                 }
             }
             if (!suppressWarning)
                 MarkModuleTypeAsNotLoaded(t.ToString());
-            return null;
-        }
-
-        public ModuleBase FindModule(string name, bool suppressWarning = true)
-        {
-            foreach (ModuleView na1 in GetNeuronArray().modules)
-            {
-                if (na1.Label == name)
-                {
-                    return na1.TheModule;
-                }
-            }
-            if (!suppressWarning)
-                MarkModuleNameAsNotLoaded("Module" + name);
             return null;
         }
     }

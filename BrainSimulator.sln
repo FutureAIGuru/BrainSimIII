@@ -15,8 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{1C458A63
 		BrainSimulator\Tools\VS Templates Readme.txt = BrainSimulator\Tools\VS Templates Readme.txt
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModuleTester", "ModuleTester\ModuleTester.csproj", "{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,18 +37,6 @@ Global
 		{C08F318A-B8E6-4187-9ED4-0A126B3B63A9}.Release|x64.Build.0 = Release|Any CPU
 		{C08F318A-B8E6-4187-9ED4-0A126B3B63A9}.Release|x86.ActiveCfg = Release|Any CPU
 		{C08F318A-B8E6-4187-9ED4-0A126B3B63A9}.Release|x86.Build.0 = Release|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Debug|x64.Build.0 = Debug|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Debug|x86.Build.0 = Debug|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Release|x64.ActiveCfg = Release|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Release|x64.Build.0 = Release|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Release|x86.ActiveCfg = Release|Any CPU
-		{7C3884EC-8E88-4D35-A8F6-47A848C30BF6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

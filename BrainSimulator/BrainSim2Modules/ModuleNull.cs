@@ -16,10 +16,6 @@ namespace BrainSimulator.Modules
 
         public ModuleNull()
         {
-            minWidth = 1;
-            minHeight = 1;
-            maxWidth = 10;
-            maxHeight = 10;
         }
 
         //Fll this method in with code which will execute

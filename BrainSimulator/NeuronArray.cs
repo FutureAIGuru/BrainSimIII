@@ -5,6 +5,7 @@
 // © 2022 FutureAI, Inc., all rights reserved
 // 
 
+using BrainSimulator.Modules;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,7 +26,6 @@ namespace BrainSimulator
         public int rows;
 
         public int lastFireCount = 0;
-        internal List<ModuleView> modules = new List<ModuleView>();
 
         //these have nothing to do with the NeuronArray but are here so it will be saved and restored with the network
         private bool showSynapses = false;
@@ -38,11 +38,6 @@ namespace BrainSimulator
         private bool loadComplete = false;
         [XmlIgnore]
         public bool LoadComplete { get => loadComplete; set => loadComplete = value; }
-
-        public List<ModuleView> Modules
-        {
-            get { return modules; }
-        }
 
         private Dictionary<int, string> labelCache = new Dictionary<int, string>();
         public void AddLabelToCache(int nID, string label)
@@ -99,8 +94,8 @@ namespace BrainSimulator
             arraySize = count;
             ClearLabelCache();
 
-            if(MainWindow.pauseTheNeuronArray)
-                EngineIsPaused = true;
+            // if(MainWindow.pauseTheNeuronArray)
+            //     EngineIsPaused = true;
         }
 
         public NeuronArray()
@@ -124,84 +119,33 @@ namespace BrainSimulator
         {
             int badModule = -1;
             string message = "";
-            lock (modules)
+            lock (MainWindow.modules)
             {
                 // First make sure all modules that need it have the proper camera image...
-                ImgUtils.DistributeNextFrame(modules);
+                ImgUtils.DistributeNextFrame(MainWindow.modules);
                 List<int> firstNeurons = new List<int>();
-                for (int i = 0; i < modules.Count; i++)
-                    firstNeurons.Add(modules[i].FirstNeuron);
-                firstNeurons.Sort();
 
                 long startModules = Utils.GetPreciseTime();
-                for (int i = 0; i < modules.Count; i++)
+                for (int i = 0; i < MainWindow.modules.Count; i++)
                 {
-                    ModuleView na = modules.Find(x => x.FirstNeuron == firstNeurons[i]);
-                    if (na != null && na.TheModule != null)
+                    ModuleBase ma = MainWindow.modules[i];
+                    if (ma != null)
                     {
-                        int kk = 0;
-                        //if (na.TheModule.UKS.)
-                        //if not in debug mode, trap exceptions and offer to delete module
-#if !DEBUG
-                        try
-                        {
-                            if (na.TheModule.isEnabled)
-                                na.TheModule.Fire();
-                        }
-                        catch (Exception e)
-                        {
-                            // Get stack trace for the exception with source file information
-                            var st = new StackTrace(e, true);
-                            // Get the top stack frame
-                            var frame = st.GetFrame(0);
-                            // Get the line number from the stack frame
-                            var line = frame.GetFileLineNumber();
-
-                            message = "Module " + na.Label + " threw an unhandled exception with the message:\n" + e.Message;
-                            message += "\nat line " + line;
-                            message += "\n\n Would you like to remove it from this network?";
-                            badModule = i;
-                        }
-#else
-                        if (na.TheModule.isEnabled)
+                        if (ma.isEnabled)
                         {
                             long start = Utils.GetPreciseTime();
-                            na.TheModule.Fire();
+                            ma.Fire();
                             long duration = Utils.GetPreciseTime() - start;
                             if (duration > 1000000)
                             {
                                 // Debug.WriteLine("Fire() runs " + duration + " for " + na.TheModule.ToString());
                             }
                         }
- #endif
                     }
                 }
                 // long TotalDuration = Utils.GetPreciseTime() - startModules;
                 // Debug.WriteLine("Fire() runs " + TotalDuration + " for all modules");
             }
-            if (message != "")
-            {
-                MessageBoxResult mbr = MessageBox.Show(message, "Remove Module?", MessageBoxButton.YesNo);
-                if (mbr == MessageBoxResult.Yes)
-                {
-                    ModuleView.DeleteModule(badModule);
-                    // MainWindow.Update();
-                }
-            }
-        }
-
-        public ModuleView FindModuleByLabel(string label)
-        {
-            ModuleView moduleView = modules.Find(na => na.Label.Trim() == label);
-            if (moduleView == null)
-            {
-                if (label.StartsWith("Module"))
-                {
-                    label = label.Replace("Module", "");
-                    moduleView = modules.Find(na => na.Label.Trim() == label);
-                }
-            }
-            return moduleView;
         }
     }
 }

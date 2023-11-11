@@ -368,10 +368,10 @@ namespace BrainSimulator.Modules
             return tList;
         }
 
-        // public override void UKSInitializedNotification()
-        // {
-        //     MainWindow.SuspendEngine();
-        //     MainWindow.ResumeEngine();
-        // }
+        public override void UKSInitializedNotification()
+        {
+            MainWindow.SuspendEngine();
+            MainWindow.ResumeEngine();
+        }
     }
 }

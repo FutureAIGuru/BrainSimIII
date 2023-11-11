@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BrainSimulator;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -18,10 +19,17 @@ namespace ModuleTester
             //if (e.Args.Length == 1)
             //    StartupString = e.Args[0];
 
-            BrainSimulator.MainWindow mainWin = new();
+            MainWindow mainWin = new();
+#if !DEBUG
             mainWin.WindowState = WindowState.Minimized;
+#endif
             mainWin.Show();
+#if !DEBUG
             mainWin.Hide();
+#endif        
         }
+        private static string startupString = "";
+
+        public static string StartupString { get => startupString; set => startupString = value; }
     }
 }

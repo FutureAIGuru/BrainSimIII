@@ -186,20 +186,6 @@ namespace BrainSimulator
             }
         }
 
-        public IList<Thing> DescendentsWhichFired(long generations = 30)
-        {
-            IList<Thing> retVal = new List<Thing>();
-            long oldestGeneration = MainWindow.theNeuronArray.Generation - generations;
-            foreach (Thing t in Descendents)
-            {
-                if (t.lastFired >= oldestGeneration)
-                {
-                    retVal.Add(t);
-                }
-            }
-            return retVal;
-        }
-
         //Get the ancestors of a thing with recursion
 
         public IList<Thing> AncestorList(List<Thing> ancestors = null, int depth = 0)
@@ -367,13 +353,13 @@ namespace BrainSimulator
         {
             if (t != null)
             {
-                t.lastFired = MainWindow.theNeuronArray.Generation;
+                // t.lastFired = MainWindow.theNeuronArray.Generation;
                 t.lastFiredTime = DateTime.Now;
                 t.useCount++;
             }
             else
             {
-                lastFired = MainWindow.theNeuronArray.Generation;
+                // lastFired = MainWindow.theNeuronArray.Generation;
                 lastFiredTime = DateTime.Now;
                 useCount++;
             }
@@ -857,10 +843,11 @@ namespace BrainSimulator
             {
                 if (hasChildType == null)
                 {
+                    /*
                     if (MainWindow.theNeuronArray == null) return null;
                     if (MainWindow.theNeuronArray.modules == null) return null;
 
-                    var uks = MainWindow.theNeuronArray.modules.Find(x => x.Label == "UKS").TheModule;
+                    // var uks = MainWindow.modules.Find(x => x. == "UKS");
                     uks.GetUKS();
                     hasChildType = uks.UKS.Labeled("has-child");
                     if (hasChildType == null)
@@ -875,6 +862,7 @@ namespace BrainSimulator
                         relParent.AddRelationship(hasChildType, hasChildType);
                         uks.UKS.Labeled("Thing").AddRelationship(relParent, hasChildType);
                     }
+                    */
                 }
                 return hasChildType;
             }

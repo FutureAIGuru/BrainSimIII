@@ -21,19 +21,8 @@ namespace BrainSimulator.Modules
         {
             Init();  //be sure to leave this here
             string tempString = "";
-            ModuleView naKB = GetNeuronArray().FindModuleByLabel("Module2DKB");
-            if (naKB == null) return;
-            for (int x = 0; x < naKB.Width; x+= 2)
-                for (int y = 0; y < naKB.Height; y++)
-                {
-                    /*
-                    Neuron n = naKB.GetNeuronAt(x,y);
-                    if (n.Fired())
-                    {
-                        tempString += " " + n.Label;
-                    }
-                    */
-                }
+            // ModuleBase naKB = MainWindow.FindModule(typeof(Module2DKB)); 
+            // if (naKB == null) return;
             if (tempString != "" && tempString != history.LastOrDefault())
             {
                 lock (history)

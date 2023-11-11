@@ -112,7 +112,7 @@ namespace BrainSimulator.Modules
                 WriteTheRelationship(rSave1);
             }
 
-            ModuleObject mObject = (ModuleObject)FindModule(typeof(ModuleObject));
+            ModuleObject mObject = (ModuleObject)base.FindModule(typeof(ModuleObject));
             if (mObject != null)
             {
                 if (rSave.reltype?.Label == "has-child")

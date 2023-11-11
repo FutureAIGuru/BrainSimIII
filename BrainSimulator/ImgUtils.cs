@@ -31,7 +31,7 @@ namespace BrainSimulator
         // Image distribution method. ==========================================
         // DistributeNextFrame() takes an image from Sallie.VideoQueue, and distributes it
         // to all modules that need it. 
-        public static void DistributeNextFrame(List<ModuleView> modules)
+        public static void DistributeNextFrame(List<ModuleBase> modules)
         {
             if (modules == null) return;
             Mat NextImage = null;
@@ -66,7 +66,7 @@ namespace BrainSimulator
             
             foreach (var module in modules)
             {
-                module.TheModule.SetInputImage(NextImage.Clone(), NextFilename);
+                module.SetInputImage(NextImage.Clone(), NextFilename);
             }
         }
 

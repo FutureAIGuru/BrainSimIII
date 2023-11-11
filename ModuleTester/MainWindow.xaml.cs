@@ -18,14 +18,14 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace ModuleTester
+namespace BrainSimulator
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static NeuronArray theNeuronArray = null;
+        public static List<ModuleBase> modules = new List<ModuleBase>();
 
         public MainWindow()
         {
@@ -35,21 +35,17 @@ namespace ModuleTester
 
             Debug.WriteLine("Opening ModuleViews");
 
-            if (MainWindow.theNeuronArray != null)
+            foreach (ModuleBase mb in MainWindow.modules)
             {
-                foreach (ModuleView na in MainWindow.theNeuronArray.Modules)
+                if (mb != null && !mb.dlgIsOpen)
                 {
-                    if (na.TheModule != null && !na.TheModule.dlgIsOpen)
+                    Application.Current.Dispatcher.Invoke((Action)delegate
                     {
-                        Application.Current.Dispatcher.Invoke((Action)delegate
-                        {
-                            Debug.WriteLine("Showing "+na.Label);
-                            na.TheModule.ShowDialog();
-                        });
-                    }
+                        mb.ShowDialog();
+                    });
                 }
             }
-
+            
             Debug.WriteLine("Starting Tick Timer");
             DispatcherTimer dt = new();
             dt.Interval = TimeSpan.FromSeconds(0.1);
@@ -62,55 +58,27 @@ namespace ModuleTester
         {
             Debug.WriteLine("CreateEmptyNetwork entered");
 
-            theNeuronArray = BrainSimulator.MainWindow.theNeuronArray;
-            if (theNeuronArray == null) {
-                theNeuronArray = new NeuronArray();
-                // BrainSimulator.MainWindow.theNeuronArray = theNeuronArray;
-            }
-
-            theNeuronArray.Initialize(450, 15);
             InsertModules();
-            theNeuronArray.LoadComplete = true;
-            // MainWindow.theNeuronArray = theNeuronArray;
+
             Update();
         }
 
         public void InsertModules()
         {
             Debug.WriteLine("InsertModules entered");
-            CreateModule("ModuleUKS", "ModuleUKS");
-            CreateModule("ModuleUKSInteract", "ModuleUKSInteract");
-        }
-
-        public static void CreateModule(string label, string commandLine)
-        {
-            Debug.WriteLine("CreateModule entered");
-            ModuleView mv = new ModuleView(0, 1, 1, label, commandLine, Utils.ColorToInt(new Color() { A = 64, R = 192, G = 192, B = 192 }));
-            if (mv.Width < mv.theModule.MinWidth) mv.Width = mv.theModule.MinWidth;
-            if (mv.Height < mv.theModule.MinHeight) mv.Height = mv.theModule.MinHeight;
-            mv.theModule.SetNeuronArray(MainWindow.theNeuronArray);
-            MainWindow.theNeuronArray.Modules.Add(mv);
-            string[] Params = commandLine.Split(' ');
-            Type t1x = Type.GetType("BrainSimulator.Modules." + Params[0]);
-            if (t1x != null && (mv.TheModule == null || mv.TheModule.GetType() != t1x))
-            {
-                mv.TheModule = (ModuleBase)Activator.CreateInstance(t1x);
-                // MainWindow.theNeuronArray.areas[i].TheModule.Initialize();
-            }
+            modules.Add(new BrainSimulator.Modules.ModuleUKS());
+            modules.Add(new BrainSimulator.Modules.ModuleUKSInteract());
         }
 
         public static void CloseAllModuleDialogs()
         {
-            if (MainWindow.theNeuronArray != null)
+            lock (modules)
             {
-                lock (MainWindow.theNeuronArray.Modules)
+                foreach (ModuleBase md in MainWindow.modules)
                 {
-                    foreach (ModuleView na in MainWindow.theNeuronArray.Modules)
+                    if (md != null)
                     {
-                        if (na.TheModule != null)
-                        {
-                            na.TheModule.CloseDlg();
-                        }
+                        md.CloseDlg();
                     }
                 }
             }
@@ -118,16 +86,13 @@ namespace ModuleTester
 
         public static void CloseAllModules()
         {
-            if (MainWindow.theNeuronArray != null)
+            lock (MainWindow.modules)
             {
-                lock (MainWindow.theNeuronArray.Modules)
+                foreach (ModuleBase mb in MainWindow.modules)
                 {
-                    foreach (ModuleView na in MainWindow.theNeuronArray.Modules)
+                    if (mb != null)
                     {
-                        if (na.TheModule != null)
-                        {
-                            na.TheModule.Closing();
-                        }
+                        mb.Closing();
                     }
                 }
             }
@@ -141,17 +106,14 @@ namespace ModuleTester
         private void Dt_Tick(object? sender, EventArgs e)
         {
             Debug.WriteLine("Dt_tick entered");
-            if (MainWindow.theNeuronArray == null) return;
-            Debug.WriteLine("TheNeuronArray not null");
 
-            foreach (ModuleView na in MainWindow.theNeuronArray.Modules)
+            foreach (ModuleBase mb in MainWindow.modules)
             {
-                if (na.TheModule != null && na.TheModule.dlgIsOpen)
+                if (mb != null && mb.dlgIsOpen)
                 {
                     Application.Current.Dispatcher.Invoke((Action)delegate
                     {
-                        Debug.WriteLine("Firing "+na.Label);
-                        na.TheModule.Fire();
+                        mb.Fire();
                     });
                 }
             }

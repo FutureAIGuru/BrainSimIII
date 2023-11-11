@@ -32,10 +32,6 @@ public partial class ModuleUKS : ModuleBase
     public ModuleUKS()
     {
         allowMultipleDialogs = true;
-        minHeight = 1;
-        maxHeight = 500;
-        minWidth = 1;
-        maxWidth = 500;
     }
 
     public override void Fire()

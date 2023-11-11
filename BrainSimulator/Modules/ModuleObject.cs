@@ -25,10 +25,6 @@ namespace BrainSimulator.Modules
         //set max to be -1 if unlimited
         public ModuleObject()
         {
-            minHeight = 1;
-            maxHeight = 500;
-            minWidth = 1;
-            maxWidth = 500;
         }
 
         Relationship pendingRelationship = null;
@@ -650,7 +646,8 @@ namespace BrainSimulator.Modules
 
         public void Forget2(Thing Parent)
         {
-            ModuleUKS uks = (ModuleUKS)FindModule(typeof(ModuleUKS));
+            /*
+            ModuleUKS uks = (ModuleUKS)MainWindow.FindModule(typeof(ModuleUKS));
             float min = float.MaxValue;
             Thing delParent = null;
             if (Parent.Descendents.Count() > 0)
@@ -672,7 +669,7 @@ namespace BrainSimulator.Modules
             {
                 uks.DeleteThing(delParent);
             }
-
+            */
         }
 
         public void AddNewParentRelationship(Thing Parent, Thing Target)
@@ -912,7 +909,7 @@ namespace BrainSimulator.Modules
         //delete if not needed
         public override void SizeChanged()
         {
-            if (mv == null) return; //this is called the first time before the module actually exists
+            // if (mv == null) return; //this is called the first time before the module actually exists
         }
         public override void UKSInitializedNotification()
         {
