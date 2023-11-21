@@ -414,10 +414,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         List<Relationship> theChildren = new();
         foreach (Relationship r in t.Relationships)
+        {
             if (Relationship.TrimDigits(r.reltype?.Label) == "has-child" && r.target != null)
             {
                 theChildren.Add(r);
             }
+        }
         theChildren = theChildren.OrderBy(x => x.target.Label).ToList();
 
         ModuleUKS UKS = (ModuleUKS)ParentModule;
@@ -527,24 +529,24 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private string FindPropertyName(Thing property)
     {
-        //ModuleUKS UKS = (ModuleUKS)base.ParentModule;
-        //Thing objectRoot = UKS.GetOrAddThing("Object", "Thing");
-        //if (property.GetRelationshipByWithAncestor(objectRoot) == null)
-        //{
-        //    return property.Label;
-        //}
-        //else
-        //{
-        //    foreach (Relationship l in property.GetRelationshipByWithAncestor(objectRoot))
-        //    {
-        //        if ((l.source as Thing).Relationships.Count == 1)
-        //        {
-        //            return (l.source as Thing).Label;
-        //        }
-        //    }
-        //}
-        //if (property.V != null)
-        //    return property.V.ToString();
+        ModuleUKS UKS = (ModuleUKS)base.ParentModule;
+        Thing objectRoot = UKS.GetOrAddThing("Object", "Thing");
+        if (property.GetRelationshipByWithAncestor(objectRoot) == null)
+        {
+            return property.Label;
+        }
+        else
+        {
+            foreach (Relationship l in property.GetRelationshipByWithAncestor(objectRoot))
+            {
+                if ((l.source as Thing).Relationships.Count == 1)
+                {
+                    return (l.source as Thing).Label;
+                }
+            }
+        }
+        if (property.V != null)
+            return property.V.ToString();
         return property.Label;
     }
 

@@ -5,12 +5,15 @@
 // 
 
 using Mosaik.Core;
+using Newtonsoft.Json.Linq;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml;
 using System.Xml.Schema;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace BrainSimulator.Modules;
 
@@ -50,11 +53,11 @@ public partial class ModuleUKS : ModuleBase
         Thing newThing = new() { V = value };
         if (parent is not null)
         {
+            newThing.Label = label;
             newThing.AddParent(parent);
         }
         lock (UKSList)
         {
-            newThing.Label = label;
             UKSList.Add(newThing);
         }
         return newThing;
@@ -784,83 +787,115 @@ public partial class ModuleUKS : ModuleBase
         }
     }
 
-    //If a thing exists, return it.  If not, create it.
-    //If it is currently an unknown, defining the parent can make it known
-    //A value can optionally be defined.
+    // If a thing exists, return it.  If not, create it.
+    // If it is currently an unknown, defining the parent can make it known
+    // A value can optionally be defined.
     public Thing GetOrAddThing(string label, object parent, object value = null, bool reuseValue = false)
     {
-        Thing retVal = null;
-        if (label == null) return null;
+        Thing thingToReturn = null;
 
-        //if the thing exists and has the correct parent, return it
-        Thing Parent = null;
+        if (string.IsNullOrEmpty(label)) return thingToReturn;
 
-        //specified parent is null, search the entire UKS
-        if (parent is null)
-            retVal = Labeled(label);
+        thingToReturn = GetThingWithCorrectParent(label, parent);
 
-        if (retVal == null)
+        if (thingToReturn == null)
         {
-            //specified parent is a thing
-            if (parent is Thing t)
-                Parent = t;
-            else if (parent is string s1 && s1 != "")
+            Thing correctParent = GetCorrectParent(label, parent);
+            
+            if (correctParent != null)
             {
-                Parent = Labeled(s1);
-                if (Parent == null)
-                {
-                    Parent = AddThing(s1, Unknown);
-                    if (label.StartsWith("KnownArea"))
-                    { }
-                }
+                thingToReturn = GetLabeledOrValuedThing(label, correctParent, value, reuseValue);
             }
-            else if (parent is null)
-                Parent = Unknown;
-
-            if (Parent != null)
+            if (thingToReturn == null)
             {
-                var listWithLabel = AllLabeled(label);
-                retVal = Labeled(label, Parent.Children);
-                if (value is not null && (value is string || reuseValue))
-                {
-                    retVal = Valued(value, Parent.Children, 0, label);
-                    if (retVal == null)
-                    {
-                        retVal = AddThing(label, Parent, value);
-                        if (label.StartsWith("KnownArea"))
-                        { }
-                    }
-                }
-            }
-            if (retVal == null)
-            {
-                //if it exists but has a parent of unknown, make the parent known and return it
-                if (Unknown != null)
-                    retVal = Labeled(label, Unknown.Children);
-                if (retVal != null && Parent != null)
-                {
-                    retVal.AddParent(Parent);
-                    retVal.RemoveParent(unknown);
-                }
+                thingToReturn = GetUnknownParentToBeKnown(label, correctParent);
 
-                if (retVal == null)
-                { //if it does not exist, add it
-                    if (Parent != null)
-                        retVal = AddThing(label, Parent);
-                    if (retVal == null)
-                    {
-                        Parent = unknown;
-                        retVal = AddThing(label, Parent);
-                    }
+                if (thingToReturn == null)
+                {
+                    thingToReturn = AddNewThingToCorrectParent(label, thingToReturn, correctParent);
                 }
             }
         }
-        if (retVal != null && value != null)
-            retVal.V = value;
-        return retVal;
+
+        if (thingToReturn != null && value != null)
+        {
+            thingToReturn.V = value;
+        }
+
+        return thingToReturn;
     }
 
-    public Thing SetParent(object child, object parent)
+    private Thing GetThingWithCorrectParent(string label, object parent)
+    {
+        if (parent is null)
+            return Labeled(label);
+        return (Thing)null;
+    }
+
+    private Thing GetCorrectParent(string label, object parent)
+    {
+        Thing correctParent = null;
+
+        if (parent is Thing t)
+        {
+            correctParent = t;
+        }
+        else if (parent is string s1 && s1 != "")
+        {
+            correctParent = Labeled(s1);
+            if (correctParent == null)
+            {
+                correctParent = AddThing(s1, Unknown);
+            }
+        }
+        else if (parent is null)
+        {
+            correctParent = Unknown;
+        }
+        return correctParent;
+    }
+
+    private Thing GetLabeledOrValuedThing(string label, Thing correctParent, object value, bool reuseValue)
+    {
+        Thing thingToReturn = Labeled(label, correctParent.Children);
+        if (value is not null && (value is string || reuseValue))
+        {
+            thingToReturn = Valued(value, correctParent.Children, 0, label);
+            thingToReturn ??= AddThing(label, correctParent, value);
+        }
+        return thingToReturn;
+    }
+
+    private Thing GetUnknownParentToBeKnown(string label, Thing correctParent)
+    {
+        Thing thingToReturn = null;
+        if (Unknown != null)
+        {
+            thingToReturn = Labeled(label, Unknown.Children);
+        }
+        if (thingToReturn != null && correctParent != null)
+        {
+            thingToReturn.AddParent(correctParent);
+            thingToReturn.RemoveParent(unknown);
+        }
+        return thingToReturn;
+    }
+
+    private Thing AddNewThingToCorrectParent(string label, Thing thingToReturn, Thing correctParent)
+    {
+        if (correctParent != null)
+        {
+            thingToReturn = AddThing(label, correctParent);
+        }
+        if (thingToReturn == null)
+        {
+            correctParent = unknown;
+            thingToReturn = AddThing(label, correctParent);
+        }
+        return thingToReturn;
+    }
+
+public Thing SetParent(object child, object parent)
     {
         Thing tParent, tChild;
         if (parent is string sParent)

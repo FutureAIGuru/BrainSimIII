@@ -175,7 +175,7 @@ namespace BrainSimulator
 
         private void Dt_Tick(object? sender, EventArgs e)
         {
-            Debug.WriteLine("Dt_tick entered");
+            // Debug.WriteLine("Dt_tick entered");
 
             foreach (ModuleBase mb in MainWindow.modules)
             {
@@ -191,7 +191,7 @@ namespace BrainSimulator
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("Button_Click entered");
+            // Debug.WriteLine("Button_Click entered");
             CloseAllModuleDialogs();
             CloseAllModules();
             this.Close();

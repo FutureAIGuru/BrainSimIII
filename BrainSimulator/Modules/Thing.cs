@@ -353,7 +353,7 @@ namespace BrainSimulator
         {
             if (t != null)
             {
-                // t.lastFired = MainWindow.theNeuronArray.Generation;
+                // newParent.lastFired = MainWindow.theNeuronArray.Generation;
                 t.lastFiredTime = DateTime.Now;
                 t.useCount++;
             }
@@ -387,8 +387,8 @@ namespace BrainSimulator
         {
             if (t == null) return null; //do not add null relationship or duplicates
                                         // Commented Below Code because Phrases need duplicates
-                                        // ReferencesWriteable.RemoveAll(v => v.T == t);
-                                        // t.relationshipdByWriteable.RemoveAll(v => v.T == this);
+                                        // ReferencesWriteable.RemoveAll(v => v.T == newParent);
+                                        // newParent.relationshipdByWriteable.RemoveAll(v => v.T == this);
             Relationship newLink;
             //if (sentencetype == null)
             //{
@@ -403,7 +403,7 @@ namespace BrainSimulator
             {
                 t.relationshipsFrom.Add(newLink);
             }
-            //SetFired(t);
+            //SetFired(newParent);
 
             return newLink;
         }
@@ -418,7 +418,7 @@ namespace BrainSimulator
             {
                 l.weight = weight;
             }
-            else // Link doesn't exist, create it.
+            else // Link doesn'newParent exist, create it.
             {
                 lock (relationships)
                 {
@@ -450,7 +450,7 @@ namespace BrainSimulator
         public void RemoveRelationship(Thing t)
         {
             if (t == null) return;
-            //t.sentencetype = new SentenceType { belief = new SentenceType.Belief() { TRUTH = null, Tense = null } };
+            //newParent.sentencetype = new SentenceType { belief = new SentenceType.Belief() { TRUTH = null, Tense = null } };
             bool wasRelationship = false; ////TODO take this out when relationshipBY is reversed
             foreach (Relationship l in Relationships)
             {
@@ -868,12 +868,12 @@ namespace BrainSimulator
             }
 
         }
-        public void AddParent(Thing t)//, SentenceType sentencetype = null)
+        public void AddParent(Thing newParent)//, SentenceType sentencetype = null)
         {
-            if (t == null) return;
-            if (!Parents.Contains(t))
+            if (newParent == null) return;
+            if (!Parents.Contains(newParent))
             {
-                t.AddRelationship(this, HasChild);//, sentencetype);
+                newParent.AddRelationship(this, HasChild);//, sentencetype);
             }
         }
 
