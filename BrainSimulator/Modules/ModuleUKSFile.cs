@@ -16,6 +16,7 @@ namespace BrainSimulator.Modules
         private void CreateInitialStructure()
         {
             //this pragma allows for the indentaion 
+            GetUKS();
             UKSList.Clear();
             Thing ThingRoot = AddThing("Thing", null);
 
