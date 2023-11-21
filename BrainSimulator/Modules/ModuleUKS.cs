@@ -53,11 +53,11 @@ public partial class ModuleUKS : ModuleBase
         Thing newThing = new() { V = value };
         if (parent is not null)
         {
-            newThing.Label = label;
             newThing.AddParent(parent);
         }
         lock (UKSList)
         {
+            newThing.Label = label;
             UKSList.Add(newThing);
         }
         return newThing;
