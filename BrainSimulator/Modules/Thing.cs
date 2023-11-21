@@ -836,7 +836,7 @@ namespace BrainSimulator
 
         }
 
-        Thing hasChildType;
+        public static Thing hasChildType { get; set; }
         Thing HasChild
         {
             get

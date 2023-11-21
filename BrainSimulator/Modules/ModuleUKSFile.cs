@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.IO;
 using System.Windows;
+using System.Diagnostics;
 
 namespace BrainSimulator.Modules
 {
@@ -15,10 +16,19 @@ namespace BrainSimulator.Modules
         private void CreateInitialStructure()
         {
             //this pragma allows for the indentaion 
+            UKSList.Clear();
+            Thing ThingRoot = AddThing("Thing", null);
+
+            Thing relParent = UKS.AddThing("Relationship", null);
+
+            Thing hasChildType = UKS.AddThing("has-child", null);
+            relParent.AddRelationship(hasChildType, hasChildType);
+            UKS.Labeled("Thing").AddRelationship(relParent, hasChildType);
+            Thing.hasChildType = hasChildType;
+
 #pragma warning disable format
-        UKSList.Clear();
-        unknown = null;
-        Thing ThingRoot = AddThing("Thing", null);
+
+            unknown = null;
             Thing AttentionRoot = GetOrAddThing("Attention", ThingRoot);
                 GetOrAddThing("Associate", AttentionRoot);
                 GetOrAddThing("CurrentPhrase", AttentionRoot);
