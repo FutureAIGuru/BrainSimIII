@@ -3,11 +3,149 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ModuleTester"
+        xmlns:local="clr-namespace:BrainSimulator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="200" Width="250" >
-    <Grid>
-        <Button Content="Close this program..." HorizontalAlignment="Center" Height="50" Margin="0,88,0,0" VerticalAlignment="Top" Width="126" Click="Button_Click"/>
-        <TextBlock HorizontalAlignment="Center" Margin="0,26,0,0" TextWrapping="Wrap" Text="This test application starts a module independently for testing" VerticalAlignment="Top" Height="42" Width="180"/>
-    </Grid>
+        Title="MainWindow" Height="600" Width="800" >
+    <DockPanel Margin="0,0,0,0" >
+        <Border BorderThickness="1" Width="180" Grid.Column="0" Grid.Row="1" BorderBrush="LightGray">
+            <StackPanel x:Name="LoadedModuleSP">
+
+            </StackPanel>
+        </Border>
+        <Menu DockPanel.Dock="Top" x:Name="MainMenu" Height="26" Margin="0,0" VerticalAlignment="Top" >
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" InputGestureText="Ctrl-N">
+                    <MenuItem.Icon>
+                        <Image Source="/resources/icons/newFile_16x.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Open" InputGestureText="Ctrl-O">
+                    <MenuItem.Icon>
+                        <Image Source="/resources/icons/OpenFile_16x.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Save" InputGestureText="Ctrl-S">
+                    <MenuItem.Icon>
+                        <Image Source="/resources/icons/Save_16x.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Save _As">
+                    <MenuItem.Icon>
+                        <Image Source="resources/icons/saveAs_16x.png"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="_Properties">
+                    <MenuItem.Icon>
+                        <TextBlock FontSize="16" FontFamily="Segoe MDL2 Assets" Foreground="#FF00539C"  >&#xE71D;</TextBlock>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="Recent" x:Name="MRUListMenu">
+                </MenuItem>
+                <Separator />
+                <MenuItem Header="_Exit">
+                    <MenuItem.Icon>
+                        <TextBlock FontSize="16" FontFamily="Segoe MDL2 Assets" Foreground="#FF00539C" >&#xE711;</TextBlock>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="Insert Module" x:Name="InsertModuleMenu"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="View">
+                <MenuItem Header="Start Pan">
+                    <MenuItem.Icon>
+                        <Image Source="/resources/icons/hand.png" Height="20"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Zoom In">
+                    <MenuItem.Icon>
+                        <Image Source="/resources/icons/ZoomIn_16x.png" Height="20"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Zoom Out">
+                    <MenuItem.Icon>
+                        <Image Source="/resources/icons/ZoomOut_16x.png" Height="20"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Show all">
+                    <MenuItem.Icon>
+                        <Image Source="/resources/icons/ZoomoriginalSize_16x.png" Height="20"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Origin">
+                    <MenuItem.Icon>
+                        <Image Source="/resources/icons/ZoomoriginalSize_16x.png" Height="20"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Show Synapses" Name="ShowSynapses" IsCheckable="true"></MenuItem>
+            </MenuItem>
+            <MenuItem Header=" Help">
+                <MenuItem InputGestureText="F1">
+                    <MenuItem.Header>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
+                            <Label Width="100" VerticalAlignment="Center" Padding="0,0,5,0">Getting Started</Label>
+                            <CheckBox x:Name="cbShowHelpAtStartup" VerticalAlignment="Center" Padding="5,0,5,0">Show at startup</CheckBox>
+                        </StackPanel>
+                    </MenuItem.Header>
+                </MenuItem>
+                <MenuItem Header="Register">
+                    <MenuItem.Icon>
+                        <Image Source="/resources/mailing-list-icon-17.jpg"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Help Contents">
+                    <MenuItem.Icon>
+                        <TextBlock FontSize="16" FontFamily="Segoe MDL2 Assets" Foreground="#FF00539C" >&#xE897;</TextBlock>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Report bugs, request features">
+                    <MenuItem.Icon>
+                        <Image Source="/resources/github-9-24.ico"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Join Facebook discussion">
+                    <MenuItem.Icon>
+                        <Image Source="resources/facebook-3-24.ico"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Watch the YouTubeChannel">
+                    <MenuItem.Icon>
+                        <Image Source="resources/youtube-24.ico"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Check for available updates"></MenuItem>
+                <MenuItem Header="About"/>
+            </MenuItem>
+        </Menu>
+        <Grid>
+            <!-- The Toolbar -->
+            <DockPanel Grid.Row="0" Grid.Column="0" x:Name="MainToolBar" Grid.ColumnSpan="3" Height="30" Margin="7,5,0,0" VerticalAlignment="Top">
+                <Button x:Name="NewButton" VerticalAlignment="Top" ToolTip="New File">
+                    <Image Source="/resources/icons/NewFile_16x.png" Height="20"  ></Image>
+                </Button>
+                <Button x:Name="OpenButton" VerticalAlignment="Top" ToolTip="Open File">
+                    <Image Source="/resources/icons/OpenFile_16x.png" Height="20"></Image>
+                </Button>
+                <Button x:Name="SaveButton" VerticalAlignment="Top" ToolTip="Save File" >
+                    <Image Source="/resources/icons/Save_16x.png" Height="20"></Image>
+                </Button>
+                <Button x:Name="SaveAsButton" VerticalAlignment="Top" ToolTip="Save File As"  >
+                    <Image Source="/resources/icons/SaveAs_16x.png" Height="20"></Image>
+                </Button>
+                <Button x:Name="ReloadNetwork" VerticalAlignment="Top" ToolTip="Reload Current Network" IsEnabled="False" >
+                    <Image Source="/resources/icons/Refresh_16x.png" Height="20" ></Image>
+                </Button>
+                <Label Visibility="Hidden" Width="30"></Label>
+                <Label Visibility="Hidden" Width="5"></Label>
+                <Label Visibility="Hidden" Width="30"></Label>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Label Content="Add Module:"/>
+                    <ComboBox x:Name="ModuleListComboBox" SelectionChanged="ModuleList_SelectionChanged" VerticalContentAlignment="Center" Width="271" Height="26" IsEditable="True"/>
+                </StackPanel>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
 </Window>

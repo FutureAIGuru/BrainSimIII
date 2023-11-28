@@ -353,13 +353,13 @@ namespace BrainSimulator
         {
             if (t != null)
             {
-                // newParent.lastFired = MainWindow.theNeuronArray.Generation;
+                // newParent.lastFired = MainWindow.Generation;
                 t.lastFiredTime = DateTime.Now;
                 t.useCount++;
             }
             else
             {
-                // lastFired = MainWindow.theNeuronArray.Generation;
+                // lastFired = MainWindow.Generation;
                 lastFiredTime = DateTime.Now;
                 useCount++;
             }
@@ -845,7 +845,7 @@ namespace BrainSimulator
                 {
                     /*
                     if (MainWindow.theNeuronArray == null) return null;
-                    if (MainWindow.theNeuronArray.modules == null) return null;
+                    if (MainWindow.modules == null) return null;
 
                     // var uks = MainWindow.modules.Find(x => x. == "UKS");
                     uks.GetUKS();

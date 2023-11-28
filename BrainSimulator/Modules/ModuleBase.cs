@@ -18,9 +18,6 @@ namespace BrainSimulator.Modules
 {
     abstract public class ModuleBase
     {
-        protected NeuronArray theNeuronArray;
-        // protected ModuleView mv = null;
-
         //this is public so it will be included in the saved xml file.  That way
         //initialized data content can be preserved from run to run and only reinitialized when requested.
         public bool initialized = false;

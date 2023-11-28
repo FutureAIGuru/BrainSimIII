@@ -298,7 +298,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                         moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.partsOf);
                     break;
                 //case "Add Types":
-                //    moi = (ModuleOnlineInfo)MainWindow.theNeuronArray.modules.FindFirst(x => x.Label == "OnlineInfo")?.TheModule;
+                //    moi = (ModuleOnlineInfo)MainWindow.modules.FindFirst(x => x.Label == "OnlineInfo")?;
                 //    if (moi != null)
                 //        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.list);
                 //    break;

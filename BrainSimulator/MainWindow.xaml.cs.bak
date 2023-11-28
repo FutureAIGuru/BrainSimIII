@@ -27,8 +27,6 @@ namespace BrainSimulator
     public partial class MainWindow : Window
     {
         public static List<ModuleBase> modules = new List<ModuleBase>();
-        //the name of the currently-loaded network file
-        public static string currentFileName = "";
 
         public MainWindow()
         {
@@ -48,24 +46,7 @@ namespace BrainSimulator
                     });
                 }
             }
-
-            LoadModuleTypeMenu();
-            SetTitleBar();
-
-            loadedModulesSP = LoadedModuleSP;
-            LoadedModuleSP.Children.Clear();
-
-            for (int i = 0; i < MainWindow.modules.Count; i++)
-            {
-                ModuleBase mod = MainWindow.modules[i];
-                if (mod != null)
-                {
-                    mod.SetUpAfterLoad();
-                }
-            }
-
-            ReloadLoadedModules();
-
+            
             Debug.WriteLine("Starting Tick Timer");
             DispatcherTimer dt = new();
             dt.Interval = TimeSpan.FromSeconds(0.1);
@@ -118,11 +99,6 @@ namespace BrainSimulator
             }
         }
 
-        private void SetTitleBar()
-        {
-            Title = "Brain Simulator III " + System.IO.Path.GetFileNameWithoutExtension(currentFileName);
-        }
-        
         public static void Update()
         {
             Debug.WriteLine("Update entered");
@@ -219,21 +195,6 @@ namespace BrainSimulator
             CloseAllModuleDialogs();
             CloseAllModules();
             this.Close();
-        }
-
-        private void LoadModuleTypeMenu()
-        {
-            var moduleTypes = Utils.GetArrayOfModuleTypes();
-
-            foreach (var moduleType in moduleTypes)
-            {
-                string moduleName = moduleType.Name;
-                moduleName = moduleName.Replace("Module", "");
-                Modules.ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(moduleType);
-                string toolTip = ModuleDescriptionFile.GetToolTip(moduleType.Name);
-
-                ModuleListComboBox.Items.Add(new Label { Content = moduleName, ToolTip = toolTip, Margin = new Thickness(0), Padding = new Thickness(0) });
-            }
         }
 
     }

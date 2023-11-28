@@ -37,9 +37,9 @@ namespace BrainSimulator
                 }
                 xamlText = xamlText.Replace("</Hyperlink>", "");
 
-                // MainWindow.theNeuronArray.networkNotes = xamlText;
+                // MainWindow.networkNotes = xamlText;
             }
-            // MainWindow.theNeuronArray.hideNotes = (bool)checkBox.IsChecked;
+            // MainWindow.hideNotes = (bool)checkBox.IsChecked;
             Close();
         }
 

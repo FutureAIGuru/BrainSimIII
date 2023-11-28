@@ -34,6 +34,7 @@ public partial class ModuleUKS : ModuleBase
     //set max to be -1 if unlimited
     public ModuleUKS()
     {
+        Label = "ModuleUKS";
         allowMultipleDialogs = true;
     }
 

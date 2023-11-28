@@ -27,6 +27,8 @@ namespace BrainSimulator.Modules
         //set max to be -1 if unlimited
         public ModuleUKSInteract()
         {
+            Label = "ModuleUKSInteract";
+
         }
 
 
