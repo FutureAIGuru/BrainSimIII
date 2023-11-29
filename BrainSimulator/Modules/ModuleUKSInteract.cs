@@ -27,10 +27,7 @@ namespace BrainSimulator.Modules
         //set max to be -1 if unlimited
         public ModuleUKSInteract()
         {
-            Label = "ModuleUKSInteract";
-
         }
-
 
         //fill this method in with code which will execute
         //once for each cycle of the engine

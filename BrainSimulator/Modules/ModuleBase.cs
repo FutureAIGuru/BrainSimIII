@@ -35,9 +35,9 @@ namespace BrainSimulator.Modules
         public ModuleBase() 
         {
             string moduleName = this.GetType().Name;
-            if (moduleName.StartsWith("BrainSimulator.Modules.Module"))
+            if (moduleName.StartsWith("Module"))
             {
-                Label = moduleName[29..];
+                Label = moduleName[6..];
             }
         }
 

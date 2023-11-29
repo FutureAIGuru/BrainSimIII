@@ -32,26 +32,20 @@ namespace BrainSimulator
 
         public MainWindow()
         {
-            Debug.WriteLine("MainWindow entered");
             InitializeComponent();
-            CreateEmptyNetwork();
-
-            Debug.WriteLine("Opening ModuleViews");
-
-            foreach (ModuleBase mb in MainWindow.modules)
-            {
-                if (mb != null && !mb.dlgIsOpen)
-                {
-                    Application.Current.Dispatcher.Invoke((Action)delegate
-                    {
-                        mb.ShowDialog();
-                    });
-                }
-            }
-
-            LoadModuleTypeMenu();
             SetTitleBar();
+            CreateEmptyNetwork();
+            LoadModuleTypeMenu();
+            InitializeModulePane();
 
+            DispatcherTimer dt = new();
+            dt.Interval = TimeSpan.FromSeconds(0.1);
+            dt.Tick += Dt_Tick;
+            dt.Start();
+        }
+
+        public void InitializeModulePane()
+        {
             loadedModulesSP = LoadedModuleSP;
             LoadedModuleSP.Children.Clear();
 
@@ -65,29 +59,42 @@ namespace BrainSimulator
             }
 
             ReloadLoadedModules();
+        }
 
-            Debug.WriteLine("Starting Tick Timer");
-            DispatcherTimer dt = new();
-            dt.Interval = TimeSpan.FromSeconds(0.1);
-            dt.Tick += Dt_Tick;
-            dt.Start();
-            // this.Close();
+        public void ShowAllModuleDialogs()
+        {
+            foreach (ModuleBase mb in MainWindow.modules)
+            {
+                if (mb != null && !mb.dlgIsOpen)
+                {
+                    Application.Current.Dispatcher.Invoke((Action)delegate
+                    {
+                        mb.ShowDialog();
+                    });
+                }
+            }
         }
 
         public void CreateEmptyNetwork()
         {
-            Debug.WriteLine("CreateEmptyNetwork entered");
-
-            InsertModules();
-
+            InsertMandatoryModules();
+            InitializeModulePane();
             Update();
         }
 
-        public void InsertModules()
+        public void InsertMandatoryModules()
         {
-            Debug.WriteLine("InsertModules entered");
-            modules.Add(new BrainSimulator.Modules.ModuleUKS());
-            modules.Add(new BrainSimulator.Modules.ModuleUKSInteract());
+            Debug.WriteLine("InsertMandatoryModules entered");
+            modules.Clear();
+            modules.Add(CreateNewUniqueModule("UKS"));
+            modules.Add(CreateNewUniqueModule("UKSInteract"));
+        }
+
+        public ModuleBase CreateNewUniqueModule(string ModuleName)
+        {
+            ModuleBase newModule = CreateNewModule(ModuleName);
+            newModule.Label = MainWindow.GetUniqueModuleLabel(ModuleName);
+            return newModule;
         }
 
         public static void CloseAllModuleDialogs()

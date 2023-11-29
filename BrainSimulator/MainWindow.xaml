@@ -14,7 +14,7 @@
         </Border>
         <Menu DockPanel.Dock="Top" x:Name="MainMenu" Height="26" Margin="0,0" VerticalAlignment="Top" >
             <MenuItem Header="_File">
-                <MenuItem Header="_New" InputGestureText="Ctrl-N">
+                <MenuItem Header="_New" Click="button_FileNew_Click" InputGestureText="Ctrl-N">
                     <MenuItem.Icon>
                         <Image Source="/resources/icons/newFile_16x.png"/>
                     </MenuItem.Icon>
@@ -33,6 +33,8 @@
                     <MenuItem.Icon>
                         <Image Source="resources/icons/saveAs_16x.png"></Image>
                     </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="Reload_network" Header="Reload _Network" Click="buttonReloadNetwork_click" IsEnabled="False">
                 </MenuItem>
                 <Separator />
                 <MenuItem Header="_Properties">

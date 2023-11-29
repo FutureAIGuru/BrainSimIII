@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Collections.Generic;
 using BrainSimulator.Modules;
+using System.Linq;
 
 namespace BrainSimulator
 {
@@ -24,7 +25,7 @@ namespace BrainSimulator
     {
         private void buttonSave_Click(object sender, RoutedEventArgs e)
         {
-            if (currentFileName == "")
+            if (currentFileName.Length == 0)
             {
                 buttonSaveAs_Click(null, null);
             }
@@ -36,40 +37,23 @@ namespace BrainSimulator
 
         private void buttonSaveAs_Click(object sender, RoutedEventArgs e)
         {
-            //if (SaveAs())
-            //{
-            //    SaveButton.IsEnabled = true;
-            //    Reload_network.IsEnabled = true;
-            //    ReloadNetwork.IsEnabled = true;
-            //}
+            if (SaveAs())
+            {
+                SaveButton.IsEnabled = true;
+                Reload_network.IsEnabled = true;
+                ReloadNetwork.IsEnabled = true;
+            }
         }
 
         private void buttonReloadNetwork_click(object sender, RoutedEventArgs e)
         {
-
-            //if (PromptToSaveChanges())
-            //    return;
-            //else
-            //{
-            //    if (currentFileName != "")
-            //    {
-            //        LoadCurrentFile();
-            //        Modules.Sallie.VideoQueue.Clear();
-            //    }
-            //}
-        }
-
-        public void SetPlayPauseButtonImage(bool paused)
-        {
-            if (paused)
+            if (PromptToSaveChanges())
+                return;
+            
+            if (currentFileName != "")
             {
-                //buttonPlay.IsEnabled = true;
-                //buttonPause.IsEnabled = false;
-            }
-            else
-            {
-                //buttonPlay.IsEnabled = false;
-                //buttonPause.IsEnabled = true;
+                LoadCurrentFile();
+                // Modules.Sallie.VideoQueue.Clear();
             }
         }
 
@@ -166,23 +150,7 @@ namespace BrainSimulator
             ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(t);
 
             //ensure no name collistions
-            foreach (ModuleBase mb in MainWindow.modules)
-            {
-                if (mb.Label == moduleLabel)
-                {
-                    int i = 1;
-                    int index = mb.Label.IndexOf("(");
-                    if (index != -1)
-                    {
-                        string num = mb.Label.Substring(index + 1);
-                        num = num.Replace(")", "").Trim();
-                        int.TryParse(num, out i);
-                        moduleLabel = moduleLabel.Substring(0, index);
-                        i++;
-                    }
-                    moduleLabel = moduleLabel + "(" + i + ")";
-                }
-            }
+            theModule.Label = MainWindow.GetUniqueModuleLabel(moduleLabel);
             return theModule;
         }
         private void ModuleList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -194,7 +162,6 @@ namespace BrainSimulator
                     string moduleName = ((Label)cb.SelectedItem).Content.ToString();
                     cb.SelectedIndex = -1;
                     ModuleBase newModule = CreateNewModule(moduleName);
-                    newModule.Label = moduleName;
                     MainWindow.modules.Add(newModule);
                 }
             }
@@ -211,6 +178,33 @@ namespace BrainSimulator
             }
 
             ReloadLoadedModules();
+        }
+        private void button_FileNew_Click(object sender, RoutedEventArgs e)
+        {
+            if (PromptToSaveChanges())
+                return;
+
+            SuspendEngine();
+            CreateEmptyNetwork(); // to avoid keeping too many bytes occupied...
+
+            ReloadNetwork.IsEnabled = false;
+            Reload_network.IsEnabled = false;
+            
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            currentFileName = "";
+            SetCurrentFileNameToProperties();
+            SetTitleBar();
+                
+            Update();
+            Modules.Sallie.VideoQueue.Clear();
+            ResumeEngine();
+        }
+
+        internal static string GetUniqueModuleLabel(string searchString)
+        {
+            string number = (modules.Count(module => module.Label.StartsWith(searchString + "_", StringComparison.OrdinalIgnoreCase)) + 1).ToString();            return searchString + "_" + number;
         }
     }
 }

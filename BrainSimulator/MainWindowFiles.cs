@@ -100,11 +100,13 @@ namespace BrainSimulator
             loadedModulesSP.Children.Clear();
 
             System.Collections.Generic.SortedDictionary<string, int> nameList = new();
-
-            //build the sorted list of names and module numbers
             for (int i = 0; i < modules.Count; i++)
             {
-                if (modules[i].Label == "") continue;
+                if (modules[i].Label == "")
+                {
+                    continue;
+                }
+                    
                 nameList.Add(modules[i].Label, i);
             }
 
@@ -114,13 +116,6 @@ namespace BrainSimulator
                 ModuleBase mod = modules[x.Value];
                 AddModuleToLoadedModules(x.Value, mod);
             }
-
-            //in case sorting causes an issue, this was the original code
-            //for (int i = 0; i < modules.Count; i++)
-            //{
-            //    ModuleBase mod = modules[i];
-            //    AddModuleToLoadedModules(i, mod);
-            //}
         }
 
         private static void AddModuleToLoadedModules(int i, ModuleBase mod)
@@ -160,8 +155,6 @@ namespace BrainSimulator
             return true;
         }
         */
-
-        /*
         private bool SaveFile(string fileName)
         {
             SuspendEngine();
@@ -177,28 +170,23 @@ namespace BrainSimulator
                     return false;
             }
 
-            foreach (ModuleView mod in theNeuronArray.modules)
+            foreach (ModuleBase mod in modules)
             {
-                if (mod.TheModule != null)
+                try
                 {
-                    try
-                    {
-                        mod.TheModule.SetUpBeforeSave();
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show("SetupBeforeSave failed on module " + mod.Label + ".   Message: " + e.Message);
-                    }
+                    mod.SetUpBeforeSave();
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("SetupBeforeSave failed on module " + mod.Label + ".   Message: " + e.Message);
                 }
             }
 
-            theNeuronArray.displayParams = theNeuronArrayView.Dp;
-            if (XmlFile.Save(theNeuronArray, fileName))
+            if (XmlFile.Save(fileName))
             {
                 currentFileName = fileName;
                 SetCurrentFileNameToProperties();
                 ResumeEngine();
-                undoCountAtLastSave = theNeuronArray.GetUndoCount();
                 return true;
             }
             else
@@ -207,8 +195,7 @@ namespace BrainSimulator
                 return false;
             }
         }
-        */
-
+        
         /*
         private void SaveClipboardToFile(string fileName)
         {
@@ -245,13 +232,9 @@ namespace BrainSimulator
             Properties.Settings.Default.Save();
         }
 
-        /*
         public int undoCountAtLastSave = 0;
         private bool PromptToSaveChanges()
         {
-            if (IsArrayEmpty()) return false;
-            if (theNeuronArray.GetUndoCount() == undoCountAtLastSave) return false; //no changes have been made
-
             bool canWrite = XmlFile.CanWriteTo(currentFileName, out string message);
 
             SuspendEngine();
@@ -261,17 +244,13 @@ namespace BrainSimulator
             MessageBoxImage.Asterisk, MessageBoxResult.No);
             if (mbResult == MessageBoxResult.Yes)
             {
-                if (currentFileName != "" && canWrite)
+                if (currentFileName.Length != 0 && canWrite)
                 {
-                    if (SaveFile(currentFileName))
-                        undoCountAtLastSave = theNeuronArray.GetUndoCount();
+                    SaveFile(currentFileName);
                 }
                 else
                 {
-                    if (SaveAs())
-                    {
-                    }
-                    else
+                    if (!SaveAs())
                     {
                         retVal = true;
                     }
@@ -284,8 +263,7 @@ namespace BrainSimulator
             ResumeEngine();
             return retVal;
         }
-        */
-        /* 
+      
         private bool SaveAs()
         {
             string defaultPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -321,6 +299,5 @@ namespace BrainSimulator
             }
             return false;
         }
-        */
     }
 }
