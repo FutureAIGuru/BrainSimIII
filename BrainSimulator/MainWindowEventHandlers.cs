@@ -23,6 +23,8 @@ namespace BrainSimulator
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static bool WasClosed = false;
+
         private void buttonSave_Click(object sender, RoutedEventArgs e)
         {
             if (currentFileName.Length == 0)
@@ -31,7 +33,7 @@ namespace BrainSimulator
             }
             else
             {
-                // SaveFile(currentFileName);
+                SaveFile(currentFileName);
             }
         }
 
@@ -56,6 +58,14 @@ namespace BrainSimulator
                 // Modules.Sallie.VideoQueue.Clear();
             }
         }
+
+        private void button_Exit_Click(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.Save();
+            MainWindow.WasClosed = true;
+            this.Close();
+        }
+
 
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
@@ -201,6 +211,39 @@ namespace BrainSimulator
             Modules.Sallie.VideoQueue.Clear();
             ResumeEngine();
         }
+
+        private void buttonLoad_Click(object sender, RoutedEventArgs e)
+        {
+            if (PromptToSaveChanges())
+                return;
+            string fileName = "_Open";
+            if (sender is MenuItem mainMenu)
+                fileName = (string)mainMenu.Header;
+
+            if (fileName == "_Open")
+            {
+                OpenFileDialog openFileDialog1 = new OpenFileDialog
+                {
+                    Filter = Utils.FilterXMLs,
+                    Title = Utils.TitleBrainSimLoad,
+                };
+                // Show the Dialog.  
+                // If the user clicked OK in the dialog and  
+                Nullable<bool> result = openFileDialog1.ShowDialog();
+                if (result ?? false)
+                {
+                    currentFileName = openFileDialog1.FileName;
+                    LoadCurrentFile();
+                }
+            }
+            else
+            {
+                //this is a file name from the File menu
+                currentFileName = Path.GetFullPath("./Networks/" + fileName + ".xml");
+                LoadCurrentFile();
+            }
+        }
+
 
         internal static string GetUniqueModuleLabel(string searchString)
         {

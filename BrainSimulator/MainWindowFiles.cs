@@ -24,17 +24,16 @@ namespace BrainSimulator
         private static StackPanel loadedModulesSP;
         private async void LoadFile(string fileName)
         {
-            /*
             CloseAllModuleDialogs();
             //CloseHistoryWindow();
             //CloseNotesWindow();
             //theNeuronArrayView.theSelection.selectedRectangles.Clear();
             CloseAllModules();
             SuspendEngine();
-            Modules.Sallie.VideoQueue.Clear();
+            //Modules.Sallie.VideoQueue.Clear();
 
             bool success = false;
-            await Task.Run(delegate { success = XmlFile.Load(ref theNeuronArray, fileName); });
+            await Task.Run(delegate { success = XmlFile.Load(fileName); });
             if (!success)
             {
                 CreateEmptyNetwork();
@@ -47,11 +46,10 @@ namespace BrainSimulator
 
             ReloadNetwork.IsEnabled = true;
             Reload_network.IsEnabled = true;
-            if (XmlFile.CanWriteTo(currentFileName))
-                SaveButton.IsEnabled = true;
-            else
-                SaveButton.IsEnabled = false;
-            */
+            //if (XmlFile.CanWriteTo(currentFileName))
+            //    SaveButton.IsEnabled = true;
+            //else
+            //    SaveButton.IsEnabled = false;
             SetTitleBar();
             // await Task.Delay(1000).ContinueWith(t => ShowDialogs());
             loadedModulesSP = LoadedModuleSP;
@@ -131,30 +129,6 @@ namespace BrainSimulator
             loadedModulesSP.Children.Add(tb);
         }
 
-        /*
-        private bool LoadClipBoardFromFile(string fileName)
-        {
-
-            XmlFile.Load(ref myClipBoard, fileName);
-
-            foreach (ModuleView mod in myClipBoard.modules)
-            {
-                if (mod.TheModule != null)
-                    mod.TheModule.SetUpAfterLoad();
-                {
-                    try
-                    {
-                        mod.TheModule.SetUpAfterLoad();
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show("SetupAfterLoad failed on module " + mod.Label + ".   Message: " + e.Message);
-                    }
-                }
-            }
-            return true;
-        }
-        */
         private bool SaveFile(string fileName)
         {
             SuspendEngine();
@@ -196,20 +170,6 @@ namespace BrainSimulator
             }
         }
         
-        /*
-        private void SaveClipboardToFile(string fileName)
-        {
-            foreach (ModuleView mod in myClipBoard.modules)
-            {
-                if (mod.TheModule != null)
-                    mod.TheModule.SetUpBeforeSave();
-            }
-
-            if (XmlFile.Save(myClipBoard, fileName))
-                currentFileName = fileName;
-        }
-        */
-
         private void AddFileToMRUList(string filePath)
         {
             StringCollection MRUList = (StringCollection)Properties.Settings.Default["MRUList"];

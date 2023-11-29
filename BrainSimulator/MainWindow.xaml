@@ -19,17 +19,17 @@
                         <Image Source="/resources/icons/newFile_16x.png"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="_Open" InputGestureText="Ctrl-O">
+                <MenuItem Header="_Open" Click="buttonLoad_Click" InputGestureText="Ctrl-O">
                     <MenuItem.Icon>
                         <Image Source="/resources/icons/OpenFile_16x.png"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="_Save" InputGestureText="Ctrl-S">
+                <MenuItem Header="_Save" Click="buttonSave_Click" InputGestureText="Ctrl-S">
                     <MenuItem.Icon>
                         <Image Source="/resources/icons/Save_16x.png"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Save _As">
+                <MenuItem Header="Save _As" Click="buttonSaveAs_Click">
                     <MenuItem.Icon>
                         <Image Source="resources/icons/saveAs_16x.png"></Image>
                     </MenuItem.Icon>
@@ -46,7 +46,7 @@
                 <MenuItem Header="Recent" x:Name="MRUListMenu">
                 </MenuItem>
                 <Separator />
-                <MenuItem Header="_Exit">
+                <MenuItem Header="_Exit" Click="button_Exit_Click" >
                     <MenuItem.Icon>
                         <TextBlock FontSize="16" FontFamily="Segoe MDL2 Assets" Foreground="#FF00539C" >&#xE711;</TextBlock>
                     </MenuItem.Icon>
@@ -124,19 +124,19 @@
         <Grid>
             <!-- The Toolbar -->
             <DockPanel Grid.Row="0" Grid.Column="0" x:Name="MainToolBar" Grid.ColumnSpan="3" Height="30" Margin="7,5,0,0" VerticalAlignment="Top">
-                <Button x:Name="NewButton" VerticalAlignment="Top" ToolTip="New File">
+                <Button x:Name="NewButton" Click="button_FileNew_Click" VerticalAlignment="Top" ToolTip="New File">
                     <Image Source="/resources/icons/NewFile_16x.png" Height="20"  ></Image>
                 </Button>
-                <Button x:Name="OpenButton" VerticalAlignment="Top" ToolTip="Open File">
+                <Button x:Name="OpenButton" Click="buttonLoad_Click" VerticalAlignment="Top" ToolTip="Open File">
                     <Image Source="/resources/icons/OpenFile_16x.png" Height="20"></Image>
                 </Button>
-                <Button x:Name="SaveButton" VerticalAlignment="Top" ToolTip="Save File" >
+                <Button x:Name="SaveButton" Click="buttonSave_Click" VerticalAlignment="Top" ToolTip="Save File" >
                     <Image Source="/resources/icons/Save_16x.png" Height="20"></Image>
                 </Button>
-                <Button x:Name="SaveAsButton" VerticalAlignment="Top" ToolTip="Save File As"  >
+                <Button x:Name="SaveAsButton" Click="buttonSaveAs_Click" VerticalAlignment="Top" ToolTip="Save File As"  >
                     <Image Source="/resources/icons/SaveAs_16x.png" Height="20"></Image>
                 </Button>
-                <Button x:Name="ReloadNetwork" VerticalAlignment="Top" ToolTip="Reload Current Network" IsEnabled="False" >
+                <Button x:Name="ReloadNetwork" Click="buttonReloadNetwork_click" VerticalAlignment="Top" ToolTip="Reload Current Network" IsEnabled="False" >
                     <Image Source="/resources/icons/Refresh_16x.png" Height="20" ></Image>
                 </Button>
                 <Label Visibility="Hidden" Width="30"></Label>
