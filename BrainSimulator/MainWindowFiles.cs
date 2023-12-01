@@ -55,9 +55,9 @@ namespace BrainSimulator
             loadedModulesSP = LoadedModuleSP;
             LoadedModuleSP.Children.Clear();
 
-            for ( int i = 0; i < MainWindow.modules.Count; i++ )
+            for ( int i = 0; i < MainWindow.BrainSim3Data.modules.Count; i++ )
             {
-                ModuleBase mod = MainWindow.modules[i];
+                ModuleBase mod = MainWindow.BrainSim3Data.modules[i];
                 if (mod != null)
                 {
                     mod.SetUpAfterLoad();
@@ -98,20 +98,20 @@ namespace BrainSimulator
             loadedModulesSP.Children.Clear();
 
             System.Collections.Generic.SortedDictionary<string, int> nameList = new();
-            for (int i = 0; i < modules.Count; i++)
+            for (int i = 0; i < BrainSim3Data.modules.Count; i++)
             {
-                if (modules[i].Label == "")
+                if (BrainSim3Data.modules[i].Label == "")
                 {
                     continue;
                 }
                     
-                nameList.Add(modules[i].Label, i);
+                nameList.Add(BrainSim3Data.modules[i].Label, i);
             }
 
             //add the modules to the stackPanel
             foreach (var x in nameList)
             {
-                ModuleBase mod = modules[x.Value];
+                ModuleBase mod = BrainSim3Data.modules[x.Value];
                 AddModuleToLoadedModules(x.Value, mod);
             }
         }
@@ -144,7 +144,7 @@ namespace BrainSimulator
                     return false;
             }
 
-            foreach (ModuleBase mod in modules)
+            foreach (ModuleBase mod in BrainSim3Data.modules)
             {
                 try
                 {

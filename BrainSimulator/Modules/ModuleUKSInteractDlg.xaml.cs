@@ -134,7 +134,7 @@ namespace BrainSimulator.Modules
 
         private void UpdateParentBox()
         {
-            if (deleteThingRadio.IsChecked == true || addReferenceRadio.IsChecked == true)
+            if (addReferenceRadio.IsChecked == true)
             {
                 parentComboBox.Items.Clear();
 
@@ -312,12 +312,6 @@ namespace BrainSimulator.Modules
         {
             if(e.Key == Key.Enter)
                 addReferenceRadio.IsChecked=true;
-        }
-
-        private void DeleteThingRadio_KeyUp(object sender, KeyEventArgs e)
-        {
-            if(e.Key == Key.Enter)
-                deleteThingRadio.IsChecked=true;
         }
 
         private void thingText_TextChanged(object sender, TextChangedEventArgs e)

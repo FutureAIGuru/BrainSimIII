@@ -21,12 +21,18 @@ using System.Xml.Serialization;
 
 namespace BrainSimulator
 {
+    public class BrainSim3Data
+    {
+        public List<ModuleBase> modules = new List<ModuleBase>();
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static List<ModuleBase> modules = new List<ModuleBase>();
+        public static BrainSim3Data BrainSim3Data = new BrainSim3Data();
+
         //the name of the currently-loaded network file
         public static string currentFileName = "";
 
@@ -49,9 +55,9 @@ namespace BrainSimulator
             loadedModulesSP = LoadedModuleSP;
             LoadedModuleSP.Children.Clear();
 
-            for (int i = 0; i < MainWindow.modules.Count; i++)
+            for (int i = 0; i < MainWindow.BrainSim3Data.modules.Count; i++)
             {
-                ModuleBase mod = MainWindow.modules[i];
+                ModuleBase mod = MainWindow.BrainSim3Data.modules[i];
                 if (mod != null)
                 {
                     mod.SetUpAfterLoad();
@@ -63,7 +69,7 @@ namespace BrainSimulator
 
         public void ShowAllModuleDialogs()
         {
-            foreach (ModuleBase mb in MainWindow.modules)
+            foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
             {
                 if (mb != null && !mb.dlgIsOpen)
                 {
@@ -85,9 +91,9 @@ namespace BrainSimulator
         public void InsertMandatoryModules()
         {
             Debug.WriteLine("InsertMandatoryModules entered");
-            modules.Clear();
-            modules.Add(CreateNewUniqueModule("UKS"));
-            modules.Add(CreateNewUniqueModule("UKSInteract"));
+            BrainSim3Data.modules.Clear();
+            BrainSim3Data.modules.Add(CreateNewUniqueModule("UKS"));
+            BrainSim3Data.modules.Add(CreateNewUniqueModule("UKSInteract"));
         }
 
         public ModuleBase CreateNewUniqueModule(string ModuleName)
@@ -99,9 +105,9 @@ namespace BrainSimulator
 
         public static void CloseAllModuleDialogs()
         {
-            lock (modules)
+            lock (BrainSim3Data.modules)
             {
-                foreach (ModuleBase md in MainWindow.modules)
+                foreach (ModuleBase md in MainWindow.BrainSim3Data.modules)
                 {
                     if (md != null)
                     {
@@ -113,9 +119,9 @@ namespace BrainSimulator
 
         public static void CloseAllModules()
         {
-            lock (MainWindow.modules)
+            lock (MainWindow.BrainSim3Data.modules)
             {
-                foreach (ModuleBase mb in MainWindow.modules)
+                foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
                 {
                     if (mb != null)
                     {
@@ -147,7 +153,7 @@ namespace BrainSimulator
 
         public ModuleBase FindModule(Type t, bool suppressWarning = true)
         {
-            foreach (ModuleBase mb1 in modules)
+            foreach (ModuleBase mb1 in BrainSim3Data.modules)
             {
                 if (mb1 != null && mb1.GetType() == t)
                 {
@@ -208,7 +214,7 @@ namespace BrainSimulator
         {
             // Debug.WriteLine("Dt_tick entered");
 
-            foreach (ModuleBase mb in MainWindow.modules)
+            foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
             {
                 if (mb != null && mb.dlgIsOpen)
                 {

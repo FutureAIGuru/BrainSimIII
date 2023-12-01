@@ -172,15 +172,15 @@ namespace BrainSimulator
                     string moduleName = ((Label)cb.SelectedItem).Content.ToString();
                     cb.SelectedIndex = -1;
                     ModuleBase newModule = CreateNewModule(moduleName);
-                    MainWindow.modules.Add(newModule);
+                    MainWindow.BrainSim3Data.modules.Add(newModule);
                 }
             }
             loadedModulesSP = LoadedModuleSP;
             LoadedModuleSP.Children.Clear();
 
-            for (int i = 0; i < MainWindow.modules.Count; i++)
+            for (int i = 0; i < MainWindow.BrainSim3Data.modules.Count; i++)
             {
-                ModuleBase mod = MainWindow.modules[i];
+                ModuleBase mod = MainWindow.BrainSim3Data.modules[i];
                 if (mod != null)
                 {
                     mod.SetUpAfterLoad();
@@ -247,7 +247,7 @@ namespace BrainSimulator
 
         internal static string GetUniqueModuleLabel(string searchString)
         {
-            string number = (modules.Count(module => module.Label.StartsWith(searchString + "_", StringComparison.OrdinalIgnoreCase)) + 1).ToString();            return searchString + "_" + number;
+            string number = (BrainSim3Data.modules.Count(module => module.Label.StartsWith(searchString + "_", StringComparison.OrdinalIgnoreCase)) + 1).ToString();            return searchString + "_" + number;
         }
     }
 }

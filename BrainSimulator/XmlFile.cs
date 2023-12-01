@@ -75,7 +75,7 @@ namespace BrainSimulator
             byte[] buffer = new byte[200];
             file.Read(buffer, 0, 200);
             string line = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-            if (line.Contains("ArrayOfModuleBase"))
+            if (line.Contains("BrainSim3Data"))
             {
                 file.Seek(0, SeekOrigin.Begin);
             }
@@ -86,10 +86,10 @@ namespace BrainSimulator
                 return false;
             }
 
-            XmlSerializer reader1 = new XmlSerializer(typeof(List<ModuleBase>), GetModuleTypes());
+            XmlSerializer reader1 = new XmlSerializer(typeof(BrainSim3Data), GetModuleTypes());
             try
             {
-                MainWindow.modules = (List<ModuleBase>)reader1.Deserialize(file);
+                MainWindow.BrainSim3Data = (BrainSim3Data)reader1.Deserialize(file);
             }
             catch (Exception e)
             {
@@ -129,35 +129,24 @@ namespace BrainSimulator
 
         }
 
-        //if you pass in the fileName 'ClipBoard', the save is to the windows clipboard
-        public static bool Save(/*NeuronArray theNeuronArray, */ string fileName)
+        public static bool Save(string fileName)
         {
             Stream file;
             string tempFile = "";
-            bool fromClipboard = fileName == "ClipBoard";
-            if (!fromClipboard)
-            {
-                //Check for file access
-                if (!CanWriteTo(fileName, out string message))
-                {
-                    MessageBox.Show("Could not save file because: " + message);
-                    return false;
-                }
 
-                //MainWindow.thisWindow.SetProgress(0, "Saving Network File");
-
-                tempFile = System.IO.Path.GetTempFileName();
-                file = File.Create(tempFile);
-            }
-            else
+            if (!CanWriteTo(fileName, out string message))
             {
-                file = new MemoryStream();
+                MessageBox.Show("Could not save file because: " + message);
+                return false;
             }
+
+            // tempFile = System.IO.Path.GetTempFileName();
+            file = File.Create(fileName);
             Type[] extraTypes = GetModuleTypes();
             try
             {
-                XmlSerializer writer = new XmlSerializer(typeof(List<ModuleBase>), extraTypes);
-                writer.Serialize(file, MainWindow.modules);
+                XmlSerializer writer = new XmlSerializer(typeof(BrainSim3Data), extraTypes);
+                writer.Serialize(file, MainWindow.BrainSim3Data);
             }
             catch (Exception e)
             {
@@ -168,40 +157,7 @@ namespace BrainSimulator
                 //MainWindow.thisWindow.SetProgress(100,"");
                 return false;
             }
-            file.Position = 0; 
-
-            XmlDocument xmldoc = new XmlDocument();
-            xmldoc.Load(file);
-
-            XmlElement root = xmldoc.DocumentElement;
-            XmlNode neuronsNode = xmldoc.CreateNode("element", "Neurons", "");
-            root.AppendChild(neuronsNode);
-  
-            file.Position = 0;
-            xmldoc.Save(file);
-            if (!fromClipboard)
-            {
-                file.Close();
-                try
-                {
-                    File.Copy(tempFile, fileName, true);
-                    File.Delete(tempFile);
-                    //MainWindow.thisWindow.SetProgress(100, "");
-                }
-                catch (Exception e)
-                {
-                    //MainWindow.thisWindow.SetProgress(100, "");
-                    MessageBox.Show("Could not save file because: " + e.Message);
-                    return false;
-                }
-            }
-            else
-            {
-                file.Position = 0;
-                StreamReader str = new StreamReader(file);
-                string temp = str.ReadToEnd();
-                Clipboard.SetText(temp);
-            }
+            file.Close();
             
             return true;
         }

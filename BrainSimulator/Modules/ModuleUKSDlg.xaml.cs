@@ -288,12 +288,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     RefreshButton_Click(null, null);
                     break;
                 case "Add Types":
-                    ModuleOnlineInfo moi = (ModuleOnlineInfo)MainWindow.modules.FindFirst(x => x.Label == "OnlineInfo");
+                    ModuleOnlineInfo moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
                     if (moi != null)
                         moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.types);
                     break;
                 case "Add Parts":
-                    moi = (ModuleOnlineInfo)MainWindow.modules.FindFirst(x => x.Label == "OnlineInfo");
+                    moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
                     if (moi != null)
                         moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.partsOf);
                     break;
@@ -303,7 +303,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 //        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.list);
                 //    break;
                 case "Add Actions":
-                    moi = (ModuleOnlineInfo)MainWindow.modules.FindFirst(x => x.Label == "OnlineInfo");
+                    moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
                     if (moi != null)
                         moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.can);
                     break;

@@ -59,9 +59,9 @@ namespace BrainSimulator
             //cb1.Unchecked += Cb1_Checked;
             //cm.Items.Add(mi);
 
-            if (MainWindow.modules[i] != null)
+            if (MainWindow.BrainSim3Data.modules[i] != null)
             {
-                var t = MainWindow.modules[i].GetType();
+                var t = MainWindow.BrainSim3Data.modules[i].GetType();
                 Type t1 = Type.GetType(t.ToString() + "Dlg");
                 while (t1 == null && t.BaseType.Name != "ModuleBase")
                 {
@@ -201,17 +201,17 @@ namespace BrainSimulator
                     color = ((SolidColorBrush)((ComboBoxItem)cb1.SelectedValue).Background).Color;
                 if (label == "" && theModuleTypeStr == "") return;
 
-                ModuleBase theModule = MainWindow.modules[i];
+                ModuleBase theModule = MainWindow.BrainSim3Data.modules[i];
 
                 //update the existing module
                 theModule.Label = label;
 
                 //did we change the module type?
                 Type t1x = Type.GetType("BrainSimulator.Modules." + theModuleTypeStr);
-                if (t1x != null && (MainWindow.modules[i] == null || MainWindow.modules[i].GetType() != t1x))
+                if (t1x != null && (MainWindow.BrainSim3Data.modules[i] == null || MainWindow.BrainSim3Data.modules[i].GetType() != t1x))
                 {
-                    MainWindow.modules[i] = (ModuleBase)Activator.CreateInstance(t1x);
-                    MainWindow.modules[i].Label = theModuleTypeStr;
+                    MainWindow.BrainSim3Data.modules[i] = (ModuleBase)Activator.CreateInstance(t1x);
+                    MainWindow.BrainSim3Data.modules[i].Label = theModuleTypeStr;
                 }
             }
             MainWindow.Update();
@@ -226,7 +226,7 @@ namespace BrainSimulator
                 if ((string)mi.Header == "View Source" || (string)mi.Header == "View Dialog Source")
                 {
                     int i = (int)mi.Parent.GetValue(AreaNumberProperty);
-                    ModuleBase m = MainWindow.modules[i];
+                    ModuleBase m = MainWindow.BrainSim3Data.modules[i];
                     string theModuleType = m.GetType().Name.ToString();
 
                     if ((string)mi.Header == "View Dialog Source")
@@ -263,11 +263,11 @@ namespace BrainSimulator
                         {
                             try
                             {
-                                MainWindow.modules[i].Initialize();
+                                MainWindow.BrainSim3Data.modules[i].Initialize();
                             }
                             catch (Exception e1)
                             {
-                                MessageBox.Show("Initialize failed on module " + MainWindow.modules[i].Label + ".   Message: " + e1.Message);
+                                MessageBox.Show("Initialize failed on module " + MainWindow.BrainSim3Data.modules[i].Label + ".   Message: " + e1.Message);
                             }
                         }
 
@@ -281,7 +281,7 @@ namespace BrainSimulator
                     }
                     else
                     {
-                        MainWindow.modules[i].ShowDialog();
+                        MainWindow.BrainSim3Data.modules[i].ShowDialog();
                     }
                 }
                 if ((string)mi.Header == "Hide Dialog")
@@ -292,7 +292,7 @@ namespace BrainSimulator
                     }
                     else
                     {
-                        MainWindow.modules[i].CloseDlg();
+                        MainWindow.BrainSim3Data.modules[i].CloseDlg();
                     }
                 }
                 if ((string)mi.Header == "Info...")
@@ -303,7 +303,7 @@ namespace BrainSimulator
                     }
                     else
                     {
-                        ModuleBase m = MainWindow.modules[i];
+                        ModuleBase m = MainWindow.BrainSim3Data.modules[i];
                         string theModuleType = m.GetType().Name.ToString();
                         ModuleDescriptionDlg md = new ModuleDescriptionDlg(theModuleType);
                         md.ShowDialog();
@@ -323,10 +323,10 @@ namespace BrainSimulator
 
         public static void DeleteModule(int i)
         {
-            ModuleBase mb = MainWindow.modules[i];
+            ModuleBase mb = MainWindow.BrainSim3Data.modules[i];
             mb.CloseDlg();
             mb.Closing();
-            MainWindow.modules.RemoveAt(i);
+            MainWindow.BrainSim3Data.modules.RemoveAt(i);
 
             MainWindow.ReloadLoadedModules();
         }
