@@ -63,6 +63,8 @@ namespace BrainSimulator
         {
             Properties.Settings.Default.Save();
             MainWindow.WasClosed = true;
+            CloseAllModuleDialogs();
+            CloseAllModules();
             this.Close();
         }
 

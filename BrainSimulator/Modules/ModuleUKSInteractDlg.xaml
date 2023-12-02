@@ -5,21 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
-        Title="UKS Interact" Height="290" Width="500" Background="Gray" ShowInTaskbar="False">
-    <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" Loaded="TheGrid_Loaded" Margin="0,0,0,0" >
-        <Label x:Name="thingLabel"               Content="Thing"    HorizontalContentAlignment="right"   Height="33"   Margin="10,18,422,223"   FontSize="16"  Width="68"/>
-        <Label x:Name="thingParentLabel"         Content="Parent"   HorizontalContentAlignment="right"   Height="33"   Margin="10,56,422,185"   FontSize="16"  Width="68"/>
-        <Label x:Name="relationshipTypeLabel"    Content="Type"     HorizontalContentAlignment="right"   Height="33"   Margin="10,101,422,140"   FontSize="16"  Width="68" />
-        <Label x:Name="referenceLabel"           Content="Target"   HorizontalContentAlignment="right"   Height="33"   Margin="10,145,422,96"   FontSize="16"  Width="68"/>
-        <Label x:Name="referenceParentLabel"     Content="Parent"   HorizontalContentAlignment="right"   Height="33"   Margin="10,183,422,58"   FontSize="16"  Width="68"/>
+        Title="UKS Interact" Height="270" Width="500" Background="Gray" ShowInTaskbar="True">
+    <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" Margin="0,0,0,0" >
+        <Label x:Name="thingLabel"               Content="Thing"    Canvas.Left="617"   Canvas.Top="40"  HorizontalAlignment="Left"   Height="33"   Margin="10,18,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
+        <Label x:Name="thingParentLabel"         Content="Parent"   Canvas.Left="617"   Canvas.Top="40"  HorizontalAlignment="Left"   Height="33"   Margin="10,56,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
+        <Label x:Name="relationshipTypeLabel"    Content="Type"     Canvas.Left="617"   Canvas.Top="40"  HorizontalAlignment="Left"   Height="33"   Margin="10,101,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
+        <Label x:Name="referenceLabel"           Content="Target"   Canvas.Left="617"   Canvas.Top="40"  HorizontalAlignment="Left"   Height="33"   Margin="10,139,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
 
-        <TextBox x:Name="thingText"                TabIndex="1"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,18,174,0"    KeyUp="ThingText_KeyUp"                TextChanged="thingText_TextChanged"/>
-        <TextBox x:Name="parentText"               TabIndex="2"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,56,174,0"    KeyUp="ParentText_KeyUp"               TextChanged="parentText_TextChanged"/>
-        <TextBox x:Name="relationshipTypeTextBox"  TabIndex="3"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,101,174,141" KeyUp="RelationshipTypeComboBox_KeyUp" TextChanged="relationshipTypeTextBox_TextChanged"/>
-        <TextBox x:Name="referenceText"            TabIndex="4"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,145,174,0"   KeyUp="ReferenceText_KeyUp"            TextChanged="referenceText_TextChanged"/>
-        <ComboBox x:Name="referenceParentComboBox" TabIndex="5"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,183,174,0"   KeyUp="ReferenceParentComboBox_KeyUp"/>
+        <TextBox x:Name="thingText"                TabIndex="1"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,18,174,0" TextChanged="thingText_TextChanged"/>
+        <TextBox x:Name="parentText"               TabIndex="2"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,56,174,0" TextChanged="parentText_TextChanged_1"/>
+        <TextBox x:Name="relationshipTypeTextBox"  TabIndex="3"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,101,174,0"/>
+        <TextBox x:Name="referenceText"            TabIndex="4"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,139,174,0"/>
 
-        <Button x:Name="updateButton_Copy" TabIndex="8" Content="Add Relationship" Height="32" Click="UpdateButton_Click" VerticalAlignment="Top" FontSize="16" Margin="0,101,10,0" HorizontalAlignment="Right" Width="159"/>
-        <Button x:Name="updateButton" TabIndex="8" Content="Add Thing" Height="33" Canvas.Left="232" Canvas.Top="50" Click="UpdateButton_Click" VerticalAlignment="Top" FontSize="16" Margin="0,18,10,0" HorizontalAlignment="Right" Width="159"/>
+        <Button x:Name="BtnAddRelationship"   TabIndex="8" Content="Add Relationship" Height="32" VerticalAlignment="Top" FontSize="16" Margin="0,101,10,0" HorizontalAlignment="Right" Width="159" Click="BtnAddRelationship_Click"/>
+        <Button x:Name="BtnAddThing"          TabIndex="8" Content="Add Thing" Height="33" Canvas.Left="232" Canvas.Top="50" VerticalAlignment="Top" FontSize="16" Margin="0,18,10,0" HorizontalAlignment="Right" Width="159" Click="BtnAddThing_Click"/>
+        <Label x:Name="errorText"     Content=""   HorizontalContentAlignment="Center"   Height="33"   FontSize="16" Margin="10,195,10,0" VerticalAlignment="Top" Background="Gray" Foreground="#FFF80902"/>
     </Grid>
 </local:ModuleBaseDlg>

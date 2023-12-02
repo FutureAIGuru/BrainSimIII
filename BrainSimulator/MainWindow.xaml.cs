@@ -43,6 +43,7 @@ namespace BrainSimulator
             CreateEmptyNetwork();
             LoadModuleTypeMenu();
             InitializeModulePane();
+            ShowAllModuleDialogs();
 
             DispatcherTimer dt = new();
             dt.Interval = TimeSpan.FromSeconds(0.1);
@@ -224,14 +225,6 @@ namespace BrainSimulator
                     });
                 }
             }
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            // Debug.WriteLine("Button_Click entered");
-            CloseAllModuleDialogs();
-            CloseAllModules();
-            this.Close();
         }
 
         private void LoadModuleTypeMenu()
