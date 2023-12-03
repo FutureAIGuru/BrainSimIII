@@ -93,7 +93,7 @@ public partial class ModuleUKS : ModuleBase
             for (int i = 0; i < UKSt.Count; i++)
             {
                 Thing t = UKSt[i];
-                if (t?.Label == label)
+                if (t?.Label.ToLower() == label.ToLower())
                     return t;
             }
             return retVal;
@@ -111,7 +111,7 @@ public partial class ModuleUKS : ModuleBase
             for (int i = 0; i < UKSt.Count; i++)
             {
                 Thing t = UKSt[i];
-                if (t.Label == label)
+                if (t.Label.ToLower() == label.ToLower())
                     retVal.Add(t);
             }
             return retVal;

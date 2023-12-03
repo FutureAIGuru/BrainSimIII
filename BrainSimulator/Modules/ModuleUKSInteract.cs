@@ -73,17 +73,6 @@ namespace BrainSimulator.Modules
             GetUKS();
             if (UKS == null) return true;
 
-            List<Thing> labeledList = UKS.AllLabeled(newThing);
-
-            foreach (var labelThing in labeledList)
-                foreach (var parentThing in labelThing.Parents)
-                {
-                    if (parentThing.Label == parent)
-                    {
-                        return false;
-                    }
-                }
-
             UKS.GetOrAddThing(newThing, parent);
             return true;
         }

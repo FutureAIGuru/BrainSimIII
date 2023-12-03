@@ -149,15 +149,21 @@ namespace BrainSimulator.Modules
         private void BtnAddThing_Click(object sender, RoutedEventArgs e)
         {
             string newThing = thingText.Text;
-            string parent = parentText.Text;
+            string parent = GetParentName();
 
             if (newThing == "" || GetParentName() == "")
             {
-                SetError("Fill all entry fields.");
+                SetError("Fill thing name and parent name (defaults unknownObject).");
                 return;
             }
 
-            if (CheckParentExistance() == false)
+            if (CheckThingExistence())
+            {
+                SetError("Thing exists already.");
+                return;
+            }
+
+            if (!CheckParentExistence())
             {
                 SetError("Parent does not exist.");
                 return;
@@ -165,10 +171,6 @@ namespace BrainSimulator.Modules
 
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
             if (uksInteract.AddChildButton(newThing, parent) == false)
-            {
-                SetError("Thing already exists.");
-                return;
-            }
             SetError("");
         }
 
@@ -184,7 +186,7 @@ namespace BrainSimulator.Modules
 
         private void parentText_TextChanged_1(object sender, TextChangedEventArgs e)
         {
-            CheckParentExistance();
+            CheckParentExistence();
         }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.
@@ -205,7 +207,7 @@ namespace BrainSimulator.Modules
         }
 
         // Check for parent existence and set background color of the textbox and the error message accordingly.
-        private bool CheckParentExistance()
+        private bool CheckParentExistence()
         {
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
 
