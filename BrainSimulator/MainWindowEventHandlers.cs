@@ -11,8 +11,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Collections.Generic;
 using BrainSimulator.Modules;
 using System.Linq;
 
@@ -67,7 +65,6 @@ namespace BrainSimulator
             CloseAllModules();
             this.Close();
         }
-
 
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);

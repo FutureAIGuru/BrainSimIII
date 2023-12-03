@@ -1,21 +1,8 @@
-﻿using BrainSimulator;
-using BrainSimulator.Modules;
+﻿using BrainSimulator.Modules;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 
@@ -39,6 +26,7 @@ namespace BrainSimulator
         public MainWindow()
         {
             InitializeComponent();
+
             SetTitleBar();
             CreateEmptyNetwork();
             LoadModuleTypeMenu();
@@ -74,7 +62,7 @@ namespace BrainSimulator
             {
                 if (mb != null && !mb.dlgIsOpen)
                 {
-                    Application.Current.Dispatcher.Invoke((Action)delegate
+                    System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
                     {
                         mb.ShowDialog();
                     });
@@ -219,7 +207,7 @@ namespace BrainSimulator
             {
                 if (mb != null && mb.dlgIsOpen)
                 {
-                    Application.Current.Dispatcher.Invoke((Action)delegate
+                    System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
                     {
                         mb.Fire();
                     });
@@ -238,7 +226,7 @@ namespace BrainSimulator
                 Modules.ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(moduleType);
                 string toolTip = ModuleDescriptionFile.GetToolTip(moduleType.Name);
 
-                ModuleListComboBox.Items.Add(new Label { Content = moduleName, ToolTip = toolTip, Margin = new Thickness(0), Padding = new Thickness(0) });
+                ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = moduleName, ToolTip = toolTip, Margin = new Thickness(0), Padding = new Thickness(0) });
             }
         }
 

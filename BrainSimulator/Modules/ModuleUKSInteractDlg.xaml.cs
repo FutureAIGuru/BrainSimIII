@@ -7,6 +7,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+//using System.Windows.Forms;
 using System.Windows.Media;
 
 namespace BrainSimulator.Modules
@@ -16,6 +17,16 @@ namespace BrainSimulator.Modules
         public ModuleUKSInteractDlg()
         {
             InitializeComponent();
+        }
+
+        private void FillRelationshipsComboBox()
+        {
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+            List<string> relTypes = uksInteract.RelationshipTypes();
+            foreach (string item in relTypes)
+            {
+                relationshipComboBox.Items.Add(item);
+            }
         }
 
         public override bool Draw(bool checkDrawTimer)
@@ -28,78 +39,8 @@ namespace BrainSimulator.Modules
         private void TheGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Draw(false);
+            FillRelationshipsComboBox();
         }
-
-        /*
-        private void UpdateUKS()
-        {
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            SetError("");
-
-            if (addThingRadio.IsChecked == true)
-            {
-                string newThing = thingText.Text;
-                string parent = parentText.Text;
-
-                if (newThing == "" || parent == "")
-                {
-                    SetError("Fill all entry fields.");
-                    return;
-                }
-
-                if (CheckThingExistance() == false)
-                {
-                    SetError("Parent does not exist.");
-                    return;
-                }
-
-                if (uksInteract.AddChildButton(newThing, parent) == false)
-                {
-                    SetError("Thing already exists.");
-                    return;
-                }
-            }
-            else if (addReferenceRadio.IsChecked == true)
-            {
-                string thing = thingText.Text;
-                string parent = parentComboBox.Text;
-                string reference = referenceText.Text;
-                string relType = relationshipTypeTextBox.Text;
-                string referenceParent = referenceParentComboBox.Text;
-                string[] modifiersText = ModifiersTextBox.Text.Split("\r\n");
-
-                if (thing == "" || parent == "" || reference == "" || referenceParent == "")
-                {
-                    SetError("Fill all entry fields.");
-                    return;
-                }
-
-                uksInteract.AddReference(thing, parent, reference, relType,referenceParent,modifiersText);
-
-                UpdateParentBox();
-                UpdateReferenceParentBox();
-            }
-            else //delete thing
-            {
-                string thing = thingText.Text;
-                string parent = parentComboBox.Text;
-
-                if (thing == "" || parent == "")
-                {
-                    SetError("Fill all entry fields.");
-                    return;
-                }
-
-                if (uksInteract.DeleteThing(thing, parent) == false)
-                {
-                    SetError("Cannot delete a thing with children.");
-                    return;
-                }
-
-                UpdateParentBox();
-            }
-        }
-        */
 
         private void UpdateReferenceParentBox()
         {
@@ -151,32 +92,26 @@ namespace BrainSimulator.Modules
             string newThing = thingText.Text;
             string parent = GetParentName();
 
-            if (newThing == "" || GetParentName() == "")
-            {
-                SetError("Fill thing name and parent name (defaults unknownObject).");
-                return;
-            }
-
-            if (CheckThingExistence())
-            {
-                SetError("Thing exists already.");
-                return;
-            }
-
-            if (!CheckParentExistence())
-            {
-                SetError("Parent does not exist.");
-                return;
-            }
+            AddThingChecks();
 
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            if (uksInteract.AddChildButton(newThing, parent) == false)
-            SetError("");
+            uksInteract.AddChildButton(newThing, parent);
+
+            AddThingChecks();
+            SetError("Thing created in UKS.");
         }
 
         private void BtnAddRelationship_Click(object sender, RoutedEventArgs e)
         {
+            string newThing = thingText.Text;
+            string parent = GetParentName();
 
+            AddRelationshipChecks();
+
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+            uksInteract.AddChildButton(newThing, parent);
+
+            AddRelationshipChecks();
         }
         
         private void thingText_TextChanged(object sender, TextChangedEventArgs e)
@@ -202,7 +137,7 @@ namespace BrainSimulator.Modules
             }
 
             thingText.Background = new SolidColorBrush(Colors.Pink);
-            SetError("Thing exists already.");
+            SetError("Thing exists in UKS.");
             return true;
         }
 
@@ -245,6 +180,38 @@ namespace BrainSimulator.Modules
             }
 
             errorText.Content = message;
+        }
+
+        // Checks the relevant fields for AddThing, 
+        private void AddThingChecks()
+        {
+            if (thingText.Text.Length == 0 || GetParentName().Length == 0)
+            {
+                SetError("Fill thing name and parent name (defaults unknownObject).");
+                return;
+            }
+
+            if (CheckThingExistence())
+                return;
+
+            if (!CheckParentExistence())
+                return;
+        }
+
+        // Checks the relevant fields for AddRelationship, 
+        private void AddRelationshipChecks()
+        {
+            if (thingText.Text.Length == 0 || GetParentName().Length == 0)
+            {
+                SetError("Fill thing name and parent name (defaults unknownObject).");
+                return;
+            }
+
+            if (CheckThingExistence())
+                return;
+
+            if (!CheckParentExistence())
+                return;
         }
     }
 }
