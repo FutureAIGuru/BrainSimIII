@@ -14,32 +14,13 @@ namespace BrainSimulator.Modules
 {
     public partial class ModuleUKSInteractDlg : ModuleBaseDlg
     {
+        // Constructor of the ModuleUKSInteract dialog
         public ModuleUKSInteractDlg()
         {
             InitializeComponent();
         }
 
-        private void FillRelationshipsComboBox()
-        {
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            List<string> relTypes = uksInteract.RelationshipTypes();
-            foreach (string item in relTypes)
-            {
-                relationshipComboBox.Items.Add(item);
-            }
-        }
-
-        private bool CheckRelationshipsType(string candidate)
-        {
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            List<string> relTypes = uksInteract.RelationshipTypes();
-            foreach (string item in relTypes)
-            {
-                if (item == candidate) return true;
-            }
-            return false;
-        }
-
+        // Draw gets called to draw the dialog when it needs refreshing
         public override bool Draw(bool checkDrawTimer)
         {
             if (!base.Draw(checkDrawTimer)) return false;
@@ -47,51 +28,10 @@ namespace BrainSimulator.Modules
             return true;
         }
 
-        private void TheGrid_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            Draw(false);
-            FillRelationshipsComboBox();
-        }
-
-        private void UpdateReferenceParentBox()
-        {
-            //referenceParentComboBox.Items.Clear();
-
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-
-            //repopulate selections
-
-            List<Thing> referenceParents = uksInteract.ParentsOfLabel(referenceText.Text);
-
-            if (referenceParents == null) return;
-            foreach (var parent in referenceParents)
-            {
-              //  referenceParentComboBox.Items.Add(parent.Label);
-            }
-
-        //    if (referenceParentComboBox.Items.Count == 1)
-          //      referenceParentComboBox.SelectedIndex = 0;
-        }
-
-        private void updateReferenceBox()
-        {
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-
-            if (uksInteract.SearchLabelUKS(referenceText.Text) == null || uksInteract.isRoot(referenceText.Text))
-                referenceText.Background = new SolidColorBrush(Colors.Pink);
-            else
-                referenceText.ClearValue(Control.BackgroundProperty);
-        }
-
-        private void parentText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CheckThingExistence();
-            parentText.ClearValue(Control.BackgroundProperty);
-        }
-
+        // BtnAddThing_Click is called the AddThing button is clicked
         private void BtnAddThing_Click(object sender, RoutedEventArgs e)
         {
-            string newThing = thingText.Text;
+            string newThing = GetThingName();
             string parent = GetParentName();
 
             AddThingChecks();
@@ -101,11 +41,16 @@ namespace BrainSimulator.Modules
 
             AddThingChecks();
             SetError("Thing created in UKS.");
+            if (parent.ToLower() == "relationship")
+            {
+                FillRelationshipsComboBox();
+            }
         }
 
+        // BtnAddRelationship_Click is called the AddRelationship button is clicked
         private void BtnAddRelationship_Click(object sender, RoutedEventArgs e)
         {
-            string newThing = thingText.Text;
+            string newThing = GetThingName();
             string targetThing = GetReferenceName();
             string relationType = relationshipComboBox.SelectedItem.ToString();
 
@@ -116,47 +61,13 @@ namespace BrainSimulator.Modules
 
             AddRelationshipChecks();
         }
-        
-        private void thingText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CheckThingExistence();
-        }
-
-        private void parentText_TextChanged_1(object sender, TextChangedEventArgs e)
-        {
-            CheckParentExistence();
-        }
-
-        // Check for parent existence and set background color of the textbox and the error message accordingly.
-        private bool CheckAddThingFieldsFilled()
-        {
-            SetError("");
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            if (thingText.Text.Length == 0 || GetParentName().Length == 0)
-            {
-                SetError("Fill thing name and parent name (defaults unknownObject).");
-                return false;
-            }
-            parentText.ClearValue(Control.BackgroundProperty);
-            return true;
-        }
-
-        // Check for parent existence and set background color of the textbox and the error message accordingly.
-        private bool CheckAddRelationshipFieldsFilled()
-        {
-            SetError("");
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-
-            parentText.ClearValue(Control.BackgroundProperty);
-            return true;
-        }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.
         private bool CheckThingExistence()
         {
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
 
-            if (uksInteract.SearchLabelUKS(thingText.Text) == null)
+            if (uksInteract.SearchLabelUKS(GetThingName()) == null)
             {
                 thingText.ClearValue(Control.BackgroundProperty);
                 SetError("");
@@ -200,14 +111,14 @@ namespace BrainSimulator.Modules
             return true;
         }
 
-        // GetThingName returns either the content of the parentName textbox, or the default "unknownObject" value.
+        // GetThingName returns either the content of the parentName textbox, or the default "" value.
         private string GetThingName()
         {
             if (thingText.Text.Length == 0)
-                return "unknownObject";
+                return "";
             return thingText.Text;
         }
-        
+
         // GetParentName returns either the content of the parentName textbox, or the default "unknownObject" value.
         private string GetParentName()
         {
@@ -216,13 +127,76 @@ namespace BrainSimulator.Modules
             return parentText.Text;
         }
 
-        // GetParentName returns either the content of the parentName textbox, or the default "unknownObject" value.
+        // GetReferenceName returns either the content of the referenceName textbox, or the default "" value.
         private string GetReferenceName()
         {
             if (referenceText.Text.Length == 0)
                 return "";
             return referenceText.Text;
         }
+
+        // TheGrid_SizeChanged is called when the dialog is sized
+        private void TheGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Draw(false);
+            FillRelationshipsComboBox();
+        }
+
+        // FillRelationshipsComboBox can be called to refresh the contents of the relationshiptype combobox
+        private void FillRelationshipsComboBox()
+        {
+            relationshipComboBox.Items.Clear();
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+            List<string> relTypes = uksInteract.RelationshipTypes();
+            foreach (string item in relTypes)
+            {
+                relationshipComboBox.Items.Add(item);
+            }
+        }
+
+        // thingText_TextChanged is called when the thing textbox changes
+        private void thingText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CheckThingExistence();
+        }
+
+        // parentText_TextChanged is called when the parent textbox changes
+        private void parentText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CheckThingExistence();
+            parentText.ClearValue(Control.BackgroundProperty);
+        }
+
+        // referenceText_TextChanged is called when the reference textbox changes
+        private void referenceText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CheckReferenceExistence();
+        }
+
+        // Check for parent existence and set background color of the textbox and the error message accordingly.
+        private bool CheckAddThingFieldsFilled()
+        {
+            SetError("");
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+            if (GetThingName().Length == 0 || GetParentName().Length == 0)
+            {
+                SetError("Fill thing name and parent name (defaults unknownObject).");
+                return false;
+            }
+            parentText.ClearValue(Control.BackgroundProperty);
+            return true;
+        }
+
+        // Check for parent existence and set background color of the textbox and the error message accordingly.
+        private bool CheckAddRelationshipFieldsFilled()
+        {
+            SetError("");
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+
+            parentText.ClearValue(Control.BackgroundProperty);
+            return true;
+        }
+
 
         // SetError turns the error text yellow and sets the message, or clears the color and the text.
         private void SetError(string message)
@@ -256,9 +230,5 @@ namespace BrainSimulator.Modules
             // CheckRelationshipsType(relationshipComboBox.Text);
         }
 
-        private void referenceText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CheckReferenceExistence();
-        }
     }
 }
