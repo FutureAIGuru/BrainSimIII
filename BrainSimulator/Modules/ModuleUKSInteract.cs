@@ -69,38 +69,16 @@ namespace BrainSimulator.Modules
             return true;
         }
 
-        public void AddReference(string source, string parent, string target, string relationshipType, string targetParent, string[] modifiersString)
+        public void AddReference(string source, string target, string relationshipType)
         {
             GetUKS();
             if (UKS == null) return;
 
-            Thing firstThing = UKS.GetOrAddThing(source, parent);
-            Thing referenceThing = UKS.GetOrAddThing(target, targetParent);
-            List<Thing> modifiers = new();
+            Thing firstThing = UKS.Labeled(source);
+            Thing referenceThing = UKS.Labeled(target);
 
-            foreach (string s in modifiersString)
-            {
-                if (s != "")
-                {
-                    if (Int32.TryParse(s, out int count))
-                    {
-                        Thing relType = UKS.GetOrAddThing(relationshipType, "Relationship");
-                        firstThing.AddRelationship(referenceThing, relType, count);
-                        return;
-                    }
-                    Console.WriteLine($"Unable to parse '{s}'");
-                    Thing t = UKS.Labeled(s);
-                    if (t == null) t = UKS.GetOrAddThing(s, "Object");
-                    modifiers.Add(t);
-                }
-            }
-            if (relationshipType == "None")
-                firstThing.AddRelationship(referenceThing);
-            else
-            {
-                Thing relType = UKS.GetOrAddThing(relationshipType, "Relationship");
-                firstThing.AddRelationship(referenceThing, relType, modifiers);
-            }
+            Thing relType = UKS.GetOrAddThing(relationshipType, "Relationship");
+            firstThing.AddRelationship(referenceThing, relType);
         }
 
         public Thing GetUKSThing(string thing, string parent)

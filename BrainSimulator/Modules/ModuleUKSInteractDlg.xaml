@@ -13,9 +13,9 @@
         <Label x:Name="referenceLabel"           Content="Target"   Canvas.Left="617"   Canvas.Top="40"  HorizontalAlignment="Left"   Height="33"   Margin="10,139,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
 
         <TextBox  x:Name="thingText"                TabIndex="1"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,18,174,0" TextChanged="thingText_TextChanged"/>
-        <TextBox  x:Name="parentText"               TabIndex="2"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,56,174,0" TextChanged="parentText_TextChanged_1"/>
-        <ComboBox x:Name="relationshipComboBox"     TabIndex="3"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,101,174,0"/>
-        <TextBox  x:Name="referenceText"            TabIndex="4"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,139,174,0"/>
+        <TextBox  x:Name="parentText"               TabIndex="2"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,56,174,0" TextChanged="parentText_TextChanged"/>
+        <ComboBox x:Name="relationshipComboBox"     TabIndex="3"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,101,174,0" SelectedIndex="1" SelectionChanged="relationshipComboBox_SelectionChanged"/>
+        <TextBox  x:Name="referenceText"            TabIndex="4"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,139,174,0" TextChanged="referenceText_TextChanged" />
 
         <Button x:Name="BtnAddRelationship"   TabIndex="5" Content="Add Relationship" Height="32" VerticalAlignment="Top" FontSize="16" Margin="0,101,10,0" HorizontalAlignment="Right" Width="159" Click="BtnAddRelationship_Click"/>
         <Button x:Name="BtnAddThing"          TabIndex="6" Content="Add Thing" Height="33" Canvas.Left="232" Canvas.Top="50" VerticalAlignment="Top" FontSize="16" Margin="0,18,10,0" HorizontalAlignment="Right" Width="159" Click="BtnAddThing_Click" IsDefault="True"/>

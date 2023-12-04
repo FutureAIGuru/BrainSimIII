@@ -29,6 +29,17 @@ namespace BrainSimulator.Modules
             }
         }
 
+        private bool CheckRelationshipsType(string candidate)
+        {
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+            List<string> relTypes = uksInteract.RelationshipTypes();
+            foreach (string item in relTypes)
+            {
+                if (item == candidate) return true;
+            }
+            return false;
+        }
+
         public override bool Draw(bool checkDrawTimer)
         {
             if (!base.Draw(checkDrawTimer)) return false;
@@ -78,15 +89,6 @@ namespace BrainSimulator.Modules
             parentText.ClearValue(Control.BackgroundProperty);
         }
 
-        private void referenceText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-
-            updateReferenceBox();
-
-            UpdateReferenceParentBox();
-        }
-
         private void BtnAddThing_Click(object sender, RoutedEventArgs e)
         {
             string newThing = thingText.Text;
@@ -104,12 +106,13 @@ namespace BrainSimulator.Modules
         private void BtnAddRelationship_Click(object sender, RoutedEventArgs e)
         {
             string newThing = thingText.Text;
-            string parent = GetParentName();
+            string targetThing = GetReferenceName();
+            string relationType = relationshipComboBox.SelectedItem.ToString();
 
             AddRelationshipChecks();
 
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            uksInteract.AddChildButton(newThing, parent);
+            uksInteract.AddReference(newThing, targetThing, relationType);
 
             AddRelationshipChecks();
         }
@@ -122,6 +125,30 @@ namespace BrainSimulator.Modules
         private void parentText_TextChanged_1(object sender, TextChangedEventArgs e)
         {
             CheckParentExistence();
+        }
+
+        // Check for parent existence and set background color of the textbox and the error message accordingly.
+        private bool CheckAddThingFieldsFilled()
+        {
+            SetError("");
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+            if (thingText.Text.Length == 0 || GetParentName().Length == 0)
+            {
+                SetError("Fill thing name and parent name (defaults unknownObject).");
+                return false;
+            }
+            parentText.ClearValue(Control.BackgroundProperty);
+            return true;
+        }
+
+        // Check for parent existence and set background color of the textbox and the error message accordingly.
+        private bool CheckAddRelationshipFieldsFilled()
+        {
+            SetError("");
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+
+            parentText.ClearValue(Control.BackgroundProperty);
+            return true;
         }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.
@@ -157,61 +184,81 @@ namespace BrainSimulator.Modules
             return true;
         }
 
+        // Check for target existence and set background color of the textbox and the error message accordingly.
+        private bool CheckReferenceExistence()
+        {
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+
+            if (uksInteract.SearchLabelUKS(GetReferenceName()) == null)
+            {
+                referenceText.Background = new SolidColorBrush(Colors.Pink);
+                SetError("Target does not exist.");
+                return false;
+            }
+            referenceText.ClearValue(Control.BackgroundProperty);
+            SetError("");
+            return true;
+        }
+
+        // GetThingName returns either the content of the parentName textbox, or the default "unknownObject" value.
+        private string GetThingName()
+        {
+            if (thingText.Text.Length == 0)
+                return "unknownObject";
+            return thingText.Text;
+        }
+        
         // GetParentName returns either the content of the parentName textbox, or the default "unknownObject" value.
         private string GetParentName()
         {
             if (parentText.Text.Length == 0)
-            {
                 return "unknownObject";
-            }
             return parentText.Text;
+        }
+
+        // GetParentName returns either the content of the parentName textbox, or the default "unknownObject" value.
+        private string GetReferenceName()
+        {
+            if (referenceText.Text.Length == 0)
+                return "";
+            return referenceText.Text;
         }
 
         // SetError turns the error text yellow and sets the message, or clears the color and the text.
         private void SetError(string message)
         {
-            if (string.IsNullOrEmpty(message)) 
-            {
+            if (string.IsNullOrEmpty(message))  
                 errorText.Background = new SolidColorBrush(Colors.Gray);
-            }
-            else
-            {
+            else 
                 errorText.Background = new SolidColorBrush(Colors.Yellow);
-            }
 
             errorText.Content = message;
         }
 
         // Checks the relevant fields for AddThing, 
-        private void AddThingChecks()
+        private bool AddThingChecks()
         {
-            if (thingText.Text.Length == 0 || GetParentName().Length == 0)
-            {
-                SetError("Fill thing name and parent name (defaults unknownObject).");
-                return;
-            }
-
-            if (CheckThingExistence())
-                return;
-
-            if (!CheckParentExistence())
-                return;
+            if (CheckAddThingFieldsFilled()) return false;
+            if (CheckThingExistence())       return false;
+            if (!CheckParentExistence())     return false;
+            return true;
         }
 
         // Checks the relevant fields for AddRelationship, 
         private void AddRelationshipChecks()
         {
-            if (thingText.Text.Length == 0 || GetParentName().Length == 0)
-            {
-                SetError("Fill thing name and parent name (defaults unknownObject).");
-                return;
-            }
+            if (!AddThingChecks())                  return;
+            if (CheckAddRelationshipFieldsFilled()) return;
+        }
 
-            if (CheckThingExistence())
-                return;
+        private void relationshipComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // CheckRelationshipsType(relationshipComboBox.Text);
+        }
 
-            if (!CheckParentExistence())
-                return;
+        private void referenceText_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CheckReferenceExistence();
         }
     }
 }
