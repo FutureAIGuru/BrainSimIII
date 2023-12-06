@@ -31,12 +31,17 @@ namespace BrainSimulator
             CreateEmptyNetwork();
             LoadModuleTypeMenu();
             InitializeModulePane();
-            ShowAllModuleDialogs();
+            Loaded += MainWindow_Loaded;
 
             DispatcherTimer dt = new();
             dt.Interval = TimeSpan.FromSeconds(0.1);
             dt.Tick += Dt_Tick;
             dt.Start();
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            ShowAllModuleDialogs();
         }
 
         public void InitializeModulePane()
