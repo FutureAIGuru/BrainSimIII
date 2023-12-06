@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "GetVersionInfo": {
-      "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\c_sim\\source\\repos\\FutureAIGuru\\BrainSimII\\Installer\\Brain Simulator III Setup.exe\""
-    }
-  }
-}
