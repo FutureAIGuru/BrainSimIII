@@ -1,2 +1,0 @@
-Area0 Area1 below left
-Area1 Area0 above right

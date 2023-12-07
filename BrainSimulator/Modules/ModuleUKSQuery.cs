@@ -116,7 +116,7 @@ namespace BrainSimulator.Modules
                         {
                             DeleteAllChildren(currentSpeaker);
                             query.source = currentSpeaker;
-                            query.reltype = UKS.GetOrAddThing("has-child", "Relationship");
+                            query.reltype = UKS.GetOrAddThing("has-child", "RelationshipType");
                             if (!query.target.HasAncestorLabeled("person") && !query.target.HasAncestorLabeled("pronounType"))
                                 AddStatement(query.target, "is-a", "person");
                             handled = true;
@@ -135,7 +135,7 @@ namespace BrainSimulator.Modules
                         {
                             DeleteAllChildren(self);
                             query.source = self;
-                            query.reltype = UKS.GetOrAddThing("has-child", "Relationship");
+                            query.reltype = UKS.GetOrAddThing("has-child", "RelationshipType");
                             if (!query.target.HasAncestorLabeled("person") && !query.target.HasAncestorLabeled("pronounType"))
                                 AddStatement(query.target, "is-a", "person");
                             handled = true;

@@ -1,4 +1,0 @@
-Area1 Area0 bigger
-Area0 Area1 smaller
-Area1 Area0 bigger
-Area0 Area1 smaller

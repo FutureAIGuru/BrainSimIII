@@ -37,7 +37,7 @@ namespace BrainSimulator.Modules
                 rangeOfSearch = mentalModel.Children;
             }
 
-            Thing relationshipRoot = GetOrAddThing("Relationship", "Thing");
+            Thing relationshipRoot = GetOrAddThing("RelationshipType", "Thing");
             List<Thing> retVal = new();
 
             //bulld list of relationships
@@ -46,7 +46,7 @@ namespace BrainSimulator.Modules
 
             foreach (var relationship in relationships)
             {
-                Thing t = Labeled(relationship, allRelationships);
+                Thing t = Labeled(relationship);
                 if (t != null) relationshipThings.Add(t);
             }
             //default temp to first object referenced by base object
@@ -338,9 +338,9 @@ namespace BrainSimulator.Modules
             foreach (KeyValuePair<string, object> prop in properties)
             {
                 string propName = prop.Key;
-                Thing propRoot = Labeled(propName, propertiesRoot.Children);
+                Thing propRoot = Labeled(propName);
                 if (propRoot == null)
-                    propRoot = Labeled(propName, transientPropertiesRoot.Children);
+                    propRoot = Labeled(propName);
                 if (propRoot != null)
                 {
                     // one or more matching propert types found...

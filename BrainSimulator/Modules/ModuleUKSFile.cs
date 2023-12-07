@@ -15,53 +15,20 @@ namespace BrainSimulator.Modules
 
         private void CreateInitialStructure()
         {
-            //this pragma allows for the indentaion 
             GetUKS();
             UKSList.Clear();
             Thing ThingRoot = AddThing("Thing", null);
-
-            Thing relParent = UKS.AddThing("Relationship", null);
-
-            Thing hasChildType = UKS.AddThing("has-child", null);
-            relParent.AddRelationship(hasChildType, hasChildType);
-            UKS.Labeled("Thing").AddRelationship(relParent, hasChildType);
-            Thing.hasChildType = hasChildType;
-
-#pragma warning disable format
-
-            unknown = null;
-            Thing AttentionRoot = GetOrAddThing("Attention", ThingRoot);
-                GetOrAddThing("Associate", AttentionRoot);
-                GetOrAddThing("CurrentPhrase", AttentionRoot);
-                GetOrAddThing("CurrentQueryResult", AttentionRoot);
-                GetOrAddThing("CurrentVerbalResponse", AttentionRoot);
-                GetOrAddThing("CurrentWord", AttentionRoot);
-                GetOrAddThing("VisualAttention", AttentionRoot);
-            Thing BehaviorRoot = GetOrAddThing("Behavior", ThingRoot);
-                GetOrAddThing("Event", BehaviorRoot);
-                GetOrAddThing("Situation", BehaviorRoot);
-                GetOrAddThing("Action", BehaviorRoot);
-            GetOrAddThing("MentalModel", ThingRoot);
-            Thing ObjectRoot = GetOrAddThing("Object", ThingRoot);
-                GetOrAddThing("unknownObject", ObjectRoot);
-                GetOrAddThing("unknownModifier", ObjectRoot);
-            Thing PropertyRoot = GetOrAddThing("Property", ThingRoot);
-                GetOrAddThing("TransientProperty", PropertyRoot);
-            Thing RelationshipRoot = GetOrAddThing("Relationship", "Thing");
-            Thing SenseRoot = GetOrAddThing("Sense", ThingRoot);
-                Thing AudibleRoot = GetOrAddThing("Audible", SenseRoot);
-                    Thing PhraseRoot = GetOrAddThing("Phrase", AudibleRoot);
-                    GetOrAddThing("Word", AudibleRoot);
-                    GetOrAddThing("ReplacementPhrase", PhraseRoot);
-                Thing SelfRoot = GetOrAddThing("Self", SenseRoot);
-                    GetOrAddThing("Happiness", SelfRoot);
-                    Thing CollisionRoot = GetOrAddThing("NearObstacle", SelfRoot);
-                        GetOrAddThing("Best Direction", CollisionRoot);
-                Thing VisualRoot = GetOrAddThing("Visual", SenseRoot);
-                    GetOrAddThing("KnownAreas", VisualRoot);
-#pragma warning restore format
-            SetupNumbers();
-            SetupPronouns();
+            Thing ObjectRoot = AddThing("Object", ThingRoot);
+            AddThing("unknownObject", ObjectRoot);
+            GetOrAddThing("is-a", "RelationshipType");
+            GetOrAddThing("inverseOf", "RelationshipType");
+            GetOrAddThing("hasProperty", "RelationshipType");
+            GetOrAddThing("is", "RelationshipType");
+            AddStatement("is-a", "inverseOf", "has-child");
+            AddStatement("isexclusive", "is-a", "RelationshipType");
+            AddStatement("with", "is-a", "RelationshipType");
+            AddStatement("and", "is-a", "RelationshipType");
+            AddStatement("isSimilarTo", "is-a", "RelationshipType");
         }
 
 
@@ -318,15 +285,15 @@ namespace BrainSimulator.Modules
             List<Type> extraTypes = new List<Type>();
             // Add classes so XML saving works
             extraTypes.Add(typeof(Angle));
-            extraTypes.Add(typeof(CornerTwoD));
+            //extraTypes.Add(typeof(CornerTwoD));
             extraTypes.Add(typeof(HSLColor));
-            extraTypes.Add(typeof(KnownArea));
+            //extraTypes.Add(typeof(KnownArea));
             extraTypes.Add(typeof(Point3DPlus));
             extraTypes.Add(typeof(List<Point3DPlus>));
             extraTypes.Add(typeof(PointPlus));
-            extraTypes.Add(typeof(PointTwoD));
-            extraTypes.Add(typeof(Polar));
-            extraTypes.Add(typeof(SegmentTwoD));
+            //extraTypes.Add(typeof(PointTwoD));
+            //extraTypes.Add(typeof(Polar));
+            //extraTypes.Add(typeof(SegmentTwoD));
             //extraTypes.Add(typeof(SentenceType));
             //the following are needed to handle the new nested graphic representation
             extraTypes.Add(typeof(System.Windows.Media.Color));

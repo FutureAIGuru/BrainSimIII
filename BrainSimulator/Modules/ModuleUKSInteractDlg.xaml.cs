@@ -41,7 +41,7 @@ namespace BrainSimulator.Modules
 
             AddThingChecks();
             SetError("Thing created in UKS.");
-            if (parent.ToLower() == "relationship")
+            if (parent.ToLower() == "RelationshipType")
             {
                 FillRelationshipsComboBox();
             }

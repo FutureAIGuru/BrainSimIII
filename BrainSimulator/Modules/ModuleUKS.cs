@@ -84,38 +84,45 @@ public partial class ModuleUKS : ModuleBase
 
     //returns the first thing with the given label
     //2nd paramter defines UKS to search, null=search entire knowledge store
-    public Thing Labeled(string label, IList<Thing> UKSt = null)
+    public Thing Labeled(string label)
     {
-        UKSt ??= UKSList; //if UKSt is null, search the entire UKS
-        Thing retVal = null;
-        lock (UKSt)
-        {
-            for (int i = 0; i < UKSt.Count; i++)
-            {
-                Thing t = UKSt[i];
-                if (t?.Label.ToLower() == label.ToLower())
-                    return t;
-            }
-            return retVal;
-        }
+        Thing retVal = Thing.GetThing(label);
+        return retVal;
+        //UKSt ??= UKSList; //if UKSt is null, search the entire UKS
+        //Thing retVal = null;
+        //lock (UKSt)
+        //{
+        //    for (int i = 0; i < UKSt.Count; i++)
+        //    {
+        //        Thing t = UKSt[i];
+        //        if (t?.Label.ToLower() == label.ToLower())
+        //            return t;
+        //    }
+        //    return retVal;
+        //}
     }
 
     //returns all things with the given label
     //2nd parameter defines UKS to search
     public List<Thing> AllLabeled(string label, IList<Thing> UKSt = null)
     {
-        UKSt ??= UKSList; //if UKSt is null, search the entire UKS
-        lock (UKSt)
-        {
-            List<Thing> retVal = new();
-            for (int i = 0; i < UKSt.Count; i++)
-            {
-                Thing t = UKSt[i];
-                if (t.Label.ToLower() == label.ToLower())
-                    retVal.Add(t);
-            }
-            return retVal;
-        }
+        List<Thing> retVal = new();
+        Thing t = Thing.GetThing(label);
+        if (t is not null)
+            retVal.Add(t);
+        return retVal;
+        //UKSt ??= UKSList; //if UKSt is null, search the entire UKS
+        //lock (UKSt)
+        //{
+        //    List<Thing> retVal = new();
+        //    for (int i = 0; i < UKSt.Count; i++)
+        //    {
+        //        Thing t = UKSt[i];
+        //        if (t.Label.ToLower() == label.ToLower())
+        //            retVal.Add(t);
+        //    }
+        //    return retVal;
+        //}
     }
 
     public bool ThingInTree(Thing t1, Thing t2)
@@ -790,37 +797,52 @@ public partial class ModuleUKS : ModuleBase
     // If a thing exists, return it.  If not, create it.
     // If it is currently an unknown, defining the parent can make it known
     // A value can optionally be defined.
-    public Thing GetOrAddThing(string label, object parent, object value = null, bool reuseValue = false)
+    public Thing GetOrAddThing(string label, object parent = null, object value = null, bool reuseValue = false)
     {
         Thing thingToReturn = null;
 
         if (string.IsNullOrEmpty(label)) return thingToReturn;
 
-        thingToReturn = GetThingWithCorrectParent(label, parent);
+        thingToReturn = Thing.GetThing(label);
+        if (thingToReturn != null) return thingToReturn;
 
-        if (thingToReturn == null)
-        {
-            Thing correctParent = GetCorrectParent(label, parent);
+        Thing correctParent = null;
+        if (parent is string s)
+            correctParent = Thing.GetThing(s);
+        if (parent is Thing t)
+            correctParent = t;
+        if (correctParent == null)
+            correctParent = Thing.GetThing("unknownObject");
+
+        if (correctParent is null) throw new ArgumentException("GetOrAddThing: could not find parent");
+
+        thingToReturn = AddThing(label, correctParent);
+
+        //thingToReturn = GetThingWithCorrectParent(label, parent);
+
+        //if (thingToReturn == null)
+        //{
+        //    = GetCorrectParent(label, parent);
             
-            if (correctParent != null)
-            {
-                thingToReturn = GetLabeledOrValuedThing(label, correctParent, value, reuseValue);
-            }
-            if (thingToReturn == null)
-            {
-                thingToReturn = GetUnknownParentToBeKnown(label, correctParent);
+        //    if (correctParent != null)
+        //    {
+        //        thingToReturn = GetLabeledOrValuedThing(label, correctParent, value, reuseValue);
+        //    }
+        //    if (thingToReturn == null)
+        //    {
+        //        thingToReturn = GetUnknownParentToBeKnown(label, correctParent);
 
-                if (thingToReturn == null)
-                {
-                    thingToReturn = AddNewThingToCorrectParent(label, thingToReturn, correctParent);
-                }
-            }
-        }
+        //        if (thingToReturn == null)
+        //        {
+        //            thingToReturn = AddNewThingToCorrectParent(label, thingToReturn, correctParent);
+        //        }
+        //    }
+        //}
 
-        if (thingToReturn != null && value != null)
-        {
-            thingToReturn.V = value;
-        }
+        //if (thingToReturn != null && value != null)
+        //{
+        //    thingToReturn.V = value;
+        //}
 
         return thingToReturn;
     }
@@ -857,7 +879,7 @@ public partial class ModuleUKS : ModuleBase
 
     private Thing GetLabeledOrValuedThing(string label, Thing correctParent, object value, bool reuseValue)
     {
-        Thing thingToReturn = Labeled(label, correctParent.Children);
+        Thing thingToReturn = Labeled(label);
         if (value is not null && (value is string || reuseValue))
         {
             thingToReturn = Valued(value, correctParent.Children, 0, label);
@@ -871,7 +893,7 @@ public partial class ModuleUKS : ModuleBase
         Thing thingToReturn = null;
         if (Unknown != null)
         {
-            thingToReturn = Labeled(label, Unknown.Children);
+            thingToReturn = Labeled(label);
         }
         if (thingToReturn != null && correctParent != null)
         {
@@ -937,17 +959,17 @@ public Thing SetParent(object child, object parent)
 
     public void SetupNumbers()
     {
-        GetOrAddThing("is-a", "Relationship");
-        GetOrAddThing("inverseOf", "Relationship");
-        GetOrAddThing("hasProperty", "Relationship");
-        GetOrAddThing("is", "Relationship");
+        GetOrAddThing("is-a", "RelationshipType");
+        GetOrAddThing("inverseOf", "RelationshipType");
+        GetOrAddThing("hasProperty", "RelationshipType");
+        GetOrAddThing("is", "RelationshipType");
 
         AddStatement("is-a", "inverseOf", "has-child");
-        AddStatement("isexclusive", "is-a", "Relationship");
-        AddStatement("with", "is-a", "Relationship");
+        AddStatement("isexclusive", "is-a", "RelationshipType");
+        AddStatement("with", "is-a", "RelationshipType");
         AddStatement("and", "is-a", "Relationship");
-        AddStatement("isSimilarTo", "is-a", "Relationship");
-        AddStatement("greaterThan", "is-a", "Relationship");
+        AddStatement("isSimilarTo", "is-a", "RelationshipType");
+        AddStatement("greaterThan", "is-a", "RelationshipType");
 
 
         //put in numbers 1-4

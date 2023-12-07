@@ -131,7 +131,7 @@ namespace BrainSimulator.Modules
 
             NoteChildrenWithNegativeParents(r.source);
             //possible parents of the source
-            if (r.source?.Parents.FindFirst(x => x.Label == "Object") != null && r.target?.Parents.FindFirst(x => x.Label == "Relationship") == null)
+            if (r.source?.Parents.FindFirst(x => x.Label == "Object") != null && r.target?.Parents.FindFirst(x => x.Label == "RelationshipType") == null)
                 PredictParentsOfSource(r.source);
             //possible parents of the target  TODO: doesn't work if the target is an instance because it has parameters
             if (r.target?.Parents.FindFirst(x => x.Label == "Object" || x.Label.StartsWith("unknownObject")) != null)
@@ -550,7 +550,7 @@ namespace BrainSimulator.Modules
         public void ConnectedRelationshipCheck()
         {
             GetUKS();
-            Thing R = UKS.GetOrAddThing("Relationship", "Thing");
+            Thing R = UKS.GetOrAddThing("RelationshipType", "Thing");
             for (int i = 0; i < R.Children.Count(); i++)
             {
                 Thing Con = R.Children[i];
@@ -787,7 +787,7 @@ namespace BrainSimulator.Modules
             if (s == "") { return; }
             GetUKS();
             Thing thing = UKS.Labeled("Object");
-            Thing newParent = UKS.Labeled(s, thing.Descendents.ToList());
+            Thing newParent = UKS.Labeled(s);
             if (newParent == null)
             {
                 newParent = UKS.GetOrAddThing(s, "Object");
@@ -820,7 +820,7 @@ namespace BrainSimulator.Modules
             //List<Thing> parent = t.Parents;
             GetUKS();
             Thing thing = UKS.Labeled("Object");
-            Thing newParent = UKS.Labeled(parentLabel, thing.Descendents.ToList());
+            Thing newParent = UKS.Labeled(parentLabel);
             if (newParent == null)
             {
                 newParent = UKS.GetOrAddThing(parentLabel, "Object");
@@ -832,7 +832,7 @@ namespace BrainSimulator.Modules
                     if (prop.HasAncestor(UKS.Labeled("Property")) &&
                         !prop.HasAncestor(UKS.Labeled("TransientProperty")))
                     {
-                        newParent.AddRelationship(prop, UKS.GetOrAddThing("HasProperty", "Relationship"));
+                        newParent.AddRelationship(prop, UKS.GetOrAddThing("HasProperty", "RelationshipType"));
                     }
                 }
             }

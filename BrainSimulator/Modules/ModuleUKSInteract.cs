@@ -73,12 +73,7 @@ namespace BrainSimulator.Modules
         {
             GetUKS();
             if (UKS == null) return;
-
-            Thing firstThing = UKS.Labeled(source);
-            Thing referenceThing = UKS.Labeled(target);
-
-            Thing relType = UKS.GetOrAddThing(relationshipType, "Relationship");
-            firstThing.AddRelationship(referenceThing, relType);
+            UKS.AddStatement(source, relationshipType, target);
         }
 
         public Thing GetUKSThing(string thing, string parent)
@@ -102,7 +97,7 @@ namespace BrainSimulator.Modules
             GetUKS();
             if (UKS == null) return null;
 
-            Thing relParent = UKS.GetOrAddThing("Relationship", "Thing");
+            Thing relParent = UKS.GetOrAddThing("RelationshipType", "Thing");
             List<string> relTypes = new();
 
             foreach (Thing relationshipType in relParent.Children)

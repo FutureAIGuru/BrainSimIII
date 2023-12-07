@@ -38,7 +38,7 @@ namespace BrainSimulator.Modules
                 //hack needed to top-level things
                 Thing source = ThingFromObject(oSource);
                 Thing relationshipType;
-                if (source?.HasAncestorLabeled("Relationship") != true)
+                if (source?.HasAncestorLabeled("RelationshipType") != true)
                     relationshipType = ThingFromObject(oRelationshipType, "action");
                 else
                     relationshipType = ThingFromObject(oRelationshipType, "action");
@@ -47,7 +47,7 @@ namespace BrainSimulator.Modules
                 { }
 
                 List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
-                List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "Relationship");
+                List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "RelationshipType");
                 List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
 
                 Relationship theRelationship = AddStatement(source, relationshipType, target, sourceModifiers, relationshipTypeModifiers, targetModifiers);
@@ -310,7 +310,7 @@ namespace BrainSimulator.Modules
             if (t != null && t.Parents.Count > 1)
             {
                 t.RemoveParent(rootObjectThing);
-                if (!t.HasAncestor(rootObjectThing) && !t.HasAncestorLabeled("Relationship"))
+                if (!t.HasAncestor(rootObjectThing) && !t.HasAncestorLabeled("RelationshipType"))
                     t.AddParent(rootObjectThing);
             }
             //remove leapfrogging ancestors
@@ -350,7 +350,7 @@ namespace BrainSimulator.Modules
         }
         public bool CheckForInverse(string relType)
         {
-            Thing t = ThingFromString(relType, "Relationship");
+            Thing t = ThingFromString(relType, "RelationshipType");
             Relationship inverse = t.Relationships.FindFirst(x => x.reltype.Label == "inverseOf");
             return inverse != null;
         }

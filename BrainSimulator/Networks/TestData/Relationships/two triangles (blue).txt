@@ -1,2 +1,0 @@
-Area0 Area1 darker
-Area1 Area0 lighter

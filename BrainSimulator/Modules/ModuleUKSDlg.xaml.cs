@@ -22,7 +22,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     public static readonly DependencyProperty ThingObjectProperty =
     DependencyProperty.Register("Thing", typeof(Thing), typeof(TreeViewItem));
     public static readonly DependencyProperty RelationshipObjectProperty =
-    DependencyProperty.Register("Relationship", typeof(Relationship), typeof(TreeViewItem));
+    DependencyProperty.Register("RelationshipType", typeof(Relationship), typeof(TreeViewItem));
 
 
     private const int maxDepth = 20;
@@ -481,8 +481,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     header += " : " + iVal.ToString("X");
                 else if (child.V is List<Point3DPlus>)
                     header += " : Point List";
-                else if (child.V is not UnknownArea)
-                    header += " : " + child.V.ToString();
+                //else if (child.V is not UnknownArea)
+                //    header += " : " + child.V.ToString();
             }
 
             TreeViewItem tviChild = new() { Header = header };
@@ -760,7 +760,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
         theTreeView.Items.Clear();
         expandedItems.Clear();
-        Sallie.VideoQueue.Clear();
+        //Sallie.VideoQueue.Clear();
         parent.Initialize();
         textBoxRoot.Text = "Thing";
         RefreshButton_Click(null, null);

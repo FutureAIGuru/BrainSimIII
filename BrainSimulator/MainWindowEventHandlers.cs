@@ -207,7 +207,7 @@ namespace BrainSimulator
             SetTitleBar();
                 
             Update();
-            Modules.Sallie.VideoQueue.Clear();
+            //Modules.Sallie.VideoQueue.Clear();
             ResumeEngine();
         }
 

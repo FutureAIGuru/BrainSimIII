@@ -29,68 +29,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="Tools\**" />
-		<EmbeddedResource Remove="Tools\**" />
-		<None Remove="Tools\**" />
-		<Page Remove="Tools\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Remove="BrainSim2Modules\Module2DModel.cs" />
-		<Compile Remove="BrainSim2Modules\Module2DModelDlg.xaml.cs" />
-		<Compile Remove="BrainSim2Modules\Module2DSmell.cs" />
-		<Compile Remove="BrainSim2Modules\Module2DTouch.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleArm.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBehavior.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundary.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundaryAreas.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundaryByNeurons.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundaryColor.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundaryDescription.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundaryDescriptionDlg.xaml.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundaryKnown.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundaryMotion.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundaryRelationship.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundarySegments.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundarySegmentsDlg.xaml.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleBoundaryShapes.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleChain.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleChainCounter.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleColorComponent.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleCommand.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleCommandDlg.xaml.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleFireOldest.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleGoToDest.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleGraph.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleHearWords.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleImageFile.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleImageFileDlg.xaml.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleImageZoom.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleLearnPhonemes.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleLearnPhonemesDlg.xaml.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleLearnSequence.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleLearnSequenceDlg.xaml.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleLife.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleMotor.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleMoveObject.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleNavigate.cs" />
-		<Compile Remove="BrainSim2Modules\ModulePatternGenerator.cs" />
-		<Compile Remove="BrainSim2Modules\ModulePatternRecognizer.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleRateDecoder.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleRateDecoder2.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleRateDecoder3.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleShortTermMemory.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleSpeakPhonemes.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleSpeakPhonemesDlg.xaml.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleSpeakWords.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleStrokeCenter.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleUKS2.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleUKSN.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleUnitTests.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleUnitTestsDlg.xaml.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleWords.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleWords2UKS.cs" />
-		<Compile Remove="BrainSim2Modules\ModuleWords2UKSDlg.xaml.cs" />
+		<Compile Remove="GlobalSuppressions.cs" />
+		<Compile Remove="ImgUtils.cs" />
 		<Compile Remove="Modules\Module2DSim.cs" />
 		<Compile Remove="Modules\Module2DSimDlg.xaml.cs" />
 		<Compile Remove="Modules\Module2DVision.cs" />
@@ -102,88 +42,26 @@
 		<Compile Remove="Modules\ModulePremiseDlg.xaml.cs" />
 		<Compile Remove="Modules\ModuleQueryResolution.cs" />
 		<Compile Remove="Modules\ModuleTurn.cs" />
+		<Compile Remove="Modules\PhysicalObject.cs" />
+		<Compile Remove="Modules\UnknownArea.cs" />
+		<Compile Remove="Modules\WaveMemoryStream.cs" />
+		<Compile Remove="Network.cs" />
+		<Compile Remove="Sallie.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="BrainSim2Modules\TxtLearnAndSpeakFromText.txt" />
-		<None Remove="BrainSim2Networks\3DSim.xml" />
 		<None Remove="BrainSimv2.bmp" />
 		<None Remove="Networks\3DSim.xml" />
-		<None Remove="Networks\AudioFiles\ES_Magical Whoosh 4 WAV.wav" />
-		<None Remove="Networks\AudioFiles\Ouch!.wav" />
-		<None Remove="Networks\AudioFiles\Ouch!1.wav" />
-		<None Remove="Networks\AudioFiles\Ouch!2.wav" />
-		<None Remove="Networks\AudioFiles\Sallie Awake1.wav" />
-		<None Remove="Networks\AudioFiles\SallieCollision1.wav" />
-		<None Remove="Networks\AudioFiles\SallieConfirm1.wav" />
-		<None Remove="Networks\AudioFiles\SallieNegative1.wav" />
-		<None Remove="Networks\AudioFiles\SalliePositive1.wav" />
-		<None Remove="Networks\AudioFiles\SallieTilted.wav" />
 		<None Remove="Networks\BabyTalk.xml" />
 		<None Remove="Networks\BasicNeurons.xml" />
-		<None Remove="Networks\ColorIdentifier.xml" />
 		<None Remove="Networks\GameOfLife.xml" />
-		<None Remove="Networks\HebbianSynapses.xml" />
 		<None Remove="Networks\Imagination.xml" />
 		<None Remove="Networks\Maze.xml" />
 		<None Remove="Networks\NeuralGraph.xml" />
 		<None Remove="Networks\ObjectMotion.xml" />
 		<None Remove="Networks\Perception.xml" />
-		<None Remove="Networks\Sallie.xml" />
 		<None Remove="Networks\SallieKeyword.table" />
-		<None Remove="Networks\SallieMind.xml" />
 		<None Remove="Networks\SalliePod.xml" />
-		<None Remove="Networks\SimVision.xml" />
-		<None Remove="Networks\SpeechTest.xml" />
-		<None Remove="Networks\StandardNetworkUI.xml" />
-		<None Remove="Networks\TestData\Blank.png" />
-		<None Remove="Networks\TestData\ColorVariation\Blue rectangle.png" />
-		<None Remove="Networks\TestData\ColorVariation\Red rectangle 1.png" />
-		<None Remove="Networks\TestData\ColorVariation\Red rectangle 2.png" />
-		<None Remove="Networks\TestData\ColorVariation\White triangle.png" />
-		<None Remove="Networks\TestData\Motion\1 One Triangle.png" />
-		<None Remove="Networks\TestData\Motion\2 two triangles .png" />
-		<None Remove="Networks\TestData\Motion\3 Three triangle.png" />
-		<None Remove="Networks\TestData\Motion\4 Three triangle Center Moved.png" />
-		<None Remove="Networks\TestData\Motion\Three triangle %28R1%29.png" />
-		<None Remove="Networks\TestData\Motion\Three triangle %28Z1%29.png" />
-		<None Remove="Networks\TestData\Relationships\1.png" />
-		<None Remove="Networks\TestData\Relationships\1.txt" />
-		<None Remove="Networks\TestData\Relationships\2.png" />
-		<None Remove="Networks\TestData\Relationships\2.txt" />
-		<None Remove="Networks\TestData\Relationships\3.png" />
-		<None Remove="Networks\TestData\Relationships\3.txt" />
-		<None Remove="Networks\TestData\Relationships\4.png" />
-		<None Remove="Networks\TestData\Relationships\4.txt" />
-		<None Remove="Networks\TestData\Relationships\5.png" />
-		<None Remove="Networks\TestData\Relationships\5.txt" />
-		<None Remove="Networks\TestData\Relationships\6.png" />
-		<None Remove="Networks\TestData\Relationships\6.txt" />
-		<None Remove="Networks\TestData\Relationships\8.png" />
-		<None Remove="Networks\TestData\Relationships\8.txt" />
-		<None Remove="Networks\TestData\Relationships\9.png" />
-		<None Remove="Networks\TestData\Relationships\9.txt" />
-		<None Remove="Networks\TestData\Relationships\two triangles %28blue%29.png" />
-		<None Remove="Networks\TestData\Relationships\two triangles %28blue%29.txt" />
-		<None Remove="Networks\TestData\Relationships\two triangles.png" />
-		<None Remove="Networks\TestData\Relationships\two triangles.txt" />
-		<None Remove="Networks\TestData\ShapeTest\1.png" />
-		<None Remove="Networks\TestData\ShapeTest\2.png" />
-		<None Remove="Networks\TestData\ShapeTest\3.png" />
-		<None Remove="Networks\TestData\ShapeTest\4.png" />
-		<None Remove="Networks\TestData\ShapeTest\5.png" />
-		<None Remove="Networks\TestData\SingleShapes\Blue Line.png" />
-		<None Remove="Networks\TestData\SingleShapes\Blue rectangle.png" />
-		<None Remove="Networks\TestData\SingleShapes\Blue square.png" />
-		<None Remove="Networks\TestData\SingleShapes\Blue triangle.png" />
-		<None Remove="Networks\TestData\SingleShapes\Red Line.png" />
-		<None Remove="Networks\TestData\SingleShapes\Red rectangle.png" />
-		<None Remove="Networks\TestData\SingleShapes\Red square.png" />
-		<None Remove="Networks\TestData\SingleShapes\Red triangle.png" />
-		<None Remove="Networks\TestData\SingleShapes\Yellow Line.png" />
-		<None Remove="Networks\TestData\SingleShapes\Yellow rectangle.png" />
-		<None Remove="Networks\TestData\SingleShapes\Yellow square.png" />
-		<None Remove="Networks\TestData\SingleShapes\Yellow triangle.png" />
 		<None Remove="Resources\charactergrowfont.png" />
 		<None Remove="Resources\charactershrinkfont.png" />
 		<None Remove="Resources\ClearHistory.png" />
@@ -326,82 +204,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Page Remove="BrainSim2Modules\Module2DModelDlg.xaml" />
-	  <Page Remove="BrainSim2Modules\ModuleBoundaryDescriptionDlg.xaml" />
-	  <Page Remove="BrainSim2Modules\ModuleBoundarySegmentsDlg.xaml" />
-	  <Page Remove="BrainSim2Modules\ModuleCommandDlg.xaml" />
-	  <Page Remove="BrainSim2Modules\ModuleImageFileDlg.xaml" />
-	  <Page Remove="BrainSim2Modules\ModuleLearnPhonemesDlg.xaml" />
-	  <Page Remove="BrainSim2Modules\ModuleLearnSequenceDlg.xaml" />
-	  <Page Remove="BrainSim2Modules\ModuleSpeakPhonemesDlg.xaml" />
-	  <Page Remove="BrainSim2Modules\ModuleUnitTestsDlg.xaml" />
-	  <Page Remove="BrainSim2Modules\ModuleWords2UKSDlg.xaml" />
 	  <Page Remove="Modules\Module2DSimDlg.xaml" />
 	  <Page Remove="Modules\ModulePremiseDlg.xaml" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Content Include="Iconsmall.ico" />
-		<Content Include="BrainSim2Networks\3DSim.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BrainSim2Networks\BabyTalk.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BrainSim2Networks\BasicNeurons.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\AudioFiles\ES_Magical Whoosh 4 WAV.wav">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\AudioFiles\Ouch!.wav">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\AudioFiles\Sallie Awake1.wav">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\AudioFiles\SallieCollision1.wav">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\AudioFiles\SallieConfirm1.wav">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\AudioFiles\SallieNegative1.wav">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\AudioFiles\SalliePositive1.wav">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\AudioFiles\SallieTilted.wav">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\ColorIdentifier.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BrainSim2Networks\GameOfLife.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\HebbianSynapses.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BrainSim2Networks\Imagination.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BrainSim2Networks\Maze.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\ModuleDescriptions.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BrainSim2Networks\NeuralGraph.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BrainSim2Networks\ObjectMotion.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\Sallie.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
 		<Content Include="Resources\Fonts\OpenSans-Bold.ttf">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
@@ -438,132 +246,6 @@
 		<Content Include="Resources\KeywordTables\SallieKeyword.table">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Content Include="Networks\SallieMind.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\SimVision.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\SpeechTest.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Blank.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Motion\1 One Triangle.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Motion\2 two triangles .png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Motion\3 Three triangle.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Motion\4 Three triangle Center Moved.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Motion\Three triangle (R1).png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Motion\Three triangle (Z1).png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\1.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\1.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\2.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\2.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\3.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\3.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\4.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\4.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\5.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\5.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\6.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\6.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\8.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\8.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\9.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\9.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\two triangles (blue).png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\two triangles (blue).txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\two triangles.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\Relationships\two triangles.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Blue Line.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Blue rectangle.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Blue square.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Blue triangle.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Red Line.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Red rectangle.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Red square.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Red triangle.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Yellow Line.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Yellow rectangle.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Yellow square.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\SingleShapes\Yellow triangle.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
 		<Content Include="Resources\KeywordTables\SapphireKeyword.table">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
@@ -574,9 +256,6 @@
 
 	<ItemGroup>
 		<Resource Include="BrainSimv2.bmp" />
-		<Content Include="Networks\StandardNetworkUI.xml">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
 		<Resource Include="Resources\charactergrowfont.png" />
 		<Resource Include="Resources\charactershrinkfont.png" />
 		<Resource Include="Resources\ClearHistory.png" />
@@ -702,40 +381,6 @@
 		<Resource Include="Resources\youtube-24.ico" />
 		<Resource Include="Resources\ZoomIn.png" />
 		<Resource Include="Resources\ZoomOut.png" />
-		<Resource Include="SplashScreen3.bmp" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Include="Networks\TestData\ColorVariation\Blue rectangle.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\ColorVariation\Red rectangle 1.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\ColorVariation\Red rectangle 2.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\ColorVariation\White triangle.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Include="Networks\TestData\ShapeTest\1.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\ShapeTest\2.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\ShapeTest\3.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\ShapeTest\4.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
-		<Content Include="Networks\TestData\ShapeTest\5.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -800,34 +445,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="Networks\3DSimulator.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Networks\ImageRecognitionParameters\IntegratedVisionLive.xml">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Networks\SallieNavigation.xml">
+		<None Update="Networks\ModuleDescriptions.xml">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Networks\SallieShapes.xml">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Networks\SallieSpeech.xml">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Networks\SallieVision.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Networks\SallieVisionManyObjects.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Networks\StandardNetworkLive.xml">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Networks\old  StandardNetworkVirtual.xml">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Networks\StandardNetworkVirtual.xml">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Properties\Settings.settings">

@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using BrainSimulator.Modules;
+using System.Collections.Concurrent;
 
 namespace BrainSimulator
 {
@@ -40,6 +41,47 @@ namespace BrainSimulator
             }
         }
 
+        static ConcurrentDictionary <string, Thing> labelList = new ConcurrentDictionary<string, Thing>();
+        public static Thing GetThing(string label)
+        {
+            Thing retVal = null;
+            if (labelList.TryGetValue(label.ToLower(), out retVal)) { }
+            return retVal;
+        }
+        public static string AddThingLabel(string label)
+        {
+            return label;
+        }
+
+        //This hack is needed because add-parent/add-child rely on knowledge of the has-child relationship which may not exist yet
+        static Thing hasChildType;
+        static Thing HasChild
+        {
+            get
+            {
+                if (hasChildType == null)
+                {
+                    hasChildType = GetThing("has-child");
+                    if (hasChildType == null)
+                    {
+                        Thing thingRoot = GetThing("Thing");
+                        if (thingRoot == null) return null;
+                        Thing relTypeRoot = GetThing("RelationshipType");
+                        if (relTypeRoot == null)
+                        {
+                            hasChildType = new Thing() { Label = "has-child" };
+                            relTypeRoot = new Thing() { Label = "RelationshipType"};
+                            thingRoot.AddRelationship(relTypeRoot, hasChildType);
+                            relTypeRoot.AddRelationship(hasChildType , hasChildType);
+                        }
+                    }
+                }
+                return hasChildType;
+            }
+        }
+
+
+
         public string Label
         {
             get
@@ -50,30 +92,20 @@ namespace BrainSimulator
             set
             { //This code allows you to put a * at the end of a label and it will auto-increment
                 string newLabel = value;
+                if (newLabel == label) return;
+                int curDigits = -1;
+                string baseString = newLabel;
                 if (newLabel.EndsWith("*"))
                 {
-                    int greatestValue = -1;
-                    string baseString = newLabel.Substring(0, newLabel.Length - 1);
-                    foreach (Thing parent in Parents)
-                    {
-                        lock (parent)
-                        {
-                            foreach (Thing t in parent.Children)
-                            {
-                                if (t.Label.StartsWith(baseString))
-                                {
-                                    if (int.TryParse(t.Label.Substring(baseString.Length), out int theVal))
-                                    {
-                                        if (theVal > greatestValue)
-                                            greatestValue = theVal;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    greatestValue++;
-                    newLabel = baseString + greatestValue.ToString();
+                    curDigits++;
+                    baseString = newLabel.Substring(0, newLabel.Length - 1);
+                    newLabel = baseString + curDigits;
                 }
+
+                while (!labelList.TryAdd(newLabel.ToLower(), this))
+                    { curDigits++;
+                    newLabel = baseString + curDigits;
+                    }
                 label = newLabel;
             }
         }
@@ -836,38 +868,38 @@ namespace BrainSimulator
 
         }
 
-        public static Thing hasChildType { get; set; }
-        Thing HasChild
-        {
-            get
-            {
-                if (hasChildType == null)
-                {
-                    /*
-                    if (MainWindow.theNeuronArray == null) return null;
-                    if (MainWindow.modules == null) return null;
+        //public static Thing hasChildType { get; set; }
+        //Thing HasChild
+        //{
+        //    get
+        //    {
+        //        if (hasChildType == null)
+        //        {
+        //            /*
+        //            if (MainWindow.theNeuronArray == null) return null;
+        //            if (MainWindow.modules == null) return null;
 
-                    // var uks = MainWindow.modules.Find(x => x. == "UKS");
-                    uks.GetUKS();
-                    hasChildType = uks.UKS.Labeled("has-child");
-                    if (hasChildType == null)
-                    {
-                        Thing relParent = uks.UKS.Labeled("Relationship");
-                        if (relParent == null)
-                        {
-                            relParent = uks.UKS.AddThing("Relationship", null);
-                        }
-                        Debug.Assert(relParent != null);
-                        hasChildType = uks.UKS.AddThing("has-child", null);
-                        relParent.AddRelationship(hasChildType, hasChildType);
-                        uks.UKS.Labeled("Thing").AddRelationship(relParent, hasChildType);
-                    }
-                    */
-                }
-                return hasChildType;
-            }
+        //            // var uks = MainWindow.modules.Find(x => x. == "UKS");
+        //            uks.GetUKS();
+        //            hasChildType = uks.UKS.Labeled("has-child");
+        //            if (hasChildType == null)
+        //            {
+        //                Thing relParent = uks.UKS.Labeled("RelationshipType");
+        //                if (relParent == null)
+        //                {
+        //                    relParent = uks.UKS.AddThing("RelationshipType", null);
+        //                }
+        //                Debug.Assert(relParent != null);
+        //                hasChildType = uks.UKS.AddThing("has-child", null);
+        //                relParent.AddRelationship(hasChildType, hasChildType);
+        //                uks.UKS.Labeled("Thing").AddRelationship(relParent, hasChildType);
+        //            }
+        //            */
+        //        }
+        //        return hasChildType;
+        //    }
 
-        }
+        //}
         public void AddParent(Thing newParent)//, SentenceType sentencetype = null)
         {
             if (newParent == null) return;

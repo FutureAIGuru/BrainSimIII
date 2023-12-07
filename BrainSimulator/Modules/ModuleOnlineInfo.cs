@@ -37,6 +37,7 @@ namespace BrainSimulator.Modules
         //   Only the kids actually works
 
         public string Output = "";
+        static bool httpClientBusy = false;  //NEVER USED
 
         //set size parameters as needed in the constructor
         //set max to be -1 if unlimited
@@ -1066,11 +1067,12 @@ namespace BrainSimulator.Modules
             var itemLabel = item;
             try
             {
-                Network.httpClientBusy = true;
+                HttpClient client = new HttpClient();
+                httpClientBusy = true;
                 var url = "http://" + "www.wikidata.org/w/api.php?action=wbsearchentities&search=" +
                           itemLabel +
                           "&language=en&format=xml";
-                var response = await Network.theHttpClient.GetAsync(url);
+                var response = await client.GetAsync(url);
 
                 if (response != null)
                 {
@@ -1083,7 +1085,7 @@ namespace BrainSimulator.Modules
                     {
                         var nameLabel = xmlItemDocValueFirst.Attributes[0];
                         string itemID = nameLabel.InnerXml;
-                        Network.httpClientBusy = false;
+                        httpClientBusy = false;
                         GetPropertiesFromURL(itemID, prop);///
                     }
                 }
@@ -1097,7 +1099,7 @@ namespace BrainSimulator.Modules
         {
             Output = "";
             propName = propName.ToLower();
-            Network.httpClientBusy = true;
+            httpClientBusy = true;
             var urlBegin = @"https://query.wikidata.org/sparql?query=";
             var url = @"SELECT ?wdLabel ?ps_Label ?wdpqLabel ?pq_Label " +
                       @"{VALUES(?company) { (wd:" + itemID + @")} " +
