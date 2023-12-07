@@ -29,6 +29,9 @@ namespace BrainSimulator.Modules
             AddStatement("with", "is-a", "RelationshipType");
             AddStatement("and", "is-a", "RelationshipType");
             AddStatement("isSimilarTo", "is-a", "RelationshipType");
+            foreach (Thing t in Thing.AllThingsInLabelList())
+                if (!UKSList.Contains(t))
+                    UKSList.Add(t);
         }
 
 
@@ -40,6 +43,8 @@ namespace BrainSimulator.Modules
         {
             MainWindow.SuspendEngine();
             UKSList.Clear();
+            Thing.ClearLabelList();
+
             CreateInitialStructure();
 
             UKSTemp.Clear();
@@ -71,16 +76,16 @@ namespace BrainSimulator.Modules
 
             // Wipe transient data from Vision root...
             GetUKS();
-            Thing VisionRoot = UKS.GetOrAddThing("Sense", "FrameNow");
-            if (VisionRoot != null)
-            {
-                UKS.DeleteAllChildren(VisionRoot);
-            }
-            Thing KnownRoot = UKS.GetOrAddThing("KnownAreas", "Visual");
-            if (KnownRoot != null)
-            {
-                UKS.DeleteAllChildren(KnownRoot);
-            }
+            //Thing VisionRoot = UKS.GetOrAddThing("Sense", "FrameNow");
+            //if (VisionRoot != null)
+            //{
+            //    UKS.DeleteAllChildren(VisionRoot);
+            //}
+            //Thing KnownRoot = UKS.GetOrAddThing("KnownAreas", "Visual");
+            //if (KnownRoot != null)
+            //{
+            //    UKS.DeleteAllChildren(KnownRoot);
+            //}
             foreach (Thing t in UKSList)
             {
                 SThing st = new()
@@ -167,6 +172,7 @@ namespace BrainSimulator.Modules
         private void DeFormatContentAfterLoading()
         {
             UKSList.Clear();
+            Thing.ClearLabelList();
             foreach (SThing st in UKSTemp)
             {
                 Thing t = new()
@@ -199,7 +205,6 @@ namespace BrainSimulator.Modules
                     AddClauses(r);
                 }
             }
-
         }
 
         private void AddClauses(Relationship r)
@@ -347,9 +352,11 @@ namespace BrainSimulator.Modules
                     MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
                 return;
             }
+            file.Close();
             if (merge)
                 DeFormatAndMergeContentAfterLoading();
             else
+                DeFormatContentAfterLoading();
                 DeFormatContentAfterLoading();
             base.UKSReloaded();
         }

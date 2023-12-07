@@ -43,6 +43,8 @@ namespace BrainSimulator
                 return;
             }
             currentFileName = fileName;
+            Properties.Settings.Default["CurrentFile"] = currentFileName;
+            Properties.Settings.Default.Save();
 
             ReloadNetwork.IsEnabled = true;
             Reload_network.IsEnabled = true;
@@ -65,6 +67,8 @@ namespace BrainSimulator
             }
 
             ReloadLoadedModules();
+            ShowAllModuleDialogs();
+
             /*
             theNeuronArray.LoadComplete = true;
 

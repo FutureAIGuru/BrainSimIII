@@ -760,7 +760,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
         theTreeView.Items.Clear();
         expandedItems.Clear();
-        //Sallie.VideoQueue.Clear();
         parent.Initialize();
         textBoxRoot.Text = "Thing";
         RefreshButton_Click(null, null);

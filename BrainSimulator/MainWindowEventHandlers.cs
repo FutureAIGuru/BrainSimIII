@@ -53,6 +53,7 @@ namespace BrainSimulator
             if (currentFileName != "")
             {
                 LoadCurrentFile();
+                ShowAllModuleDialogs();
                 // Modules.Sallie.VideoQueue.Clear();
             }
         }

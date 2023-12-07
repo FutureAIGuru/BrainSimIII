@@ -4,16 +4,10 @@
 // © 2022 FutureAI, Inc., all rights reserved
 // 
 
-using Mosaik.Core;
-using Newtonsoft.Json.Linq;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Xml;
-using System.Xml.Schema;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace BrainSimulator.Modules;
 
@@ -370,15 +364,15 @@ public partial class ModuleUKS : ModuleBase
         return currentList;
     }
 
-    public (Thing,int) DepthToFirstCommonAncestor(Thing t1, Thing t2)
+    public (Thing, int) DepthToFirstCommonAncestor(Thing t1, Thing t2)
     {
-        if (t1 == null) return (null,-1);
-        if (t2 == null) return (null,-1);
+        if (t1 == null) return (null, -1);
+        if (t2 == null) return (null, -1);
         // get the ancestor lists
-        var ancestors1 = t1.ExpandTransitiveRelationshipWithDepth("has-child",true);
+        var ancestors1 = t1.ExpandTransitiveRelationshipWithDepth("has-child", true);
         ancestors1.Insert(0, (t1, 0));
         var ancestors2 = t2.ExpandTransitiveRelationshipWithDepth("has-child", true);
-        ancestors2.Insert(0, (t2, 0 ));
+        ancestors2.Insert(0, (t2, 0));
         Thing commonAncestor = null;
         //find the nearest common ancestor
         int depth = -1;
@@ -393,7 +387,7 @@ public partial class ModuleUKS : ModuleBase
                 break;
             }
         }
-        return (commonAncestor,depth);
+        return (commonAncestor, depth);
     }
 
     public bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
@@ -823,7 +817,7 @@ public partial class ModuleUKS : ModuleBase
         //if (thingToReturn == null)
         //{
         //    = GetCorrectParent(label, parent);
-            
+
         //    if (correctParent != null)
         //    {
         //        thingToReturn = GetLabeledOrValuedThing(label, correctParent, value, reuseValue);
@@ -917,7 +911,7 @@ public partial class ModuleUKS : ModuleBase
         return thingToReturn;
     }
 
-public Thing SetParent(object child, object parent)
+    public Thing SetParent(object child, object parent)
     {
         Thing tParent, tChild;
         if (parent is string sParent)

@@ -112,7 +112,8 @@ namespace BrainSimulator.Modules
                 WriteTheRelationship(rSave1);
             }
 
-            ModuleObject mObject = (ModuleObject)base.FindModule(typeof(ModuleObject));
+/*          HERE is where we'll do bubbling etc  
+ *          ModuleObject mObject = (ModuleObject)base.FindModule(typeof(ModuleObject));
             if (mObject != null)
             {
                 if (rSave.reltype?.Label == "has-child")
@@ -128,7 +129,7 @@ namespace BrainSimulator.Modules
                     //mObject.PredictParents(rSave.target);  //TODO: need to handle multiple possible suggestions
                 }
             }
-
+*/
             //if this is adding a child relationship, remove any unknownObject parent
             ClearExtraneousParents(rSave.source);
             if (rSave.source?.Label != "Object")

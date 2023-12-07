@@ -41,7 +41,7 @@ namespace BrainSimulator
             }
         }
 
-        static ConcurrentDictionary <string, Thing> labelList = new ConcurrentDictionary<string, Thing>();
+        static ConcurrentDictionary<string, Thing> labelList = new ConcurrentDictionary<string, Thing>();
         public static Thing GetThing(string label)
         {
             Thing retVal = null;
@@ -52,6 +52,31 @@ namespace BrainSimulator
         {
             return label;
         }
+        public static void ClearLabelList()
+        {
+            labelList.Clear();
+            hasChildType = null;
+        }
+        public static List<Thing> AllThingsInLabelList()
+        {
+            List<Thing> retVal = new();
+            foreach (Thing thing in labelList.Values) { retVal.Add(thing); }
+            return retVal;
+        }
+
+        public override string ToString()
+        {
+            string retVal = label + ": " + useCount;
+            if (Relationships.Count > 0)
+            {
+                retVal += " {";
+                foreach (Relationship l in Relationships)
+                    retVal += l.T?.label + ",";
+                retVal += "}";
+            }
+            return retVal;
+        }
+
 
         //This hack is needed because add-parent/add-child rely on knowledge of the has-child relationship which may not exist yet
         static Thing hasChildType;
@@ -70,9 +95,9 @@ namespace BrainSimulator
                         if (relTypeRoot == null)
                         {
                             hasChildType = new Thing() { Label = "has-child" };
-                            relTypeRoot = new Thing() { Label = "RelationshipType"};
+                            relTypeRoot = new Thing() { Label = "RelationshipType" };
                             thingRoot.AddRelationship(relTypeRoot, hasChildType);
-                            relTypeRoot.AddRelationship(hasChildType , hasChildType);
+                            relTypeRoot.AddRelationship(hasChildType, hasChildType);
                         }
                     }
                 }
@@ -84,61 +109,71 @@ namespace BrainSimulator
 
         public string Label
         {
-            get
-            {
-                return label;
-            }
-
+            get => label;
             set
-            { //This code allows you to put a * at the end of a label and it will auto-increment
+            {
+                //sets a label and appends/increments trailing digits in the event of collisions
                 string newLabel = value;
-                if (newLabel == label) return;
+                if (newLabel == label) return; //label is unchanged
+                if (newLabel == "") return; //don't index empty lables
+                if (!string.IsNullOrEmpty(label)) labelList.TryRemove(label.ToLower(), out Thing dummy);
                 int curDigits = -1;
                 string baseString = newLabel;
+                //This code allows you to put a * at the end of a label and it will auto-increment
                 if (newLabel.EndsWith("*"))
                 {
-                    curDigits++;
+                    curDigits = 0;
                     baseString = newLabel.Substring(0, newLabel.Length - 1);
                     newLabel = baseString + curDigits;
                 }
 
+                //autoincrement in the event of name collisions
                 while (!labelList.TryAdd(newLabel.ToLower(), this))
-                    { curDigits++;
+                {
+                    curDigits++;
                     newLabel = baseString + curDigits;
-                    }
+                }
+                if (newLabel.EndsWith("1"))
+                { }
                 label = newLabel;
             }
         }
 
-        public IList<Thing> Parents
+        private  IList<Thing> RelationshipsOfType(Thing relType, bool useRelationshipFrom=false)
         {
-            get
+            IList<Thing> retVal= new List<Thing>();
+            if (!useRelationshipFrom)
             {
-                List<Thing> list = new List<Thing>();
+                lock (relationshipsFrom)
+                {
+                    foreach (Relationship r in relationships)
+                        if (r.relType != null && r.relType == relType && r.source == this)
+                            retVal.Add(r.target);
+                }
+            }
+            else
+            {
                 lock (relationshipsFrom)
                 {
                     foreach (Relationship r in relationshipsFrom)
-                        if (r.relType != null && Relationship.TrimDigits(r.relType.Label) == "has-child" && r.target == this)
-                            list.Add(r.source);
+                        if (r.relType != null && r.relType == relType && r.target == this)
+                            retVal.Add(r.source);
                 }
-                return list;
             }
+            return retVal;
+        }
+        private bool IsKindOf(Thing thingType)
+        {
+            if (this == thingType) return true;
+            foreach (Thing t in this.Parents)
+                if (t.IsKindOf(thingType)) return true;
+            return false;
         }
 
-        public IList<Thing> Children
-        {
-            get
-            {
-                List<Thing> list = new List<Thing>();
-                lock (relationships)
-                {
-                    foreach (Relationship r in relationships)
-                        if (r.relType != null && Relationship.TrimDigits(r.relType.Label) == "has-child" && r.target != null)
-                            list.Add(r.target);
-                }
-                return list;
-            }
-        }
+
+        public IList<Thing> Parents{ get => RelationshipsOfType(GetThing("has-Child"), true); }
+
+        public IList<Thing> Children{ get => RelationshipsOfType(GetThing("has-Child"), false); }
 
         public IList<Relationship> Relationships
         {
@@ -162,18 +197,6 @@ namespace BrainSimulator
                     if (r.reltype == null || Relationship.TrimDigits(r.relType.Label) != "has-child") retVal.Add(r);
                 return retVal;
             }
-        }
-
-        public float Value()
-        {
-            float retVal = 0;
-            float denom = .1f;
-            retVal = useCount / denom;
-            TimeSpan age = lastFiredTime - DateTime.Now;
-            retVal = retVal / (float)age.TotalMilliseconds;
-            //bloating the score so its more readable
-            retVal = retVal * -10000;
-            return retVal;
         }
 
 
@@ -242,35 +265,35 @@ namespace BrainSimulator
             return ancestors;
         }
 
-        public IList<Relationship> GetAttributesWithInheritance(string relationshipToTrace,bool followFroms)
+        public IList<Relationship> GetAttributesWithInheritance(string relationshipToTrace, bool followFroms)
         {
             List<Relationship> resultList = new();
-            var ancestors = ExpandTransitiveRelationship(relationshipToTrace,followFroms);
+            var ancestors = ExpandTransitiveRelationship(relationshipToTrace, followFroms);
             ancestors.Insert(0, this);
             foreach (Thing t in ancestors)
                 foreach (Relationship r in t.relationships)
                 {
                     //type match
-                    if (r.reltype.Label == relationshipToTrace) 
+                    if (r.reltype.Label == relationshipToTrace)
                         goto DontAdd;
                     //already in list
-                    if (resultList.FindFirst(x => x.reltype == r.reltype && x.target == r.target) != null) 
-                        goto DontAdd ;
+                    if (resultList.FindFirst(x => x.reltype == r.reltype && x.target == r.target) != null)
+                        goto DontAdd;
                     //conflicts 
                     foreach (Relationship r1 in resultList)
-                        if (Exclusive(r1, r)==0) 
+                        if (Exclusive(r1, r) == 0)
                             goto DontAdd;
                     resultList.Add(r);
                 DontAdd: continue;
                 }
-             return resultList;
+            return resultList;
         }
-        float Exclusive(Relationship r1,Relationship r2)
+        float Exclusive(Relationship r1, Relationship r2)
         {
             //todo extend to handle instances of targets
             if (r1.target == r2.target)
             {
-                var commonParents = ModuleUKS.FindCommonParents(r1.reltype,r2.reltype);
+                var commonParents = ModuleUKS.FindCommonParents(r1.reltype, r2.reltype);
                 if (commonParents.Count > 0)
                 {
                     //IList<Thing> r1RelProps = GetProperties(r1.reltype);
@@ -281,11 +304,11 @@ namespace BrainSimulator
             return 1;
         }
 
-        public IList<Thing> ExpandTransitiveRelationship(string relationshipToTrace,bool followFroms)
+        public IList<Thing> ExpandTransitiveRelationship(string relationshipToTrace, bool followFroms)
         {
             //for has-child relationships, followFroms=true  gets ancestors
             //get the full list of ancestors including duplicates and depths
-            List<(Thing,int)> resultList = FollowTransitivieRelationshipOneLevel(this, 1, relationshipToTrace, followFroms);
+            List<(Thing, int)> resultList = FollowTransitivieRelationshipOneLevel(this, 1, relationshipToTrace, followFroms);
             //sort by depth and remove duplicates
             resultList = resultList.OrderBy(x => x.Item2).ToList();
             List<Thing> ancestors = new();
@@ -293,18 +316,18 @@ namespace BrainSimulator
                 if (ancestors.Count == 0 || t1.Item1 != ancestors.Last()) ancestors.Add(t1.Item1);
             return ancestors;
         }
-        public IList<(Thing t,int depth)> ExpandTransitiveRelationshipWithDepth(string relationshipToTrace,bool followFroms)
+        public IList<(Thing t, int depth)> ExpandTransitiveRelationshipWithDepth(string relationshipToTrace, bool followFroms)
         {
             //get the full list of ancestors including duplicates and depths
-            List<(Thing t,int depth)> resultList = FollowTransitivieRelationshipOneLevel(this, 1, relationshipToTrace,followFroms);
+            List<(Thing t, int depth)> resultList = FollowTransitivieRelationshipOneLevel(this, 1, relationshipToTrace, followFroms);
             //sort by depth and remove duplicates
             resultList = resultList.OrderBy(x => x.Item2).ToList();
-            List<(Thing t,int depth)> ancestors = new();
+            List<(Thing t, int depth)> ancestors = new();
             foreach (var t1 in resultList)
                 if (ancestors.Count == 0 || t1 != ancestors.Last()) ancestors.Add(t1);
             return ancestors;
         }
-        private List<(Thing t,int depth)> FollowTransitivieRelationshipOneLevel(Thing t, int depth, string relationshipToTrace, bool followFroms)
+        private List<(Thing t, int depth)> FollowTransitivieRelationshipOneLevel(Thing t, int depth, string relationshipToTrace, bool followFroms)
         {
             List<(Thing t, int depth)> resultList = new();
             if (followFroms)
@@ -368,18 +391,6 @@ namespace BrainSimulator
             return false;
         }
 
-        public override string ToString()
-        {
-            string retVal = label + ": " + useCount;
-            if (Relationships.Count > 0)
-            {
-                retVal += " {";
-                foreach (Relationship l in Relationships)
-                    retVal += l.T?.label + ",";
-                retVal += "}";
-            }
-            return retVal;
-        }
 
         public void SetFired(Thing t = null)
         {
@@ -415,18 +426,12 @@ namespace BrainSimulator
         }
 
         //add a relationship from this thing to the specified thing
-        public Relationship AddRelationship(Thing t, float weight = 1)//, SentenceType sentencetype = null)
+        public Relationship AddRelationship(Thing t, float weight = 1)
         {
             if (t == null) return null; //do not add null relationship or duplicates
-                                        // Commented Below Code because Phrases need duplicates
-                                        // ReferencesWriteable.RemoveAll(v => v.T == newParent);
-                                        // newParent.relationshipdByWriteable.RemoveAll(v => v.T == this);
+
             Relationship newLink;
-            //if (sentencetype == null)
-            //{
-            //    sentencetype = new SentenceType();
-            //}
-            newLink = new Relationship { source = this, T = t, weight = weight/*, sentencetype = sentencetype */};
+            newLink = new Relationship { source = this, T = t, weight = weight};
             lock (relationships)
             {
                 relationships.Add(newLink);
@@ -435,8 +440,6 @@ namespace BrainSimulator
             {
                 t.relationshipsFrom.Add(newLink);
             }
-            //SetFired(newParent);
-
             return newLink;
         }
 
@@ -462,21 +465,6 @@ namespace BrainSimulator
                 }
             }
             return newLink;
-        }
-
-        public void InsertRelationshipAt(int index, Thing t, float weight = 1)
-        {
-            if (t == null) return; //do not add null relationships
-            Relationship r = new Relationship { source = this, T = t, weight = weight };
-            lock (relationships)
-            {
-                if (index > relationships.Count) return;
-                Relationships.Insert(index, r);
-            }
-            lock (t.relationshipsFrom)
-            {
-                t.RelationshipsFrom.Add(r);
-            }
         }
 
         public void RemoveRelationship(Thing t)
@@ -673,24 +661,23 @@ namespace BrainSimulator
         //    return rel;
         //}
 
-        public Relationship AddRelationship(Thing t2, Thing relationshipType)//, SentenceType sentencetype = null)
+        public Relationship AddRelationship(Thing t2, Thing relationshipType)
         {
             if (relationshipType == null)
                 return null;
 
             relationshipType.SetFired();
-            //Relationship r = HasRelationship(t2, relationshipType);
-            //if (r != null)
-            //{
-            //    AdjustRelationship(r.T);
-            //    return r;
-            //}
-            Relationship r = new Relationship()
+            Relationship r = HasRelationship(t2, relationshipType);
+            if (r != null)
+            {
+                AdjustRelationship(r.T);
+                return r;
+            }
+            r = new Relationship()
             {
                 relType = relationshipType,
                 source = this,
                 T = t2,
-                //sentencetype = (sentencetype != null ? sentencetype : new SentenceType())
             };
             if (t2 != null)
             {
@@ -868,38 +855,6 @@ namespace BrainSimulator
 
         }
 
-        //public static Thing hasChildType { get; set; }
-        //Thing HasChild
-        //{
-        //    get
-        //    {
-        //        if (hasChildType == null)
-        //        {
-        //            /*
-        //            if (MainWindow.theNeuronArray == null) return null;
-        //            if (MainWindow.modules == null) return null;
-
-        //            // var uks = MainWindow.modules.Find(x => x. == "UKS");
-        //            uks.GetUKS();
-        //            hasChildType = uks.UKS.Labeled("has-child");
-        //            if (hasChildType == null)
-        //            {
-        //                Thing relParent = uks.UKS.Labeled("RelationshipType");
-        //                if (relParent == null)
-        //                {
-        //                    relParent = uks.UKS.AddThing("RelationshipType", null);
-        //                }
-        //                Debug.Assert(relParent != null);
-        //                hasChildType = uks.UKS.AddThing("has-child", null);
-        //                relParent.AddRelationship(hasChildType, hasChildType);
-        //                uks.UKS.Labeled("Thing").AddRelationship(relParent, hasChildType);
-        //            }
-        //            */
-        //        }
-        //        return hasChildType;
-        //    }
-
-        //}
         public void AddParent(Thing newParent)//, SentenceType sentencetype = null)
         {
             if (newParent == null) return;

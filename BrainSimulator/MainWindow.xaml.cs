@@ -28,9 +28,6 @@ namespace BrainSimulator
             InitializeComponent();
 
             SetTitleBar();
-            CreateEmptyNetwork();
-            LoadModuleTypeMenu();
-            InitializeModulePane();
             Loaded += MainWindow_Loaded;
 
             DispatcherTimer dt = new();
@@ -41,6 +38,27 @@ namespace BrainSimulator
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+
+            try
+            {
+                string fileName = ""; //if the load is successful, currentfile will be set by the load process
+                //if (App.StartupString != "")
+                //    fileName = App.StartupString;
+                if (fileName == "")
+                    fileName = (string)Properties.Settings.Default["CurrentFile"];
+                if (fileName != "")
+                {
+                    LoadFile(fileName);
+                }
+                else //force a new file creation on startup if no file name set
+                {
+                    CreateEmptyNetwork();
+                }
+            }
+            catch (Exception ex) { }
+
+            LoadModuleTypeMenu();
+            InitializeModulePane();
             ShowAllModuleDialogs();
         }
 
@@ -65,7 +83,7 @@ namespace BrainSimulator
         {
             foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
             {
-                if (mb != null && !mb.dlgIsOpen)
+                if (mb != null && mb.dlgIsOpen)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
                     {
