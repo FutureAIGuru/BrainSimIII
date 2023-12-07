@@ -25,12 +25,8 @@ namespace BrainSimulator
         private async void LoadFile(string fileName)
         {
             CloseAllModuleDialogs();
-            //CloseHistoryWindow();
-            //CloseNotesWindow();
-            //theNeuronArrayView.theSelection.selectedRectangles.Clear();
             CloseAllModules();
             SuspendEngine();
-            //Modules.Sallie.VideoQueue.Clear();
 
             bool success = false;
             await Task.Run(delegate { success = XmlFile.Load(fileName); });
@@ -69,31 +65,6 @@ namespace BrainSimulator
             ReloadLoadedModules();
             ShowAllModuleDialogs();
 
-            /*
-            theNeuronArray.LoadComplete = true;
-
-            if (theNeuronArray.displayParams != null)
-                theNeuronArrayView.Dp = theNeuronArray.displayParams;
-
-            AddFileToMRUList(currentFileName);
-            Properties.Settings.Default["CurrentFile"] = currentFileName;
-            Properties.Settings.Default.Save();
-
-            Update();
-            SetShowSynapsesCheckBox(theNeuronArray.ShowSynapses);
-            SetPlayPauseButtonImage(theNeuronArray.EngineIsPaused);
-            SetSliderPosition(theNeuronArray.EngineSpeed);
-
-            engineIsPaused = theNeuronArray.EngineIsPaused;
-
-            engineSpeedStack.Clear();
-            engineSpeedStack.Push(theNeuronArray.EngineSpeed);
-
-            if (!engineIsPaused)
-                ResumeEngine();
-
-            undoCountAtLastSave = 0;
-            */
         }
 
         public static void ReloadLoadedModules()

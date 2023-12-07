@@ -7,11 +7,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="800" >
     <DockPanel Margin="0,0,0,0" >
-        <Border BorderThickness="1" Width="180" Grid.Column="0" Grid.Row="1" BorderBrush="LightGray">
-            <StackPanel x:Name="LoadedModuleSP">
-
-            </StackPanel>
-        </Border>
         <Menu DockPanel.Dock="Top" x:Name="MainMenu" Height="26" Margin="0,0" VerticalAlignment="Top" >
             <MenuItem Header="_File">
                 <MenuItem Header="_New" Click="button_FileNew_Click" InputGestureText="Ctrl-N">
@@ -122,6 +117,15 @@
             </MenuItem>
         </Menu>
         <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
             <!-- The Toolbar -->
             <DockPanel Grid.Row="0" Grid.Column="0" x:Name="MainToolBar" Grid.ColumnSpan="3" Height="30" Margin="7,5,0,0" VerticalAlignment="Top">
                 <Button x:Name="NewButton" Click="button_FileNew_Click" VerticalAlignment="Top" ToolTip="New File">
@@ -148,6 +152,13 @@
                     <ComboBox x:Name="ModuleListComboBox" SelectionChanged="ModuleList_SelectionChanged" VerticalContentAlignment="Center" Width="271" Height="26" IsEditable="True"/>
                 </StackPanel>
             </DockPanel>
+            <Border BorderThickness="4" Width="180" Grid.Column="0" Grid.Row="1" BorderBrush="Gray" HorizontalAlignment="Left">
+                <StackPanel x:Name="LoadedModuleSP">
+                </StackPanel>
+            </Border>
+
+        </Grid>
+        <Grid>
         </Grid>
     </DockPanel>
 </Window>
