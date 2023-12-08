@@ -1,7 +1,7 @@
 ﻿//
 // PROPRIETARY AND CONFIDENTIAL
 // Brain Simulator 3 v.1.0
-// © 2022 FutureAI, Inc., all rights reserved
+// © 2024 FutureAI, Inc., all rights reserved
 //
 
 using System.Collections.Generic;
@@ -16,7 +16,6 @@ namespace BrainSimulator.Modules
         private bool AddThingMode = true; // Adding a Thing if true, or a Relationship if false
         private const string DefaultSourceText = "unknownObject";
 
-        // Constructor of the ModuleUKSInteract dialog
         public ModuleUKSInteractDlg()
         {
             InitializeComponent();
@@ -26,7 +25,6 @@ namespace BrainSimulator.Modules
             relationshipComboBox.ToolTip = "This relationship adds a new Source Thing.";
         }
 
-        // Draw gets called to draw the dialog when it needs refreshing
         public override bool Draw(bool checkDrawTimer)
         {
             if (!base.Draw(checkDrawTimer)) return false;
@@ -34,7 +32,6 @@ namespace BrainSimulator.Modules
             return true;
         }
 
-        // BtnAddThis_Click is called the AddThing button is clicked
         private void BtnAddThis_Click(object sender, RoutedEventArgs e)
         {
             string source = GetSourceName();
@@ -79,64 +76,12 @@ namespace BrainSimulator.Modules
         }
 
 
-        // TheGrid_SizeChanged is called when the dialog is sized
         private void TheGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Draw(false);
             FillRelationshipsComboBox();
         }
 
-        // Check for parent existence and set background color of the textbox and the error message accordingly.
-        private bool CheckAddThingFieldsFilled()
-        {
-            SetError("");
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            if (GetSourceName().Length == 0 /* || GetParentName().Length == 0 */)
-            {
-                SetError("Fill thing name and parent name (defaults unknownObject).");
-                return false;
-            }
-            // parentText.ClearValue(Control.BackgroundProperty);
-            return true;
-        }
-
-        // Check for parent existence and set background color of the textbox and the error message accordingly.
-        private bool CheckAddRelationshipFieldsFilled()
-        {
-            SetError("");
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-
-            // parentText.ClearValue(Control.BackgroundProperty);
-            return true;
-        }
-
-
-        // SetError turns the error text yellow and sets the message, or clears the color and the text.
-        private void SetError(string message)
-        {
-            // if (string.IsNullOrEmpty(message))  
-            //     errorText.Background = new SolidColorBrush(Colors.Gray);
-            // else 
-            //     errorText.Background = new SolidColorBrush(Colors.Yellow);
-            // errorText.Content = message;
-        }
-
-        // Checks the relevant fields for AddThing, 
-        private bool AddThingChecks()
-        {
-            if (CheckAddThingFieldsFilled()) return false;
-            if (CheckSourceExistence())      return false;
-            return true;
-        }
-
-        // Checks the relevant fields for AddRelationship, 
-        private void AddRelationshipChecks()
-        {
-            if (!AddThingChecks())                  return;
-            if (CheckAddRelationshipFieldsFilled()) return;
-        }
-
-        // FillRelationshipsComboBox can be called to refresh the contents of the relationshiptype combobox
         private void FillRelationshipsComboBox()
         {
             relationshipComboBox.Items.Clear();
@@ -148,7 +93,6 @@ namespace BrainSimulator.Modules
             }
         }
 
-        // relationshipComboBox_SelectionChanged set the AddThingMode correctly, depending on the relationshipType
         private void relationshipComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             updateMessage.Content = "";
@@ -168,21 +112,18 @@ namespace BrainSimulator.Modules
             CheckTargetExistence();
         }
 
-        // thingText_TextChanged is called when the thing textbox changes
         private void SourceText_TextChanged(object sender, TextChangedEventArgs e)
         {
             updateMessage.Content = "";
             CheckSourceExistence();
         }
 
-        // TargetText_TextChanged is called when the Target textbox changes
         private void TargetText_TextChanged(object sender, TextChangedEventArgs e)
         {
             updateMessage.Content = "";
             CheckTargetExistence();
         }
 
-        // Check for thing existence and set background color of the textbox and the error message accordingly.
         private bool CheckSourceExistence()
         {
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
@@ -201,7 +142,6 @@ namespace BrainSimulator.Modules
             return shouldExist;
         }
 
-        // Check for target existence and set background color of the textbox and the error message accordingly.
         private bool CheckTargetExistence()
         {
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
@@ -220,7 +160,6 @@ namespace BrainSimulator.Modules
             return shouldExist;
         }
 
-        // GetSourceName returns either the content of the parentName textbox, or the default "" value.
         private string GetSourceName()
         {
             if (SourceText.Text.Length == 0)
@@ -230,7 +169,6 @@ namespace BrainSimulator.Modules
             return SourceText.Text;
         }
 
-        // GetTargetName returns either the content of the TargetName textbox, or the default "" value.
         private string GetTargetName()
         {
             if (TargetText.Text.Length == 0)
