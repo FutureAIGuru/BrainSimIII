@@ -847,7 +847,7 @@ namespace BrainSimulator.Modules
                     {
                         Thing trans = UKS.Labeled("TransientProperty");
                         // if (!x.HasAncestor(trans))
-                        // newParent.AddReference(x);
+                        // newParent.AddRelationship(x);
                     }
                 }
                 AddNewParentRelationship(newParent, t);

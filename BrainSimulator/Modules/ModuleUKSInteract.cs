@@ -69,7 +69,7 @@ namespace BrainSimulator.Modules
             return true;
         }
 
-        public void AddReference(string source, string target, string relationshipType)
+        public void AddRelationship(string source, string target, string relationshipType)
         {
             GetUKS();
             if (UKS == null) return;
