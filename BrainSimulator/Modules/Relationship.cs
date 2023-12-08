@@ -6,14 +6,13 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Markup;
-using System.Windows.Navigation;
 using System.Windows.Threading;
-using System.Xml.Serialization;
 
 namespace BrainSimulator.Modules
 {
-    //these are used so that Children can be readOnly. This prevents programmers from accidentally doing a (e.g.) Child.Add() which will not handle reverse links properly
+    //these are used so that relatinoship lists can be readOnly.
+    //This prevents programmers from accidentally doing a (e.g.) relationships.Add() which will not handle reverse links properly
+    //Why the IList doesn't have FindAll and FindFirst is a ???
     public static class IListExtensions
     {
         public static T FindFirst<T>(this IList<T> source, Func<T, bool> condition)
@@ -59,7 +58,6 @@ namespace BrainSimulator.Modules
             source = r.source;
             reltype = r.reltype;
             target = r.target;
-            //sentencetype = r.sentencetype;
             foreach (ClauseType c in r.clauses)
                 clauses.Add(c);
         }
@@ -68,15 +66,11 @@ namespace BrainSimulator.Modules
     //a relationship is a weighted link to a thing and has a type
     public class Relationship
     {
-
         public Thing s = null;
         public Thing source
         {
-            get { return s; }
-            set
-            {
-                s = value;
-            }
+            get => s;
+            set {s = value;}
         }
         public Thing reltype = null;
         public Thing relType
@@ -101,10 +95,6 @@ namespace BrainSimulator.Modules
         public List<ClauseType> clauses = new();
         public List<Relationship> clausesFrom = new();
 
-        //private SentenceType st = null;
-        //public SentenceType sentencetype { get { return st; } set { this.st = value; } }
-
-        public string label = "";
         public float weight = 1;
         public int hits = 0;
         public int misses = 0;
@@ -136,7 +126,6 @@ namespace BrainSimulator.Modules
             source = r.source;
             weight = r.weight;
             hits = r.hits++;
-            //sentencetype = r.sentencetype;
             target = r.target;
             inferred = r.inferred;
             if (r.clauses == null) clauses = new();
@@ -154,17 +143,10 @@ namespace BrainSimulator.Modules
             misses = 0;
         }
 
-
         public int count
         {
-            get
-            {
-                int retVal = -1;
-                return retVal;
-            }
-            set
-            {
-            }
+            get=>-1;
+            set{}
         }
 
 
@@ -267,70 +249,23 @@ namespace BrainSimulator.Modules
         }
 
 
-        //This is the (temporary) algorithm calculating the weight based on hits or misses
-        public float Value()
-        {
-            float retVal = weight;
-            if (hits != 0 && misses != 0)
-            {
-                float denom = misses;
-                if (denom == 0) denom = .1f;
-                retVal = hits / denom;
-                TimeSpan age = lastUsed - DateTime.Now;
-                retVal = retVal / (float)age.TotalMilliseconds;
-                //bloating the score so its more readable
-                retVal = retVal * -100000;
-            }
-            return retVal;
-        }
-
-        public float Value1
+        public float Value
         {
             get
             {
-                float val = hits;
-                if (float.IsNaN(val))
-                    val = -1;
-                return val;
+                //need a way to track how confident we should be
+                float retVal = weight;
+                if (hits != 0 && misses != 0)
+                {
+                    //replace with more robust algorithm
+                    float denom = misses;
+                    if (denom == 0) denom = .1f;
+                    retVal = hits / denom;
+                }
+                return retVal;
             }
         }
 
-        public float Confidence()
-        {
-            //need a way to track how confident we should be
-            float retVal = weight;
-            if (hits != 0 && misses != 0)
-            {
-                //replace with more robust algorithm
-                float denom = misses;
-                if (denom == 0) denom = .1f;
-                retVal = hits / denom;
-            }
-            return retVal;
-        }
-
-        public void UpdateRelationship(Relationship r)
-        {
-            count = r.count;
-            misses = r.misses;
-            relType = r.relType;
-            source = r.source;
-            weight = r.weight;
-            hits = r.hits++;
-            //sentencetype = r.sentencetype;
-            target = r.target;
-            inferred = r.inferred;
-            clauses = r.clauses;
-            clausesFrom = r.clausesFrom;
-        }
-
-        public Relationship AddClause(AppliesTo a, Relationship tClause)
-        {
-            ClauseType c = new ClauseType() { clause = tClause, a = a, };
-            if (!clauses.Contains(c)) clauses.Add(c);
-            if (!tClause.clausesFrom.Contains(this)) tClause.clausesFrom.Add(this);
-            return this;
-        }
 
         private void AddToTransientList()
         {
@@ -384,13 +319,13 @@ namespace BrainSimulator.Modules
 
     }
 
-
     //this is a non-pointer representation of a relationship needed for XML storage
     public class SClauseType
     {
         public AppliesTo a;
         public SRelationship r;
     }
+
     public class SRelationship
     {
         public int source = -1;
@@ -400,7 +335,6 @@ namespace BrainSimulator.Modules
         public float weight = 0;
         public int relationshipType = -1;
         public int count = -1;
-//        public object sentencetype;
         public List<SClauseType> clauses = new();
     }
 

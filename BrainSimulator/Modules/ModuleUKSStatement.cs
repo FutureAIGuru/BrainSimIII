@@ -37,14 +37,8 @@ namespace BrainSimulator.Modules
                 }
                 //hack needed to top-level things
                 Thing source = ThingFromObject(oSource);
-                Thing relationshipType;
-                if (source?.HasAncestorLabeled("RelationshipType") != true)
-                    relationshipType = ThingFromObject(oRelationshipType, "action");
-                else
-                    relationshipType = ThingFromObject(oRelationshipType, "action");
+                Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType");
                 Thing target = ThingFromObject(oTarget);
-                if (relationshipType.HasAncestorLabeled("action"))
-                { }
 
                 List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
                 List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "RelationshipType");
@@ -112,28 +106,29 @@ namespace BrainSimulator.Modules
                 WriteTheRelationship(rSave1);
             }
 
-/*          HERE is where we'll do bubbling etc  
- *          ModuleObject mObject = (ModuleObject)base.FindModule(typeof(ModuleObject));
-            if (mObject != null)
-            {
-                if (rSave.reltype?.Label == "has-child")
-                {
-                    //here we are defining a parent so we don't need to guess as in the other case
-                    mObject.BubbleProperties1(rSave.target);
-                    ClearRedundancyInAncestry(rSave.target);
-                }
-                else
-                {
-                    mObject.BubbleProperties1(rSave.source);
-                    mObject.PredictParents(rSave);
-                    //mObject.PredictParents(rSave.target);  //TODO: need to handle multiple possible suggestions
-                }
-            }
-*/
+            /*          HERE is where we'll do bubbling etc  
+             *          ModuleObject mObject = (ModuleObject)base.FindModule(typeof(ModuleObject));
+                        if (mObject != null)
+                        {
+                            if (rSave.reltype?.Label == "has-child")
+                            {
+                                //here we are defining a parent so we don't need to guess as in the other case
+                                mObject.BubbleProperties1(rSave.target);
+                                ClearRedundancyInAncestry(rSave.target);
+                            }
+                            else
+                            {
+                                mObject.BubbleProperties1(rSave.source);
+                                mObject.PredictParents(rSave);
+                                //mObject.PredictParents(rSave.target);  //TODO: need to handle multiple possible suggestions
+                            }
+                        }
+            */
             //if this is adding a child relationship, remove any unknownObject parent
             ClearExtraneousParents(rSave.source);
-            if (rSave.source?.Label != "Object")
-                ClearExtraneousParents(rSave.T);
+            //if (rSave.source?.Label != "Object")
+            ClearExtraneousParents(rSave.T);
+            ClearExtraneousParents(rSave.relType);
 
             return rSave;
         }
@@ -307,12 +302,12 @@ namespace BrainSimulator.Modules
             if (t == null) return;
             if (t != null && t.Parents.Count > 1)
                 t.RemoveParent(Unknown);
-            Thing rootObjectThing = GetOrAddThing("Object", "Thing");
+            Thing rootObjectThing = GetOrAddThing("unknownObject");
             if (t != null && t.Parents.Count > 1)
             {
                 t.RemoveParent(rootObjectThing);
-                if (!t.HasAncestor(rootObjectThing) && !t.HasAncestorLabeled("RelationshipType"))
-                    t.AddParent(rootObjectThing);
+                //if (!t.HasAncestor(rootObjectThing) && !t.HasAncestorLabeled("RelationshipType"))
+                //    t.AddParent(rootObjectThing);
             }
             //remove leapfrogging ancestors
         }
@@ -339,7 +334,7 @@ namespace BrainSimulator.Modules
             ClearExtraneousParents(t);
             return retVal;
         }
-        public  Thing CheckForInverse(Thing relationshipType)
+        public Thing CheckForInverse(Thing relationshipType)
         {
             if (relationshipType == null) return null;
             Relationship inverse = relationshipType.Relationships.FindFirst(x => x.reltype.Label == "inverseOf");

@@ -612,7 +612,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         tvi.Items.Add(tviRefLabel);
 
         totalItemCount++;
-        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => -x.Value1).ToList();
+        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => -x.Value).ToList();
         foreach (Relationship l in sortedReferences)
         {
             if (l.relType?.Label == "has-child") continue;
@@ -659,7 +659,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private void DetermineRelationshipAndUpdateItemCount(Thing t, TreeViewItem tviRefLabel)
     {
-        IList<Relationship> sortedReferencedBy = t.RelationshipsFrom.OrderBy(x => -x.Value1).ToList();
+        IList<Relationship> sortedReferencedBy = t.RelationshipsFrom.OrderBy(x => -x.Value).ToList();
         foreach (Relationship referencedBy in sortedReferencedBy)
         {
             if (referencedBy.relType?.Label == "has-child") continue;

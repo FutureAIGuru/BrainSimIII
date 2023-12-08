@@ -567,7 +567,7 @@ namespace BrainSimulator
                         retVal.Add(Relationships[i]);
                     }
                 }
-                return retVal.OrderBy(x => -x.Value1).ToList();
+                return retVal.OrderBy(x => -x.Value).ToList();
             }
         }
 
@@ -581,7 +581,7 @@ namespace BrainSimulator
                     retVal.Add(relationshipsFrom[i]);
                 }
             }
-            return retVal.OrderBy(x => -x.Value1).ToList();
+            return retVal.OrderBy(x => -x.Value).ToList();
         }
 
         public void AddParent(Thing newParent)//, SentenceType sentencetype = null)

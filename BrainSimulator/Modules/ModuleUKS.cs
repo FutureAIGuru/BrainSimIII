@@ -514,14 +514,7 @@ public partial class ModuleUKS : ModuleBase
     public Thing ThingFromObject(object o, string parentLabel = "")
     {
         if (parentLabel == "")
-        {
             parentLabel = "unknownObject";
-            if (Labeled("Object")?.Children.Count < 7)
-            {
-
-            }
-            parentLabel = "Object";
-        }
         if (o is string s3)
             return ThingFromString(s3.Trim(), parentLabel);
         else if (o is Thing t3)

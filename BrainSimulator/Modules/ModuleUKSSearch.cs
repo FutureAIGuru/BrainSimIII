@@ -144,12 +144,12 @@ namespace BrainSimulator.Modules
                 Thing bestMatch = null;
                 foreach ( Relationship l in word.Relationships)
                 {
-                    if (((l.T as Thing).HasAncestor(Labeled("col")) || ((l.T as Thing).HasAncestor(Labeled("shp")))) && l.Value1 >= bestValue)
+                    if (((l.T as Thing).HasAncestor(Labeled("col")) || ((l.T as Thing).HasAncestor(Labeled("shp")))) && l.Value >= bestValue)
                     {
-                        if ( l.Value1 > bestValue || l.misses < bestMisses )
+                        if ( l.Value > bestValue || l.misses < bestMisses )
                         {
                             bestMisses = l.misses;
-                            bestValue = l.Value1;
+                            bestValue = l.Value;
                             bestMatch = l.T as Thing;
                         }
                     }
