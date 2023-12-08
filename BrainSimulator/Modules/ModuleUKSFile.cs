@@ -29,6 +29,8 @@ namespace BrainSimulator.Modules
             AddStatement("with", "is-a", "RelationshipType");
             AddStatement("and", "is-a", "RelationshipType");
             AddStatement("isSimilarTo", "is-a", "RelationshipType");
+
+            //This hack is here because some Things created at startup don't get put into the UKS List.
             foreach (Thing t in Thing.AllThingsInLabelList())
                 if (!UKSList.Contains(t))
                     UKSList.Add(t);

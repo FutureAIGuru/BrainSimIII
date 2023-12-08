@@ -48,9 +48,28 @@ namespace BrainSimulator
             if (labelList.TryGetValue(label.ToLower(), out retVal)) { }
             return retVal;
         }
-        public static string AddThingLabel(string label)
+        public static string AddThingLabel(string newLabel,Thing t)
         {
-            return label;
+            //sets a label and appends/increments trailing digits in the event of collisions
+            if (newLabel == "") return newLabel; //don't index empty lables
+            labelList.TryRemove(t.label.ToLower(), out Thing dummy);
+            int curDigits = -1;
+            string baseString = newLabel;
+            //This code allows you to put a * at the end of a label and it will auto-increment
+            if (newLabel.EndsWith("*"))
+            {
+                curDigits = 0;
+                baseString = newLabel.Substring(0, newLabel.Length - 1);
+                newLabel = baseString + curDigits;
+            }
+
+            //autoincrement in the event of name collisions
+            while (!labelList.TryAdd(newLabel.ToLower(), t))
+            {
+                curDigits++;
+                newLabel = baseString + curDigits;
+            }
+            return newLabel;
         }
         public static void ClearLabelList()
         {
@@ -63,6 +82,7 @@ namespace BrainSimulator
             foreach (Thing thing in labelList.Values) { retVal.Add(thing); }
             return retVal;
         }
+
 
         public override string ToString()
         {
@@ -105,37 +125,13 @@ namespace BrainSimulator
             }
         }
 
-
-
         public string Label
         {
             get => label;
             set
             {
-                //sets a label and appends/increments trailing digits in the event of collisions
-                string newLabel = value;
-                if (newLabel == label) return; //label is unchanged
-                if (newLabel == "") return; //don't index empty lables
-                if (!string.IsNullOrEmpty(label)) labelList.TryRemove(label.ToLower(), out Thing dummy);
-                int curDigits = -1;
-                string baseString = newLabel;
-                //This code allows you to put a * at the end of a label and it will auto-increment
-                if (newLabel.EndsWith("*"))
-                {
-                    curDigits = 0;
-                    baseString = newLabel.Substring(0, newLabel.Length - 1);
-                    newLabel = baseString + curDigits;
-                }
-
-                //autoincrement in the event of name collisions
-                while (!labelList.TryAdd(newLabel.ToLower(), this))
-                {
-                    curDigits++;
-                    newLabel = baseString + curDigits;
-                }
-                if (newLabel.EndsWith("1"))
-                { }
-                label = newLabel;
+                if (value == label) return; //label is unchanged
+                label = AddThingLabel(value,this);
             }
         }
 
@@ -202,6 +198,7 @@ namespace BrainSimulator
 
         /// ////////////////////////////////////////////////////////////////////////////
         //Handle the descendents of a Thing
+        //////////////////////////////////////////////////////////////
         public int GetDescendentsCount()
         {
             return DescendentsList().Count;
@@ -265,29 +262,6 @@ namespace BrainSimulator
             return ancestors;
         }
 
-        public IList<Relationship> GetAttributesWithInheritance(string relationshipToTrace, bool followFroms)
-        {
-            List<Relationship> resultList = new();
-            var ancestors = ExpandTransitiveRelationship(relationshipToTrace, followFroms);
-            ancestors.Insert(0, this);
-            foreach (Thing t in ancestors)
-                foreach (Relationship r in t.relationships)
-                {
-                    //type match
-                    if (r.reltype.Label == relationshipToTrace)
-                        goto DontAdd;
-                    //already in list
-                    if (resultList.FindFirst(x => x.reltype == r.reltype && x.target == r.target) != null)
-                        goto DontAdd;
-                    //conflicts 
-                    foreach (Relationship r1 in resultList)
-                        if (Exclusive(r1, r) == 0)
-                            goto DontAdd;
-                    resultList.Add(r);
-                DontAdd: continue;
-                }
-            return resultList;
-        }
         float Exclusive(Relationship r1, Relationship r2)
         {
             //todo extend to handle instances of targets
@@ -302,57 +276,6 @@ namespace BrainSimulator
                 }
             }
             return 1;
-        }
-
-        public IList<Thing> ExpandTransitiveRelationship(string relationshipToTrace, bool followFroms)
-        {
-            //for has-child relationships, followFroms=true  gets ancestors
-            //get the full list of ancestors including duplicates and depths
-            List<(Thing, int)> resultList = FollowTransitivieRelationshipOneLevel(this, 1, relationshipToTrace, followFroms);
-            //sort by depth and remove duplicates
-            resultList = resultList.OrderBy(x => x.Item2).ToList();
-            List<Thing> ancestors = new();
-            foreach (var t1 in resultList)
-                if (ancestors.Count == 0 || t1.Item1 != ancestors.Last()) ancestors.Add(t1.Item1);
-            return ancestors;
-        }
-        public IList<(Thing t, int depth)> ExpandTransitiveRelationshipWithDepth(string relationshipToTrace, bool followFroms)
-        {
-            //get the full list of ancestors including duplicates and depths
-            List<(Thing t, int depth)> resultList = FollowTransitivieRelationshipOneLevel(this, 1, relationshipToTrace, followFroms);
-            //sort by depth and remove duplicates
-            resultList = resultList.OrderBy(x => x.Item2).ToList();
-            List<(Thing t, int depth)> ancestors = new();
-            foreach (var t1 in resultList)
-                if (ancestors.Count == 0 || t1 != ancestors.Last()) ancestors.Add(t1);
-            return ancestors;
-        }
-        private List<(Thing t, int depth)> FollowTransitivieRelationshipOneLevel(Thing t, int depth, string relationshipToTrace, bool followFroms)
-        {
-            List<(Thing t, int depth)> resultList = new();
-            if (followFroms)
-            {
-                foreach (Relationship r in t.RelationshipsFrom)
-                {
-                    if (r.relType == null) continue;
-                    if (r.relType.Label != relationshipToTrace && !r.relType.HasAncestorLabeled(relationshipToTrace)) continue;
-                    if (resultList.FindFirst(x => x.t == r.s) == default)
-                        resultList.AddRange(FollowTransitivieRelationshipOneLevel(r.s, depth + 1, relationshipToTrace, followFroms));
-                    resultList.Add((r.s, depth));
-                }
-            }
-            else
-            {
-                foreach (Relationship r in t.Relationships)
-                {
-                    if (r.relType == null) continue;
-                    if (r.relType.Label != relationshipToTrace && !r.relType.HasAncestorLabeled(relationshipToTrace)) continue;
-                    if (resultList.FindFirst(x => x.t == r.target) == default)
-                        resultList.AddRange(FollowTransitivieRelationshipOneLevel(r.target, depth + 1, relationshipToTrace, followFroms));
-                    resultList.Add((r.target, depth));
-                }
-            }
-            return resultList;
         }
 
         public IEnumerable<Thing> Ancestors
@@ -414,22 +337,17 @@ namespace BrainSimulator
 
         //RELATIONSHIPS
 
-        public List<Thing> RelationshipsAsThings
-        {
-            get
-            {
-                List<Thing> retVal = new List<Thing>();
-                foreach (Relationship l in Relationships)
-                    retVal.Add(l.target);
-                return retVal;
-            }
-        }
-
         //add a relationship from this thing to the specified thing
         public Relationship AddRelationship(Thing t, float weight = 1)
         {
             if (t == null) return null; //do not add null relationship or duplicates
 
+            Relationship r = relationships.Find(l => l.source == this && l.T == t);
+            if (r != null)
+            {
+                r.weight = weight;
+                return r;
+            }
             Relationship newLink;
             newLink = new Relationship { source = this, T = t, weight = weight};
             lock (relationships)
@@ -443,41 +361,18 @@ namespace BrainSimulator
             return newLink;
         }
 
-        public Relationship AddRelationWithoutDuplicate(Thing t, float weight = 1)
-        {
-            if (t == null) return null; //do not add null relationships or duplicates
-
-            Relationship newLink = new Relationship { source = this, T = t, weight = weight };
-            Relationship l = relationships.Find(l => l.source == this && l.T == t);
-            if (l != null) // Link already exists, set new weight.
-            {
-                l.weight = weight;
-            }
-            else // Link doesn'newParent exist, create it.
-            {
-                lock (relationships)
-                {
-                    relationships.Add(newLink);
-                }
-                lock (t.relationshipsFrom)
-                {
-                    t.relationshipsFrom.Add(newLink);
-                }
-            }
-            return newLink;
-        }
 
         public void RemoveRelationship(Thing t)
         {
             if (t == null) return;
-            //newParent.sentencetype = new SentenceType { belief = new SentenceType.Belief() { TRUTH = null, Tense = null } };
+
             bool wasRelationship = false; ////TODO take this out when relationshipBY is reversed
-            foreach (Relationship l in Relationships)
+            foreach (Relationship r in Relationships)
             {
-                if (l.relType is not null && l.reltype.Label != "has-child") //hack for performance
+                if (r.relType is not null && r.reltype.Label != "has-child") //hack for performance
                 {
-                    lock (l.relType.relationshipsFrom)
-                        l.relType.relationshipsFrom.RemoveAll(v => v.target == t && v.source == this);
+                    lock (r.relType.relationshipsFrom)
+                        r.relType.relationshipsFrom.RemoveAll(v => v.target == t && v.source == this);
                 }
             }
             lock (relationships)
@@ -533,44 +428,6 @@ namespace BrainSimulator
             }
             foreach (ClauseType c in r.clauses)
                 RemoveRelationship(c.clause);
-        }
-
-        public void RemoveAllRelationships()
-        {
-            lock (relationships)
-            {
-                while (relationships.Count > 0)
-                {
-                    RemoveRelationshipAt(0);
-                }
-            }
-        }
-        //TODO this only works for simple relationships
-        public void RemoveRelationshipAt(int i)
-        {
-            lock (relationships)
-            {
-                if (i < relationships.Count)
-                {
-                    Relationship r = relationships[i];
-                    if (r.target != null)
-                    {
-                        lock (r.target.relationshipsFrom)
-                        {
-                            for (int j = 0; j < r.target.relationshipsFrom.Count; j++)
-                            {
-                                Relationship l1 = r.target.relationshipsFrom[j];
-                                if (l1.source == this && l1.reltype == r.reltype)
-                                {
-                                    r.target.relationshipsFrom.RemoveAt(j);
-                                    break;
-                                }
-                            }
-                        }
-                        relationships.RemoveAt(i);
-                    }
-                }
-            }
         }
 
         public Relationship HasRelationship(Thing t)
@@ -634,33 +491,6 @@ namespace BrainSimulator
             return 0;
         }
 
-        public Relationship AddRelationship(Thing t2, Thing relationshipType, List<Thing> modifiers)
-        {
-            Relationship rel = AddRelationship(t2, relationshipType);
-
-            //foreach (Thing mod in modifiers)
-            //{
-            //    rel.targetProperties.Add(mod);
-            //}
-            return rel;
-        }
-        public Relationship AddRelationship(Thing t2, Thing relationshipType, int count)
-        {
-            Relationship rel = AddRelationship(t2, relationshipType);
-            rel.count = count;
-            //rel.AsThing.Label = this.Label + " " + relationshipType.Label + " " + t2.Label;
-            //rel.AsThing.AddParent(this.AncestorLabeled("Object"));
-            return rel;
-        }
-        //public Relationship AddRelationship(Thing t2, Thing relationshipType, int count, SentenceType sentencetype)
-        //{
-        //    Relationship rel = AddRelationship(t2, relationshipType);
-        //    if (rel == null) return null;
-        //    rel.count = count;
-        //    //rel.sentencetype = sentencetype;
-        //    return rel;
-        //}
-
         public Relationship AddRelationship(Thing t2, Thing relationshipType)
         {
             if (relationshipType == null)
@@ -723,64 +553,6 @@ namespace BrainSimulator
         }
 
 
-        public Dictionary<string, object> GetRelationshipsAsDictionary(bool optionalbool = false)
-        {
-            if (!optionalbool)
-            {
-                Dictionary<string, object> retVal = new Dictionary<string, object>();
-                foreach (Relationship l in Relationships)
-                {
-                    IList<Thing> thingParents = l.T.Parents;
-                    if (thingParents.Count == 0)
-                        continue;
-                    if (thingParents[0].Label != "MentalModel")
-                    {
-                        IList<Thing> par = l.T.Parents;
-                        if (par.Count > 0)
-                        {
-                            string propLabel = par[0].Label;
-                            if (propLabel == "TransientProperty")
-                                propLabel = l.T.Label;
-                            if (!retVal.ContainsKey(propLabel))
-                            {
-                                if (l.T.HasAncestorLabeled("TransientProperty"))
-                                {
-                                    retVal.Add(propLabel, l.T.V);
-                                }
-                                else
-                                {
-                                    if (l.T.Children.Count > 0)
-                                        retVal.Add(propLabel, l.T.Children[0].V);
-                                }
-                            }
-                        }
-                    }
-                }
-                return retVal;
-            }
-            else
-            {
-                Dictionary<string, object> retVal = new Dictionary<string, object>();
-                foreach (Relationship l in Relationships)
-                {
-                    if (l.T.Label != "MentalModel")
-                        try
-                        {
-                            if (!retVal.ContainsKey(l.T.Label))
-
-                            {
-                                retVal.Add(l.T.Label, l.T.V);
-                            }
-
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.WriteLine(e.StackTrace);
-                        }
-                }
-                return retVal;
-            }
-        }
 
         //returns all the matching refrences
         public List<Relationship> GetRelationshipsWithAncestor(Thing t)
@@ -799,31 +571,6 @@ namespace BrainSimulator
             }
         }
 
-        public void RemoveRelationshpsWithAncestor(Thing t)
-        {
-            if (t == null) return;
-            lock (relationships)
-            {
-                for (int i = 0; i < relationships.Count; i++)
-                {
-                    if (relationships[i].T.HasAncestor(t))
-                    {
-                        RemoveRelationship(relationships[i].T);
-                        i--;
-                    }
-                }
-            }
-        }
-
-        //returns the best matching relationship
-        public Thing GetRelationshipWithAncestor(Thing t)
-        {
-            List<Relationship> refs = GetRelationshipsWithAncestor(t);
-            if (refs.Count > 0)
-                return refs[0].T;
-            return null;
-        }
-
         public List<Relationship> GetRelationshipByWithAncestor(Thing t)
         {
             List<Relationship> retVal = new List<Relationship>();
@@ -835,24 +582,6 @@ namespace BrainSimulator
                 }
             }
             return retVal.OrderBy(x => -x.Value1).ToList();
-        }
-
-
-        public void ChangeParent(Thing oldParent, Thing newParent)
-        {
-            if (oldParent == null || newParent == null && !newParent.Descendents.Contains(newParent)) return;
-
-            RemoveParent(oldParent);
-            AddParent(newParent);
-
-        }
-
-        public void ChangeReleationship(Thing oldref, Thing newref)
-        {
-            if (oldref == null || newref == null) return;
-            RemoveRelationship(oldref);
-            AddRelationship(newref);
-
         }
 
         public void AddParent(Thing newParent)//, SentenceType sentencetype = null)
@@ -879,30 +608,6 @@ namespace BrainSimulator
             RemoveRelationship(t, HasChild);
         }
 
-        public bool HasChildWithLabel(string labelToFind)
-        {
-            foreach (Thing t in Children)
-            {
-                if (t?.Label == labelToFind)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        //TODO:  move this to the UKS
-        internal Thing ChildWithProperties(List<string> properties)
-        {
-            foreach (Thing t in Children)
-            {
-                List<Thing> list = t.RelationshipsAsThings;
-                foreach (string s in properties)
-                    if (list.FindFirst(x => x.Label == s) == null) goto notFound;
-                return t;
-            notFound: continue;
-            }
-            return null;
-        }
     }
 
     //this is a modification of Thing which is used to store and retrieve the KB in XML

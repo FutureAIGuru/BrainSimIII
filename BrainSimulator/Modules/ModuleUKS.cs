@@ -62,13 +62,13 @@ public partial class ModuleUKS : ModuleBase
         if (t == null) return;
         if (t.Children.Count != 0)
             return; //can't delete something with children...must delete all children first.
-        foreach (Relationship l1 in t.Relationships)
+        foreach (Relationship r in t.Relationships)
         {
-            t.RemoveRelationship(l1);
+            t.RemoveRelationship(r);
         }
-        foreach (Relationship l1 in t.RelationshipsFrom)
+        foreach (Relationship r in t.RelationshipsFrom)
         {
-            l1.source.RemoveRelationship(l1);
+            r.source.RemoveRelationship(r);
         }
         lock (UKSList)
         {
@@ -82,42 +82,8 @@ public partial class ModuleUKS : ModuleBase
     {
         Thing retVal = Thing.GetThing(label);
         return retVal;
-        //UKSt ??= UKSList; //if UKSt is null, search the entire UKS
-        //Thing retVal = null;
-        //lock (UKSt)
-        //{
-        //    for (int i = 0; i < UKSt.Count; i++)
-        //    {
-        //        Thing t = UKSt[i];
-        //        if (t?.Label.ToLower() == label.ToLower())
-        //            return t;
-        //    }
-        //    return retVal;
-        //}
     }
 
-    //returns all things with the given label
-    //2nd parameter defines UKS to search
-    public List<Thing> AllLabeled(string label, IList<Thing> UKSt = null)
-    {
-        List<Thing> retVal = new();
-        Thing t = Thing.GetThing(label);
-        if (t is not null)
-            retVal.Add(t);
-        return retVal;
-        //UKSt ??= UKSList; //if UKSt is null, search the entire UKS
-        //lock (UKSt)
-        //{
-        //    List<Thing> retVal = new();
-        //    for (int i = 0; i < UKSt.Count; i++)
-        //    {
-        //        Thing t = UKSt[i];
-        //        if (t.Label.ToLower() == label.ToLower())
-        //            retVal.Add(t);
-        //    }
-        //    return retVal;
-        //}
-    }
 
     public bool ThingInTree(Thing t1, Thing t2)
     {
@@ -138,15 +104,6 @@ public partial class ModuleUKS : ModuleBase
         if (t1.HasRelationshipWithAncestorLabeled(label) != null) return true;
         return false;
 
-    }
-    bool ThingInTransitiveChain(Thing t1, Thing t2, Thing relType)
-    {
-        if (t2 == null) return false;
-        if (t1 == null) return false;
-        if (!HasProperty(relType, "transitive")) return false;
-        if (t1 == t2) return true;
-        if (GetTransitiveTargetChain(t1, relType).Contains(t2)) return true;
-        return false;
     }
     List<Thing> GetTransitiveTargetChain(Thing t, Thing relType, List<Thing> results = null)
     {
@@ -364,32 +321,6 @@ public partial class ModuleUKS : ModuleBase
         return currentList;
     }
 
-    public (Thing, int) DepthToFirstCommonAncestor(Thing t1, Thing t2)
-    {
-        if (t1 == null) return (null, -1);
-        if (t2 == null) return (null, -1);
-        // get the ancestor lists
-        var ancestors1 = t1.ExpandTransitiveRelationshipWithDepth("has-child", true);
-        ancestors1.Insert(0, (t1, 0));
-        var ancestors2 = t2.ExpandTransitiveRelationshipWithDepth("has-child", true);
-        ancestors2.Insert(0, (t2, 0));
-        Thing commonAncestor = null;
-        //find the nearest common ancestor
-        int depth = -1;
-        foreach (var ancestor in ancestors1)
-        {
-            var tComm2 = ancestors2.FindFirst(x => x.Item1 == ancestor.Item1);
-            if (tComm2 != default)
-            {
-                commonAncestor = tComm2.Item1;
-                var tComm1 = ancestors1.FindFirst(x => x.Item1 == tComm2.Item1);
-                depth = Math.Max(tComm2.Item2, tComm1.Item2);
-                break;
-            }
-        }
-        return (commonAncestor, depth);
-    }
-
     public bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
     {
         //are two relationships mutually exclusive?
@@ -510,58 +441,6 @@ public partial class ModuleUKS : ModuleBase
         if (v.FindFirst(x => x.T?.Label.ToLower() == propertyName.ToLower() && x.reltype.Label == "hasProperty") != null) return true;
         return false;
     }
-    public IList<Thing> ResultsOfType(IList<Relationship> results, Object theParent)
-    {
-        Thing TheParent;
-        if (theParent is string s) TheParent = GetOrAddThing(s, "Object");
-        else if (theParent is Thing t) TheParent = t;
-        else
-            throw new ArgumentException("Argument must be string or thing");
-        List<Thing> retVal = new();
-        if (TheParent.Label == "number" && results.Count > 0)
-        {
-            //If there are multiple relationships with number > 1, pick the higher weight
-            //else count the number of relationships
-            int total = 0;
-            foreach (Relationship r in results)
-            {
-                if (r.weight >= .5)
-                {
-                    IList<Thing> list = GetAttributes(r.reltype);
-                    Thing bestValue = list.FindFirst(x => x.HasAncestorLabeled("number"));
-                    if (list.FindFirst(x => x.Label == "not") == null)
-                    {
-                        int count = 0;
-                        if (int.TryParse(bestValue?.Label, out count)) { }
-                        else if (bestValue?.V is int i1) { count = i1; }
-                        total += count;
-                    }
-                }
-            }
-            if (total == 0) total = results.Count;
-
-            string[] numberWords = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten" };
-            string numberWord = "";
-            Thing t;
-            if (total >= numberWords.Length) { numberWord = "many"; }
-            else numberWord = numberWords[total];
-            retVal.Clear();
-            t = GetOrAddThing(numberWord, "number");
-            retVal.Add(t);
-        }
-        else
-        {
-            foreach (Relationship r in results)
-            {
-                AddPropertiesToList(TheParent, retVal, GetAttributes(r.source));
-                AddPropertiesToList(TheParent, retVal, GetAttributes(r.relType));
-                AddPropertiesToList(TheParent, retVal, GetAttributes(r.target));
-                if (r.source.HasAncestor(TheParent)) retVal.Add(r.source);
-                if (r.target.HasAncestor(TheParent)) retVal.Add(r.target);
-            }
-        }
-        return retVal;
-    }
 
     private void AddPropertiesToList(Thing theParent, List<Thing> retVal, IList<Thing> properties)
     {
@@ -573,14 +452,6 @@ public partial class ModuleUKS : ModuleBase
     }
 
 
-    //do two lists have the same content
-    //ignoring order and possible duplicates
-    bool ListsAreEqual(List<Thing> l1, List<Thing> l2)
-    {
-        foreach (var v in l1)
-            if (!l2.Contains(v)) return false;
-        return true;
-    }
     bool RelationshipsAreEqual(Relationship r1, Relationship r2, bool ignoreSource = true)
     {
         if (
@@ -626,32 +497,7 @@ public partial class ModuleUKS : ModuleBase
     private Thing ThingFromString(string s, string defaultParent)
     {
         if (string.IsNullOrEmpty(s)) return null;
-        Thing t = null;
-        List<Thing> list = AllLabeled(s);
-        if (list.Count == 1)
-        {
-            t = list[0];
-        }
-        else
-        {
-            foreach (Thing t1 in list)
-            {
-                t = t1.Parents.FindFirst(v => v.Label == defaultParent);
-                if (t != null)
-                {
-                    t = t1;
-                    break;
-                }
-            }
-            if (t == null)
-            {
-                foreach (Thing t1 in list)
-                {
-                    t = t1.Parents.FindFirst(v => v.Label.StartsWith("unknown"));
-                    if (t != null) break;
-                }
-            }
-        }
+        Thing t = Labeled(s);
 
         if (t == null)
         {

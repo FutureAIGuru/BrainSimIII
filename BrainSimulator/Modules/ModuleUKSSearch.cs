@@ -77,23 +77,6 @@ namespace BrainSimulator.Modules
             return rangeOfSearch.OrderByDescending(x => x.useCount).ToList();
         }
 
-        //order list by distance from center
-        public IList<Thing> OrderByDistanceFromCenter(IList<Thing> inList)
-        {
-            float DistFromCenter(Thing t)
-            {
-                Dictionary<string, object> props = t.GetRelationshipsAsDictionary();
-                if (props.ContainsKey("cen"))
-                {
-                    if (props["cen"] is Point3DPlus pp)
-                        return Abs(pp.Phi) + Abs(pp.Theta);
-                }
-                return float.MaxValue;
-            };
-
-            return inList.OrderBy(x => DistFromCenter(x)).ToList();
-        }
-
         private class Counts
         {
             public Thing t; public int count = 1;
@@ -227,80 +210,7 @@ namespace BrainSimulator.Modules
             return retval.Count == 0 ? null:retval;
         }
 
-        public Thing QueryProperties(List<string> propertyValues, IList<Thing> rangeOfSearch = null)
-        {
-            if (rangeOfSearch == null)
-            {
-                Thing mentalModel = GetOrAddThing("MentalModel", "Thing");
-                if (mentalModel is null) return null;
-                rangeOfSearch = mentalModel.Children;
-            }
-
-            Thing propertyRoot = GetOrAddThing("Property", "Thing");
-            List<Thing> propertyThings = new();
-            List<Thing> possible = new();
-            //turn the propertyValues list to a list of things
-            IList<Thing> allProps = propertyRoot.DescendentsList();
-            foreach (var property in propertyValues)
-            {
-                Thing item = Valued(property, allProps);
-                if (item != null)
-                    propertyThings.Add(item);
-                else
-                    return null;
-            }
-
-            //See if mentalModel objects reference any required properties
-            foreach (Thing t in rangeOfSearch)
-            {
-                var theRefereneces = t.RelationshipsAsThings;
-                foreach (Thing property in propertyThings)
-                {
-                    if (!theRefereneces.Contains(property))
-                    {
-                        goto NotFound;
-                    }
-                }
-                possible.Add(t);
-            NotFound: { }
-            }
-
-            if (possible.Count == 0)
-            {
-                //no possible hits
-                return null;
-            }
-            else if (possible.Count == 1)
-            {
-                //one possible hit, return it
-                return possible[0];
-            }
-            else
-            {
-                //multiple possible hits
-                //find successful Thing closest to the center of view
-                Angle min = 180;
-                Thing center = new Thing();
-
-                for (int i = 0; i < possible.Count; i++)
-                {
-                    var reference = possible[i].GetRelationshipsAsDictionary();
-                    if (reference.ContainsKey("cen"))
-                    {
-                        if (reference["cen"] is Point3DPlus p1)
-                        {
-                            if (Abs(p1.Theta) + Abs(p1.Phi) <= Abs(min))
-                            {
-                                min = p1.Theta;
-                                center = possible[i];
-                            }
-                        }
-                    }
-                }
-                return center;
-            }
-        }
-
+        
         private bool PropertiesNear(object o1, object o2, float tolerance)
         {
             if (o1 == null || o2 == null) return false;

@@ -156,9 +156,6 @@
                 <StackPanel x:Name="LoadedModuleSP">
                 </StackPanel>
             </Border>
-
-        </Grid>
-        <Grid>
         </Grid>
     </DockPanel>
 </Window>

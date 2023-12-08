@@ -613,14 +613,8 @@ namespace BrainSimulator.Modules
             {
                 if (word.Item1 == "")
                 { continue; }
-                var existingThings = UKS.AllLabeled(word.Item1);
-                Thing existingThing = null;
-                foreach (var t in existingThings)
-                    if (t.HasAncestorLabeled("Words"))
-                    {
-                        existingThing = t;
-                        break;
-                    }
+                var existingThing = UKS.Labeled(word.Item1);
+                
                 string firstLetter = word.Item1.Substring(0, 1).ToUpper();
                 UKS.GetOrAddThing("Words", "Object");
                 UKS.GetOrAddThing(word.Item2, "Words");

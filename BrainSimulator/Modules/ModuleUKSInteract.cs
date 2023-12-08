@@ -107,38 +107,5 @@ namespace BrainSimulator.Modules
 
             return relTypes;
         }
-
-        public List<Thing> ParentsOfLabel(string label)
-        {
-            GetUKS();
-            if (UKS == null) return null;
-
-            List<Thing> allLabels = UKS.AllLabeled(label);
-            List<Thing> allParents = new();
-
-            foreach (var labelThing in allLabels)
-            {
-                foreach (var parentThing in labelThing.Parents)
-                {
-                    allParents.Add(parentThing);
-                }
-            }
-
-            return allParents;
-        }
-
-        public bool isRoot(string label)
-        {
-            GetUKS();
-            if (UKS == null) return false;
-
-            foreach (var labelThing in UKS.AllLabeled(label))
-            {
-                if (labelThing.Parents.Count != 0)
-                    return false;
-            }
-
-            return true;
-        }
     }
 }
