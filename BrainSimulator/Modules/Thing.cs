@@ -366,7 +366,6 @@ namespace BrainSimulator
         {
             if (t == null) return;
 
-            bool wasRelationship = false; ////TODO take this out when relationshipBY is reversed
             foreach (Relationship r in Relationships)
             {
                 if (r.relType is not null && r.reltype.Label != "has-child") //hack for performance

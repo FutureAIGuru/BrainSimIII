@@ -4,6 +4,7 @@
 // © 2022 FutureAI, Inc., all rights reserved
 //
 
+using System;
 using System.Collections.Generic;
 
 namespace BrainSimulator.Modules
@@ -62,11 +63,16 @@ namespace BrainSimulator.Modules
             return true;
         }
 
-        public void AddReference(string source, string target, string relationshipType)
+        public void AddReference(string source, string target, string relationshipType,float confidence, TimeSpan duration)
         {
             GetUKS();
             if (UKS == null) return;
-            UKS.AddStatement(source, relationshipType, target);
+            Relationship r = UKS.AddStatement(source, relationshipType, target);
+            r.TimeToLive = duration;
+            r.weight = confidence;
+            r.source.SetFired();
+            r.target.SetFired();
+            r.reltype.SetFired();
         }
 
         public Thing GetUKSThing(string thing, string parent)

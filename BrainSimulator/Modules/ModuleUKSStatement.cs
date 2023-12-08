@@ -60,6 +60,8 @@ namespace BrainSimulator.Modules
                         List<Thing> targetProperties
                 )
         {
+            if (source == null || relType == null) return null;
+
             QueryRelationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
 
             //does this relationship already exist (without conditions)?

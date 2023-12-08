@@ -499,6 +499,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviChild.SetValue(ThingObjectProperty, child);
             if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
                 tviChild.Background = new SolidColorBrush(Colors.LightGreen);
+            if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+                tviChild.Background = new SolidColorBrush(Colors.LightYellow);
 
             if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
                 tviChild.IsExpanded = true;

@@ -285,35 +285,22 @@ namespace BrainSimulator.Modules
 
         private void ForgetTransientRelationships(object sender, EventArgs e)
         {
-            /*
+            
             for (int i = transientRelationships.Count - 1; i >= 0; i--)
             {
                 Relationship r = transientRelationships[i];
                 //check to see if the relationship has expired
                 if (r.timeToLive != TimeSpan.MaxValue && r.lastUsed + r.timeToLive < DateTime.Now)
                 {
-                    //hack to force the MM dialog to update to make things disappear
-                    if (r.target?.Label.StartsWith("io") == true)
-                    {
-                        ModuleMentalModel mm = (ModuleMentalModel)MainWindow.modules.Find(x => x.Label == "MentalModel");
-                        if (mm != null)
-                            mm.MentalModelChanged = true;
-                    }
                     r.source.RemoveRelationship(r);
                     //if this leaves an orphan thing, delete the thing
                     if (r.reltype.Label == "has-child" && r.target?.Parents.Count == 0)
                     {
-                        ModuleUKS uks = (ModuleUKS)MainWindow.modules.Find(x => x.Label == "UKS");
-                        if (uks != null)
-                        {
-                            uks.DeleteAllChildren(r.target);
-                            uks.DeleteThing(r.target);
-                        }
+                        r.target.AddParent(Thing.GetThing("unknownObject"));
                     }
                     transientRelationships.Remove(r);
                 }
             }
-            */
         }
 
 

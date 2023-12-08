@@ -4,6 +4,7 @@
 // © 2022 FutureAI, Inc., all rights reserved
 //
 
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,11 +37,22 @@ namespace BrainSimulator.Modules
             string relationType = GetTypeName();
 
             if (!AddRelationshipChecks()) return;
+            TimeSpan duration = TimeSpan.MaxValue;
+            string durationText = ((ComboBoxItem)durationCombo.SelectedItem).Content.ToString();
+            switch(durationText)
+            {
+                case "Eternal": duration=TimeSpan.MaxValue; break;
+                case "1 hr": duration = TimeSpan.FromHours(1); break;
+                case "5 min": duration = TimeSpan.FromMinutes(5); break;
+                case "1 min": duration = TimeSpan.FromMinutes(1); break;
+                case "30 sec": duration = TimeSpan.FromSeconds(30); break;
+                case "10 sec": duration = TimeSpan.FromSeconds(10); break;
+            }
+            float confidence = (float)confidenceSlider.Value;
+
 
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            uksInteract.AddReference(newThing, targetThing, relationType);
-
-            AddRelationshipChecks();
+            uksInteract.AddReference(newThing, targetThing, relationType, confidence,duration);
         }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.
@@ -125,13 +137,6 @@ namespace BrainSimulator.Modules
             CheckThingExistence(sender);
         }
 
-        // Check for parent existence and set background color of the textbox and the error message accordingly.
-        private bool CheckAddThingFieldsFilled()
-        {
-            SetError("");
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            return true;
-        }
 
         // Check for parent existence and set background color of the textbox and the error message accordingly.
         private bool CheckAddRelationshipFieldsFilled()
