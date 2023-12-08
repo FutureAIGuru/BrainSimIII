@@ -14,7 +14,7 @@
         <TextBox  x:Name="SourceText"                TabIndex="1"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,18,174,0" TextChanged="SourceText_TextChanged"/>
         <ComboBox x:Name="relationshipComboBox"     TabIndex="3"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,56,174,0" SelectedIndex="1" SelectionChanged="relationshipComboBox_SelectionChanged"/>
         <TextBox  x:Name="TargetText"            TabIndex="4"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,94,174,0" TextChanged="TargetText_TextChanged" />
-        <Button x:Name="BtnAddThing"          TabIndex="6" Content="Add Thing" Height="109" Canvas.Left="232" Canvas.Top="50" VerticalAlignment="Top" FontSize="16" Margin="0,18,10,0" HorizontalAlignment="Right" Width="159" Click="BtnAddThis_Click" IsDefault="True"/>
+        <Button x:Name="BtnAddThis"         IsEnabled="false"  TabIndex="6" Content="Add Thing" Height="109" Canvas.Left="232" Canvas.Top="50" VerticalAlignment="Top" FontSize="16" Margin="0,18,10,0" HorizontalAlignment="Right" Width="159" Click="BtnAddThis_Click" IsDefault="True"/>
         <Label x:Name="updateMessage"           Content=""  HorizontalAlignment="Center"   Height="33"   Margin="0,144,0,0"   FontSize="16"  Width="480" VerticalAlignment="Top"/>
     </Grid>
 </local:ModuleBaseDlg>

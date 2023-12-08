@@ -37,12 +37,6 @@ namespace BrainSimulator.Modules
             string source = GetSourceName();
             string target = GetTargetName();
 
-            if (CheckSourceExistence() || CheckTargetExistence())
-            {
-                updateMessage.Content = "Operation cannot proceed, check inputs.";
-                return;
-            }
-
             if (AddThingMode)
             {
                 AddThing(source, target);
@@ -91,6 +85,25 @@ namespace BrainSimulator.Modules
             {
                 relationshipComboBox.Items.Add(item);
             }
+            relationshipComboBox.SelectedValue = (object)"is-a";
+        }
+
+
+        private void EnableButtonIfDoable()
+        {
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+            bool sourceOK = CheckSourceOK();
+            bool targetOK = CheckTargetOK();
+            if (uksInteract == null || !sourceOK || !targetOK)
+            {
+                updateMessage.Content = "Operation cannot proceed, check inputs.";
+                BtnAddThis.IsEnabled = false;
+            }
+            else
+            {
+                updateMessage.Content = "";
+                BtnAddThis.IsEnabled = true;
+            }
         }
 
         private void relationshipComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -99,65 +112,62 @@ namespace BrainSimulator.Modules
             if (relationshipComboBox.SelectedIndex == -1 || relationshipComboBox.SelectedItem.ToString().ToLower() == "is-a")
             {
                 AddThingMode = true;
-                BtnAddThing.Content = "Add Thing";
+                BtnAddThis.Content = "Add Thing";
                 relationshipComboBox.ToolTip = "This relationship adds a new Source Thing.";
             }
             else
             {
                 AddThingMode = false;
-                BtnAddThing.Content = "Add Relationship";
+                BtnAddThis.Content = "Add Relationship";
                 relationshipComboBox.ToolTip = "This relationship adds a new Relationship between a Source and a Target Thing.";
             }
-            CheckSourceExistence();
-            CheckTargetExistence();
+            EnableButtonIfDoable();
         }
 
         private void SourceText_TextChanged(object sender, TextChangedEventArgs e)
         {
             updateMessage.Content = "";
-            CheckSourceExistence();
+            EnableButtonIfDoable();
         }
 
         private void TargetText_TextChanged(object sender, TextChangedEventArgs e)
         {
             updateMessage.Content = "";
-            CheckTargetExistence();
+            EnableButtonIfDoable();
         }
 
-        private bool CheckSourceExistence()
-        {
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            if (uksInteract == null) return false; 
-            bool noSource = (GetSourceName() == "");
-            bool shouldExist = !AddThingMode ^ (uksInteract.SearchLabelUKS(GetSourceName()) != null);
-
-            if (noSource || shouldExist)
-            {
-                SourceText.Background = new SolidColorBrush(Colors.Pink);
-            }
-            else
-            {
-                SourceText.ClearValue(Control.BackgroundProperty);
-            }
-            return shouldExist;
-        }
-
-        private bool CheckTargetExistence()
+        private bool CheckSourceOK()
         {
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
             if (uksInteract == null) return false;
-            bool noTarget = (GetTargetName() == "");
-            bool shouldExist = (uksInteract.SearchLabelUKS(GetTargetName()) == null);
+            string sourceName = GetSourceName();
+            bool noSource = (sourceName.Length == 0);
+            bool shouldNotExist = AddThingMode;
+            bool doesExist = (uksInteract.SearchLabelUKS(GetSourceName()) != null);
 
-            if (noTarget || shouldExist)
+            if (noSource || (shouldNotExist && doesExist))
+            {
+                SourceText.Background = new SolidColorBrush(Colors.Pink);
+                return false;
+            }
+            SourceText.ClearValue(Control.BackgroundProperty);
+            return true;
+        }
+
+        private bool CheckTargetOK()
+        {
+            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+            if (uksInteract == null) return true;
+            bool noTarget = (GetTargetName() == "");
+            bool doesNotExist = (uksInteract.SearchLabelUKS(GetTargetName()) == null);
+
+            if (noTarget || doesNotExist)
             {
                 TargetText.Background = new SolidColorBrush(Colors.Pink);
+                return false;
             }
-            else
-            {
-                TargetText.ClearValue(Control.BackgroundProperty);
-            }
-            return shouldExist;
+            TargetText.ClearValue(Control.BackgroundProperty);
+            return true;
         }
 
         private string GetSourceName()
