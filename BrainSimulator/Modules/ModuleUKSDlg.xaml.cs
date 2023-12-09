@@ -89,7 +89,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             {
                 t = t1;
                 childCount += t1.Children.Count;
-                refCount += t1.RelationshipsWithoutChildren.Count;
+                refCount += t1.Relationships.Count - childCount;
             }
         }
 
@@ -261,7 +261,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             ContextMenu cm = mi.Parent as ContextMenu;
             Thing t = (Thing)cm.GetValue(ThingObjectProperty);
             string testName = tb.Text + e.Key;
-            Thing testThing = Thing.GetThing(testName);
+            Thing testThing = ThingLabels.GetThing(testName);
             if (testName != "" && testThing != null && testThing != t)
             {
                 tb.Background = new SolidColorBrush(Colors.Pink);
@@ -394,10 +394,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private string ChildHasReferences(ModuleUKS UKS, Thing child, string header, int depth)
     {
-        int count = child.RelationshipsWithoutChildren.Count;
+        int childCount = child.Children.Count;
+        int count = child.Relationships.Count - childCount;
         if (count > 0)
         {
-            header += " Refs:" + child.RelationshipsWithoutChildren.Count;
+            header += " Refs:" + count;
         }
         //List<Relationship> sortedRelationships = child.RelationshipsNoCount.OrderBy(x => -x.Value1).ToList();
         //bool trueCount = true;
@@ -527,6 +528,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 tviChild.Foreground = Y > 0.4 ? Brushes.Black : Brushes.White;
             }
 
+            //change color of things which just fired or are about to expire
             tviChild.SetValue(ThingObjectProperty, child);
             if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
                 tviChild.Background = new SolidColorBrush(Colors.LightGreen);
@@ -536,6 +538,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
                 tviChild.IsExpanded = true;
             tvi.Items.Add(tviChild);
+
             totalItemCount++;
             tviChild.ContextMenu = GetContextMenu(child);
             if (depth < maxDepth)

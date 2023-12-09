@@ -31,7 +31,7 @@ namespace BrainSimulator.Modules
             AddStatement("isSimilarTo", "is-a", "RelationshipType");
 
             //This hack is here because some Things created at startup don't get put into the UKS List.
-            foreach (Thing t in Thing.AllThingsInLabelList())
+            foreach (Thing t in ThingLabels.AllThingsInLabelList())
                 if (!UKSList.Contains(t))
                     UKSList.Add(t);
         }
@@ -45,7 +45,7 @@ namespace BrainSimulator.Modules
         {
             MainWindow.SuspendEngine();
             UKSList.Clear();
-            Thing.ClearLabelList();
+            ThingLabels.ClearLabelList();
 
             CreateInitialStructure();
 
@@ -174,7 +174,7 @@ namespace BrainSimulator.Modules
         private void DeFormatContentAfterLoading()
         {
             UKSList.Clear();
-            Thing.ClearLabelList();
+            ThingLabels.ClearLabelList();
             foreach (SThing st in UKSTemp)
             {
                 Thing t = new()

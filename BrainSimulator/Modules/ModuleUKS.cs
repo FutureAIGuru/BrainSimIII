@@ -80,7 +80,7 @@ public partial class ModuleUKS : ModuleBase
     //2nd paramter defines UKS to search, null=search entire knowledge store
     public Thing Labeled(string label)
     {
-        Thing retVal = Thing.GetThing(label);
+        Thing retVal = ThingLabels.GetThing(label);
         return retVal;
     }
 
@@ -635,16 +635,16 @@ public partial class ModuleUKS : ModuleBase
 
         if (string.IsNullOrEmpty(label)) return thingToReturn;
 
-        thingToReturn = Thing.GetThing(label);
+        thingToReturn = ThingLabels.GetThing(label);
         if (thingToReturn != null) return thingToReturn;
 
         Thing correctParent = null;
         if (parent is string s)
-            correctParent = Thing.GetThing(s);
+            correctParent = ThingLabels.GetThing(s);
         if (parent is Thing t)
             correctParent = t;
         if (correctParent == null)
-            correctParent = Thing.GetThing("unknownObject");
+            correctParent = ThingLabels.GetThing("unknownObject");
 
         if (correctParent is null) throw new ArgumentException("GetOrAddThing: could not find parent");
 

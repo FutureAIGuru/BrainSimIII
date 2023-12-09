@@ -214,8 +214,9 @@ namespace BrainSimulator.Modules
         string ThingProperties(Thing t)
         {
             string retVal = null;
-            foreach (Relationship r in t.RelationshipsWithoutChildren)
+            foreach (Relationship r in t.Relationships)
             {
+                if (r.reltype == Thing.HasChild) continue;
                 if (r.relType?.Label == "is")
                 {
                     if (retVal == null) retVal += "(";
@@ -296,7 +297,7 @@ namespace BrainSimulator.Modules
                     //if this leaves an orphan thing, delete the thing
                     if (r.reltype.Label == "has-child" && r.target?.Parents.Count == 0)
                     {
-                        r.target.AddParent(Thing.GetThing("unknownObject"));
+                        r.target.AddParent(ThingLabels.GetThing("unknownObject"));
                     }
                     transientRelationships.Remove(r);
                 }

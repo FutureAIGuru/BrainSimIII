@@ -16,7 +16,7 @@
         <TextBox  x:Name="sourceText"               TabIndex="1"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,20,174,0" TextChanged="thingText_TextChanged"/>
         <TextBox  x:Name="relationshipText"         TabIndex="3"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16"   Margin="78,60,174,0" TextChanged="relationshipText_TextChanged"/>
         <TextBox  x:Name="targetText"               TabIndex="4"  Height="33"  Canvas.Left="617"   Canvas.Top="40"  VerticalAlignment="Top"   FontSize="16" AcceptsReturn="False"  Margin="78,100,174,0" TextChanged="targetText_TextChanged" />
-        <Slider   x:Name="confidenceSlider"         TabIndex="5"  Minimum="0" Maximum="1" TickFrequency="0.1" TickPlacement="Both" Value=".9" HorizontalAlignment="Left" Height="25" Margin="362,44,0,0" VerticalAlignment="Top" Width="100"/>
+        <Slider   x:Name="confidenceSlider"         TabIndex="5"  Minimum="0" Maximum="1" IsMoveToPointEnabled="True" TickFrequency="0.1"   TickPlacement="Both" Value=".9" HorizontalAlignment="Left" Height="25" Margin="362,44,0,0" VerticalAlignment="Top" Width="100"/>
         <ComboBox x:Name="durationCombo"            TabIndex="6"  SelectedIndex="0" HorizontalAlignment="Left" Height="21" Margin="366,101,0,0" VerticalAlignment="Top" Width="100">
             <ComboBoxItem Content="Eternal"/>
             <ComboBoxItem Content="1 hr" />
