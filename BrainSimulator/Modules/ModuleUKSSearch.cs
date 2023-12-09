@@ -82,55 +82,6 @@ namespace BrainSimulator.Modules
             public Thing t; public int count = 1;
         }
         
-        public IList<Thing> QueryProperties1(List<string> propertyValues, bool exactMatch = false)
-        {
-            List<Counts> theCounts = new();
-            Thing propertyRoot = GetOrAddThing("Property", "Thing");
-            Thing transPropertyRoot = GetOrAddThing("TransientProperty", "Property");
-            List<Thing> propertyThings = new();
-            //turn the propertyValues list to a list of things
-            IList<Thing> allProps = propertyRoot.DescendentsList();
-            IList<Thing> allTransProps = transPropertyRoot.DescendentsList();
-            foreach (var property in propertyValues)
-            {
-                Thing item = Valued(property, allTransProps);
-                if (item.Label == "col" || item.Label == "shp")
-                    propertyThings.Add(item);
-                    
-                else if (item != null)
-                    transPropertyRoot.AddRelationship(item);
-            }
-            foreach (Thing prop in propertyThings)
-            {
-                foreach (Relationship l in prop.RelationshipsFrom)
-                {
-                    foreach (Counts c in theCounts)
-                    {
-                        if (c.t == l.T)
-                        {
-                            c.count++;
-                            goto Found;
-                        }
-                    }
-                    theCounts.Add(new Counts { t = l.T as Thing });
-                Found: { }
-                }
-            }
-            theCounts = theCounts.OrderByDescending(x => x.count).ToList();
-
-            IList<Thing> retVal = new List<Thing>();
-            foreach (Counts c in theCounts)
-        {
-                if (exactMatch)
-                {
-                    if (c.count == propertyValues.Count) retVal.Add(c.t);
-                }
-                else retVal.Add(c.t);
-            }
-
-            return retVal;
-        }
-
         public IList<Thing> QueryPropertiesByAssociatedWords(List<Thing> words, bool exactMatch = false)
         {
             List<Counts> theCounts = new();

@@ -128,7 +128,6 @@ namespace BrainSimulator.Modules
             */
             //if this is adding a child relationship, remove any unknownObject parent
             ClearExtraneousParents(rSave.source);
-            //if (rSave.source?.Label != "Object")
             ClearExtraneousParents(rSave.T);
             ClearExtraneousParents(rSave.relType);
 

@@ -108,7 +108,6 @@ public partial class ModuleUKS : ModuleBase
     List<Thing> GetTransitiveTargetChain(Thing t, Thing relType, List<Thing> results = null)
     {
         if (results == null) results = new();
-        //        foreach (Relationship r in t.Relationships)
         List<Relationship> targets = RelationshipTree(t, relType);
         foreach (Relationship r in targets)
             if (r.reltype == relType)

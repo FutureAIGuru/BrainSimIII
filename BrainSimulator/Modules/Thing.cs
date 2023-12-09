@@ -6,7 +6,6 @@
 
 
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using BrainSimulator.Modules;
@@ -35,8 +34,8 @@ namespace BrainSimulator
             get => value;
             set
             {
-                if (value is Thing t)
-                    throw new ArgumentException("Cannot add a Thing to a Thing's Value");
+                if (!value.GetType().IsSerializable)
+                    throw new ArgumentException("Cannot set nonserializable value");
                 this.value = value;
             }
         }
@@ -48,7 +47,7 @@ namespace BrainSimulator
             if (labelList.TryGetValue(label.ToLower(), out retVal)) { }
             return retVal;
         }
-        public static string AddThingLabel(string newLabel,Thing t)
+        public static string AddThingLabel(string newLabel, Thing t)
         {
             //sets a label and appends/increments trailing digits in the event of collisions
             if (newLabel == "") return newLabel; //don't index empty lables
@@ -83,7 +82,7 @@ namespace BrainSimulator
             return retVal;
         }
 
-
+        //even with no references, don't delete this because the debugger uses it
         public override string ToString()
         {
             string retVal = label + ": " + useCount;
@@ -131,13 +130,13 @@ namespace BrainSimulator
             set
             {
                 if (value == label) return; //label is unchanged
-                label = AddThingLabel(value,this);
+                label = AddThingLabel(value, this);
             }
         }
 
-        private  IList<Thing> RelationshipsOfType(Thing relType, bool useRelationshipFrom=false)
+        private IList<Thing> RelationshipsOfType(Thing relType, bool useRelationshipFrom = false)
         {
-            IList<Thing> retVal= new List<Thing>();
+            IList<Thing> retVal = new List<Thing>();
             if (!useRelationshipFrom)
             {
                 lock (relationshipsFrom)
@@ -167,9 +166,9 @@ namespace BrainSimulator
         }
 
 
-        public IList<Thing> Parents{ get => RelationshipsOfType(GetThing("has-Child"), true); }
+        public IList<Thing> Parents { get => RelationshipsOfType(GetThing("has-Child"), true); }
 
-        public IList<Thing> Children{ get => RelationshipsOfType(GetThing("has-Child"), false); }
+        public IList<Thing> Children { get => RelationshipsOfType(GetThing("has-Child"), false); }
 
         public IList<Relationship> Relationships
         {
@@ -197,85 +196,11 @@ namespace BrainSimulator
 
 
         /// ////////////////////////////////////////////////////////////////////////////
-        //Handle the descendents of a Thing
+        //Handle the ancestors and descendents of a Thing
         //////////////////////////////////////////////////////////////
-        public int GetDescendentsCount()
+        public IList<Thing> AncestorList()
         {
-            return DescendentsList().Count;
-        }
-        public IList<Thing> DescendentsList(List<Thing> descendents = null)
-        {
-            if (descendents == null)
-            {
-                descendents = new List<Thing>();
-            }
-            if (descendents.Count < 5000)
-            {
-                foreach (Thing t2 in this.Children)
-                {
-                    if (t2 == null) continue;
-                    if (!descendents.Contains(t2))
-                    {
-                        descendents.Add(t2);
-                        t2.DescendentsList(descendents);
-                    }
-                }
-            }
-            return descendents;
-        }
-
-        //recursively gets all descendents
-        public IEnumerable<Thing> Descendents
-        {
-            get
-            {
-                IList<Thing> descendents = DescendentsList();
-                for (int i = 0; i < descendents.Count; i++)
-                {
-                    Thing child = descendents[i];
-                    yield return child;
-                }
-            }
-        }
-
-        //Get the ancestors of a thing with recursion
-
-        public IList<Thing> AncestorList(List<Thing> ancestors = null, int depth = 0)
-        {
-            depth++;
-            if (depth > 10)
-                return ancestors;
-            if (ancestors == null)
-            {
-                ancestors = new List<Thing>();
-            }
-            foreach (Thing t2 in this.Parents)
-            {
-                if (!ancestors.Contains(t2))// && ancestors.Count < 100)
-                {
-                    ancestors.Add(t2);
-                    t2.AncestorList(ancestors, depth);
-                }
-                else
-                { }  //track circular reference?
-            }
-            return ancestors;
-        }
-
-        float Exclusive(Relationship r1, Relationship r2)
-        {
-            //todo extend to handle instances of targets
-            if (r1.target == r2.target)
-            {
-                var commonParents = ModuleUKS.FindCommonParents(r1.reltype, r2.reltype);
-                if (commonParents.Count > 0)
-                {
-                    //IList<Thing> r1RelProps = GetProperties(r1.reltype);
-                    //IList<Thing> r2RelProps = GetProperties(r2.reltype);
-
-                }
-            }
-            return 1;
+            return FollowTransitiveRelationships(hasChildType, true);
         }
 
         public IEnumerable<Thing> Ancestors
@@ -293,25 +218,58 @@ namespace BrainSimulator
 
         public bool HasAncestorLabeled(string label)
         {
-            IList<Thing> ancestors = AncestorList();
-            for (int i = 0; i < ancestors.Count; i++)
-            {
-                Thing parent = ancestors[i];
-                if (parent.label == label)
-                    return true;
-            }
-            return false;
+            return HasAncestor(GetThing(label));
         }
         public bool HasAncestor(Thing t)
         {
-            IList<Thing> ancestors = AncestorList();
-            for (int i = 0; i < ancestors.Count; i++)
+            return FollowTransitiveRelationships(hasChildType, true, t).Count != 0;
+        }
+
+        public int GetDescendentsCount()
+        {
+            return DescendentsList().Count;
+        }
+        public IList<Thing> DescendentsList()
+        {
+            return FollowTransitiveRelationships(hasChildType, false);
+        }
+
+        //recursively gets all descendents
+        public IEnumerable<Thing> Descendents
+        {
+            get
             {
-                Thing parent = ancestors[i];
-                if (parent == t)
-                    return true;
+                IList<Thing> descendents = DescendentsList();
+                for (int i = 0; i < descendents.Count; i++)
+                {
+                    Thing child = descendents[i];
+                    yield return child;
+                }
             }
-            return false;
+        }
+
+        //Follow chain of relationships with relType
+        public IList<Thing> FollowTransitiveRelationships(Thing relType, bool followUpwards = true, Thing searchTarget = null)
+        {
+            List<Thing> retVal = new();
+            retVal.Add(this);
+            for (int i = 0; i < retVal.Count; i++)
+            {
+                Thing t = retVal[i];
+                IList<Relationship> relationshipsToFollow = followUpwards?t.RelationshipsFrom:t.Relationships;
+                foreach (Relationship r in relationshipsToFollow)
+                {
+                    Thing thingToAdd = followUpwards ? r.source : r.target;
+                    if (r.reltype == relType)
+                    { 
+                        if (searchTarget == thingToAdd) return retVal;
+                        if (!retVal.Contains(thingToAdd))
+                            retVal.Add(thingToAdd);
+                    }
+                }
+            }
+            if (searchTarget != null) retVal.Clear();
+            return retVal;
         }
 
 
@@ -319,13 +277,11 @@ namespace BrainSimulator
         {
             if (t != null)
             {
-                // newParent.lastFired = MainWindow.Generation;
                 t.lastFiredTime = DateTime.Now;
                 t.useCount++;
             }
             else
             {
-                // lastFired = MainWindow.Generation;
                 lastFiredTime = DateTime.Now;
                 useCount++;
             }
@@ -338,50 +294,54 @@ namespace BrainSimulator
         //RELATIONSHIPS
 
         //add a relationship from this thing to the specified thing
-        public Relationship AddRelationship(Thing t, float weight = 1)
+        public Relationship AddRelationship(Thing target, Thing relationshipType)
         {
-            if (t == null) return null; //do not add null relationship or duplicates
+            if (relationshipType == null)
+                return null;
 
-            Relationship r = relationships.Find(l => l.source == this && l.T == t);
+            //does the relationship already exist?
+            Relationship r = HasRelationship(target, relationshipType);
             if (r != null)
             {
-                r.weight = weight;
+                //AdjustRelationship(r.T);
                 return r;
             }
-            Relationship newLink;
-            newLink = new Relationship { source = this, T = t, weight = weight};
-            lock (relationships)
+            r = new Relationship()
             {
-                relationships.Add(newLink);
-            }
-            lock (t.relationshipsFrom)
+                relType = relationshipType,
+                source = this,
+                T = target,
+            };
+            if (target != null)
             {
-                t.relationshipsFrom.Add(newLink);
+                lock (relationships)
+                    lock (target.relationshipsFrom)
+                        lock (relationshipType.relationshipsFrom)
+                        {
+                            RelationshipsWriteable.Add(r);
+                            target.RelationshipsFromWriteable.Add(r);
+                            relationshipType.RelationshipsFromWriteable.Add(r);
+                        }
             }
-            return newLink;
+            else
+            {
+                lock (relationships)
+                    lock (relationshipType.relationshipsFrom)
+                    {
+                        RelationshipsWriteable.Add(r);
+                        relationshipType.RelationshipsFromWriteable.Add(r);
+                    }
+            }
+            return r;
         }
-
-
-        public void RemoveRelationship(Thing t)
+        private Relationship HasRelationship(Thing target, Thing relationshipType)
         {
-            if (t == null) return;
-
-            foreach (Relationship r in Relationships)
+            foreach (Relationship r in relationships)
             {
-                if (r.relType is not null && r.reltype.Label != "has-child") //hack for performance
-                {
-                    lock (r.relType.relationshipsFrom)
-                        r.relType.relationshipsFrom.RemoveAll(v => v.target == t && v.source == this);
-                }
+                if (r.source == this && r.target == target && r.reltype == relationshipType)
+                    return r;
             }
-            lock (relationships)
-            {
-                relationships.RemoveAll(v => v.target == t);
-            }
-            lock (t.relationshipsFrom)
-            {
-                t.relationshipsFrom.RemoveAll(v => v.source == this);
-            }
+            return null;
         }
 
         public void RemoveRelationship(Relationship r)
@@ -394,8 +354,8 @@ namespace BrainSimulator
                 {
                     lock (r.target.RelationshipsFromWriteable)
                     {
-                        r.relType.RelationshipsFromWriteable.Remove(r);
-                        r.target.RelationshipsFromWriteable.Remove(r);
+                        r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
+                        r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
                     }
                 }
             }
@@ -405,8 +365,8 @@ namespace BrainSimulator
                 {
                     lock (r.relType.RelationshipsFromWriteable)
                     {
-                        r.source.RelationshipsWriteable.Remove(r);
-                        r.relType.RelationshipsFromWriteable.Remove(r);
+                        r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
+                        r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
                     }
                 }
             }
@@ -418,9 +378,9 @@ namespace BrainSimulator
                     {
                         lock (r.target.RelationshipsFromWriteable)
                         {
-                            r.source.RelationshipsWriteable.Remove(r);
-                            r.relType.RelationshipsFromWriteable.Remove(r);
-                            r.target.RelationshipsFromWriteable.Remove(r);
+                            r.source.RelationshipsWriteable.RemoveAll(x=>x.source ==r.source && x.reltype == r.reltype && x.target == r.target);
+                            r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
+                            r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
                         }
                     }
                 }
@@ -456,101 +416,12 @@ namespace BrainSimulator
             return null;
         }
 
-        //(send a negative value to decrease a relationship weight)
-        public float AdjustRelationship(Thing t, float incr = 1)
-        {
-            //change any exisiting link or add a new one
-            Relationship existingLink = Relationships.FindFirst(v => v.T == t);
-            if (existingLink == null && incr > 0)
-            {
-                existingLink = AddRelationship(t, incr);
-            }
-            if (existingLink != null)
-            {
-                if (existingLink.relType is not null)
-                {
-                    //TODO adjust the weight of relationshipType revers link
-                }
-                else
-                {
-                    Relationship reverseLink = existingLink.T.relationshipsFrom.Find(v => v.T == this);
-                    existingLink.weight += incr;
-                    if (incr > 0) existingLink.hits++;
-                    if (incr < 0) existingLink.misses++;
-                    reverseLink.weight = existingLink.weight;
-                    reverseLink.hits = existingLink.hits;
-                    reverseLink.misses = existingLink.misses;
-                }
-                if (existingLink.weight < 0)
-                {
-                    return -1;
-                }
-                return existingLink.weight;
-            }
-            return 0;
-        }
-
-        public Relationship AddRelationship(Thing t2, Thing relationshipType)
-        {
-            if (relationshipType == null)
-                return null;
-
-            relationshipType.SetFired();
-            Relationship r = HasRelationship(t2, relationshipType);
-            if (r != null)
-            {
-                AdjustRelationship(r.T);
-                return r;
-            }
-            r = new Relationship()
-            {
-                relType = relationshipType,
-                source = this,
-                T = t2,
-            };
-            if (t2 != null)
-            {
-                lock (relationships)
-                    lock (t2.relationshipsFrom)
-                        lock (relationshipType.relationshipsFrom)
-                        {
-                            RelationshipsWriteable.Add(r);
-                            t2.RelationshipsFromWriteable.Add(r);
-                            relationshipType.RelationshipsFromWriteable.Add(r);
-                        }
-            }
-            else
-            {
-                lock (relationships)
-                    lock (relationshipType.relationshipsFrom)
-                    {
-                        RelationshipsWriteable.Add(r);
-                        relationshipType.RelationshipsFromWriteable.Add(r);
-                    }
-            }
-            return r;
-        }
-
-        public Relationship HasRelationship(Thing t2, Thing relationshipType)
-        {
-            Relationship retVal = null;
-            foreach (Relationship r in Relationships)
-            {
-                if ((r.relType == relationshipType || relationshipType == null) && r.target == t2)
-                {
-                    retVal = r;
-                    break;
-                }
-            }
-            return retVal;
-        }
-
 
         public void RemoveRelationship(Thing t2, Thing relationshipType)
         {
-            RemoveRelationship(t2);
+            Relationship r = new() { source = this, reltype = relationshipType, target = t2 };
+            RemoveRelationship(r);
         }
-
 
 
         //returns all the matching refrences
@@ -583,18 +454,19 @@ namespace BrainSimulator
             return retVal.OrderBy(x => -x.Value).ToList();
         }
 
-        public void AddParent(Thing newParent)//, SentenceType sentencetype = null)
+        public void AddParent(Thing newParent)
         {
             if (newParent == null) return;
             if (!Parents.Contains(newParent))
             {
-                newParent.AddRelationship(this, HasChild);//, sentencetype);
+                newParent.AddRelationship(this, HasChild);
             }
         }
 
         public void RemoveParent(Thing t)
         {
-            t.RemoveRelationship(this);
+            Relationship r = new() { source = t, reltype = hasChildType, target = this };
+            t.RemoveRelationship(r);
         }
 
         public Relationship AddChild(Thing t)
@@ -604,7 +476,8 @@ namespace BrainSimulator
 
         public void RemoveChild(Thing t)
         {
-            RemoveRelationship(t, HasChild);
+            Relationship r = new() { source = this, reltype = hasChildType, target = t };
+            RemoveRelationship(r);
         }
 
     }

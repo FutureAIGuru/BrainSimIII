@@ -176,19 +176,21 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         string thingLabel = "___";
         if (t != null)
             thingLabel = t.Label;
-        mi.Header = "Name: " + thingLabel + "  Index:" + ID;
+        mi.Header = "Name: " + thingLabel + "  Index: " + ID;
         mi.IsEnabled = false;
         menu.Items.Add(mi);
 
-        TextBox renameBox = new(){ Text = thingLabel,Width=200 };
+        TextBox renameBox = new() { Text = thingLabel, Width = 200,Name="RenameBox" };
         renameBox.PreviewKeyDown += RenameBox_PreviewKeyDown;
         mi = new();
         mi.Header = renameBox;
         menu.Items.Add(mi);
+
         mi = new();
         mi.Click += Mi_Click;
         mi.Header = "Delete";
         menu.Items.Add(mi);
+
         mi = new();
         mi.Click += Mi_Click;
         mi.Header = "Make Root";
@@ -226,7 +228,29 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             mi.SetValue(ThingObjectProperty, t1);
             menu.Items.Add(mi);
         }
+
+        menu.Opened += Menu_Opened;
+        menu.Closed += Menu_Closed;
         return menu;
+    }
+
+    private void Menu_Closed(object sender, RoutedEventArgs e)
+    {
+        Draw(true);
+    }
+
+    private void Menu_Opened(object sender, RoutedEventArgs e)
+    {
+        //when the context menu opens, focus on the label and position text cursor to end
+        if (sender is ContextMenu cm)
+        {
+            Control cc = Utils.FindByName(cm, "RenameBox");
+            if (cc is TextBox tb)
+            {
+                tb.Focus();
+                tb.Select(0, tb.Text.Length);
+            }
+        }
     }
 
     private void RenameBox_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -236,7 +260,14 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             MenuItem mi = tb.Parent as MenuItem;
             ContextMenu cm = mi.Parent as ContextMenu;
             Thing t = (Thing)cm.GetValue(ThingObjectProperty);
-
+            string testName = tb.Text + e.Key;
+            Thing testThing = Thing.GetThing(testName);
+            if (testName != "" && testThing != null && testThing != t)
+            {
+                tb.Background = new SolidColorBrush(Colors.Pink);
+                return;
+            }
+            tb.Background = new SolidColorBrush(Colors.White);
             if (e.Key == Key.Enter)
             {
                 t.Label = tb.Text;
@@ -297,11 +328,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     if (moi != null)
                         moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.partsOf);
                     break;
-                //case "Add Types":
+                case "Change Label":
                 //    moi = (ModuleOnlineInfo)MainWindow.modules.FindFirst(x => x.Label == "OnlineInfo")?;
                 //    if (moi != null)
                 //        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.list);
-                //    break;
+                    break;
                 case "Add Actions":
                     moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
                     if (moi != null)
