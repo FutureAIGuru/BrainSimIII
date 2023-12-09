@@ -44,6 +44,7 @@
 		<Compile Remove="Modules\ModulePremiseDlg.xaml.cs" />
 		<Compile Remove="Modules\ModuleQueryResolution.cs" />
 		<Compile Remove="Modules\ModuleTurn.cs" />
+		<Compile Remove="Modules\ModuleUKSSearch.cs" />
 		<Compile Remove="Modules\PhysicalObject.cs" />
 		<Compile Remove="Modules\UnknownArea.cs" />
 		<Compile Remove="Modules\WaveMemoryStream.cs" />

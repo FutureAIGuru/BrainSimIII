@@ -7,73 +7,6 @@ namespace BrainSimulator.Modules
 {
     public partial class ModuleUKS
     {
-        public List<Thing> ComplexQuery(string source, string verb, string target, string prepositionString, string resultType, out List<Relationship> rawResult)
-        {
-            failedConditions.Clear();
-            succeededConditions.Clear();
-            //basic query
-            rawResult = Query(source, verb, target).ToList();
-            if (rawResult.Count == 0 && verb == "")
-                rawResult = Query(target, verb, source).ToList();
-            List<Relationship> clauses = new();
-            if (!string.IsNullOrEmpty(prepositionString))
-            {
-                //add prepositionsl clauses
-                string[] prepositions = prepositionString.Split("|");
-                foreach (string s in prepositions)
-                {
-                    if (source != "")
-                        clauses.AddRange(UKS.Query("", s, source));
-                    if (target != "")
-                        clauses.AddRange(UKS.Query("", s, target));
-                }
-            }
-
-            //merge phrases containing clauses
-            foreach (Relationship clause in clauses)
-                rawResult.AddRange(clause.clausesFrom);
-
-            //delete results which do not contain an element with the resultTipe
-            if (resultType != "")
-            {
-                for (int i = rawResult.Count - 1; i >= 0; i--)
-                {
-                    Relationship r = rawResult[i];
-                    if (r.source != null && ThingInTree(r.source, resultType)) continue;
-                    if (r.target != null && ThingInTree(r.target, resultType)) continue;
-                    if (r.relType != null && ThingInTree(r.relType, resultType)) continue;
-                    rawResult.RemoveAt(i);
-                }
-            }
-            //get the correct things from the result and eliminate source from result
-            List<Thing> resultList = GetThingsWithAncestor(rawResult, resultType);
-            resultList = resultList.FindAll(x => Relationship.TrimDigits(x.Label) != source);
-            return resultList;
-        }
-        public List<Thing> GetThingsWithAncestor(IList<Relationship> queryResult, string ancestorLabel)
-        {
-            bool HasAncestor(Thing t) { return t?.HasAncestorLabeled(ancestorLabel) == true; }
-            Thing HasProperty(Thing t) { return t?.HasRelationshipWithAncestorLabeled(ancestorLabel); }
-            List<Thing> resultList = new();
-            foreach (Relationship rv in queryResult)
-            {
-                if (HasAncestor(rv.source))
-                    resultList.Add(rv.source);
-                else if (HasAncestor(rv.target))
-                    resultList.Add(rv.target);
-                else if (HasProperty(rv.source) is Thing t)
-                    resultList.Add(t);
-                else if (HasProperty(rv.target) is Thing t1)
-                    resultList.Add(t1);
-                else if (HasProperty(rv.reltype) is Thing t2)
-                    resultList.Add(t2);
-                foreach (ClauseType c in rv.clauses)
-                    resultList.AddRange(GetThingsWithAncestor(new List<Relationship> { c.clause }, ancestorLabel));
-            }
-            resultList = resultList.Distinct().ToList();
-            return resultList;
-        }
-
 
         public IList<Relationship> Query(
                 object source, object relationshipType = null, object target = null,
@@ -100,101 +33,10 @@ namespace BrainSimulator.Modules
             return queryResult;
         }
 
-        private bool HandlePronouns(QueryRelationship query)
-        {
-            bool handled = false;
-            //currently handles "this" and "that" as targets only
-            Thing prounounReplacement = GetOrAddThing("pronounReplacements", "Object");
-            if (query.source != null && query.source.HasAncestorLabeled("pronoun"))
-            {
-                Thing person = query.source.Relationships.FindFirst(x => x.target != null && x.target.HasAncestorLabeled("personPro"))?.target;
-                switch (person?.Label)
-                {
-                    case "1st":
-                        Thing currentSpeaker = GetOrAddThing("currentSpeaker", "pronounReplacements");
-                        if (query.reltype?.Label == "is")
-                        {
-                            DeleteAllChildren(currentSpeaker);
-                            query.source = currentSpeaker;
-                            query.reltype = UKS.GetOrAddThing("has-child", "RelationshipType");
-                            if (!query.target.HasAncestorLabeled("person") && !query.target.HasAncestorLabeled("pronounType"))
-                                AddStatement(query.target, "is-a", "person");
-                            handled = true;
-                        }
-                        else
-                        {
-                            if (currentSpeaker.Children.Count == 1)
-                                query.source = currentSpeaker.Children[0];
-                            else
-                                return true;  //error, reference to I with no antecedant
-                        }
-                        break;
-                    case "2nd":
-                        Thing self = GetOrAddThing("self", "pronounReplacements");
-                        if (query.reltype?.Label == "is")
-                        {
-                            DeleteAllChildren(self);
-                            query.source = self;
-                            query.reltype = UKS.GetOrAddThing("has-child", "RelationshipType");
-                            if (!query.target.HasAncestorLabeled("person") && !query.target.HasAncestorLabeled("pronounType"))
-                                AddStatement(query.target, "is-a", "person");
-                            handled = true;
-                        }
-                        else
-                        {
-                            if (self.Children.Count == 1)
-                                query.source = self.Children[0];
-                            else
-                                return true;  //error, reference to you with no antecedant
-                        }
-                        break;
-                }
-            }
-            if (query.target != null && query.target.HasAncestorLabeled("pronoun"))
-            {
-                Thing person = query.target.Relationships.FindFirst(x => x.target != null && x.target.HasAncestorLabeled("personPro"))?.target;
-                switch (person?.Label)
-                {
-                    case "1st":
-                        Thing currentSpeaker = GetOrAddThing("currentSpeaker", "pronounReplacements");
-                        if (currentSpeaker.Children.Count == 1)
-                            query.target = currentSpeaker.Children[0];
-                        else
-                            return true;  //error, reference to I with no antecedant
-                        break;
-                    case "2nd":
-                        Thing self = GetOrAddThing("self", "pronounReplacements");
-                        if (self.Children.Count == 1)
-                            query.target = self.Children[0];
-                        else
-                            return true;  //error, reference to I with no antecedant
-                        break;
-                }
-                if (query.target.Label == "this" || query.target.Label == "that")
-                {
-                    Thing physicalObject = null;
-                    /*
-                    if (FindModule("MentalModel") is ModuleMentalModel mm)
-                    {
-                        Angle a = (Angle)(Labeled("CameraPan").V);
-                        IList<Thing> objects = UKS.SearchByAngle(UKS.Labeled("MentalModel").Children, a);
-                        if (objects.Count > 0) physicalObject = objects[0];
-                        if (physicalObject == null)
-                            return true;
-                        //                        throw new Exception("Nothing found for 'this'");
-                        query.target = physicalObject;
-                        mm.MentalModelChanged = true;
-                    }
-                    */
-                }
-            }
-            return handled;
-        }
-
         IList<Relationship> SearchRelationships(QueryRelationship searchMask, bool doInheritance = true)
         {
             List<Relationship> queryResult = new();
-            HandlePronouns(searchMask);
+            //HandlePronouns(searchMask);
             Thing invType = CheckForInverse(searchMask.relType);
             //if this relationship has an inverse, switcheroo so we are storing consistently in one direction
             if (invType != null)
@@ -205,7 +47,7 @@ namespace BrainSimulator.Modules
             }
 
             //handle pronouns in statements
-            if (HandlePronouns(searchMask)) return queryResult;
+            //if (HandlePronouns(searchMask)) return queryResult;
 
             //first get all the relationships from the given source or target (whichever is specified)
             if (searchMask.source != null)
@@ -413,53 +255,6 @@ namespace BrainSimulator.Modules
                 RelationshipWithInheritance(t2, relationshipList, depthLimit);
             }
             return relationshipList;
-        }
-        public List<Thing> GeneralQuery(List<Thing> properties)
-        {
-            List<Thing> resultList = new();
-            List<Thing> firingList = new();
-            foreach (Thing t in properties) if (t != null) firingList.Add(t);
-
-            for (int loopCount = 0; loopCount < 10 && resultList.Count == 0; loopCount++)
-            {
-                //check for result
-                //is there a thing which has all the properties?
-                foreach (Thing t in firingList)
-                {
-                    int count = MatchingPropertyCount(t, properties);
-                    if (count == properties.Count)
-                        if (!resultList.Contains(t)) resultList.Add(t);
-                }
-                if (resultList.Count == 0)
-                {
-                    //expand the firing list
-                    //TODO, only expand with transitive properties
-                    //startingCount keeps new things from being processed on this pass
-                    int startingCount = firingList.Count;
-                    for (int i = 0; i < startingCount; i++)
-                    {
-                        Thing t = firingList[i];
-                        foreach (Relationship r in t.Relationships)
-                        {
-                            //HasProperty(r.relType, "transitive");
-                            if (!firingList.Contains(r.target)) firingList.Add(r.target);
-                        }
-                        foreach (Relationship r in t.RelationshipsFrom)
-                            if (!firingList.Contains(r.source)) firingList.Add(r.source);
-                    }
-                }
-            }
-            return resultList;
-        }
-        int MatchingPropertyCount(Thing t, List<Thing> properties)
-        {
-            //TODO expand this to handle transitive relationships
-            int retVal = 0;
-            foreach (Relationship r in t.Relationships)
-                if (properties.Contains(r.target)) retVal++;
-            foreach (Relationship r in t.RelationshipsFrom)
-                if (properties.Contains(r.source)) retVal++;
-            return retVal;
         }
         void AddRelationshipToList(Relationship r, List<Relationship> relations, bool checkExclusion = true, bool ignoreSource = false)
         {

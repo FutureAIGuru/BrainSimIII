@@ -130,21 +130,23 @@ namespace BrainSimulator.Modules
             ClearExtraneousParents(rSave.source);
             ClearExtraneousParents(rSave.T);
             ClearExtraneousParents(rSave.relType);
+            ClearRedundancyInAncestry(rSave.target);
 
             return rSave;
         }
         void ClearRedundancyInAncestry(Thing t)
         {
-            var ancestors = t.AncestorList();
-            foreach (Thing child in t.Children)
+            if (t == null) return;
+            //if a direct parent has an ancestor which is also another direct parent, remove that 2nd direct parent
+            var parents = t.Parents;
+            foreach (Thing parent in parents)
             {
-                var childAncestors = child.AncestorList();
-                foreach (Thing childAncestor in childAncestors)
+                var p = parent.AncestorList();
+                p.RemoveAt(0); //don't check yourself
+                foreach (Thing ancestor in p)
                 {
-                    if (ancestors.Contains(childAncestor))
-                    {
-                        child.RemoveParent(childAncestor);
-                    }
+                    if (parents.Contains(ancestor))
+                        t.RemoveParent(ancestor);
                 }
             }
         }
@@ -171,7 +173,7 @@ namespace BrainSimulator.Modules
             };
 
             //handle pronouns in statements
-            if (HandlePronouns(r)) return r;
+            //if (HandlePronouns(r)) return r;
 
             //if this is a "has" relationship see if a new instance of the objecte is needed?
             //TODO properly find if the target already exists or needs to have an instance created
@@ -302,15 +304,7 @@ namespace BrainSimulator.Modules
         {
             if (t == null) return;
             if (t != null && t.Parents.Count > 1)
-                t.RemoveParent(Unknown);
-            Thing rootObjectThing = GetOrAddThing("unknownObject");
-            if (t != null && t.Parents.Count > 1)
-            {
-                t.RemoveParent(rootObjectThing);
-                //if (!t.HasAncestor(rootObjectThing) && !t.HasAncestorLabeled("RelationshipType"))
-                //    t.AddParent(rootObjectThing);
-            }
-            //remove leapfrogging ancestors
+                t.RemoveParent(ThingLabels.GetThing("unknownObject"));
         }
 
         Thing CreateInstanceOf(Thing t, List<Thing> targetModifiers)
@@ -327,7 +321,11 @@ namespace BrainSimulator.Modules
             notFound:
                 continue;
             }
-            Thing retVal = GetOrAddThing(t.Label + "*", t);
+            string newLabel = t.Label;
+            foreach (Thing t1 in targetModifiers)
+                newLabel += "." + t1.Label;
+
+            Thing retVal = GetOrAddThing(newLabel, t);
             foreach (Thing t1 in targetModifiers)
             {
                 AddStatement(retVal, "is", t1);
@@ -335,7 +333,7 @@ namespace BrainSimulator.Modules
             ClearExtraneousParents(t);
             return retVal;
         }
-        public Thing CheckForInverse(Thing relationshipType)
+        private Thing CheckForInverse(Thing relationshipType)
         {
             if (relationshipType == null) return null;
             Relationship inverse = relationshipType.Relationships.FindFirst(x => x.reltype.Label == "inverseOf");
@@ -344,12 +342,6 @@ namespace BrainSimulator.Modules
             //inverse = relationshipType.RelationshipsBy.FindFirst(x => x.reltype.Label == "inverseOf");
             //if (inverse != null) return inverse.source;
             return null;
-        }
-        public bool CheckForInverse(string relType)
-        {
-            Thing t = ThingFromString(relType, "RelationshipType");
-            Relationship inverse = t.Relationships.FindFirst(x => x.reltype.Label == "inverseOf");
-            return inverse != null;
         }
         public static List<Thing> FindCommonParents(Thing t, Thing t1)
         {

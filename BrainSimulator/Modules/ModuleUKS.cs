@@ -76,14 +76,12 @@ public partial class ModuleUKS : ModuleBase
         }
     }
 
-    //returns the first thing with the given label
-    //2nd paramter defines UKS to search, null=search entire knowledge store
+    //returns the thing with the given label
     public Thing Labeled(string label)
     {
         Thing retVal = ThingLabels.GetThing(label);
         return retVal;
     }
-
 
     public bool ThingInTree(Thing t1, Thing t2)
     {
@@ -441,16 +439,6 @@ public partial class ModuleUKS : ModuleBase
         return false;
     }
 
-    private void AddPropertiesToList(Thing theParent, List<Thing> retVal, IList<Thing> properties)
-    {
-        foreach (Thing t in properties)
-        {
-            if (t.HasAncestor(theParent) && !retVal.Contains(t))
-                retVal.Add(t);
-        }
-    }
-
-
     bool RelationshipsAreEqual(Relationship r1, Relationship r2, bool ignoreSource = true)
     {
         if (
@@ -473,11 +461,6 @@ public partial class ModuleUKS : ModuleBase
                 return false;
         }
         return true;
-    }
-    void AddToList(List<Relationship> l1, Relationship r)
-    {
-        if (r != null && !l1.Contains(r))
-            l1.Add(r);
     }
 
 
@@ -510,7 +493,7 @@ public partial class ModuleUKS : ModuleBase
     }
 
     //temporarily public for testing
-    public Thing ThingFromObject(object o, string parentLabel = "")
+    private Thing ThingFromObject(object o, string parentLabel = "")
     {
         if (parentLabel == "")
             parentLabel = "unknownObject";
@@ -521,9 +504,7 @@ public partial class ModuleUKS : ModuleBase
         else if (o is null)
             return null;
         else
-        {
             return null;
-        }
     }
     private List<Thing> ThingListFromString(string s, string parentLabel = "unknownObject")
     {
@@ -556,41 +537,6 @@ public partial class ModuleUKS : ModuleBase
 
 
 
-    //returns the first thing it encounters which with a given value or null if none is found
-    //the 2nd paramter defines the UKS to search (e.g. list of children)
-    //if it is null, it searches the entire UKS,
-    //the 3rd paramter defines the tolerance for spatial matches
-    //if it is null, an exact match is required
-    public virtual Thing Valued(object value, IList<Thing> UKSt = null, float toler = 0, string label = "")
-    {
-        UKSt ??= UKSList;
-        if (value is null) return null;
-        lock (UKSt)
-        {
-            foreach (Thing t in UKSt)
-            {
-                if (label != "" && t.Label != label) continue;
-                //if (t is null) continue; //this should never happen
-                if (t.V is PointPlus p1 && value is PointPlus p2)
-                {
-                    if (p1.Near(p2, toler))
-                    {
-                        t.useCount++;
-                        return t;
-                    }
-                }
-                else
-                {
-                    if (t.V is not null && t.V.ToString().ToLower().Trim() == value.ToString().ToLower().Trim())
-                    {
-                        t.useCount++;
-                        return t;
-                    }
-                }
-            }
-            return null;
-        }
-    }
 
     //TODO ?move to Thing  t.DeleteAllChildren()
     public void DeleteAllChildren(Thing t)
@@ -614,22 +560,9 @@ public partial class ModuleUKS : ModuleBase
 
     }
 
-    //This buffers the location of the unknownObject tree for consistency and speed
-    private Thing unknown;
-    public Thing Unknown
-    {
-        get
-        {
-            if (unknown == null)
-                unknown = Labeled("unknownObject");
-            return unknown;
-        }
-    }
-
     // If a thing exists, return it.  If not, create it.
     // If it is currently an unknown, defining the parent can make it known
-    // A value can optionally be defined.
-    public Thing GetOrAddThing(string label, object parent = null, object value = null, bool reuseValue = false)
+    public Thing GetOrAddThing(string label, object parent = null)
     {
         Thing thingToReturn = null;
 
@@ -649,146 +582,10 @@ public partial class ModuleUKS : ModuleBase
         if (correctParent is null) throw new ArgumentException("GetOrAddThing: could not find parent");
 
         thingToReturn = AddThing(label, correctParent);
-
-        //thingToReturn = GetThingWithCorrectParent(label, parent);
-
-        //if (thingToReturn == null)
-        //{
-        //    = GetCorrectParent(label, parent);
-
-        //    if (correctParent != null)
-        //    {
-        //        thingToReturn = GetLabeledOrValuedThing(label, correctParent, value, reuseValue);
-        //    }
-        //    if (thingToReturn == null)
-        //    {
-        //        thingToReturn = GetUnknownParentToBeKnown(label, correctParent);
-
-        //        if (thingToReturn == null)
-        //        {
-        //            thingToReturn = AddNewThingToCorrectParent(label, thingToReturn, correctParent);
-        //        }
-        //    }
-        //}
-
-        //if (thingToReturn != null && value != null)
-        //{
-        //    thingToReturn.V = value;
-        //}
-
         return thingToReturn;
     }
 
-    private Thing GetThingWithCorrectParent(string label, object parent)
-    {
-        if (parent is null)
-            return Labeled(label);
-        return (Thing)null;
-    }
-
-    private Thing GetCorrectParent(string label, object parent)
-    {
-        Thing correctParent = null;
-
-        if (parent is Thing t)
-        {
-            correctParent = t;
-        }
-        else if (parent is string s1 && s1 != "")
-        {
-            correctParent = Labeled(s1);
-            if (correctParent == null)
-            {
-                correctParent = AddThing(s1, Unknown);
-            }
-        }
-        else if (parent is null)
-        {
-            correctParent = Unknown;
-        }
-        return correctParent;
-    }
-
-    private Thing GetLabeledOrValuedThing(string label, Thing correctParent, object value, bool reuseValue)
-    {
-        Thing thingToReturn = Labeled(label);
-        if (value is not null && (value is string || reuseValue))
-        {
-            thingToReturn = Valued(value, correctParent.Children, 0, label);
-            thingToReturn ??= AddThing(label, correctParent, value);
-        }
-        return thingToReturn;
-    }
-
-    private Thing GetUnknownParentToBeKnown(string label, Thing correctParent)
-    {
-        Thing thingToReturn = null;
-        if (Unknown != null)
-        {
-            thingToReturn = Labeled(label);
-        }
-        if (thingToReturn != null && correctParent != null)
-        {
-            thingToReturn.AddParent(correctParent);
-            thingToReturn.RemoveParent(unknown);
-        }
-        return thingToReturn;
-    }
-
-    private Thing AddNewThingToCorrectParent(string label, Thing thingToReturn, Thing correctParent)
-    {
-        if (correctParent != null)
-        {
-            thingToReturn = AddThing(label, correctParent);
-        }
-        if (thingToReturn == null)
-        {
-            correctParent = unknown;
-            thingToReturn = AddThing(label, correctParent);
-        }
-        return thingToReturn;
-    }
-
-    public Thing SetParent(object child, object parent)
-    {
-        Thing tParent, tChild;
-        if (parent is string sParent)
-        {
-            tParent = Labeled(sParent);
-            if (tParent == null)
-                tParent = GetOrAddThing(sParent, Unknown);
-        }
-        else if (parent is Thing t) tParent = t;
-        else throw new ArgumentException("Invalid Type");
-
-        if (child is string sChild)
-        {
-            tChild = Labeled(sChild);
-            if (tChild == null)
-                tChild = GetOrAddThing(sChild, Unknown);
-        }
-        else if (child is Thing t) tChild = t;
-        else throw new ArgumentException("Invalid Type");
-
-        return SetParent(tChild, tParent);
-    }
-
-    public Thing SetParent(Thing child, Thing parent)
-    {
-        if (parent.Children.Contains(child))
-        {
-            //TODO increase confidence in relationship
-            return parent;
-        }
-        parent.AddChild(child);
-        Thing uk1 = GetOrAddThing("unknownObject", "Object");
-        Thing uk2 = GetOrAddThing("unknownModifier", "Object");
-        child.RemoveParent(uk1);
-        child.RemoveParent(uk2);
-
-        return parent;
-    }
-
+    
     public void SetupNumbers()
     {
         GetOrAddThing("is-a", "RelationshipType");
@@ -814,7 +611,7 @@ public partial class ModuleUKS : ModuleBase
         Thing some = GetOrAddThing("some", "number");
         Thing many = GetOrAddThing("many", "number");
         Thing none = GetOrAddThing("none", "number");
-        SetParent(Labeled("number"), "Object");
+        AddStatement("number","is-a", "Object");
         none.V = (int)0;
 
         AddStatement("10", "isSimilarTo", "ten");
@@ -838,100 +635,5 @@ public partial class ModuleUKS : ModuleBase
         AddStatement("many", "greaterThan", "some");
         AddStatement("some", "greaterThan", "none");
         AddStatement("number", "hasProperty", "isexclusive");
-    }
-
-    public void SetupPronouns()
-    {
-        List<Thing> cases = new();
-        GetOrAddThing("pronoun", "Object");
-        GetOrAddThing("pronounType", "pronoun");
-        GetOrAddThing("plural", "pronounType");
-        GetOrAddThing("singular", "pronounType");
-        GetOrAddThing("gender", "pronounType");
-        GetOrAddThing("masculine", "gender");
-        GetOrAddThing("feminine", "gender");
-        GetOrAddThing("personPro", "pronounType");
-        GetOrAddThing("1st", "personPro");
-        GetOrAddThing("2nd", "personPro");
-        GetOrAddThing("3rd", "personPro");
-        GetOrAddThing("4th", "personPro"); //demonstrative
-        GetOrAddThing("5th", "personPro"); //demonstrative
-        //not sure how we'll use these:
-        cases.Add(GetOrAddThing("subj", "pronounType"));
-        cases.Add(GetOrAddThing("obj", "pronounType"));
-        cases.Add(GetOrAddThing("possAdj", "pronounType"));
-        cases.Add(GetOrAddThing("poss", "pronounType"));
-        cases.Add(GetOrAddThing("refl", "pronounType"));
-
-        //person (assumes singular) subj obje posseive poss adj refl
-        //TODO: different languages may require more cases
-        List<string> pronouns = new()
-        {
-            "1 i me my mine myself",
-            "2 you you your yours yourself",
-            "3m he him his his himself",
-            "3f she her her hers herself",
-            "3 it it its its itself",
-            "1p we us our ours ourselves",
-            "2p you you your yours yourselves",
-            "3p they them their theirs themselves",
-            "4 this this its its itself",  //4 is demonstrative near
-            "5 that that its its itself",  //5 is demonstrative far
-            "4p these these their theirs themselves",
-            "5p those those their theirs themselves",
-        };
-
-        foreach (string pronoun in pronouns)
-        {
-            string[] items = pronoun.Split(' ');
-            Debug.Assert(items.Length == 6);
-
-            int.TryParse(items[0][0].ToString(), out int person);
-            char modifier = ' ';
-            if (items[0].Length > 1)
-            {
-                modifier = items[0][1];
-            }
-            for (int i = 1; i < items.Length; i++)
-            {
-                Thing t = GetOrAddThing(items[i], "pronoun");
-                AddStatement(t, "is", cases[i - 1]);
-                switch (person)
-                {
-                    case 1:
-                        AddStatement(t, "is", "1st");
-                        break;
-                    case 2:
-                        AddStatement(t, "is", "2nd");
-                        break;
-                    case 3:
-                        AddStatement(t, "is", "3rd");
-                        break;
-                    case 4:
-                        AddStatement(t, "is", "4th");
-                        break;
-                    case 5:
-                        AddStatement(t, "is", "5th");
-                        break;
-                }
-                switch (modifier)
-                {
-                    case 'p':
-                        AddStatement(t, "is", "plural");
-                        break;
-                    case 'm':
-                        AddStatement(t, "is", "masculine");
-                        AddStatement(t, "is", "singular");
-                        break;
-                    case 'f':
-                        AddStatement(t, "is", "feminine");
-                        AddStatement(t, "is", "singular");
-                        break;
-                    case ' ':
-                        AddStatement(t, "is", "singular");
-                        break;
-                }
-            }
-        }
     }
 }

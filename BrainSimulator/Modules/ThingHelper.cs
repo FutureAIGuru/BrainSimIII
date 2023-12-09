@@ -34,7 +34,7 @@ namespace BrainSimulator.Modules
                 }
                 return hasChildType;
             }
-            set { }
+            set { hasChildType = value; }
         }
     }
 
@@ -43,6 +43,7 @@ namespace BrainSimulator.Modules
         static ConcurrentDictionary<string, Thing> labelList = new ConcurrentDictionary<string, Thing>();
         public static Thing GetThing(string label)
         {
+            if (label == null || label == "") return null;
             Thing retVal = null;
             if (labelList.TryGetValue(label.ToLower(), out retVal)) { }
             return retVal;

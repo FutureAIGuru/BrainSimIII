@@ -35,6 +35,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private List<Thing> uks;
     private int maxChildrenWhenCollapsed = 20;
     private DispatcherTimer dt;
+    private string expandAll = "";  //all the children below this will be expanded
 
     public ModuleUKSDlg()
     {
@@ -95,14 +96,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         catch (Exception ex)
         {
-            //IList<Thing> ch = t.Children;
             return;  //don't update counts display if they are wrong
         }
         statusLabel.Content = uks.Count + " Things  " + (childCount + refCount) + " Relationships";
         Title = "UKS: Knowledge Base: " + Path.GetFileNameWithoutExtension(parent.fileName);
     }
 
-    private void LoadChildrenToTreeView()
+    private void LoadContentToTreeView()
     {
         string root = textBoxRoot.Text;
         ModuleUKS parent = (ModuleUKS)ParentModule;
@@ -116,10 +116,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             theTreeView.Items.Add(tvi);
             tvi.SetValue(ThingObjectProperty, thing);
             totalItemCount++;
-            if (tvi.IsExpanded)
-            {
-                AddChildren(thing, tvi, 0, thing.Label);
-            }
+            AddChildren(thing, tvi, 0, thing.Label);
         }
         else if (string.IsNullOrEmpty(root)) //search for unattached Things
         {
@@ -138,35 +135,201 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             catch { updateFailed = true; }
         }
     }
-
-    private void RefreshButton_Click(object sender, RoutedEventArgs e)
+    private void AddChildren(Thing t, TreeViewItem tvi, int depth, string parentLabel)
     {
-        RefreshSetUp();
+        if (totalItemCount > 3000) return;
 
-        try
+        List<Relationship> theChildren = new();
+        foreach (Relationship r in t.Relationships)
         {
-            if (!updateFailed)
+            if (Relationship.TrimDigits(r.reltype?.Label) == "has-child" && r.target != null)
             {
-                expandedItems.Clear();
-                //for demo purposes
-//                expandedItems.Add("|Thing|MentalModel");
-                expandedItems.Add("|Thing|Object");
-                FindExpandedItems(theTreeView.Items, "");
+                theChildren.Add(r);
             }
-            updateFailed = false;
-
-            UpdateStatusLabel();
-
-            theTreeView.Items.Clear();
-            LoadChildrenToTreeView();
         }
-        catch
+        theChildren = theChildren.OrderBy(x => x.target.Label).ToList();
+
+        ModuleUKS UKS = (ModuleUKS)ParentModule;
+
+        foreach (Relationship r in theChildren)
         {
-            updateFailed = true;
+            Thing child = r.target;
+            int descCount = child.GetDescendentsCount();
+            string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
+            string header = child.Label;
+            if (r.weight != 1 && checkBoxNARS.IsChecked == true) //prepend weight for probabilistic children
+                header = "<" + r.weight.ToString("f2") + ">" + header;
+            if (r.reltype.HasRelationship(UKS.Labeled("not")) != null) //prepend ! for negative  children
+                header = "!" + header;
+
+            header += ":" + child.Children.Count + "," + descCountStr;
+            if (child.RelationshipsNoCount.Count > 0)
+            {
+                header = ChildHasReferences(UKS, child, header, depth);
+            }
+            //potentially display the Valur of the node
+            if (child.V is not null)
+            {
+            }
+
+            TreeViewItem tviChild = new() { Header = header };
+
+            //change color of things which just fired or are about to expire
+            tviChild.SetValue(ThingObjectProperty, child);
+            if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
+                tviChild.Background = new SolidColorBrush(Colors.LightGreen);
+            if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+                tviChild.Background = new SolidColorBrush(Colors.LightYellow);
+
+            if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
+                tviChild.IsExpanded = true;
+            if (r.target.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
+                tviChild.IsExpanded = true;
+
+            tvi.Items.Add(tviChild);
+
+            totalItemCount++;
+            tviChild.ContextMenu = GetContextMenu(child);
+            if (depth < maxDepth)
+            {
+                if (tviChild.IsExpanded)
+                {
+                    // load children and references
+                    AddChildren(child, tviChild, depth + 1, parentLabel + "|" + child.Label);
+                    AddReferences(child, tviChild, parentLabel);
+                    AddReferencedBy(child, tviChild, parentLabel);
+                }
+                else if (child.Children.Count > 0 ||
+                    CountNonChildRelationships(child.RelationshipsNoCount) > 0
+                    || CountNonChildRelationships(child.RelationshipsFrom) > 0)
+                {
+                    // don't load those that aren't expanded
+                    TreeViewItem emptyChild = new() { Header = "" };
+                    tviChild.Items.Add(emptyChild);
+                    tviChild.Expanded += EmptyChild_Expanded;
+                }
+            }
         }
-        busy = false;
     }
 
+    private void AddReferences(Thing t, TreeViewItem tvi, string parentLabel)
+    {
+        if (CountNonChildRelationships(t.RelationshipsNoCount) == 0) return;
+        TreeViewItem tviRefLabel = new() { Header = "Relationships: " + CountNonChildRelationships(t.RelationshipsNoCount).ToString() };
+
+        string fullString = "|" + parentLabel + "|" + t.Label + "|:Relationships";
+        if (expandedItems.Contains(fullString))
+            tviRefLabel.IsExpanded = true;
+        if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
+            tviRefLabel.IsExpanded = true;
+
+        tviRefLabel.ContextMenu = new ContextMenu() { Visibility = Visibility.Hidden };
+        tvi.Items.Add(tviRefLabel);
+
+        totalItemCount++;
+        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => -x.Value).ToList();
+        foreach (Relationship l in sortedReferences)
+        {
+            if (l.relType?.Label == "has-child") continue;
+            if (l.target != null && l.target.HasAncestorLabeled("Value"))
+            {
+                TreeViewItem tviRef = new() { Header = GetRelationshipString(l) };
+                tviRef.ContextMenu = GetContextMenu(l.target);
+                tviRefLabel.Items.Add(tviRef);
+                totalItemCount++;
+            }
+            else if (l.relType is not null)
+            {
+                string count = "";
+                if (l.count != 0) count = l.count + ")";
+                TreeViewItem tviRef = new() { Header = GetRelationshipString(l), };
+
+                if (l.source != t) tviRef.Header = l.source?.Label + "->" + tviRef.Header;
+                tviRef.ContextMenu = GetRelationshipContextMenu(l);
+                tviRefLabel.Items.Add(tviRef);
+                totalItemCount++;
+            }
+            else if (!l.target.HasAncestorLabeled("Object"))
+            {
+                TreeViewItem tviRef = new() { Header = GetRelationshipString(l), };
+                tviRef.ContextMenu = GetContextMenu(l.target);
+                tviRefLabel.Items.Add(tviRef);
+                totalItemCount++;
+            }
+            else
+            {
+                string refEntry = (l.target as Thing).Label + ":";
+                if ((l.T as Thing).V is not null) refEntry += (l.T as Thing).V.ToString() + ": ";
+                refEntry += l.hits + " : -";
+                refEntry += l.misses + " : ";
+                refEntry += ((float)l.hits / (float)l.misses).ToString("f3");
+
+                TreeViewItem tviRef = new() { Header = refEntry, };
+                tviRef.ContextMenu = GetContextMenu((l.target as Thing));
+                tviRefLabel.Items.Add(tviRef);
+                totalItemCount++;
+            }
+        }
+    }
+
+
+    private void AddReferencedBy(Thing t, TreeViewItem tvi, string parentLabel)
+    {
+        if (CountNonChildRelationships(t.RelationshipsFrom) == 0) return;
+        TreeViewItem tviRefLabel = new() { Header = "RelationshipsFrom: " + CountNonChildRelationships(t.RelationshipsFrom).ToString() };
+
+        string fullString = "|" + parentLabel + "|" + t.Label + "|:RelationshipsFrom";
+        if (expandedItems.Contains(fullString))
+            tviRefLabel.IsExpanded = true;
+        if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
+            tviRefLabel.IsExpanded = true;
+        tvi.ContextMenu.Visibility = Visibility.Hidden;
+        tvi.Items.Add(tviRefLabel);
+
+        totalItemCount++;
+
+        DetermineRelationshipAndUpdateItemCount(t, tviRefLabel);
+    }
+
+
+    //the tree is populated only with expanded items or it would contain the entire UKS content
+    //when an item is expanded, its content needs to be created
+    private void EmptyChild_Expanded(object sender, RoutedEventArgs e)
+    {
+        int count = 0;
+        foreach (var item in theTreeView.Items)
+        {
+            count++;
+            if (item is TreeViewItem tvi1)
+                count += TreeviewItemCount(tvi1);
+        }
+        // what tree view item is this
+        if (sender is TreeViewItem tvi)
+        {
+            string name = tvi.Header.ToString(); // to help debug
+            Thing t = (Thing)tvi.GetValue(ThingObjectProperty);
+            string parentLabel = "|" + t.Label;
+            TreeViewItem tvi1 = tvi;
+            int depth = 0;
+            while (tvi1.Parent != null && tvi1.Parent is TreeViewItem tvi2)
+            {
+                tvi1 = tvi2;
+                Thing t1 = (Thing)tvi1.GetValue(ThingObjectProperty);
+                parentLabel = "|" + t1.Label + parentLabel;
+                depth++;
+            }
+            if (!expandedItems.Contains(parentLabel))
+            {
+                expandedItems.Add(parentLabel);
+                tvi.Items.Clear(); // delete empty child
+                AddChildren(t, tvi, depth, parentLabel);
+                AddReferences(t, tvi, parentLabel);
+                AddReferencedBy(t, tvi, parentLabel);
+            }
+        }
+    }
+
+    //Context Menu creation and handling
     private ContextMenu GetContextMenu(Thing t)
     {
         ContextMenu menu = new ContextMenu();
@@ -186,6 +349,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         mi.Header = renameBox;
         menu.Items.Add(mi);
 
+        mi = new();
+        mi.Click += Mi_Click;
+        if (t.Label == expandAll)
+            mi.Header = "Collapse All";
+        else
+            mi.Header = "Expand All";
+        menu.Items.Add(mi);
         mi = new();
         mi.Click += Mi_Click;
         mi.Header = "Delete";
@@ -314,6 +484,18 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             }
             switch (mi.Header)
             {
+                case "Expand All":
+                    expandAll = t.Label;
+                    expandedItems.Clear();
+                    expandedItems.Add("|Thing|Object");
+                    updateFailed = true;
+                    break;
+                case "Collapse All":
+                    expandAll = "";
+                    expandedItems.Clear();
+                    expandedItems.Add("|Thing|Object");
+                    updateFailed = true;
+                    break;
                 case "Show All":
                     textBoxRoot.Text = "Thing";
                     RefreshButton_Click(null, null);
@@ -327,11 +509,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
                     if (moi != null)
                         moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.partsOf);
-                    break;
-                case "Change Label":
-                //    moi = (ModuleOnlineInfo)MainWindow.modules.FindFirst(x => x.Label == "OnlineInfo")?;
-                //    if (moi != null)
-                //        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.list);
                     break;
                 case "Add Actions":
                     moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
@@ -369,6 +546,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         return s;
     }
 
+    //keep track of which tree items are expanded
+
     private void FindExpandedItems(ItemCollection items, string parentLabel)
     {
         foreach (TreeViewItem tvi1 in items)
@@ -398,32 +577,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         int count = child.Relationships.Count - childCount;
         if (count > 0)
         {
-            header += " Refs:" + count;
+            header += " Rels:" + count;
         }
-        //List<Relationship> sortedRelationships = child.RelationshipsNoCount.OrderBy(x => -x.Value1).ToList();
-        //bool trueCount = true;
-
-        //for (int j = 0; j < sortedRelationships.Count; j++)
-        //{
-        //    Relationship l = sortedRelationships[j];
-        //    if (checkBoxNARS.IsChecked == false && l.weight <= .5) continue;
-
-        //    if (l.reltype != null && Relationship.TrimDigits(l.relType?.Label) != "has-child")
-        //    {
-        //        if (header.Length - header.LastIndexOf('\n') > charsPerLine - 6 * depth)
-        //            header += "\n";
-        //        header += GetRelationshipString(l);
-        //        if (j > maxChildrenWhenCollapsed)
-        //        {
-        //            trueCount = false;
-        //            break;
-        //        }
-        //    }
-        //}
-        //if (!trueCount)
-        //{
-        //    header += "...";
-        //}
         return header;
     }
 
@@ -440,151 +595,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         return retVal;
     }
 
-    private void AddChildren(Thing t, TreeViewItem tvi, int depth, string parentLabel)
-    {
-        if (totalItemCount > 3000) return;
-
-        List<Relationship> theChildren = new();
-        foreach (Relationship r in t.Relationships)
-        {
-            if (Relationship.TrimDigits(r.reltype?.Label) == "has-child" && r.target != null)
-            {
-                theChildren.Add(r);
-            }
-        }
-        theChildren = theChildren.OrderBy(x => x.target.Label).ToList();
-
-        ModuleUKS UKS = (ModuleUKS)ParentModule;
-        Thing shapeRoot = UKS.Labeled("shp");
-        Thing colorRoot = UKS.Labeled("col");
-        Thing visibleRoot = UKS.Labeled("vsb");
-        Thing sizeRoot = UKS.Labeled("siz");
-        Thing appearingRoot = UKS.Labeled("app");
-
-        foreach (Relationship r in theChildren)
-        {
-            Thing child = r.target;
-            int descCount = child.GetDescendentsCount();
-            string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
-            string header = child.Label;
-            if (r.weight != 1 && checkBoxNARS.IsChecked == true) //prepend weight for probabilistic children
-                header = "<"+r.weight.ToString("f2")+">"+header;
-            if (r.reltype.HasRelationship(UKS.Labeled("not")) != null) //prepend ! for negative  children
-                header = "!" + header;
-
-            header += ":" + child.Children.Count + "," + descCountStr;
-            if (child.Label.StartsWith("po") || child.Label.StartsWith("io"))
-            {
-                header += " [";
-                if (colorRoot is not null)
-                {
-                    Thing tcol = child.HasRelationshipWithParent(colorRoot);
-                    if (tcol is not null) header += FindPropertyName(tcol) + ", ";
-                }
-                if (sizeRoot is not null)
-                {
-                    Thing tsiz = child.HasRelationshipWithParent(sizeRoot);
-                    if (tsiz is not null) header += FindPropertyName(tsiz).Substring(0, 4) + ", ";
-                }
-                if (visibleRoot is not null)
-                {
-                    Thing tvsb = child.HasRelationshipWithParent(visibleRoot);
-                    if (tvsb is not null) header += FindPropertyName(tvsb) + ", ";
-                }
-                if (appearingRoot is not null)
-                {
-                    Thing tapp = child.HasRelationshipWithParent(appearingRoot);
-                    if (tapp is not null) header += FindPropertyName(tapp) + ", ";
-                }
-                if (shapeRoot is not null)
-                {
-                    Thing tshp = child.HasRelationshipWithParent(shapeRoot);
-                    if (tshp is not null) header += FindPropertyName(tshp);
-                }
-                header += "]";
-            }
-            else if (child.RelationshipsNoCount.Count > 0)
-            {
-                header = ChildHasReferences(UKS, child, header, depth);
-            }
-            if (child.V is not null)
-            {
-                if (child.V is int iVal)
-                    header += " : " + iVal.ToString("X");
-                else if (child.V is List<Point3DPlus>)
-                    header += " : Point List";
-                //else if (child.V is not UnknownArea)
-                //    header += " : " + child.V.ToString();
-            }
-
-            TreeViewItem tviChild = new() { Header = header };
-
-            if (child.Label.StartsWith("cv")&& !child.HasAncestorLabeled("Object"))
-            {
-                HSLColor hslColor = (HSLColor)child.V;
-                Color backgroundColor = hslColor.ToColor();
-                tviChild.Background = new SolidColorBrush(backgroundColor);
-                double Y = 0.2126 * backgroundColor.ScR + 0.7152 * backgroundColor.ScG + 0.0722 * backgroundColor.ScB;
-                tviChild.Foreground = Y > 0.4 ? Brushes.Black : Brushes.White;
-            }
-
-            //change color of things which just fired or are about to expire
-            tviChild.SetValue(ThingObjectProperty, child);
-            if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
-                tviChild.Background = new SolidColorBrush(Colors.LightGreen);
-            if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
-                tviChild.Background = new SolidColorBrush(Colors.LightYellow);
-
-            if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
-                tviChild.IsExpanded = true;
-            tvi.Items.Add(tviChild);
-
-            totalItemCount++;
-            tviChild.ContextMenu = GetContextMenu(child);
-            if (depth < maxDepth)
-            {
-                if (tviChild.IsExpanded)
-                {
-                    // load children and references
-                    AddChildren(child, tviChild, depth + 1, parentLabel + "|" + child.Label);
-                    AddReferences(child, tviChild, parentLabel);
-                    AddReferencedBy(child, tviChild, parentLabel);
-                }
-                else if (child.Children.Count > 0 ||
-                    CountNonChildRelationships(child.RelationshipsNoCount) > 0
-                    || CountNonChildRelationships(child.RelationshipsFrom) > 0)
-                {
-                    // don't load those that aren't expanded
-                    TreeViewItem emptyChild = new() { Header = "" };
-                    tviChild.Items.Add(emptyChild);
-                    tviChild.Expanded += EmptyChild_Expanded;
-                }
-            }
-        }
-    }
-
-    private string FindPropertyName(Thing property)
-    {
-        ModuleUKS UKS = (ModuleUKS)base.ParentModule;
-        Thing objectRoot = UKS.GetOrAddThing("Object", "Thing");
-        if (property.GetRelationshipByWithAncestor(objectRoot) == null)
-        {
-            return property.Label;
-        }
-        else
-        {
-            foreach (Relationship l in property.GetRelationshipByWithAncestor(objectRoot))
-            {
-                if ((l.source as Thing).Relationships.Count == 1)
-                {
-                    return (l.source as Thing).Label;
-                }
-            }
-        }
-        if (property.V != null)
-            return property.V.ToString();
-        return property.Label;
-    }
 
     //for debug/test
     int TreeviewItemCount(TreeViewItem tvi)
@@ -596,102 +606,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         }
         return retVal;
     }
-    private void EmptyChild_Expanded(object sender, RoutedEventArgs e)
-    {
-        int count = 0;
-        foreach (var item in theTreeView.Items)
-        {
-            count++;
-            if (item is TreeViewItem tvi1)
-                count += TreeviewItemCount(tvi1);
-        }
-        // what tree view item is this
-        if (sender is TreeViewItem tvi)
-        {
-            string name = tvi.Header.ToString(); // to help debug
-            Thing t = (Thing)tvi.GetValue(ThingObjectProperty);
-            string parentLabel = "|" + t.Label;
-            TreeViewItem tvi1 = tvi;
-            int depth = 0;
-            while (tvi1.Parent != null && tvi1.Parent is TreeViewItem tvi2)
-            {
-                tvi1 = tvi2;
-                Thing t1 = (Thing)tvi1.GetValue(ThingObjectProperty);
-                parentLabel = "|" + t1.Label + parentLabel;
-                depth++;
-            }
-            if (!expandedItems.Contains(parentLabel))
-            {
-                expandedItems.Add(parentLabel);
-                tvi.Items.Clear(); // delete empty child
-                AddChildren(t, tvi, depth, parentLabel);
-                AddReferences(t, tvi, parentLabel);
-                AddReferencedBy(t, tvi, parentLabel);
-            }
-        }
-    }
-
     int CountNonChildRelationships(IList<Relationship> list)
     {
         return list.Count - list.Count(x => x.relType?.Label == "has-child");
     }
 
-    private void AddReferences(Thing t, TreeViewItem tvi, string parentLabel)
-    {
-        if (CountNonChildRelationships(t.RelationshipsNoCount) == 0) return;
-        TreeViewItem tviRefLabel = new() { Header = "Relationships: " + CountNonChildRelationships(t.RelationshipsNoCount).ToString() };
-
-        string fullString = "|" + parentLabel + "|" + t.Label + "|:Relationships";
-        if (expandedItems.Contains(fullString))
-            tviRefLabel.IsExpanded = true;
-        tviRefLabel.ContextMenu = new ContextMenu() { Visibility = Visibility.Hidden };
-        tvi.Items.Add(tviRefLabel);
-
-        totalItemCount++;
-        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => -x.Value).ToList();
-        foreach (Relationship l in sortedReferences)
-        {
-            if (l.relType?.Label == "has-child") continue;
-            if (l.target != null && l.target.HasAncestorLabeled("Value"))
-            {
-                TreeViewItem tviRef = new(){Header = GetRelationshipString(l)};
-                tviRef.ContextMenu = GetContextMenu(l.target);
-                tviRefLabel.Items.Add(tviRef);
-                totalItemCount++;
-            }
-            else if (l.relType is not null)
-            {
-                string count = "";
-                if (l.count != 0) count = l.count + ")";
-                TreeViewItem tviRef = new(){Header = GetRelationshipString(l),};
-
-                if (l.source != t) tviRef.Header = l.source?.Label + "->" + tviRef.Header;
-                tviRef.ContextMenu = GetRelationshipContextMenu(l);
-                tviRefLabel.Items.Add(tviRef);
-                totalItemCount++;
-            }
-            else if (!l.target.HasAncestorLabeled("Object"))
-            {
-                TreeViewItem tviRef = new(){Header = GetRelationshipString(l),};
-                tviRef.ContextMenu = GetContextMenu(l.target);
-                tviRefLabel.Items.Add(tviRef);
-                totalItemCount++;
-            }
-            else
-            {
-                string refEntry = (l.target as Thing).Label + ":";
-                if ((l.T as Thing).V is not null) refEntry += (l.T as Thing).V.ToString() + ": ";
-                refEntry += l.hits + " : -";
-                refEntry += l.misses + " : ";
-                refEntry += ((float)l.hits / (float)l.misses).ToString("f3");
-                
-                TreeViewItem tviRef = new(){Header = refEntry,};
-                tviRef.ContextMenu = GetContextMenu((l.target as Thing));
-                tviRefLabel.Items.Add(tviRef);
-                totalItemCount++;
-            }
-        }
-    }
 
     private void DetermineRelationshipAndUpdateItemCount(Thing t, TreeViewItem tviRefLabel)
     {
@@ -710,22 +629,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             totalItemCount++;
         }
     }
-    private void AddReferencedBy(Thing t, TreeViewItem tvi, string parentLabel)
-    {
-        if (CountNonChildRelationships(t.RelationshipsFrom) == 0) return;
-        TreeViewItem tviRefLabel = new() { Header = "RelationshipsFrom: " + CountNonChildRelationships(t.RelationshipsFrom).ToString() };
 
-        string fullString = "|" + parentLabel + "|" + t.Label + "|:RelationshipsFrom";
-        if (expandedItems.Contains(fullString))
-            tviRefLabel.IsExpanded = true;
-        tvi.ContextMenu.Visibility = Visibility.Hidden;
-        tvi.Items.Add(tviRefLabel);
 
-        totalItemCount++;
-
-        DetermineRelationshipAndUpdateItemCount(t, tviRefLabel);
-    }
-
+    //EVENTS
     private void TheTreeView_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         Draw(true);
@@ -785,6 +691,34 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         theTreeView.Background = new SolidColorBrush(Colors.LightSteelBlue);
     }
 
+    private void RefreshButton_Click(object sender, RoutedEventArgs e)
+    {
+        RefreshSetUp();
+
+        try
+        {
+            if (!updateFailed)
+            {
+                expandedItems.Clear();
+
+                expandedItems.Add("|Thing|Object");
+                //expandedItems.Add("|Thing|Object|unknownObject");
+                FindExpandedItems(theTreeView.Items, "");
+            }
+            updateFailed = false;
+
+            UpdateStatusLabel();
+
+            theTreeView.Items.Clear();
+            LoadContentToTreeView();
+        }
+        catch
+        {
+            updateFailed = true;
+        }
+        busy = false;
+    }
+
     private void TheTreeView_MouseLeave(object sender, MouseEventArgs e)
     {
         mouseInTree = false;
@@ -794,10 +728,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void InitializeButton_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
-        theTreeView.Items.Clear();
-        expandedItems.Clear();
         parent.Initialize();
         textBoxRoot.Text = "Thing";
+        expandAll = "";
         RefreshButton_Click(null, null);
     }
 

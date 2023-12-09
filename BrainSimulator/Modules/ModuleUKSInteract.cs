@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using Pluralize.NET;
 
 namespace BrainSimulator.Modules
 {
@@ -67,12 +68,34 @@ namespace BrainSimulator.Modules
         {
             GetUKS();
             if (UKS == null) return;
-            Relationship r = UKS.AddStatement(source, relationshipType, target);
+            IPluralize pluralizer = new Pluralizer();
+
+
+            source = source.Trim();
+            target = target.Trim();
+            relationshipType = relationshipType.Trim();
+
+            string[] tempStringArray = source.Split(' ');
+            List<string> sourceModifiers = new();
+            source = pluralizer.Singularize(tempStringArray[tempStringArray.Length-1]);
+            for (int i = 0; i < tempStringArray.Length-1; i++) sourceModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+
+            tempStringArray = target.Split(' ');
+            List<string> targetModifiers = new();
+            target = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
+            for (int i = 0; i < tempStringArray.Length - 1; i++) targetModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+
+            tempStringArray = relationshipType.Split(' ');
+            List<string> typeModifiers = new();
+            relationshipType= pluralizer.Singularize(tempStringArray[0]);
+            for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+
+
+
+
+            Relationship r = UKS.AddStatement(source, relationshipType, target,sourceModifiers, typeModifiers, targetModifiers);
             r.TimeToLive = duration;
             r.weight = confidence;
-            r.source.SetFired();
-            r.target.SetFired();
-            r.reltype.SetFired();
         }
 
         public Thing GetUKSThing(string thing, string parent)
