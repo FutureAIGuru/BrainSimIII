@@ -149,6 +149,41 @@ namespace BrainSimulator.Modules
             set{}
         }
 
+        public Relationship AddClause(string clauseType, Relationship r2)
+        {
+            Relationship r = null;
+            ClauseType theClause = null;
+            switch (clauseType.ToLower())
+            {
+                case "condition":
+                    theClause = new ClauseType { a = AppliesTo.condition};
+                    break;
+                case "source":
+                    theClause = new ClauseType { a = AppliesTo.source};
+                    break;
+                case "target":
+                    theClause = new ClauseType { a = AppliesTo.target};
+                    break;
+                case "type":
+                    theClause = new ClauseType { a = AppliesTo.type};
+                    break;
+                case "all":
+                    theClause = new ClauseType { a = AppliesTo.all};
+                    break;
+            }
+            if (theClause != null)
+            {
+                theClause.clause = r2;
+                if (clauses.FindFirst(x => x.a == theClause.a && x.clause == r2) == null)
+                {
+                    clauses.Add(theClause);
+                    r2.clausesFrom.Add(this);
+                }
+            }
+
+            return r;
+        }
+            
 
         public override string ToString()
         {
@@ -163,22 +198,22 @@ namespace BrainSimulator.Modules
                 {
                     case AppliesTo.source:
                         {
-                            sourceModifierString += " " + c.clause;
+                            sourceModifierString += " AND " + c.clause.source;
                             break;
                         }
                     case AppliesTo.type:
                         {
-                            typeModifierString += " " + c.clause;
+                            typeModifierString += " AND " + c.clause.relType;
                             break;
                         }
                     case AppliesTo.target:
                         {
-                            targetModifierString += " " + c.clause;
+                            targetModifierString += " AND  " + c.clause.target;
                             break;
                         }
                     case AppliesTo.all:
                         {
-                            targetModifierString += " " + c.clause;
+                            targetModifierString += " AND " + c.clause;
                             break;
                         }
                     case AppliesTo.condition:

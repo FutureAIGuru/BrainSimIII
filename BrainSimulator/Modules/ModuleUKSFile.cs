@@ -359,7 +359,6 @@ namespace BrainSimulator.Modules
                 DeFormatAndMergeContentAfterLoading();
             else
                 DeFormatContentAfterLoading();
-                DeFormatContentAfterLoading();
             base.UKSReloaded();
         }
     }

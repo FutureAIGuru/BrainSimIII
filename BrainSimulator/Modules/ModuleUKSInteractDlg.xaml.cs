@@ -32,16 +32,16 @@ namespace BrainSimulator.Modules
         // BtnAddRelationship_Click is called the AddRelationship button is clicked
         private void BtnAddRelationship_Click(object sender, RoutedEventArgs e)
         {
-            string newThing = GetThingName();
-            string targetThing = GetTargetName();
-            string relationType = GetTypeName();
+            string newThing = sourceText.Text;
+            string targetThing = targetText.Text;
+            string relationType = relationshipText.Text;
 
             if (!AddRelationshipChecks()) return;
             TimeSpan duration = TimeSpan.MaxValue;
             string durationText = ((ComboBoxItem)durationCombo.SelectedItem).Content.ToString();
-            switch(durationText)
+            switch (durationText)
             {
-                case "Eternal": duration=TimeSpan.MaxValue; break;
+                case "Eternal": duration = TimeSpan.MaxValue; break;
                 case "1 hr": duration = TimeSpan.FromHours(1); break;
                 case "5 min": duration = TimeSpan.FromMinutes(5); break;
                 case "1 min": duration = TimeSpan.FromMinutes(1); break;
@@ -52,7 +52,18 @@ namespace BrainSimulator.Modules
 
 
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            uksInteract.AddReference(newThing, targetThing, relationType, confidence,duration);
+            Relationship r1 = uksInteract.AddRelationship(newThing, targetThing, relationType, confidence, duration);
+
+            if (connectorCombo.SelectedValue is ComboBoxItem c)
+                if (c.Content.ToString() != "")
+                {
+                    string newThing2 = sourceText2.Text;
+                    string targetThing2 = targetText2.Text;
+                    string relationType2 = relationshipText2.Text;
+                    Relationship r2 = uksInteract.AddRelationship(newThing2, targetThing2, relationType2, confidence, duration);
+
+                    r1.AddClause(c.Content.ToString(), r2);
+                }
         }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.
@@ -81,31 +92,6 @@ namespace BrainSimulator.Modules
             return false;
         }
 
-
-        // GetThingName returns either the content of the parentName textbox, or the default "" value.
-        private string GetThingName()
-        {
-            if (sourceText.Text.Length == 0)
-                return "";
-            return sourceText.Text;
-        }
-
-        // GetThingName returns either the content of the parentName textbox, or the default "" value.
-        private string GetTypeName()
-        {
-            if (relationshipText.Text.Length == 0)
-                return "";
-            return relationshipText.Text;
-        }
-
-
-        // GetReferenceName returns either the content of the referenceName textbox, or the default "" value.
-        private string GetTargetName()
-        {
-            if (targetText.Text.Length == 0)
-                return "";
-            return targetText.Text;
-        }
 
         // TheGrid_SizeChanged is called when the dialog is sized
         private void TheGrid_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -144,12 +130,12 @@ namespace BrainSimulator.Modules
             SetError("");
             ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
 
-            if (GetThingName() == "")
+            if (sourceText.Text == "")
             {
                 SetError("Source not provided");
                 return false;
             }
-            if (GetTypeName() == "")
+            if (relationshipText.Text == "")
             {
                 SetError("Type not provided");
                 return false;
@@ -175,5 +161,16 @@ namespace BrainSimulator.Modules
             return CheckAddRelationshipFieldsFilled();
         }
 
+        private void connectorCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox c)
+            {
+                string selector = ((ComboBoxItem)c.SelectedItem).Content as string;
+                if (selector != "")
+                    this.Height = 450;
+                else
+                    this.Height = 270;
+            }
+        }
     }
 }

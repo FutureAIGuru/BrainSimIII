@@ -21,20 +21,20 @@ namespace BrainSimulator.Modules
         {
             try
             {
-                if (oRelationshipType is string s)
-                {
-                    //hack so you can set hasproperty via speech input dialog
-                    if (s.StartsWith("hasproperty"))
-                    {
-                        string[] words = s.Split(' ');
-                        oRelationshipType = "hasProperty";
-                        if (words.Length > 0)
-                        {
-                            if (words[1] == "isexclusive") words[1] = "isexclusive";
-                            oTarget = words[1];
-                        }
-                    }
-                }
+                //if (oRelationshipType is string s)
+                //{
+                //    //hack so you can set hasproperty via speech input dialog
+                //    if (s.StartsWith("hasproperty"))
+                //    {
+                //        string[] words = s.Split(' ');
+                //        oRelationshipType = "hasProperty";
+                //        if (words.Length > 0)
+                //        {
+                //            if (words[1] == "isexclusive") words[1] = "isexclusive";
+                //            oTarget = words[1];
+                //        }
+                //    }
+                //}
                 //hack needed to top-level things
                 Thing source = ThingFromObject(oSource);
                 Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType");
@@ -65,14 +65,15 @@ namespace BrainSimulator.Modules
             QueryRelationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
 
             //does this relationship already exist (without conditions)?
-            var x = SearchRelationships(r, false);
+            var x = SearchRelationships(r, false,false);
             if (x.Count > 0)
             {
                 WeakenConflictingRelationships(source, r);
-                return x[0];
+                r.lastUsed = DateTime.Now;
+                return r;
             }
 
-            var y = SearchRelationships(r, true);
+            var y = SearchRelationships(r, true,false);
             foreach (Relationship r2 in y)
                 r2.lastUsed = DateTime.Now;
 
@@ -215,28 +216,32 @@ namespace BrainSimulator.Modules
             {
                 r.reltype = CreateInstanceOf(r.relType, r.typeProperties);
             }
+            r.source?.SetFired();
+            r.target?.SetFired();
+            r.relType?.SetFired();
+
 
             return r;
         }
 
         private void WeakenConflictingRelationships(Thing source, Relationship r1)
         {
-            Relationship r = new Relationship(r1);
             //does this new relationship conflict with an existing relationship)?
             for (int i = 0; i < source?.Relationships.Count; i++)
             {
                 Relationship sourceRel = source.Relationships[i];
-                if (sourceRel == r)
+                if (sourceRel == r1)
                 {
                     //strengthen this relationship
-                    sourceRel.weight = 1;
+                    //sourceRel.weight = 1;
+                    sourceRel.weight +=  (1-sourceRel.weight)/2.0f;
                     //sourceRel.weight = Math.Clamp(sourceRel.weight + .2f, -1f, 1f);
                     sourceRel.lastUsed = DateTime.Now;
                 }
-                else if (RelationshipsAreExclusive(r, sourceRel))
+                else if (RelationshipsAreExclusive(r1, sourceRel))
                 {
                     //special case for "not"
-                    if (GetAttributes(r.reltype)?.FindFirst(x => x.Label == "not") != null)
+                    if (GetAttributes(r1.reltype)?.FindFirst(x => x.Label == "not") != null)
                     {
                         source.RemoveRelationship(sourceRel);
                         i--;
@@ -246,7 +251,7 @@ namespace BrainSimulator.Modules
                         if (r1.weight == 1 && sourceRel.weight == 1)
                             sourceRel.weight = .5f;
                         else
-                            sourceRel.weight = Math.Clamp(sourceRel.weight - .5f, -1, 1);
+                            sourceRel.weight = Math.Clamp(sourceRel.weight - .2f, -1, 1);
                         if (sourceRel.weight <= 0)
                         {
                             source.RemoveRelationship(sourceRel);

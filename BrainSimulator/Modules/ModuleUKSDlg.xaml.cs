@@ -4,6 +4,7 @@
 // © 2022 FutureAI, Inc., all rights reserved
 // 
 
+using Emgu.CV.CvEnum;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -207,6 +208,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     TreeViewItem emptyChild = new() { Header = "" };
                     tviChild.Items.Add(emptyChild);
                     tviChild.Expanded += EmptyChild_Expanded;
+                }
+                else { 
                 }
             }
         }

@@ -64,10 +64,10 @@ namespace BrainSimulator.Modules
             return true;
         }
 
-        public void AddReference(string source, string target, string relationshipType,float confidence, TimeSpan duration)
+        public Relationship AddRelationship(string source, string target, string relationshipType,float confidence, TimeSpan duration)
         {
             GetUKS();
-            if (UKS == null) return;
+            if (UKS == null) return null;
             IPluralize pluralizer = new Pluralizer();
 
 
@@ -91,11 +91,11 @@ namespace BrainSimulator.Modules
             for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
 
-
-
             Relationship r = UKS.AddStatement(source, relationshipType, target,sourceModifiers, typeModifiers, targetModifiers);
             r.TimeToLive = duration;
             r.weight = confidence;
+
+            return r;
         }
 
         public Thing GetUKSThing(string thing, string parent)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Headers;
 
@@ -33,7 +34,7 @@ namespace BrainSimulator.Modules
             return queryResult;
         }
 
-        IList<Relationship> SearchRelationships(QueryRelationship searchMask, bool doInheritance = true)
+        IList<Relationship> SearchRelationships(QueryRelationship searchMask, bool doInheritance = true, bool checkConditions = true)
         {
             List<Relationship> queryResult = new();
             //HandlePronouns(searchMask);
@@ -88,16 +89,19 @@ namespace BrainSimulator.Modules
             {
                 return null;
             }
-            //handle conditionals
-            var listOfFalseConditions = queryResult.FindAll(r => !ConditionsAreMet(r.clauses, searchMask));
-            if (listOfFalseConditions.Count > 0)
+            if (checkConditions)
             {
-                foreach (Relationship condition in listOfFalseConditions)
+                //handle conditionals
+                var listOfFalseConditions = queryResult.FindAll(r => !ConditionsAreMet(r.clauses, searchMask));
+                if (listOfFalseConditions.Count > 0)
                 {
-                    queryResult.RemoveAll(r => r.reltype == condition.relType && r.target.HasAncestor(condition.target));
+                    foreach (Relationship condition in listOfFalseConditions)
+                    {
+                        queryResult.RemoveAll(r => r.reltype == condition.relType && r.target.HasAncestor(condition.target));
+                    }
                 }
+                queryResult.RemoveAll(r => r.clauses.FindFirst(c => c.a == AppliesTo.condition) != null);
             }
-            queryResult.RemoveAll(r => r.clauses.FindFirst(c => c.a == AppliesTo.condition) != null);
 
             //then remove the ones which don't match the search criteria
             for (int i = queryResult.Count - 1; i >= 0; i--)
@@ -157,9 +161,30 @@ namespace BrainSimulator.Modules
         }
         List<Relationship> failedConditions = new();
         List<Relationship> succeededConditions = new();
+
+        public static bool StackContains(string target, int count = 0)
+        {
+            StackTrace stackTrace = new StackTrace();           // get call stack
+            StackFrame[] stackFrames = stackTrace.GetFrames();  // get method calls (frames)
+
+            // do not bubble if called from Initialization
+            foreach (StackFrame stackFrame in stackFrames)
+            {
+                string name = stackFrame.GetMethod().Name;
+                if (name.Contains(target))
+                {
+                    if (count == 0)
+                        return true;
+                    count--;
+                }
+            }
+            return false;
+        }
+
         bool ConditionsAreMet(List<ClauseType> clauses, Relationship query)
         {
             if (clauses.Count == 0) return true;
+            if (StackContains("ConditionsAreMet",1)) return true;
             foreach (ClauseType c in clauses)
             {
                 if (c.a != AppliesTo.condition) continue;

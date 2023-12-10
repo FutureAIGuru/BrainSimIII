@@ -68,7 +68,7 @@ namespace BrainSimulator.Modules
 
 
         //return true if "Initialize" in in the call stack
-        private bool StackContains(string target, int count = 0)
+        public static bool StackContains(string target, int count = 0)
         {
             StackTrace stackTrace = new StackTrace();           // get call stack
             StackFrame[] stackFrames = stackTrace.GetFrames();  // get method calls (frames)
