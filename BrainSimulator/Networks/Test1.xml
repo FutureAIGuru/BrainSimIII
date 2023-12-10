@@ -17,10 +17,10 @@
       <UKSTemp />
       <fileName>C:\Users\c_sim\source\repos\BrainSimIIINEW\BrainSimulator\Networks\KnowledgeFiles\Test1.xml</fileName>
     </ModuleBase>
-    <ModuleBase xsi:type="ModuleUKSInteract">
+    <ModuleBase xsi:type="ModuleUKSStatement">
       <initialized>true</initialized>
       <isEnabled>true</isEnabled>
-      <Label>UKSInteract_1</Label>
+      <Label>UKSStatement_1</Label>
       <dlgPos>
         <X>973</X>
         <Y>935</Y>

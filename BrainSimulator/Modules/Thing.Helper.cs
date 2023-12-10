@@ -1,9 +1,11 @@
-﻿using System;
+﻿//
+// PROPRIETARY AND CONFIDENTIAL
+// Brain Simulator 3 v.1.0
+// © 2022 FutureAI, Inc., all rights reserved
+//
+
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BrainSimulator.Modules
 {

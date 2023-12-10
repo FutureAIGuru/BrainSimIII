@@ -11,10 +11,10 @@ using System.Windows.Media;
 
 namespace BrainSimulator.Modules
 {
-    public partial class ModuleUKSInteractDlg : ModuleBaseDlg
+    public partial class ModuleUKSStatementDlg : ModuleBaseDlg
     {
-        // Constructor of the ModuleUKSInteract dialog
-        public ModuleUKSInteractDlg()
+        // Constructor of the ModuleUKSStatement dialog
+        public ModuleUKSStatementDlg()
         {
             InitializeComponent();
         }
@@ -49,8 +49,13 @@ namespace BrainSimulator.Modules
             float confidence = (float)confidenceSlider.Value;
 
 
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
-            Relationship r1 = uksInteract.AddRelationship(newThing, targetThing, relationType, confidence, duration);
+            ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
+            Relationship r1 = UKSStatement.AddRelationship(newThing, targetThing, relationType);
+            if (setConfCB.IsChecked == true)
+            {
+                r1.weight = confidence;
+                r1.TimeToLive = duration;
+            }
 
             if (connectorCombo.SelectedValue is ComboBoxItem c)
                 if (c.Content.ToString() != "")
@@ -58,7 +63,7 @@ namespace BrainSimulator.Modules
                     string newThing2 = sourceText2.Text;
                     string targetThing2 = targetText2.Text;
                     string relationType2 = relationshipText2.Text;
-                    Relationship r2 = uksInteract.AddRelationship(newThing2, targetThing2, relationType2, confidence, duration);
+                    Relationship r2 = UKSStatement.AddRelationship(newThing2, targetThing2, relationType2);
 
                     r1.AddClause(c.Content.ToString(), r2);
                 }
@@ -69,7 +74,7 @@ namespace BrainSimulator.Modules
         {
             if (sender is TextBox tb)
             {
-                ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+                ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
 
                 if (tb.Text == "" && !tb.Name.Contains("arget"))
                 {
@@ -77,7 +82,7 @@ namespace BrainSimulator.Modules
                     SetError("Source and type cannot be empty");
                     return false;
                 }
-                if (uksInteract.SearchLabelUKS(tb.Text) == null)
+                if (UKSStatement.SearchLabelUKS(tb.Text) == null)
                 {
                     tb.Background = new SolidColorBrush(Colors.Yellow);
                     SetError("");
@@ -126,7 +131,7 @@ namespace BrainSimulator.Modules
         private bool CheckAddRelationshipFieldsFilled()
         {
             SetError("");
-            ModuleUKSInteract uksInteract = (ModuleUKSInteract)ParentModule;
+            ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
 
             if (sourceText.Text == "")
             {

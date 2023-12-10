@@ -21,10 +21,9 @@ namespace BrainSimulator.Modules
         public IList<Relationship> RelationshipsFrom { get { lock (relationshipsFrom) { return new List<Relationship>(relationshipsFrom.AsReadOnly()); } } }
         public List<Relationship> RelationshipsFromWriteable { get => relationshipsFrom; }
 
-        private string label = ""; //this is just for convenience in debugging 
+        private string label = ""; 
         object value;
         public int useCount = 0;
-        public long lastFired = 0;
         public DateTime lastFiredTime = new();
 
         public object V
@@ -137,7 +136,9 @@ namespace BrainSimulator.Modules
 
         public bool HasAncestorLabeled(string label)
         {
-            return HasAncestor(ThingLabels.GetThing(label));
+            Thing t = ThingLabels.GetThing(label);
+            if (t == null) return false;    
+            return HasAncestor(t);
         }
         public bool HasAncestor(Thing t)
         {

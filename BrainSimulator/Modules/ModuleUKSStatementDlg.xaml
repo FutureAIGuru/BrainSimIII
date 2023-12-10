@@ -1,11 +1,11 @@
-﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleUKSInteractDlg"
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleUKSStatementDlg"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
-        Title="UKS Interact" Height="479" Width="530" Background="Gray" ShowInTaskbar="True" ResizeMode="NoResize" >
+        Title="UKS Add Statement" Height="479" Width="530" Background="Gray" ShowInTaskbar="True" ResizeMode="NoResize" >
     <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" Margin="0,0,0,0" >
         <Label x:Name="sourceeLabel"               Content="Source"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
         <Label x:Name="relationshipTypeLabel"      Content="Type"          HorizontalAlignment="Left"   Height="33"   Margin="10,60,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
@@ -36,17 +36,17 @@
             <ComboBoxItem Content="Condition" />
         </ComboBox>
 
+        <Button x:Name="BtnAddRelationship"   IsDefault="True" Content="Add/Update" Height="32" VerticalAlignment="Top" FontSize="16" Margin="78,143,0,0" Click="BtnAddRelationship_Click" HorizontalAlignment="Left" Width="159"/>
+        <CheckBox x:Name="setConfCB" Content="Set Conf." IsChecked="True" FontSize="16" Height="22" Margin="265,153,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104"/>
 
-        <Button x:Name="BtnAddRelationship"   IsDefault="True" Content="Add Relationship" Height="32" VerticalAlignment="Top" FontSize="16" Margin="0,148,199,0" HorizontalAlignment="Right" Width="159" Click="BtnAddRelationship_Click"/>
         <Label  x:Name="errorText"            Content=""   HorizontalContentAlignment="Center"   Height="33"   FontSize="16" Margin="10,195,10,0" VerticalAlignment="Top" Background="Gray" Foreground="#FFF80902"/>
-        <Grid Height="221" Margin="0,232,0,0" VerticalAlignment="Top" Width="487">
-            <Label x:Name="sourceeLabel2"               Content="Source"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
-            <Label x:Name="relationshipTypeLabel2"      Content="Type"          HorizontalAlignment="Left"   Height="33"   Margin="10,60,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
-            <Label x:Name="targetLabel2"                Content="Target"        HorizontalAlignment="Left"   Height="33"   Margin="10,100,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
 
-            <TextBox  x:Name="sourceText2"               TabIndex="4"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,174,0" TextChanged="thingText_TextChanged"/>
-            <TextBox  x:Name="relationshipText2"         TabIndex="5"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,60,174,0" TextChanged="relationshipText_TextChanged"/>
-            <TextBox  x:Name="targetText2"               TabIndex="6"  Height="33" VerticalAlignment="Top"   FontSize="16" AcceptsReturn="False"  Margin="78,100,174,0" TextChanged="targetText_TextChanged" />
-        </Grid>
+        <Label x:Name="sourceeLabel2"               Content="Source"        HorizontalAlignment="Left"   Height="33"   Margin="10,269,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
+        <Label x:Name="relationshipTypeLabel2"      Content="Type"          HorizontalAlignment="Left"   Height="33"   Margin="10,309,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
+        <Label x:Name="targetLabel2"                Content="Target"        HorizontalAlignment="Left"   Height="33"   Margin="10,349,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
+
+        <TextBox  x:Name="sourceText2"               TabIndex="4"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,269,174,0" TextChanged="thingText_TextChanged"/>
+        <TextBox  x:Name="relationshipText2"         TabIndex="5"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,309,174,0" TextChanged="relationshipText_TextChanged"/>
+        <TextBox  x:Name="targetText2"               TabIndex="6"  Height="33" VerticalAlignment="Top"   FontSize="16" AcceptsReturn="False"  Margin="78,349,174,0" TextChanged="targetText_TextChanged" />
     </Grid>
 </local:ModuleBaseDlg>

@@ -1,361 +1,130 @@
-﻿using Emgu.CV.Dnn;
+﻿//
+// PROPRIETARY AND CONFIDENTIAL
+// Brain Simulator 3 v.1.0
+// © 2022 FutureAI, Inc., all rights reserved
+//
+
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Windows.Documents;
+using Pluralize.NET;
 
 namespace BrainSimulator.Modules
 {
-    public partial class ModuleUKS
+    public class ModuleUKSStatement : ModuleBase
     {
-        //this overload lets you pass in
-        //a string or a thing for the first three parameters
-        //and a string, Thing, or list of string or Thing for the last 3
-        public Relationship AddStatement(
-            object oSource, object oRelationshipType, object oTarget,
-            object oSourceProperties = null,
-            object oTypeProperties = null,
-            object oTargetProperties = null
-                        )
+        //any public variable you create here will automatically be saved and restored  with the network
+        //unless you precede it with the [XmlIgnore] directive
+
+        public ModuleUKSStatement()
         {
-            try
-            {
-                //if (oRelationshipType is string s)
-                //{
-                //    //hack so you can set hasproperty via speech input dialog
-                //    if (s.StartsWith("hasproperty"))
-                //    {
-                //        string[] words = s.Split(' ');
-                //        oRelationshipType = "hasProperty";
-                //        if (words.Length > 0)
-                //        {
-                //            if (words[1] == "isexclusive") words[1] = "isexclusive";
-                //            oTarget = words[1];
-                //        }
-                //    }
-                //}
-                //hack needed to top-level things
-                Thing source = ThingFromObject(oSource);
-                Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType");
-                Thing target = ThingFromObject(oTarget);
-
-                List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
-                List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "RelationshipType");
-                List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
-
-                Relationship theRelationship = AddStatement(source, relationshipType, target, sourceModifiers, relationshipTypeModifiers, targetModifiers);
-                return theRelationship;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
         }
 
-        public Relationship AddStatement(
-                        Thing source, Thing relType, Thing target,
-                        List<Thing> sourceProperties,
-                        List<Thing> typeProperties,
-                        List<Thing> targetProperties
-                )
+        //fill this method in with code which will execute
+        //once for each cycle of the engine
+        public override void Fire()
         {
-            if (source == null || relType == null) return null;
+            Init();  //be sure to leave this here
 
-            QueryRelationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
-
-            //does this relationship already exist (without conditions)?
-            var x = SearchRelationships(r, false,false);
-            if (x.Count > 0)
-            {
-                WeakenConflictingRelationships(source, r);
-                r.lastUsed = DateTime.Now;
-                return r;
-            }
-
-            var y = SearchRelationships(r, true,false);
-            foreach (Relationship r2 in y)
-                r2.lastUsed = DateTime.Now;
-
-            //will this cause a circular relationship?
-            if (r.reltype?.Label == "has-child")
-            {
-                if (r.source.AncestorList().Contains(target) || r.source == r.target)
-                {
-                    Debug.WriteLine($"Circular Reference: {r.ToString()}");
-                    return null;
-                }
-            }
-
-
-            WeakenConflictingRelationships(source, r);
-
-            x = SearchRelationships(r, false);
-            if (x == null) return null;
-            if (x.Count > 0) return x[0];
-
-            r.targetProperties = new();
-            r.typeProperties = new();
-            r.sourceProperties = new();
-
-            Relationship rSave = new Relationship(r);
-
-            WriteTheRelationship(rSave);
-            if (rSave.relType != null && HasProperty(rSave.relType, "commutative"))
-            {
-                Relationship rSave1 = new Relationship(rSave);
-                (rSave1.source, rSave1.target) = (rSave1.target, rSave1.source);
-                rSave1.clauses.Clear();
-                WriteTheRelationship(rSave1);
-            }
-
-            /*          HERE is where we'll do bubbling etc  
-             *          ModuleObject mObject = (ModuleObject)base.FindModule(typeof(ModuleObject));
-                        if (mObject != null)
-                        {
-                            if (rSave.reltype?.Label == "has-child")
-                            {
-                                //here we are defining a parent so we don't need to guess as in the other case
-                                mObject.BubbleProperties1(rSave.target);
-                                ClearRedundancyInAncestry(rSave.target);
-                            }
-                            else
-                            {
-                                mObject.BubbleProperties1(rSave.source);
-                                mObject.PredictParents(rSave);
-                                //mObject.PredictParents(rSave.target);  //TODO: need to handle multiple possible suggestions
-                            }
-                        }
-            */
-            //if this is adding a child relationship, remove any unknownObject parent
-            ClearExtraneousParents(rSave.source);
-            ClearExtraneousParents(rSave.T);
-            ClearExtraneousParents(rSave.relType);
-            ClearRedundancyInAncestry(rSave.target);
-
-            return rSave;
-        }
-        void ClearRedundancyInAncestry(Thing t)
-        {
-            if (t == null) return;
-            //if a direct parent has an ancestor which is also another direct parent, remove that 2nd direct parent
-            var parents = t.Parents;
-            foreach (Thing parent in parents)
-            {
-                var p = parent.AncestorList();
-                p.RemoveAt(0); //don't check yourself
-                foreach (Thing ancestor in p)
-                {
-                    if (parents.Contains(ancestor))
-                        t.RemoveParent(ancestor);
-                }
-            }
+            // if you want the dlg to update, use the following code whenever any parameter changes
+            // UpdateDialog();
         }
 
-        public QueryRelationship CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target, ref List<Thing> sourceProperties, List<Thing> typeProperties, ref List<Thing> targetProperties)
+        // fill this method in with code which will execute once
+        // when the module is added, when "initialize" is selected from the context menu,
+        // or when the engine restart button is pressed
+        public override void Initialize()
         {
-            Thing inverseType1 = CheckForInverse(relType);
-            //if this relationship has an inverse, switcheroo so we are storing consistently in one direction
-            if (inverseType1 != null)
-            {
-                (source, target) = (target, source);
-                (sourceProperties, targetProperties) = (targetProperties, sourceProperties);
-                relType = inverseType1;
-            }
-            QueryRelationship r = new()
-            {
-                relType = relType,
-                source = source,
-                T = target,
-                sourceProperties = (sourceProperties is null) ? new() : sourceProperties,
-                targetProperties = (targetProperties is null) ? new() : targetProperties,
-                typeProperties = (typeProperties is null) ? new() : typeProperties,
-                //sentencetype = new SentenceType(),
-            };
+        }
 
-            //handle pronouns in statements
-            //if (HandlePronouns(r)) return r;
+        // the following can be used to massage public data to be different in the xml file
+        // delete if not needed
+        public override void SetUpBeforeSave()
+        {
+        }
 
-            //if this is a "has" relationship see if a new instance of the objecte is needed?
-            //TODO properly find if the target already exists or needs to have an instance created
-            if (r.relType != null && HasProperty(r.reltype, "makeInstance") && r.T != null || r.targetProperties.Count > 0)
-            {
-                //does the parent of this thing already reference some sort of target?
-                //if a dog has a specific kind of tail, we need to create an instance of that specific dog
-                //TODO properly find if the target already exists or needs a new instance
-                if (r.source != null)
-                {
-                    foreach (Thing t in r.target.Parents)
-                    {
-                        foreach (Relationship r1 in t.Relationships)
-                            if (r1.target.Parents.Contains(r.T))
-                            {
-                                r.T = r1.target;
-                            }
-                    }
-                }
-                r.T = CreateInstanceOf(r.T, r.targetProperties);
-            }
+        public override void SetUpAfterLoad()
+        {
+        }
 
-            if (r.sourceProperties.Count > 0 && r.source != null)
-            {
-                //does the parent of this thing already reference some sort of target?
-                //if a dog has a specific kind of tail, we need to create an instance of that specific
-                foreach (Thing t in r.source.Parents)
-                {
-                    foreach (Relationship r1 in t.Relationships)
-                        if (r1.source.Parents.Contains(r.source))
-                        {
-                            r.source = r1.source;
-                        }
-                }
-                r.source = CreateInstanceOf(r.source, r.sourceProperties);
-            }
+        // called whenever the size of the module rectangle changes
+        // for example, you may choose to reinitialize whenever size changes
+        // delete if not needed
+        public override void SizeChanged()
+        {
+            
+        }
 
-            if (r.reltype != null && typeProperties != null && typeProperties.Count > 0)
-            {
-                r.reltype = CreateInstanceOf(r.relType, r.typeProperties);
-            }
-            r.source?.SetFired();
-            r.target?.SetFired();
-            r.relType?.SetFired();
+        // return true if thing was added
+        public bool AddChildButton(string newThing, string parent)
+        {
+            GetUKS();
+            if (UKS == null) return true;
+
+            UKS.GetOrAddThing(newThing, parent);
+            return true;
+        }
+
+        public Relationship AddRelationship(string source, string target, string relationshipType)
+        {
+            GetUKS();
+            if (UKS == null) return null;
+            IPluralize pluralizer = new Pluralizer();
 
 
+            source = source.Trim();
+            target = target.Trim();
+            relationshipType = relationshipType.Trim();
+
+            string[] tempStringArray = source.Split(' ');
+            List<string> sourceModifiers = new();
+            source = pluralizer.Singularize(tempStringArray[tempStringArray.Length-1]);
+            for (int i = 0; i < tempStringArray.Length-1; i++) sourceModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+
+            tempStringArray = target.Split(' ');
+            List<string> targetModifiers = new();
+            target = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
+            for (int i = 0; i < tempStringArray.Length - 1; i++) targetModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+
+            tempStringArray = relationshipType.Split(' ');
+            List<string> typeModifiers = new();
+            relationshipType= pluralizer.Singularize(tempStringArray[0]);
+            for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+
+            Relationship r = UKS.AddStatement(source, relationshipType, target,sourceModifiers, typeModifiers, targetModifiers);
+            
             return r;
         }
 
-        private void WeakenConflictingRelationships(Thing source, Relationship r1)
+        public Thing GetUKSThing(string thing, string parent)
         {
-            //does this new relationship conflict with an existing relationship)?
-            for (int i = 0; i < source?.Relationships.Count; i++)
-            {
-                Relationship sourceRel = source.Relationships[i];
-                if (sourceRel == r1)
-                {
-                    //strengthen this relationship
-                    //sourceRel.weight = 1;
-                    sourceRel.weight +=  (1-sourceRel.weight)/2.0f;
-                    //sourceRel.weight = Math.Clamp(sourceRel.weight + .2f, -1f, 1f);
-                    sourceRel.lastUsed = DateTime.Now;
-                }
-                else if (RelationshipsAreExclusive(r1, sourceRel))
-                {
-                    //special case for "not"
-                    if (GetAttributes(r1.reltype)?.FindFirst(x => x.Label == "not") != null)
-                    {
-                        source.RemoveRelationship(sourceRel);
-                        i--;
-                    }
-                    else
-                    {
-                        if (r1.weight == 1 && sourceRel.weight == 1)
-                            sourceRel.weight = .5f;
-                        else
-                            sourceRel.weight = Math.Clamp(sourceRel.weight - .2f, -1, 1);
-                        if (sourceRel.weight <= 0)
-                        {
-                            source.RemoveRelationship(sourceRel);
-                            i--;
-                        }
-                    }
-                }
-            }
+            GetUKS();
+            if (UKS == null) return null;
+
+            return UKS.GetOrAddThing(thing, parent);
         }
 
-        public static void WriteTheRelationship(Relationship r)
+        public Thing SearchLabelUKS(string label)
         {
-            if (r.source == null && r.target == null) return;
-            if (r.target == null)
-            {
-                lock (r.source.RelationshipsWriteable)
-                    lock (r.relType.RelationshipsFromWriteable)
-                    {
-                        r.source.RelationshipsWriteable.Add(r);
-                        r.relType.RelationshipsFromWriteable.Add(r);
-                    }
-            }
-            else if (r.source == null)
-            {
-                lock (r.target.RelationshipsWriteable)
-                    lock (r.relType.RelationshipsFromWriteable)
-                    {
-                        r.target.RelationshipsFromWriteable.Add(r);
-                        r.relType.RelationshipsFromWriteable.Add(r);
-                    }
-            }
-            else if (r.relType == null)
-            {
-                lock (r.target.RelationshipsWriteable)
-                    lock (r.source.RelationshipsFromWriteable)
-                    {
-                        r.target.RelationshipsFromWriteable.Add(r);
-                        r.source.RelationshipsWriteable.Add(r);
-                    }
-            }
-            else
-            {
-                lock (r.source.RelationshipsWriteable)
-                    lock (r.target.RelationshipsFromWriteable)
-                        lock (r.relType.RelationshipsFromWriteable)
-                        {
-                            r.source.RelationshipsWriteable.Add(r);
-                            r.target.RelationshipsFromWriteable.Add(r);
-                            r.relType.RelationshipsFromWriteable.Add(r);
-                        }
-            }
+            GetUKS();
+            if (UKS == null) return null;
+
+            return UKS.Labeled(label);
         }
 
-        void ClearExtraneousParents(Thing t)
+        public List<string> RelationshipTypes()
         {
-            if (t == null) return;
-            if (t != null && t.Parents.Count > 1)
-                t.RemoveParent(ThingLabels.GetThing("unknownObject"));
-        }
+            GetUKS();
+            if (UKS == null) return null;
 
-        Thing CreateInstanceOf(Thing t, List<Thing> targetModifiers)
-        {
-            //if instance already exists, return it
-            foreach (Thing t2 in t.Children)
+            Thing relParent = UKS.GetOrAddThing("RelationshipType", "Thing");
+            List<string> relTypes = new();
+
+            foreach (Thing relationshipType in relParent.Children)
             {
-                foreach (Thing t3 in targetModifiers)
-                {
-                    if (t2.Relationships.FindFirst(x => x.T == t3) == null)
-                        goto notFound;
-                }
-                return t2;
-            notFound:
-                continue;
+                relTypes.Add(relationshipType.Label);
             }
-            string newLabel = t.Label;
-            foreach (Thing t1 in targetModifiers)
-                newLabel += "." + t1.Label;
 
-            Thing retVal = GetOrAddThing(newLabel, t);
-            foreach (Thing t1 in targetModifiers)
-            {
-                AddStatement(retVal, "is", t1);
-            }
-            ClearExtraneousParents(t);
-            return retVal;
+            return relTypes;
         }
-        private Thing CheckForInverse(Thing relationshipType)
-        {
-            if (relationshipType == null) return null;
-            Relationship inverse = relationshipType.Relationships.FindFirst(x => x.reltype.Label == "inverseOf");
-            if (inverse != null) return inverse.target;
-            //use the bwlow if inverses ae 2-way.  Without this, there is a one-way translation
-            //inverse = relationshipType.RelationshipsBy.FindFirst(x => x.reltype.Label == "inverseOf");
-            //if (inverse != null) return inverse.source;
-            return null;
-        }
-        public static List<Thing> FindCommonParents(Thing t, Thing t1)
-        {
-            List<Thing> commonParents = new List<Thing>();
-            foreach (Thing p in t.Parents)
-                if (t1.Parents.Contains(p))
-                    commonParents.Add(p);
-            return commonParents;
-        }
-
     }
 }

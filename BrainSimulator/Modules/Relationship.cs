@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -118,6 +119,19 @@ namespace BrainSimulator.Modules
         public Relationship()
         { }
 
+        public static Relationship GetRelationship(Relationship r)
+        {
+            foreach (Relationship r1 in r.source.Relationships)
+            {
+                if (r1 == r) return r1;
+            }
+            return null;
+        }
+
+        public void Fire()
+        {
+            lastUsed = DateTime.Now;
+        }
         public Relationship(Relationship r)
         {
             count = r.count;

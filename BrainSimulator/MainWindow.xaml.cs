@@ -105,7 +105,7 @@ namespace BrainSimulator
             Debug.WriteLine("InsertMandatoryModules entered");
             BrainSim3Data.modules.Clear();
             BrainSim3Data.modules.Add(CreateNewUniqueModule("UKS"));
-            BrainSim3Data.modules.Add(CreateNewUniqueModule("UKSInteract"));
+            BrainSim3Data.modules.Add(CreateNewUniqueModule("UKSStatement"));
         }
 
         public ModuleBase CreateNewUniqueModule(string ModuleName)
