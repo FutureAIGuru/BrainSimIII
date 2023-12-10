@@ -392,9 +392,11 @@ public partial class ModuleUKS : ModuleBase
                 return true;
 
             //if one of the reltypes contains negation and not the other
-            Thing r1Not = r1RelProps.FindFirst(x => x.Label == "not");
-            Thing r2Not = r2RelProps.FindFirst(x => x.Label == "not");
-            if (r1.source == r2.source && r1.target == r2.target &&
+            Thing r1Not = r1RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
+            Thing r2Not = r2RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
+            if ((r1.source.Ancestors.Contains(r2.source) || 
+                r2.source.Ancestors.Contains(r1.source)) && 
+                r1.target == r2.target &&
                 (r1Not == null && r2Not != null || r1Not != null && r2Not == null))
                 return true;
         }

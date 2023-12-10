@@ -97,10 +97,10 @@ namespace BrainSimulator.Modules
                 {
                     foreach (Relationship condition in listOfFalseConditions)
                     {
-                        queryResult.RemoveAll(r => r.reltype == condition.relType && r.target.HasAncestor(condition.target));
+                        queryResult.RemoveAll(r => r == condition);
                     }
                 }
-                queryResult.RemoveAll(r => r.clauses.FindFirst(c => c.a == AppliesTo.condition) != null);
+                //queryResult.RemoveAll(r => r.clauses.FindFirst(c => c.a == AppliesTo.condition) != null);
             }
 
             //then remove the ones which don't match the search criteria
@@ -196,11 +196,10 @@ namespace BrainSimulator.Modules
                     q.target = query.target;
                 if (query.target != null && query.target.AncestorList().Contains(q.source))
                     q.source = query.target;
-                var qResult = SearchRelationships(q);
-                for (int i = qResult.Count - 1; i >= 0; i--)
-                    if (qResult[i].weight < 0.8)
-                        qResult.RemoveAt(i);
-                if (qResult.Count == 0)
+                var qResult = Relationship.GetRelationship(q);
+                if (qResult.weight < 0.8)
+                    return false; ;
+                if (qResult==null)
                 {
                     failedConditions.Add(q);
                     return false;

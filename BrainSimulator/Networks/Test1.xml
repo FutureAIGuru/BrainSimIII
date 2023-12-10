@@ -22,12 +22,26 @@
       <isEnabled>true</isEnabled>
       <Label>UKSStatement_1</Label>
       <dlgPos>
-        <X>973</X>
-        <Y>935</Y>
+        <X>609</X>
+        <Y>368</Y>
       </dlgPos>
       <dlgSize>
         <X>500</X>
         <Y>270</Y>
+      </dlgSize>
+      <dlgIsOpen>true</dlgIsOpen>
+    </ModuleBase>
+    <ModuleBase xsi:type="ModuleUKSQuery">
+      <initialized>true</initialized>
+      <isEnabled>true</isEnabled>
+      <Label>UKSQuery_1</Label>
+      <dlgPos>
+        <X>605</X>
+        <Y>657</Y>
+      </dlgPos>
+      <dlgSize>
+        <X>628</X>
+        <Y>300</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
     </ModuleBase>

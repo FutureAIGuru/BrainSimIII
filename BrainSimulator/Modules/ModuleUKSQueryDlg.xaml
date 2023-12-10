@@ -1,0 +1,24 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleUKSQueryDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="UKS Query" Height="300" Width="630" Background="Gray" ShowInTaskbar="False" >
+    <Grid Name="theGrid" Margin="0,0,0,0" >
+        <Label x:Name="sourceLabel"               Content="Source"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
+        <Label x:Name="relationshipTypeLabel"     Content="Filter"          HorizontalAlignment="Left"   Height="33"   Margin="10,60,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
+        <Label x:Name="targetLabel"                Content="Result"        HorizontalAlignment="Left"   Height="33"   Margin="10,100,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
+
+        <TextBox  x:Name="sourceText"         TabIndex="1"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,0,0" TextChanged="thingText_TextChanged" HorizontalAlignment="Left" Width="278"/>
+        <TextBox  x:Name="filterText"         TabIndex="2"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,60,0,0" TextChanged="relationshipText_TextChanged" HorizontalAlignment="Left" Width="278"/>
+        <TextBox  x:Name="resultText"         TabIndex="3"  Height="90" VerticalAlignment="Top"   FontSize="16" Margin="78,100,36,0"  TextWrapping="Wrap"/>
+
+
+        <Button x:Name="BtnAddRelationship"   IsDefault="True" Content="Query" Height="32" VerticalAlignment="Top" FontSize="16" Margin="386,21,0,0" Click="BtnAddRelationship_Click" HorizontalAlignment="Left" Width="84"/>
+
+        <Label  x:Name="errorText"            Content=""   HorizontalContentAlignment="Center"   Height="33"   FontSize="16" Margin="10,195,10,0" VerticalAlignment="Top" Background="Gray" Foreground="#FFF80902"/>
+
+    </Grid>
+</local:ModuleBaseDlg>
