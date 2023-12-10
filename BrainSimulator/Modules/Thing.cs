@@ -95,9 +95,9 @@ namespace BrainSimulator.Modules
         }
 
 
-        public IList<Thing> Parents { get => RelationshipsOfType(hasChildType, true); }
+        public IList<Thing> Parents { get => RelationshipsOfType(HasChild, true); }
 
-        public IList<Thing> Children { get => RelationshipsOfType(hasChildType, false); }
+        public IList<Thing> Children { get => RelationshipsOfType(HasChild, false); }
 
         public IList<Relationship> Relationships
         {

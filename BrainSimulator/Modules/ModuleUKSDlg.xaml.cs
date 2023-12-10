@@ -4,7 +4,6 @@
 // © 2022 FutureAI, Inc., all rights reserved
 // 
 
-using Emgu.CV.CvEnum;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Diagnostics;
 
 namespace BrainSimulator.Modules;
 
@@ -36,7 +36,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private List<Thing> uks;
     private int maxChildrenWhenCollapsed = 20;
     private DispatcherTimer dt;
-    private string expandAll = "";  //all the children below this will be expanded
+    private string expandAll = "";  //all the children below this named node will be expanded
 
     public ModuleUKSDlg()
     {
@@ -91,7 +91,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             {
                 t = t1;
                 childCount += t1.Children.Count;
-                refCount += t1.Relationships.Count - childCount;
+                refCount += t1.Relationships.Count - t1.Children.Count;
+                if (refCount < 0)
+                { }
             }
         }
 
@@ -193,29 +195,33 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviChild.ContextMenu = GetContextMenu(child);
             if (depth < maxDepth)
             {
+                int childCount = child.Children.Count;
+                int relCount = CountNonChildRelationships(child.RelationshipsNoCount);
+                int relFromCount = CountNonChildRelationships(child.RelationshipsFrom);
                 if (tviChild.IsExpanded)
                 {
                     // load children and references
                     AddChildren(child, tviChild, depth + 1, parentLabel + "|" + child.Label);
-                    AddReferences(child, tviChild, parentLabel);
-                    AddReferencedBy(child, tviChild, parentLabel);
+                    AddRelationships(child, tviChild, parentLabel);
+                    AddRelationshipsFrom(child, tviChild, parentLabel);
                 }
                 else if (child.Children.Count > 0 ||
                     CountNonChildRelationships(child.RelationshipsNoCount) > 0
                     || CountNonChildRelationships(child.RelationshipsFrom) > 0)
                 {
-                    // don't load those that aren't expanded
+                    // don't load those that aren't expanded, put in a dummy instead so there is and expander-handle
                     TreeViewItem emptyChild = new() { Header = "" };
                     tviChild.Items.Add(emptyChild);
                     tviChild.Expanded += EmptyChild_Expanded;
                 }
-                else { 
+                else {
+                    Debug.Write("x");
                 }
             }
         }
     }
 
-    private void AddReferences(Thing t, TreeViewItem tvi, string parentLabel)
+    private void AddRelationships(Thing t, TreeViewItem tvi, string parentLabel)
     {
         if (CountNonChildRelationships(t.RelationshipsNoCount) == 0) return;
         TreeViewItem tviRefLabel = new() { Header = "Relationships: " + CountNonChildRelationships(t.RelationshipsNoCount).ToString() };
@@ -228,6 +234,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         tviRefLabel.ContextMenu = new ContextMenu() { Visibility = Visibility.Hidden };
         tvi.Items.Add(tviRefLabel);
+
+        if (t.Label == "weather")
+        { }
 
         totalItemCount++;
         IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => -x.Value).ToList();
@@ -276,7 +285,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     }
 
 
-    private void AddReferencedBy(Thing t, TreeViewItem tvi, string parentLabel)
+    private void AddRelationshipsFrom(Thing t, TreeViewItem tvi, string parentLabel)
     {
         if (CountNonChildRelationships(t.RelationshipsFrom) == 0) return;
         TreeViewItem tviRefLabel = new() { Header = "RelationshipsFrom: " + CountNonChildRelationships(t.RelationshipsFrom).ToString() };
@@ -326,8 +335,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 expandedItems.Add(parentLabel);
                 tvi.Items.Clear(); // delete empty child
                 AddChildren(t, tvi, depth, parentLabel);
-                AddReferences(t, tvi, parentLabel);
-                AddReferencedBy(t, tvi, parentLabel);
+                AddRelationships(t, tvi, parentLabel);
+                AddRelationshipsFrom(t, tvi, parentLabel);
             }
         }
     }
@@ -491,7 +500,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     expandAll = t.Label;
                     expandedItems.Clear();
                     expandedItems.Add("|Thing|Object");
-                    updateFailed = true;
+                    updateFailed = true; //this forces the expanded items not to rebuild
                     break;
                 case "Collapse All":
                     expandAll = "";
@@ -550,7 +559,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     }
 
     //keep track of which tree items are expanded
-
     private void FindExpandedItems(ItemCollection items, string parentLabel)
     {
         foreach (TreeViewItem tvi1 in items)
