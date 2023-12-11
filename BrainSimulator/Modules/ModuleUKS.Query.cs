@@ -197,7 +197,7 @@ namespace BrainSimulator.Modules
                 if (query.target != null && query.target.AncestorList().Contains(q.source))
                     q.source = query.target;
                 var qResult = Relationship.GetRelationship(q);
-                if (qResult.weight < 0.8)
+                if (qResult != null && qResult.weight < 0.8)
                     return false; ;
                 if (qResult==null)
                 {

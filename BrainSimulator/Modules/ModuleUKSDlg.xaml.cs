@@ -179,7 +179,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             }
 
             TreeViewItem tviChild = new() { Header = header };
-
             //change color of things which just fired or are about to expire
             tviChild.SetValue(ThingObjectProperty, child);
             if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
@@ -264,6 +263,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 tviRefLabel.Items.Add(tviRef);
                 if (r.lastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
                     tviRef.Background = new SolidColorBrush(Colors.LightGreen);
+                if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+                    tviRef.Background = new SolidColorBrush(Colors.LightYellow);
                 totalItemCount++;
             }
         }
@@ -297,9 +298,10 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRefLabel.Items.Add(tviRef);
             if (r.lastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
                 tviRef.Background = new SolidColorBrush(Colors.LightGreen);
+            if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+                tviRef.Background = new SolidColorBrush(Colors.LightYellow);
             totalItemCount++;
         }
-
         totalItemCount++;
     }
 

@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.DirectoryServices.ActiveDirectory;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -100,6 +99,7 @@ namespace BrainSimulator.Modules
         public int hits = 0;
         public int misses = 0;
         public DateTime lastUsed = DateTime.Now;
+        public DateTime created = DateTime.Now;
 
         //TimeToLive processing for relationships
         static private List<Relationship> transientRelationships = new List<Relationship>();
@@ -266,6 +266,7 @@ namespace BrainSimulator.Modules
             foreach (Relationship r in t.Relationships)
             {
                 if (r.reltype == Thing.HasChild) continue;
+                if (t.Label.Contains("." + r.T?.Label))continue;
                 if (r.relType?.Label == "is")
                 {
                     if (retVal == null) retVal += "(";

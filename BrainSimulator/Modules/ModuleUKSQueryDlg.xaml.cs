@@ -8,6 +8,8 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
+using static BrainSimulator.Modules.ModuleOnlineInfo;
 
 namespace BrainSimulator.Modules
 {
@@ -17,6 +19,17 @@ namespace BrainSimulator.Modules
         public ModuleUKSQueryDlg()
         {
             InitializeComponent();
+
+            DispatcherTimer dt = new DispatcherTimer();
+            dt.Tick += Dt_Tick;
+            dt.Interval = TimeSpan.FromSeconds(1);
+            dt.Start();
+        }
+
+        private void Dt_Tick(object sender, EventArgs e)
+        {
+            if (refreshCB.IsChecked == false) { return; }
+            Draw(false);
         }
 
         // Draw gets called to draw the dialog when it needs refreshing
@@ -24,20 +37,13 @@ namespace BrainSimulator.Modules
         {
             if (!base.Draw(checkDrawTimer)) return false;
 
-            return true;
-        }
-
-        // BtnAddRelationship_Click is called the AddRelationship button is clicked
-        private void BtnAddRelationship_Click(object sender, RoutedEventArgs e)
-        {
             string source = sourceText.Text;
             string filter = filterText.Text;
 
-            if (!AddRelationshipChecks()) return;
+            if (!AddRelationshipChecks()) return false;
 
             ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-
-            var queryResult = UKSQuery.QueryUKS (source, filter);
+            var queryResult = UKSQuery.QueryUKS(source, filter);
             string resultString = "";
             if (queryResult.Count == 0) { resultString = "No Results"; }
             foreach (Relationship r in queryResult)
@@ -46,6 +52,14 @@ namespace BrainSimulator.Modules
                 resultString += r.ToString() + "\n";
             }
             resultText.Text = resultString;
+
+            return true;
+        }
+
+        // BtnAddRelationship_Click is called the AddRelationship button is clicked
+        private void BtnAddRelationship_Click(object sender, RoutedEventArgs e)
+        {
+            Draw(true);
         }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.

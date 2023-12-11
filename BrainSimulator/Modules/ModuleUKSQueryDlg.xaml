@@ -19,6 +19,7 @@
         <Button x:Name="BtnAddRelationship"   IsDefault="True" Content="Query" Height="32" VerticalAlignment="Top" FontSize="16" Margin="386,21,0,0" Click="BtnAddRelationship_Click" HorizontalAlignment="Left" Width="84"/>
 
         <Label  x:Name="errorText"            Content=""   HorizontalContentAlignment="Center"   Height="33"   FontSize="16" Margin="10,195,10,0" VerticalAlignment="Top" Background="Gray" Foreground="#FFF80902"/>
+        <CheckBox x:Name="refreshCB" Content="AutoRefresh" HorizontalAlignment="Left" Height="73" Margin="386,60,0,0" VerticalAlignment="Top" Width="119"/>
 
     </Grid>
 </local:ModuleBaseDlg>
