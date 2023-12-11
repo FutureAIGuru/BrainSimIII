@@ -56,17 +56,6 @@ namespace BrainSimulator.Modules
                 r1.weight = confidence;
                 r1.TimeToLive = duration;
             }
-
-            if (connectorCombo.SelectedValue is ComboBoxItem c)
-                if (c.Content.ToString() != "")
-                {
-                    string newThing2 = sourceText2.Text;
-                    string targetThing2 = targetText2.Text;
-                    string relationType2 = relationshipText2.Text;
-                    Relationship r2 = UKSStatement.AddRelationship(newThing2, targetThing2, relationType2);
-
-                    r1.AddClause(c.Content.ToString(), r2);
-                }
         }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.
