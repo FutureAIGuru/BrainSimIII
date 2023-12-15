@@ -30,11 +30,12 @@ namespace BrainSimulator
                 moduleSelector.Items.Add(v.Name.Replace("Module", ""));
             }
             moduleSelector.SelectedItem = theModuleType.Replace("Module", "");
+
+            Owner = Application.Current.MainWindow;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            ModuleDescriptionFile.SetToolTip(moduleType, ToolTipText.Text);
             ModuleDescriptionFile.SetDescription(moduleType, Description.Text);
             ModuleDescriptionFile.Save();
         }
@@ -44,9 +45,13 @@ namespace BrainSimulator
             if (sender is ComboBox cb)
             {
                 moduleType = "Module" + cb.SelectedItem.ToString();
-                ToolTipText.Text = ModuleDescriptionFile.GetToolTip(moduleType);
                 Description.Text = ModuleDescriptionFile.GetDescription(moduleType);
             }
+        }
+
+        private void buttonClose_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 
@@ -55,49 +60,10 @@ namespace BrainSimulator
         public class ModuleDescription
         {
             public string moduleName;
-            public string toolTip;
             public string description;
         }
         public static List<ModuleDescription> theModuleDescriptions = null;
 
-        public static string GetToolTip(string moduleName)
-        {
-            if (theModuleDescriptions == null) Load();
-            //if (theModuleDescriptions.Count == 0) GetLegacyDescriptions();
-            ModuleDescription desc = theModuleDescriptions.Find(t => t.moduleName == moduleName);
-            if (desc != null) 
-                return desc.toolTip;
-            return "";
-        }
-
-        //for backward compatibility;
-        //private static void GetLegacyDescriptions()
-        //{
-        //    var modules = Utils.GetArrayOfModuleTypes();
-
-        //    foreach (var v in modules)
-        //    {
-        //        //get the tooltip
-        //        Type t = Type.GetType("BrainSimulator.Modules." + v.CvStageName);
-        //        Modules.ModuleBase aModule = (Modules.ModuleBase)Activator.CreateInstance(t);
-        //        string toolTip = aModule.ShortDescription;
-        //        string description = aModule.LongDescription;
-        //        ModuleDescription desc = new ModuleDescription { moduleName = t.CvStageName, description = description, toolTip = toolTip, };
-        //        theModuleDescriptions.Add(desc);
-        //    }
-        //}
-
-        public static void SetToolTip(string moduleName, string theDescription)
-        {
-            ModuleDescription desc = theModuleDescriptions.Find(t => t.moduleName == moduleName);
-            if (desc != null)
-                desc.toolTip = theDescription;
-            else
-            {
-                desc = new ModuleDescription { moduleName = moduleName, toolTip = theDescription, description = "", };
-                theModuleDescriptions.Add(desc);
-            }
-        }
         public static string GetDescription(string moduleName)
         {
             if (theModuleDescriptions == null) Load();
@@ -112,7 +78,7 @@ namespace BrainSimulator
                 desc.description = theDescription;
             else
             {
-                desc = new ModuleDescription { moduleName = moduleName, description = theDescription, toolTip = "", };
+                desc = new ModuleDescription { moduleName = moduleName, description = theDescription };
                 theModuleDescriptions.Add(desc);
             }
         }

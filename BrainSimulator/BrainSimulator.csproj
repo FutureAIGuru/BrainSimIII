@@ -492,10 +492,4 @@
 		</Page>
 	</ItemGroup>
 
-	<ItemGroup>
-	  <None Include="Networks\KnowledgeFiles\Test1.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
-
 </Project>

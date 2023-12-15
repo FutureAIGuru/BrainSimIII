@@ -66,6 +66,8 @@ namespace BrainSimulator.Modules
     //a relationship is a weighted link to a thing and has a type
     public class Relationship
     {
+        public enum Part { source, type, target };
+
         public Thing s = null;
         public Thing source
         {

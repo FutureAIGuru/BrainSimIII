@@ -5,6 +5,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -20,46 +21,79 @@ namespace BrainSimulator.Modules
         {
             InitializeComponent();
 
-            DispatcherTimer dt = new DispatcherTimer();
-            dt.Tick += Dt_Tick;
-            dt.Interval = TimeSpan.FromSeconds(1);
-            dt.Start();
         }
 
-        private void Dt_Tick(object sender, EventArgs e)
-        {
-            if (refreshCB.IsChecked == false) { return; }
-            Draw(false);
-        }
 
         // Draw gets called to draw the dialog when it needs refreshing
         public override bool Draw(bool checkDrawTimer)
         {
             if (!base.Draw(checkDrawTimer)) return false;
+            return true;
+        }
+
+        // BtnQuery_Click is called the Query button is clicked
+        private void BtnTransitive_Click(object sender, RoutedEventArgs e)
+        {
 
             string source = sourceText.Text;
             string filter = filterText.Text;
 
-            if (!AddRelationshipChecks()) return false;
+            if (!AddRelationshipChecks()) return;
 
             ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-            var queryResult = UKSQuery.QueryUKS(source, filter);
+            var queryResult = UKSQuery.QueryUKS(source);
             string resultString = "";
             if (queryResult.Count == 0) { resultString = "No Results"; }
-            foreach (Relationship r in queryResult)
-            {
-                if (r.weight < 0.95) resultString += "<" + r.weight.ToString("f2") + ">";
+            foreach (var r in queryResult)
                 resultString += r.ToString() + "\n";
-            }
-            resultText.Text = resultString;
 
-            return true;
+            resultText.Text = resultString;
+        }
+        // BtnQuery_Click is called the Query button is clicked
+        private void BtnAncestors_Click(object sender, RoutedEventArgs e)
+        {
+
+            string source = sourceText.Text;
+
+            if (!AddRelationshipChecks()) return;
+
+            ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
+            var queryResult = UKSQuery.QueryAncestors(source);
+            string resultString = "";
+            if (queryResult.Count == 0) { resultString = "No Results"; }
+            foreach (Thing t in queryResult)
+                resultString += t.ToString() + "\n";
+
+            resultText.Text = resultString;
         }
 
-        // BtnAddRelationship_Click is called the AddRelationship button is clicked
-        private void BtnAddRelationship_Click(object sender, RoutedEventArgs e)
+        private void BtnRelationships_Click(object sender, RoutedEventArgs e)
         {
-            Draw(true);
+            string source = sourceText.Text;
+            string type = typeText.Text;
+            string target = targetText.Text;
+            string filter = filterText.Text;
+
+            ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
+            List<ModuleUKS.ThingWithQueryParams> queryResult = null;
+            Relationship.Part p = 0;
+            if (source != "")
+            { queryResult = UKSQuery.QueryUKS(source); p = Relationship.Part.source; }
+            else if (target != "")
+            { queryResult = UKSQuery.QueryUKS(target); p = Relationship.Part.target; }
+            else if (type != "")
+            { queryResult = UKSQuery.QueryUKS(type); p = Relationship.Part.type; }
+
+            List<Relationship> result = UKSQuery.QueryRelationships(queryResult, p);
+
+            string resultString = "";
+            if (result == null || result.Count == 0)
+                resultString = "No Results";
+            else
+                foreach (var r in result)
+                    resultString += r.ToString() + "\n";
+            resultText.Text = resultString;
+
         }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.
@@ -77,7 +111,6 @@ namespace BrainSimulator.Modules
         private void TheGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Draw(false);
-            //FillRelationshipsComboBox();
         }
 
         // thingText_TextChanged is called when the thing textbox changes
@@ -131,5 +164,32 @@ namespace BrainSimulator.Modules
             return CheckAddRelationshipFieldsFilled();
         }
 
+        private void BtnSequence_Click(object sender, RoutedEventArgs e)
+        {
+            string filter = filterText.Text;
+            ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
+            var result = UKSQuery.QuerySequence(filter);
+            string resultString = "";
+            if (result == null || result.Count == 0)
+                resultString = "No Results";
+            else
+                foreach (var r in result)
+                    resultString += r.ToString() + "\n";
+            resultText.Text = resultString;
+        }
+
+        private void BtnChildren_Click(object sender, RoutedEventArgs e)
+        {
+            string source = sourceText.Text;
+            ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
+            var result = UKSQuery.QueryChildren(source);
+            string resultString = "";
+            if (result == null || result.Count == 0)
+                resultString = "No Results";
+            else
+                foreach (var r in result)
+                    resultString += r.ToString() + "\n";
+            resultText.Text = resultString;
+        }
     }
 }

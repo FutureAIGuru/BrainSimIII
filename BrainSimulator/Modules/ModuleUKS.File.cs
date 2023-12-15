@@ -26,9 +26,6 @@ namespace BrainSimulator.Modules
             GetOrAddThing("is", "RelationshipType");
             AddStatement("is-a", "inverseOf", "has-child");
             AddStatement("isexclusive", "is-a", "RelationshipType");
-            AddStatement("with", "is-a", "RelationshipType");
-            AddStatement("and", "is-a", "RelationshipType");
-            AddStatement("isSimilarTo", "is-a", "RelationshipType");
 
             //This hack is here because some Things created at startup don't get put into the UKS List.
             foreach (Thing t in ThingLabels.AllThingsInLabelList())
@@ -203,7 +200,7 @@ namespace BrainSimulator.Modules
                     if (t1 != null)
                         t1.RelationshipsFromWriteable.Add(r);
                     if (r.relType != null)
-                        r.relType.RelationshipsFromWriteable.Add(r);
+                        r.relType.RelationshipsAsTypeWriteable.Add(r);
                     AddClauses(r);
                 }
             }

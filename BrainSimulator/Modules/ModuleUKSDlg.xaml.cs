@@ -241,7 +241,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         { }
 
         totalItemCount++;
-        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => -x.Value).ToList();
+        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => x.relType.Label).ToList();
         foreach (Relationship r in sortedReferences)
         {
             if (r.relType?.Label == "has-child") continue;
@@ -383,26 +383,27 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         mi.Click += Mi_Click;
         mi.Header = "Show All";
         menu.Items.Add(mi);
-        mi = new();
-        mi.Click += Mi_Click;
-        mi.Header = "Add Types";
-        menu.Items.Add(mi);
-        mi = new();
-        mi.Click += Mi_Click;
-        mi.Header = "Add Actions";
-        menu.Items.Add(mi);
-        mi = new();
-        mi.Click += Mi_Click;
-        mi.Header = "Add Parts";
-        menu.Items.Add(mi);
-        mi = new();
-        mi.Click += Mi_Click;
-        mi.Header = "Remove Hits and Access Count";
-        menu.Items.Add(mi);
+        //mi = new();
+        //mi.Click += Mi_Click;
+        //mi.Header = "Add Types";
+        //menu.Items.Add(mi);
+        //mi = new();
+        //mi.Click += Mi_Click;
+        //mi.Header = "Add Actions";
+        //menu.Items.Add(mi);
+        //mi = new();
+        //mi.Click += Mi_Click;
+        //mi.Header = "Add Parts";
+        //menu.Items.Add(mi);
+        //mi = new();
+        //mi.Click += Mi_Click;
+        //mi.Header = "Remove Hits and Access Count";
+        //menu.Items.Add(mi);
         mi = new();
         mi.Header = "Parents:";
         if (t.Parents.Count == 0)
             mi.Header = "Parents: NONE";
+        mi.IsEnabled = false;
         menu.Items.Add(mi);
         foreach (Thing t1 in t.Parents)
         {

@@ -21,23 +21,8 @@ namespace BrainSimulator.Modules
         {
             try
             {
-                //if (oRelationshipType is string s)
-                //{
-                //    //hack so you can set hasproperty via speech input dialog
-                //    if (s.StartsWith("hasproperty"))
-                //    {
-                //        string[] words = s.Split(' ');
-                //        oRelationshipType = "hasProperty";
-                //        if (words.Length > 0)
-                //        {
-                //            if (words[1] == "isexclusive") words[1] = "isexclusive";
-                //            oTarget = words[1];
-                //        }
-                //    }
-                //}
-                //hack needed to top-level things
                 Thing source = ThingFromObject(oSource);
-                Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType");
+                Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType",source);
                 Thing target = ThingFromObject(oTarget);
 
                 List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
@@ -73,10 +58,10 @@ namespace BrainSimulator.Modules
                 return existing;
             }
 
-            //fire all parents
-            var y = SearchRelationships(r, true,false);
-            foreach (Relationship r2 in y)
-                r2.Fire();
+            //fire all parents 
+            //var y = SearchRelationships(r, true,false);
+            //foreach (Relationship r2 in y)
+            //    r2.Fire();
 
             //will this cause a circular relationship?
             if (r.reltype?.Label == "has-child")
@@ -87,7 +72,6 @@ namespace BrainSimulator.Modules
                     return null;
                 }
             }
-
 
             WeakenConflictingRelationships(source, r);
 
@@ -110,24 +94,6 @@ namespace BrainSimulator.Modules
                 WriteTheRelationship(rSave1);
             }
 
-            /*          HERE is where we'll do bubbling etc  
-             *          ModuleObject mObject = (ModuleObject)base.FindModule(typeof(ModuleObject));
-                        if (mObject != null)
-                        {
-                            if (rSave.reltype?.Label == "has-child")
-                            {
-                                //here we are defining a parent so we don't need to guess as in the other case
-                                mObject.BubbleProperties1(rSave.target);
-                                ClearRedundancyInAncestry(rSave.target);
-                            }
-                            else
-                            {
-                                mObject.BubbleProperties1(rSave.source);
-                                mObject.PredictParents(rSave);
-                                //mObject.PredictParents(rSave.target);  //TODO: need to handle multiple possible suggestions
-                            }
-                        }
-            */
             //if this is adding a child relationship, remove any unknownObject parent
             ClearExtraneousParents(rSave.source);
             ClearExtraneousParents(rSave.T);
@@ -272,7 +238,8 @@ namespace BrainSimulator.Modules
                     lock (r.relType.RelationshipsFromWriteable)
                     {
                         r.source.RelationshipsWriteable.Add(r);
-                        r.relType.RelationshipsFromWriteable.Add(r);
+                        if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
+                            r.reltype.RelationshipsAsTypeWriteable.Add(r);
                     }
             }
             else if (r.source == null)
@@ -281,7 +248,8 @@ namespace BrainSimulator.Modules
                     lock (r.relType.RelationshipsFromWriteable)
                     {
                         r.target.RelationshipsFromWriteable.Add(r);
-                        r.relType.RelationshipsFromWriteable.Add(r);
+                        if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
+                            r.reltype.RelationshipsAsTypeWriteable.Add(r);
                     }
             }
             else if (r.relType == null)
@@ -301,7 +269,8 @@ namespace BrainSimulator.Modules
                         {
                             r.source.RelationshipsWriteable.Add(r);
                             r.target.RelationshipsFromWriteable.Add(r);
-                            r.relType.RelationshipsFromWriteable.Add(r);
+                            if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
+                                r.reltype.RelationshipsAsTypeWriteable.Add(r);
                         }
             }
         }
@@ -313,10 +282,11 @@ namespace BrainSimulator.Modules
                 t.RemoveParent(ThingLabels.GetThing("unknownObject"));
         }
 
-        Thing CreateInstanceOf(Thing t, List<Thing> targetModifiers)
+        public Thing SubclassExists(Thing t,List<Thing> targetModifiers)
         {
             //if instance already exists, return it
-            foreach (Thing t2 in t.Children)
+            if (t == null) return null;
+            foreach (Thing t2 in t.Descendents)
             {
                 foreach (Thing t3 in targetModifiers)
                 {
@@ -327,6 +297,15 @@ namespace BrainSimulator.Modules
             notFound:
                 continue;
             }
+            return null;
+        }
+
+
+        Thing CreateInstanceOf(Thing t, List<Thing> targetModifiers)
+        {
+            Thing t2 = SubclassExists(t, targetModifiers);
+            if (t2 != null) return t2;
+
             string newLabel = t.Label;
             foreach (Thing t1 in targetModifiers)
                 newLabel += "." + t1.Label;

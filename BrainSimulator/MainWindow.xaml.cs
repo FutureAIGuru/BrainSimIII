@@ -247,9 +247,8 @@ namespace BrainSimulator
                 string moduleName = moduleType.Name;
                 moduleName = moduleName.Replace("Module", "");
                 Modules.ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(moduleType);
-                string toolTip = ModuleDescriptionFile.GetToolTip(moduleType.Name);
 
-                ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = moduleName, ToolTip = toolTip, Margin = new Thickness(0), Padding = new Thickness(0) });
+                ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = moduleName, Margin = new Thickness(0), Padding = new Thickness(0) });
             }
         }
 

@@ -15,15 +15,15 @@
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
       <UKSTemp />
-      <fileName>C:\Users\c_sim\source\repos\BrainSimIIINEW\BrainSimulator\Networks\KnowledgeFiles\Test1.xml</fileName>
+      <fileName>C:\Users\c_sim\source\repos\BrainSimIIINEW\BrainSimulator\Networks\KnowledgeFiles\Knowledge1.xml</fileName>
     </ModuleBase>
     <ModuleBase xsi:type="ModuleUKSStatement">
       <initialized>true</initialized>
       <isEnabled>true</isEnabled>
       <Label>UKSStatement_1</Label>
       <dlgPos>
-        <X>609</X>
-        <Y>368</Y>
+        <X>689</X>
+        <Y>149</Y>
       </dlgPos>
       <dlgSize>
         <X>500</X>
@@ -41,9 +41,23 @@
       </dlgPos>
       <dlgSize>
         <X>628</X>
-        <Y>300</Y>
+        <Y>566</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
+    </ModuleBase>
+    <ModuleBase xsi:type="ModuleUKSEvent">
+      <initialized>true</initialized>
+      <isEnabled>true</isEnabled>
+      <Label>UKSEvent_1</Label>
+      <dlgPos>
+        <X>643</X>
+        <Y>127</Y>
+      </dlgPos>
+      <dlgSize>
+        <X>530</X>
+        <Y>479</Y>
+      </dlgSize>
+      <dlgIsOpen>false</dlgIsOpen>
     </ModuleBase>
   </modules>
 </BrainSim3Data>

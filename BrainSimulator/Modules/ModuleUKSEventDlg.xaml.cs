@@ -11,10 +11,10 @@ using System.Windows.Media;
 
 namespace BrainSimulator.Modules
 {
-    public partial class ModuleUKSStatementDlg : ModuleBaseDlg
+    public partial class ModuleUKSEventDlg : ModuleBaseDlg
     {
         // Constructor of the ModuleUKSStatement dialog
-        public ModuleUKSStatementDlg()
+        public ModuleUKSEventDlg()
         {
             InitializeComponent();
         }
@@ -35,27 +35,21 @@ namespace BrainSimulator.Modules
             string relationType = relationshipText.Text;
 
             if (!AddRelationshipChecks()) return;
-            TimeSpan duration = TimeSpan.MaxValue;
-            string durationText = ((ComboBoxItem)durationCombo.SelectedItem).Content.ToString();
-            switch (durationText)
-            {
-                case "Eternal": duration = TimeSpan.MaxValue; break;
-                case "1 hr": duration = TimeSpan.FromHours(1); break;
-                case "5 min": duration = TimeSpan.FromMinutes(5); break;
-                case "1 min": duration = TimeSpan.FromMinutes(1); break;
-                case "30 sec": duration = TimeSpan.FromSeconds(30); break;
-                case "10 sec": duration = TimeSpan.FromSeconds(10); break;
-            }
-            float confidence = (float)confidenceSlider.Value;
 
+            //NEW APPROACH
+            //"Mary can play outside IF weather is sunny"
+            //the first clause is:  reltype is potential, CAN ->  Can.Potentially (subclass with link(s) to condition(s)
+            //the second clause is: weather is sunny, weather is not current weather -> weather.hypothetical.sunny is sunny
+            //    weather implies cuurent weather  weather.hypothetical (like weather.dubai) is not current
 
-            ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
-            Relationship r1 = UKSStatement.AddRelationship(newThing, targetThing, relationType);
-            if (setConfCB.IsChecked == true)
-            {
-                r1.weight = confidence;
-                r1.TimeToLive = duration;
-            }
+            ModuleUKSEvent UKSEvent = (ModuleUKSEvent)ParentModule;
+            Relationship r1 = UKSEvent.AddRelationship(newThing, targetThing, relationType);
+
+            string newThing2 = sourceText2.Text;
+            string targetThing2 = targetText2.Text;
+            string relationType2 = relationshipText2.Text;
+            Relationship r2 = UKSEvent.AddRelationship(newThing2, targetThing2, relationType2);
+            r1.AddClause("condition", r2);
         }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.
@@ -63,7 +57,7 @@ namespace BrainSimulator.Modules
         {
             if (sender is TextBox tb)
             {
-                ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
+                ModuleUKSEvent UKSEvent = (ModuleUKSEvent)ParentModule;
 
                 if (tb.Text == "" && !tb.Name.Contains("arget"))
                 {
@@ -71,7 +65,7 @@ namespace BrainSimulator.Modules
                     SetError("Source and type cannot be empty");
                     return false;
                 }
-                if (UKSStatement.SearchLabelUKS(tb.Text) == null)
+                if (UKSEvent.SearchLabelUKS(tb.Text) == null)
                 {
                     tb.Background = new SolidColorBrush(Colors.Yellow);
                     SetError("");
@@ -120,7 +114,7 @@ namespace BrainSimulator.Modules
         private bool CheckAddRelationshipFieldsFilled()
         {
             SetError("");
-            ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
+            ModuleUKSEvent UKSEvent = (ModuleUKSEvent)ParentModule;
 
             if (sourceText.Text == "")
             {
@@ -158,10 +152,6 @@ namespace BrainSimulator.Modules
             if (sender is ComboBox c)
             {
                 string selector = ((ComboBoxItem)c.SelectedItem).Content as string;
-                if (selector != "")
-                    this.Height = 450;
-                else
-                    this.Height = 270;
             }
         }
     }

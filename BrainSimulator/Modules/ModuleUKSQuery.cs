@@ -6,7 +6,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pluralize.NET;
+using static BrainSimulator.Modules.ModuleUKS;
 
 namespace BrainSimulator.Modules
 {
@@ -64,7 +66,7 @@ namespace BrainSimulator.Modules
             return true;
         }
 
-        public IList<Relationship> QueryUKS(string source, string filter)
+        public List<ThingWithQueryParams> QueryUKS(string source)
         {
             GetUKS();
             if (UKS == null) return null;
@@ -72,15 +74,89 @@ namespace BrainSimulator.Modules
 
 
             source = source.Trim();
-            filter = filter.Trim();
-
             string[] tempStringArray = source.Split(' ');
-            List<string> sourceModifiers = new();
-            source = pluralizer.Singularize(tempStringArray[tempStringArray.Length-1]);
-            for (int i = 0; i < tempStringArray.Length-1; i++) sourceModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+            List<Thing> sourceModifiers = new();
+            source = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
+            Thing tSource = ThingLabels.GetThing(source);
+            if (tSource == null) return null;
 
-            IList<Relationship> retVal = UKS.Query(source, filter);
-            
+            for (int i = 0; i < tempStringArray.Length - 1; i++)
+            {
+                Thing t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
+                if (t == null) return null;
+                sourceModifiers.Add(t);
+            }
+
+            Thing t1 = UKS.SubclassExists(ThingLabels.GetThing(source), sourceModifiers);
+            if (t1 == null)
+            {
+                sourceModifiers.Add(tSource);
+                var x = UKS.FindThingsWithAttributes(sourceModifiers);
+            }
+
+            List<ThingWithQueryParams> retVal = UKS.Query(source);
+
+            return retVal;
+        }
+        public IList<Thing> QueryAncestors(string source)
+        {
+            GetUKS();
+            if (UKS == null) return null;
+            IPluralize pluralizer = new Pluralizer();
+
+            source = source.Trim();
+            source = pluralizer.Singularize(source);
+
+            Thing t = ThingLabels.GetThing(source);
+
+            List<Thing> retVal = new();
+            if (t != null)
+                retVal = t.AncestorList().ToList();
+
+            return retVal;
+        }
+        public IList<Thing> QuerySequence(string source)
+        {
+            GetUKS();
+            if (UKS == null) return null;
+            IPluralize pluralizer = new Pluralizer();
+            List<Thing> retVal = new();
+
+            source = source.Trim();
+            string[] tempStringArray = source.Split(' ');
+            List<Thing> sourceModifiers = new();
+            for (int i = 0; i < tempStringArray.Length; i++)
+            {
+                if (tempStringArray[i] == "") continue;
+                Thing t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
+                if (t == null) return null;
+                sourceModifiers.Add(t);
+            }
+
+            retVal = UKS.HasSequence(sourceModifiers);
+
+            return retVal;
+        }
+        public List<Relationship> QueryRelationships(List<ThingWithQueryParams> thingsToExamine, Relationship.Part p)
+        {
+            GetUKS();
+            if (UKS == null) return null;
+            if (thingsToExamine == null) return null;
+
+            List<Relationship> retVal = UKS.GetAllRelationships(thingsToExamine, p);
+
+            return retVal;
+        }
+        public IList<Thing> QueryChildren(string label)
+        {
+            GetUKS();
+            if (UKS == null) return null;
+            if (label == "") return null;
+            Thing t = ThingLabels.GetThing(label);
+            if (t == null) return null;
+
+            IList<Thing> retVal = t.Children;
+
             return retVal;
         }
     }
