@@ -5,20 +5,20 @@
     <relationships>
       <SRelationship>
         <source>0</source>
-        <target>8</target>
-        <hits>0</hits>
-        <misses>447</misses>
+        <target>12</target>
+        <hits>1</hits>
+        <misses>6269</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
+        <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
       <SRelationship>
         <source>0</source>
         <target>1</target>
-        <hits>0</hits>
-        <misses>447</misses>
+        <hits>1</hits>
+        <misses>6269</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
+        <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
     </relationships>
@@ -30,10 +30,19 @@
       <SRelationship>
         <source>1</source>
         <target>2</target>
-        <hits>0</hits>
-        <misses>893</misses>
+        <hits>1</hits>
+        <misses>12521</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>1</source>
+        <target>13</target>
+        <hits>1</hits>
+        <misses>12521</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
     </relationships>
@@ -44,56 +53,65 @@
     <relationships>
       <SRelationship>
         <source>2</source>
-        <target>10</target>
-        <hits>0</hits>
-        <misses>709</misses>
+        <target>44</target>
+        <hits>351</hits>
+        <misses>13360</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
+        <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
       <SRelationship>
         <source>2</source>
-        <target>12</target>
-        <hits>0</hits>
-        <misses>709</misses>
+        <target>45</target>
+        <hits>351</hits>
+        <misses>12423</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
+        <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
       <SRelationship>
         <source>2</source>
-        <target>13</target>
-        <hits>0</hits>
-        <misses>709</misses>
+        <target>49</target>
+        <hits>349</hits>
+        <misses>11711</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
+        <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
       <SRelationship>
         <source>2</source>
-        <target>15</target>
-        <hits>0</hits>
-        <misses>632</misses>
+        <target>50</target>
+        <hits>349</hits>
+        <misses>11579</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
+        <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
       <SRelationship>
         <source>2</source>
-        <target>16</target>
-        <hits>0</hits>
-        <misses>456</misses>
+        <target>52</target>
+        <hits>349</hits>
+        <misses>11439</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
+        <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
       <SRelationship>
         <source>2</source>
-        <target>17</target>
-        <hits>0</hits>
-        <misses>456</misses>
+        <target>53</target>
+        <hits>349</hits>
+        <misses>11283</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>2</source>
+        <target>58</target>
+        <hits>48</hits>
+        <misses>731</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
     </relationships>
@@ -104,9 +122,9 @@
     <relationships>
       <SRelationship>
         <source>3</source>
-        <target>9</target>
-        <hits>1</hits>
-        <misses>448</misses>
+        <target>11</target>
+        <hits>2</hits>
+        <misses>6267</misses>
         <weight>1</weight>
         <relationshipType>4</relationshipType>
         <count>-1</count>
@@ -117,184 +135,1047 @@
   <SThing>
     <label>inverseOf</label>
     <relationships />
-    <useCount>1</useCount>
+    <useCount>2</useCount>
   </SThing>
   <SThing>
     <label>hasProperty</label>
     <relationships />
-    <useCount>0</useCount>
+    <useCount>4</useCount>
   </SThing>
   <SThing>
     <label>is</label>
     <relationships />
-    <useCount>1</useCount>
+    <useCount>4</useCount>
   </SThing>
   <SThing>
-    <label>isexclusive</label>
+    <label>isExclusive</label>
     <relationships />
-    <useCount>1</useCount>
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>transitiveUp</label>
+    <relationships />
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>has</label>
+    <relationships>
+      <SRelationship>
+        <source>9</source>
+        <target>10</target>
+        <hits>1219</hits>
+        <misses>11104</misses>
+        <weight>1</weight>
+        <relationshipType>5</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>9</source>
+        <target>47</target>
+        <hits>22</hits>
+        <misses>10316</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>9</source>
+        <target>51</target>
+        <hits>20</hits>
+        <misses>10054</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>5</useCount>
+  </SThing>
+  <SThing>
+    <label>transitiveDown</label>
+    <relationships />
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>has-child</label>
+    <relationships>
+      <SRelationship>
+        <source>11</source>
+        <target>8</target>
+        <hits>11595</hits>
+        <misses>27078</misses>
+        <weight>1</weight>
+        <relationshipType>5</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>14</useCount>
   </SThing>
   <SThing>
     <label>RelationshipType</label>
     <relationships>
       <SRelationship>
-        <source>8</source>
-        <target>9</target>
-        <hits>2</hits>
-        <misses>682</misses>
-        <weight>1</weight>
-        <relationshipType>9</relationshipType>
-        <count>-1</count>
-      </SRelationship>
-      <SRelationship>
-        <source>8</source>
-        <target>3</target>
-        <hits>2</hits>
-        <misses>682</misses>
-        <weight>1</weight>
-        <relationshipType>9</relationshipType>
-        <count>-1</count>
-      </SRelationship>
-      <SRelationship>
-        <source>8</source>
-        <target>4</target>
-        <hits>2</hits>
-        <misses>682</misses>
-        <weight>1</weight>
-        <relationshipType>9</relationshipType>
-        <count>-1</count>
-      </SRelationship>
-      <SRelationship>
-        <source>8</source>
-        <target>5</target>
-        <hits>2</hits>
-        <misses>682</misses>
-        <weight>1</weight>
-        <relationshipType>9</relationshipType>
-        <count>-1</count>
-      </SRelationship>
-      <SRelationship>
-        <source>8</source>
-        <target>6</target>
-        <hits>2</hits>
-        <misses>682</misses>
-        <weight>1</weight>
-        <relationshipType>9</relationshipType>
-        <count>-1</count>
-      </SRelationship>
-      <SRelationship>
-        <source>8</source>
-        <target>7</target>
-        <hits>11</hits>
-        <misses>670</misses>
-        <weight>1</weight>
-        <relationshipType>9</relationshipType>
-        <count>-1</count>
-      </SRelationship>
-      <SRelationship>
-        <source>8</source>
+        <source>12</source>
         <target>11</target>
-        <hits>0</hits>
-        <misses>499</misses>
+        <hits>13</hits>
+        <misses>9495</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
-        <count>-1</count>
-      </SRelationship>
-    </relationships>
-    <useCount>1</useCount>
-  </SThing>
-  <SThing>
-    <label>has-child</label>
-    <relationships />
-    <useCount>2</useCount>
-  </SThing>
-  <SThing>
-    <label>mary</label>
-    <relationships>
-      <SRelationship>
-        <source>10</source>
-        <target>14</target>
-        <hits>7</hits>
-        <misses>632</misses>
-        <weight>0.9</weight>
         <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
       <SRelationship>
-        <source>10</source>
-        <target>15</target>
-        <hits>3</hits>
-        <misses>571</misses>
-        <weight>0.9</weight>
+        <source>12</source>
+        <target>3</target>
+        <hits>13</hits>
+        <misses>9495</misses>
+        <weight>1</weight>
         <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
-    </relationships>
-    <useCount>2</useCount>
-  </SThing>
-  <SThing>
-    <label>owns-a</label>
-    <relationships />
-    <useCount>3</useCount>
-  </SThing>
-  <SThing>
-    <label>lamb</label>
-    <relationships>
+      <SRelationship>
+        <source>12</source>
+        <target>4</target>
+        <hits>13</hits>
+        <misses>9495</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>5</target>
+        <hits>13</hits>
+        <misses>9495</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>6</target>
+        <hits>13</hits>
+        <misses>9495</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>7</target>
+        <hits>22</hits>
+        <misses>9483</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>9</target>
+        <hits>22</hits>
+        <misses>9469</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
       <SRelationship>
         <source>12</source>
         <target>14</target>
-        <hits>0</hits>
-        <misses>628</misses>
+        <hits>22</hits>
+        <misses>9453</misses>
         <weight>1</weight>
-        <relationshipType>9</relationshipType>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>15</target>
+        <hits>22</hits>
+        <misses>9435</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>17</target>
+        <hits>5</hits>
+        <misses>9435</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>18</target>
+        <hits>5</hits>
+        <misses>9435</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>34</target>
+        <hits>5</hits>
+        <misses>9435</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>8</target>
+        <hits>28</hits>
+        <misses>2716</misses>
+        <weight>0.9</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>10</target>
+        <hits>28</hits>
+        <misses>2589</misses>
+        <weight>0.9</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>6</useCount>
+  </SThing>
+  <SThing>
+    <label>number</label>
+    <relationships>
+      <SRelationship>
+        <source>13</source>
+        <target>7</target>
+        <hits>12</hits>
+        <misses>12527</misses>
+        <weight>1</weight>
+        <relationshipType>5</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>13</source>
+        <target>16</target>
+        <hits>3</hits>
+        <misses>12527</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>13</source>
+        <target>30</target>
+        <hits>3</hits>
+        <misses>12527</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>13</source>
+        <target>31</target>
+        <hits>3</hits>
+        <misses>12527</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>13</source>
+        <target>32</target>
+        <hits>3</hits>
+        <misses>12527</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>13</source>
+        <target>33</target>
+        <hits>12</hits>
+        <misses>12515</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>13</source>
+        <target>54</target>
+        <hits>1</hits>
+        <misses>9703</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>13</source>
+        <target>56</target>
+        <hits>0</hits>
+        <misses>1113</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>greaterThan</label>
+    <relationships />
+    <useCount>13</useCount>
+  </SThing>
+  <SThing>
+    <label>lessThan</label>
+    <relationships>
+      <SRelationship>
+        <source>15</source>
+        <target>14</target>
+        <hits>2</hits>
+        <misses>6255</misses>
+        <weight>1</weight>
+        <relationshipType>4</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>digit</label>
+    <relationships>
+      <SRelationship>
+        <source>16</source>
+        <target>19</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>16</source>
+        <target>20</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>16</source>
+        <target>21</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>16</source>
+        <target>22</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>16</source>
+        <target>23</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>16</source>
+        <target>24</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>16</source>
+        <target>25</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>16</source>
+        <target>26</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>16</source>
+        <target>27</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>16</source>
+        <target>28</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>16</source>
+        <target>29</target>
+        <hits>43</hits>
+        <misses>9423</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
         <count>-1</count>
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
   </SThing>
   <SThing>
-    <label>little</label>
-    <relationships />
-    <useCount>1</useCount>
-  </SThing>
-  <SThing>
-    <label>lamb.little</label>
+    <label>isSimilarTo</label>
     <relationships>
       <SRelationship>
-        <source>14</source>
-        <target>13</target>
-        <hits>87</hits>
-        <misses>757</misses>
+        <source>17</source>
+        <target>18</target>
+        <hits>2</hits>
+        <misses>6256</misses>
         <weight>1</weight>
-        <relationshipType>6</relationshipType>
+        <relationshipType>5</relationshipType>
         <count>-1</count>
       </SRelationship>
     </relationships>
     <useCount>2</useCount>
   </SThing>
   <SThing>
-    <label>dog</label>
+    <label>commutative</label>
     <relationships />
     <useCount>1</useCount>
   </SThing>
   <SThing>
-    <label>suzie</label>
+    <label>.</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>0</label>
+    <relationships />
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>2</label>
     <relationships>
       <SRelationship>
-        <source>16</source>
-        <target>17</target>
-        <hits>1</hits>
-        <misses>439</misses>
-        <weight>0.9</weight>
-        <relationshipType>11</relationshipType>
+        <source>21</source>
+        <target>22</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>3</useCount>
+  </SThing>
+  <SThing>
+    <label>1</label>
+    <relationships>
+      <SRelationship>
+        <source>22</source>
+        <target>20</target>
+        <hits>2</hits>
+        <misses>9383</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>5</useCount>
+  </SThing>
+  <SThing>
+    <label>3</label>
+    <relationships>
+      <SRelationship>
+        <source>23</source>
+        <target>21</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>3</useCount>
+  </SThing>
+  <SThing>
+    <label>4</label>
+    <relationships>
+      <SRelationship>
+        <source>24</source>
+        <target>23</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>5</label>
+    <relationships>
+      <SRelationship>
+        <source>25</source>
+        <target>24</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>6</label>
+    <relationships>
+      <SRelationship>
+        <source>26</source>
+        <target>25</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>7</label>
+    <relationships>
+      <SRelationship>
+        <source>27</source>
+        <target>26</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>8</label>
+    <relationships>
+      <SRelationship>
+        <source>28</source>
+        <target>27</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>9</label>
+    <relationships>
+      <SRelationship>
+        <source>29</source>
+        <target>28</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>some</label>
+    <relationships>
+      <SRelationship>
+        <source>30</source>
+        <target>22</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
         <count>-1</count>
       </SRelationship>
     </relationships>
     <useCount>1</useCount>
   </SThing>
   <SThing>
-    <label>horse</label>
+    <label>many</label>
+    <relationships>
+      <SRelationship>
+        <source>31</source>
+        <target>24</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>14</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>none</label>
+    <relationships>
+      <SRelationship>
+        <source>32</source>
+        <target>20</target>
+        <hits>2</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>17</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>pi</label>
+    <relationships>
+      <SRelationship>
+        <source>33</source>
+        <target>23</target>
+        <hits>14</hits>
+        <misses>9462</misses>
+        <weight>1</weight>
+        <relationshipType>35</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>33</source>
+        <target>19</target>
+        <hits>14</hits>
+        <misses>9456</misses>
+        <weight>1</weight>
+        <relationshipType>36</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>33</source>
+        <target>22</target>
+        <hits>14</hits>
+        <misses>9447</misses>
+        <weight>1</weight>
+        <relationshipType>37</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>33</source>
+        <target>24</target>
+        <hits>14</hits>
+        <misses>9435</misses>
+        <weight>1</weight>
+        <relationshipType>38</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>33</source>
+        <target>22</target>
+        <hits>14</hits>
+        <misses>9420</misses>
+        <weight>1</weight>
+        <relationshipType>39</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>33</source>
+        <target>25</target>
+        <hits>14</hits>
+        <misses>9402</misses>
+        <weight>1</weight>
+        <relationshipType>40</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>33</source>
+        <target>29</target>
+        <hits>14</hits>
+        <misses>9381</misses>
+        <weight>1</weight>
+        <relationshipType>41</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>8</useCount>
+  </SThing>
+  <SThing>
+    <label>hasDigit</label>
+    <relationships>
+      <SRelationship>
+        <source>34</source>
+        <target>35</target>
+        <hits>1</hits>
+        <misses>6255</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>34</source>
+        <target>36</target>
+        <hits>1</hits>
+        <misses>6255</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>34</source>
+        <target>37</target>
+        <hits>1</hits>
+        <misses>6255</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>34</source>
+        <target>38</target>
+        <hits>1</hits>
+        <misses>6255</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>34</source>
+        <target>39</target>
+        <hits>1</hits>
+        <misses>6255</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>34</source>
+        <target>40</target>
+        <hits>1</hits>
+        <misses>6255</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>34</source>
+        <target>41</target>
+        <hits>1</hits>
+        <misses>6255</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>0</useCount>
+  </SThing>
+  <SThing>
+    <label>hasDigit0</label>
     <relationships />
     <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>hasDigit1</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>hasDigit2</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>hasDigit3</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>hasDigit4</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>hasDigit5</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>hasDigit6</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>mary</label>
+    <relationships />
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>girl</label>
+    <relationships>
+      <SRelationship>
+        <source>43</source>
+        <target>42</target>
+        <hits>5</hits>
+        <misses>12431</misses>
+        <weight>0.9</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>3</useCount>
+  </SThing>
+  <SThing>
+    <label>person</label>
+    <relationships>
+      <SRelationship>
+        <source>44</source>
+        <target>43</target>
+        <hits>4</hits>
+        <misses>11532</misses>
+        <weight>0.9</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>44</source>
+        <target>45</target>
+        <hits>4</hits>
+        <misses>10825</misses>
+        <weight>0.9</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>body</label>
+    <relationships>
+      <SRelationship>
+        <source>45</source>
+        <target>46</target>
+        <hits>403</hits>
+        <misses>12152</misses>
+        <weight>0.9</weight>
+        <relationshipType>47</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>45</source>
+        <target>48</target>
+        <hits>403</hits>
+        <misses>12103</misses>
+        <weight>0.9</weight>
+        <relationshipType>47</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>3</useCount>
+  </SThing>
+  <SThing>
+    <label>arm</label>
+    <relationships>
+      <SRelationship>
+        <source>46</source>
+        <target>52</target>
+        <hits>410</hits>
+        <misses>11798</misses>
+        <weight>0.9</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>3</useCount>
+  </SThing>
+  <SThing>
+    <label>has.2</label>
+    <relationships>
+      <SRelationship>
+        <source>47</source>
+        <target>21</target>
+        <hits>823</hits>
+        <misses>8903</misses>
+        <weight>1</weight>
+        <relationshipType>6</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>3</useCount>
+  </SThing>
+  <SThing>
+    <label>leg</label>
+    <relationships>
+      <SRelationship>
+        <source>48</source>
+        <target>49</target>
+        <hits>410</hits>
+        <misses>11984</misses>
+        <weight>0.9</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>3</useCount>
+  </SThing>
+  <SThing>
+    <label>foot</label>
+    <relationships>
+      <SRelationship>
+        <source>49</source>
+        <target>50</target>
+        <hits>410</hits>
+        <misses>11775</misses>
+        <weight>0.9</weight>
+        <relationshipType>51</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>toe</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>has.5</label>
+    <relationships>
+      <SRelationship>
+        <source>51</source>
+        <target>25</target>
+        <hits>817</hits>
+        <misses>8445</misses>
+        <weight>1</weight>
+        <relationshipType>6</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>51</source>
+        <target>55</target>
+        <hits>18</hits>
+        <misses>8064</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>51</source>
+        <target>57</target>
+        <hits>13</hits>
+        <misses>1714</misses>
+        <weight>1</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>3</useCount>
+  </SThing>
+  <SThing>
+    <label>hand</label>
+    <relationships>
+      <SRelationship>
+        <source>52</source>
+        <target>53</target>
+        <hits>410</hits>
+        <misses>11553</misses>
+        <weight>0.9</weight>
+        <relationshipType>51</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>2</useCount>
+  </SThing>
+  <SThing>
+    <label>finger</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>10</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>has.5.10</label>
+    <relationships>
+      <SRelationship>
+        <source>55</source>
+        <target>54</target>
+        <hits>21</hits>
+        <misses>4977</misses>
+        <weight>1</weight>
+        <relationshipType>6</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>50</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>has.5.50</label>
+    <relationships>
+      <SRelationship>
+        <source>57</source>
+        <target>56</target>
+        <hits>8</hits>
+        <misses>637</misses>
+        <weight>1</weight>
+        <relationshipType>6</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>appendage</label>
+    <relationships>
+      <SRelationship>
+        <source>58</source>
+        <target>46</target>
+        <hits>5</hits>
+        <misses>825</misses>
+        <weight>0.9</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+      <SRelationship>
+        <source>58</source>
+        <target>48</target>
+        <hits>5</hits>
+        <misses>713</misses>
+        <weight>0.9</weight>
+        <relationshipType>11</relationshipType>
+        <count>-1</count>
+      </SRelationship>
+    </relationships>
+    <useCount>2</useCount>
   </SThing>
 </ArrayOfSThing>

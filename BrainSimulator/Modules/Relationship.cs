@@ -35,17 +35,17 @@ namespace BrainSimulator.Modules
 
     public class ClauseType
     {
-        public AppliesTo a;
+        public ClsType a;
         public Relationship clause;
         public ClauseType() { }
-        public ClauseType(AppliesTo a1, Relationship clause1)
+        public ClauseType(ClsType a1, Relationship clause1)
         {
             a = a1;
             clause = clause1;
         }
 
     };
-    public enum AppliesTo { all, source, type, target, condition };
+    public enum ClsType { all, source, type, target, condition };
 
     public class QueryRelationship : Relationship
     {
@@ -66,8 +66,6 @@ namespace BrainSimulator.Modules
     //a relationship is a weighted link to a thing and has a type
     public class Relationship
     {
-        public enum Part { source, type, target };
-
         public Thing s = null;
         public Thing source
         {
@@ -172,19 +170,19 @@ namespace BrainSimulator.Modules
             switch (clauseType.ToLower())
             {
                 case "condition":
-                    theClause = new ClauseType { a = AppliesTo.condition};
+                    theClause = new ClauseType { a = ClsType.condition};
                     break;
                 case "source":
-                    theClause = new ClauseType { a = AppliesTo.source};
+                    theClause = new ClauseType { a = ClsType.source};
                     break;
                 case "target":
-                    theClause = new ClauseType { a = AppliesTo.target};
+                    theClause = new ClauseType { a = ClsType.target};
                     break;
                 case "type":
-                    theClause = new ClauseType { a = AppliesTo.type};
+                    theClause = new ClauseType { a = ClsType.type};
                     break;
                 case "all":
-                    theClause = new ClauseType { a = AppliesTo.all};
+                    theClause = new ClauseType { a = ClsType.all};
                     break;
             }
             if (theClause != null)
@@ -212,27 +210,27 @@ namespace BrainSimulator.Modules
             {
                 switch (c.a)
                 {
-                    case AppliesTo.source:
+                    case ClsType.source:
                         {
                             sourceModifierString += " AND " + c.clause.source;
                             break;
                         }
-                    case AppliesTo.type:
+                    case ClsType.type:
                         {
                             typeModifierString += " AND " + c.clause.relType;
                             break;
                         }
-                    case AppliesTo.target:
+                    case ClsType.target:
                         {
                             targetModifierString += " AND  " + c.clause.target;
                             break;
                         }
-                    case AppliesTo.all:
+                    case ClsType.all:
                         {
                             targetModifierString += " AND " + c.clause;
                             break;
                         }
-                    case AppliesTo.condition:
+                    case ClsType.condition:
                         {
                             targetModifierString += " IF " + c.clause;
                             break;
@@ -268,7 +266,7 @@ namespace BrainSimulator.Modules
             foreach (Relationship r in t.Relationships)
             {
                 if (r.reltype == Thing.HasChild) continue;
-                if (t.Label.Contains("." + r.T?.Label))continue;
+                if (t.Label.Contains("." + r.target?.Label))continue;
                 if (r.relType?.Label == "is")
                 {
                     if (retVal == null) retVal += "(";
@@ -362,7 +360,7 @@ namespace BrainSimulator.Modules
     //this is a non-pointer representation of a relationship needed for XML storage
     public class SClauseType
     {
-        public AppliesTo a;
+        public ClsType clauseType;
         public SRelationship r;
     }
 

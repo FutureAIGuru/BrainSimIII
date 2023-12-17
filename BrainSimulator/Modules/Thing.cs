@@ -321,8 +321,8 @@ namespace BrainSimulator.Modules
 
         public Relationship HasRelationship(Thing t)
         {
-            foreach (Relationship L in Relationships)
-                if (L.T == t) return L;
+            foreach (Relationship r in Relationships)
+                if (r.target == t) return r;
             return null;
         }
 
@@ -408,6 +408,18 @@ namespace BrainSimulator.Modules
         {
             Relationship r = new() { source = this, reltype = hasChildType, target = t };
             RemoveRelationship(r);
+        }
+
+        public bool HasPropertyLabeled(string label)
+        {
+            foreach (Relationship r in relationships)
+                if (r.reltype.Label.ToLower() == "hasproperty" && r.target.Label.ToLower() == label.ToLower())
+                    return true;
+            foreach (Thing t in Parents)
+            {
+                return t.HasPropertyLabeled(label);
+            }
+            return false;
         }
     }
 }

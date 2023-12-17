@@ -1,241 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ArrayOfModuleDescription xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <ModuleDescription>
-    <moduleName>Module2DModel</moduleName>
-    <description>
-			This module receives input from the Touch and Vision modules and merges the information to maintain a representation of physical objects in the entity's environment. It also supports imagination via the temporary addition of imagined objects and the temporary change in point of view.
-			Dialog: the dialog shows objects from the entity's point of view. The top of the display is forward. Objects have white ends which indicate the confidence that the distance is correct--the smaller the white, the greater the confidence.
-
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>Module2DSim</moduleName>
-    <description>
-			This module uses no neurons of its own but fires neurons in various sensory modules if they are in the network. It has methods (Move and Turn and potentially others) which can be called by other modules to move its point of view around the simulation. Shift-mouse wheel can zoom the display and Shift-left mouse button can drag (pan). Right-clicking in the dialog box can direct the entity to that location. Shift + Mouse motion or mouse wheel will pan or zoom the display.
-
-			Obstacles are set with synapses and will show after initiation.
-			Weight=1 movable.
-			Weight=-1 fixed
-			Weight=(0,1) obstacle moves vertically spd=weight-.5
-			Weight=(-1,0) obstacle moves horizontally spd=weight-(-.5)
-			Speeds are adjusted with the slider.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>Module2DSmell</moduleName>
-    <description>This module has 2 rows of neurons representing input from two smell sensors. It receives input from the 2DSim module and outputs smell info to the Internal Model. It necessarily handles the positions of the two smell sensors forming the beginning of an internal sense of olfactory perception. </description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>Module2DTouch</moduleName>
-    <description>This module has 2 rows of neurons representing input from two touch sensors. It receives input from the 2DSim module and outputs touch info to the Internal Model. It necessarily handles the positions of the two touch sensors forming the beginning of an internal sense of proprioception. </description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>Module2DVision</moduleName>
-    <description>
-			This module has 2 rows of neurons representing the retinal views of the right and left eyes. It receives input from the 2DSim module and finds points of interest which are color boundaries. Based on the difference in position of these boundaries in the two eyes, it estimates the distance (depth perception) of the point and passes this information to the model. As depths are approximate, it enters these as 'possible' points.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>Module3DSimModel</moduleName>
-    <description>This module is the editor to define virtual obstacles in the 3D environment. It simple dialog allows the user to define cubes,spheres, cones and walls of various colors and sizes in various positions in the 3D world that Module3DSimControl provides an overview of, and of which Module3DSimView shows Sallie's view on that same world. Shapes can be added, updated and removed, and the Control and View dialogs update accordingly. The defined objects get saved with the network. </description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>Module3DSimControl</moduleName>
-    <description>This module is the control overview of the simulated 3D environment, which shows Sallie in her world. She initially starts at the center of it, facing forward. PodInterface module dictates the movements of Sallie and her head, and this information gets relayed to Module3DSimView to have it show a proper image of what Sallie is seeing. The camera on Module3DSimControl is totally independent of Sallie, and can be manipulated by right-drag (camera angle in 3D), scroll wheel (zoom) and right-double-click (look at this). This is quite intuitive once you get used to it.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>Module3DSimView</moduleName>
-    <description>This module works in tandem with Module3DSimModel which creates the world, and Module3DSimControl which displays all movement information of Sallie in this world. The view here can not be manipulated, as ModulePodInterface determines which way Sallie moves, and which way she looks. It does however have a frames per second setting, which determines how often an image is save in Documents\FutureAI\BrainsimulatorIII\VirtualCameraOutputs.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleArm</moduleName>
-    <description>In the simulator, Sallie has arms with touch sensors which default to moving in small circles. This module can override that process with specific arem locations for experimentation with directed exploration.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleAudible</moduleName>
-    <description>Consolidation of processing of audible input outside of the UKS.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleBehavior</moduleName>
-    <description>This module has primitives of Move and Turn behaviors and allows them to be queued into sequences. A sequence can be cancelled in the event of collision or other issue. By firing various input neurons the module may query the Model to decide where to turn.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleBoundary</moduleName>
-    <description>
-			Detects boundaries and corners in an image.
-
-			Consider this as placeholder code to be replaced with some more robuse libray such as OPENCV in the near future.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleBoundary1</moduleName>
-    <description>Follows boundaries with code.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleCamera</moduleName>
-    <description>The module Camera is a module for translating the signals from an attached camera into a rectangular field of Color Neurons, which show the camera image.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleChain</moduleName>
-    <description>A quick way to create an array of neurons representing a bucket-brigade.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleChainCounter</moduleName>
-    <description>Builds an array of synapse weights which can detect the number of neurons firing in a chain dictated by the size of the module.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleColorComponent</moduleName>
-    <description>The ColorComponent module has four labeled nerons that have the values of the red, green, blue and intensity values of a color that is fed in. This somewhat emulates the signals which would be generated by cells in the retina. In the context menu, you can change the number of discrete levels which an individual color neuron may take and the amount of jitter in the signal</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleCommand</moduleName>
-    <description>
-			For testing purposes, this module reads a script file with a direction to fire specific neurons in the network. You can edit the script file in the dialog box.
-
-			Format / commands:
-			In general, the format to fire a neuron is '[moduleLabel:] [neuronLabel]...[neuronLabel]
-			Every line in the file represents an engine cycle so commands on the same line execute in the same cycle.
-			Commands may be entered on full lines if they contain '//'
-			The 'WaitFor' command which pauses execution until the specified neuron fires.
-			The 'Stop' command aborts execution at the line in the file...useful for executing just the first lines of a file.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleEvent</moduleName>
-    <description>Creates UKS things which represent objects needed for reinforcement learning. Each triple includes a Situation, an Action, and the Outcome. For a given situation, Sallie takes an action, and receives an outcome and can subsequently search the structure to select the action which leads to the best outcome for any given situation. </description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleFireOldest</moduleName>
-    <description>The module FireOldest fires the oldest neuron in the module, which can be used to trigger functionality like forgetting something.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleNull</moduleName>
-    <description>The module accepts a destination and determines a path to get there. It works by successively trying different endpoints it can currently reach to see if there is one which can directly reach the destination. This is a demonstration of the use of various other modules.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleGraph</moduleName>
-    <description>Demonstrates how neurons can be harnessed to store knowledge in relationships.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleHearWords</moduleName>
-    <description>With an array of labeled word neurons, this modules senses the firing sequence and build phrase Things.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleImageFile</moduleName>
-    <description>This module can import an image file or set of image files and will projectthem onto a rectangular area of Color neurons much like the Camera Module does.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleKBDebug</moduleName>
-    <description>Creates a dialog box which scrolls the sequence of neuron firings into and out of the UKS. This module is used in debugging of the UKS, UKSN and UKS2 modules.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleLife</moduleName>
-    <description>With this module it is possible to show Conway's Game of Life implemented in neurons and synapses.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleMotor</moduleName>
-    <description>Allows for Sallies movement of wheels or limbs</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleMove</moduleName>
-    <description>
-			The outer neurons can move the entity by pre-programmed amounts. It always moves forward or back relative to the direction it is headed.
-
-			The center neuron can be applied with any float value to move the entity by a specified amount.
-
-			Other modules such as Simulator and Model are informed directly of the motiion. When the Simulator is informed, a collision may cancel the requested motion.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleMoveObject</moduleName>
-    <description>This module can move objects around in the simulated worlds.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleNavigate</moduleName>
-    <description>The module Navigate has specific code to navigate a maze in the simulated world, and perhaps one day in the real world.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleNull</moduleName>
-    <description>Module does nothing and is used for testing.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModulePatternGenerator</moduleName>
-    <description>Has a library of output patterns and can randomly select and output them.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModulePatternRecognizer</moduleName>
-    <description>
-			With 'Learning' not firing:
-			'RdOut' fires periodically to request data from inputs. Synapse weights are fixed. Based onthe learning algorithm, synapses are typically set so that a perfrect pattern match will fire on the first cycle and 1, 2, and 3-bit errors will fire on the subsequent cycles.
-
-			With 'Learning' firing:
-			If no recognition neuron spikes after 'RdOut,' a neuron is selected to represent the new pattern  and Hebbian synapses begin learning the new pattern.
-
-			To Set up:
-			Add synapses from various input sources to 'P0'. The system will automatically add input synapses from all labeled neurons below the input synapses added. Add a synapse from'RdOut' to each neuron which enables inputs so this module.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleRateDecoder</moduleName>
-    <description>Assuming 1ms cycle and 4ms refractory, this module can differentiate serial input by measuring the time between adjascent spikes in an input stream. The number of different levels detected is controlled by the height of the module and it detects different interspike timings in 1ms intervals. </description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleRateDecoder2</moduleName>
-    <description>Assuming 1ms cycle and 4ms refractory, this module can differentiate serial input by measuring the time between adjascent spikes in an input stream. The number of different levels detected is controlled by the height of the module and it detects different interspike timings in 1ms intervals. This module measuring the inter-spike timing for every pair of spikes whereas RateDecoder measures for every other pair of spikes.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleRateDecoder3</moduleName>
-    <description>
-			Assuming 1ms cycle and 4ms refractory, this module can differentiate serial input by measuring the time between adjacent spikes in an input stream. The number of different levels detected is controlled by the height of the module and it detects different interspike timings in 1ms intervals.
-
-			This module measures the inter-spike timing for every pair of spikes whereas RateDecoder measures for every other pair of spikes. The neuron labeled 'In' represents the input of the rate-encoded spiking signal. The neuron labeled 'Read' enables the output of the value which is stored in its short-term memory.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleRealityModel</moduleName>
-    <description>Obsolete, do not use.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleShortTermMemory</moduleName>
-    <description>Data is entered by firing the 'I' neurons. When 'Rd' is fired, data will be present on the 'O' neurons. </description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleSpeakPhonemes</moduleName>
-    <description>This module uses the onboard OS Speech synthesis to speak (strings of) phonemes, thus building words and sentences.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleSpeakPhonemes2</moduleName>
-    <description>This module uses the onboard OS Speech synthesis to speak (strings of) phonemes, thus building words and sentences.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleSpeakWords</moduleName>
-    <description>This module uses the onboard OS Speech synthesis to speak (strings of) words, thus building entire sentences.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleSpeechIn</moduleName>
-    <description>This module can detect a number of phrases which start with either the word "Sallie" or "Computer", and stores these words as a sequence under the Word root in the UKS. ModulePhraseRecognizer then does further processing.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleSpeechOut</moduleName>
-    <description>This module uses the onboard OS Speech synthesis to speak (strings of) words, thus building sentences.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleStrokeCenter</moduleName>
-    <description>This base class defines all common functionality for Modules.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleStrokeFinder</moduleName>
-    <description>This base class defines all common functionality for Modules.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleTurn</moduleName>
-    <description>
-			The outer neurons can rotate the entity by pre-programmed amounts.
-
-			The center neuron can be applied with any float value to rotate the entity by a specified amount.Other modules such as Simulator and Model are informed directly of the rotation.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
     <moduleName>ModuleUKS</moduleName>
     <description>This dialog shows the content of the Universal Knowledge Store (UKS) which is a graph composed of Things and Relationships which connect them.  Unlike most modules, you may have any number of UKS dialogs open for multiple views into the same data.  You can expand items in the tree view.
 
@@ -268,173 +33,6 @@ Bottom Panel:
 </description>
   </ModuleDescription>
   <ModuleDescription>
-    <moduleName>ModuleUKS2</moduleName>
-    <description>
-			This is like a UKS module but expanded to be accessible via neuron firings instead of just programmatically. This module uses no neurons but can be called directly by other modules.
-
-			Within the Knowledge Store, everything is a 'Thing' (see the source code for the 'Thing' object). Things may have parents, children, references to other Things, and a 'value' which can be any .NET object (with Color and Point being implemented). It can search by value with an optional tolerance. A reference to another thing is done with a 'Link' which is a thing with an attached weight which can be examined and/or modified.
-
-			Note that the Knowledge store is a bit like a neural network its own right if we consider a node to be a neuron and a link to be a synapse.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleUKSN</moduleName>
-    <description>
-			This is like a KB module but expanded to be accessible via neuron firings instead of just programmatically. This module uses no neurons but can be called directly by other modules.
-
-			Within the Knowledge Store, everything is a 'Thing' (see the source code for the 'Thing' object). Things may have parents, children, references to other Things, and a 'value' which can be any .NET object (with Color and Point being implemented). It can search by value with an optional tolerance. A reference to another thing is done with a 'Link' which is a thing with an attached weight which can be examined and/or modified.
-
-			Note that the Knowledge store is a bit like a neural network its own right if we consider a node to be a neuron and a link to be a synapse.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleWords</moduleName>
-    <description>Creates an array of neurons representing words interconnected with synapses with weights indicated the count of the next word in a sequence.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleImageZoom</moduleName>
-    <description>
-			This reads the underlying bitmap of an ImageFile module and displays it any way needed.
-
-			Neuron values in the top row set the x, y, scale, and rotation values. There are mirrored in sliders which appear in the module context folder
-
-			Minimum scale shows the image in the neuron area of the module. Maximum scale shows one pixel per neuron. Rotation is about the center of the image.
-
-			It is intended that an attention module will control the various parameters so the system can focus in on areas of intereest.
-
-			Becauses changes in scale, position, or rotation use an antialiasing algorithm, these can have an adverse impact on subsequent processing.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleAssociation</moduleName>
-    <description>
-			The ModuleAssociation module can be thought of as 'Hebbian Learning' for the Universal Knowledge Store. It does nothing unless there is a ModuleUKS object (or any object of a subclass of it) upon which it can act. If the conditions just mentioned have been satisfied, the ModuleAssociation's Fire() method will do the following:
-
-			- Acquire the UKS through a FindModuleByLabel() call.
-			- Add a Thing called "MentalModel" to the UKS under the parent "Thing".
-			- Add a Thing called "Word" to the UKS under the parent "Audible".
-			- Add a Thing called "Attention" to the UKS under the parent "Thing".
-			- Call AssociateWordsWithVisuals() to build or strengthen Links from recently fired Words to recently fired Visuals.
-
-			In the current development just this one association type is processed, but this may be extended to 'entangle' any two categories of UKS things.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleBoundaryDescription</moduleName>
-    <description>
-			1. This module accepts an input string from either a dialog or programmaticaly via a SetDescription() method which is called from the ImageFile module. It then adds words one at a time to the Attention node.
-			2. It also processes the current attention to create a verbal description, sort of an internal monologue.,
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleBoundarySegments</moduleName>
-    <description>
-			This module reads an input image from the ImageZoom module and searches from boundary segments and corners. It outputs these as neuron firings.
-
-			The Context Menu lets you adjust the thresholds for the minimum delta for Hue, Saturation, and Luminance.
-
-			THIS IS PLACEHOLDER CODE. it works with simple objects made of straight segments only.  It is eaily confused by anti-aliasing .
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleBoundaryAreas</moduleName>
-    <description>
-			Assuming there or multiple shapes in the visual field processed by Boundary Areas, this module clusters connected segments and corners into areas. Areas can be complex.
-
-			Areas are written into the UKS under the location "Sense | Visual | CurrentlyVisible".
-
-			It also calculates the center of each area and its color at the center.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleBoundaryColor</moduleName>
-    <description>
-			This module determins if the detect color (in HSL format) is already in the UKS and adds it if not.
-
-			Using the HSL representation allows for easy determiniation if colors are similar because their hue will be similar whereas the saturation and luminatnce could have much greater variation and still be the same color.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleBoundaryKnown</moduleName>
-    <description>
-			This module determines if areas in the visual field have been seen before based on their current shape and color.
-
-			Future development will allow known shapes to be as complex as desired consisting of numerout shapes.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleBoundaryMotion</moduleName>
-    <description>
-			This module detecs motion of objects in the visual field by comparing the current visual field content with the current mental model. It  detects if object have appeared or disappeared and if objects have moved.
-
-			It then assumes that if all objects are in motion, it is more likely that the point of view has changed and the objects are actually static. It can then determine the motion of the POV.
-
-			Finally, it updates the mental model.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleAttention</moduleName>
-    <description>Attention:
-Based on the idea that the mind can only pay attention to a few things at a time, this module selects which one to pay attention to. Currently the module supports a single visual stream and a single audible stream.
-Audible Attention: Incoming words are processed one at a time in sequence.
-Visual Attention: if an object has moved, it becomes a focus of attention. Absent any other input, attention skips randomly among the visible objects. Visual attention can also be controlled by the dialog box or key-words in the imageFile desciptions.
-Groups:
-Sallie identifies objects relatively close together as a group/cluster. Determined by degrees appart automatically.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleBoundaryRelationship</moduleName>
-    <description>
-			This module scans the properties of the objects in the mental model and builds relationship linkages between them.
-
-			A relationship is like a UKS Link but ALSO has a relationship type. That way, we can represent that Area0 is related to Area1 by &gt;size (meaning that one is larger than the other). Relationships are automatically created for any properties which exist.  Properties with values have comparisionts of &lt;&gt;= while properties like color or shape are simply shows as = or !=.
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModulePodCamera</moduleName>
-    <description>Test</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModulePodInterface</moduleName>
-    <description>This module's dialog is the "remote control" of Sallie, and has a number of buttons to move either the physical Pod in the outer world, or the virtual Pod in the 3DSim modules. The target is chosen via the LIVE checkbox, which can be activated as soon as a Pod module is present in the network. The UKS is needed to store Sallie's awareness of her position in the world. </description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModulePhraseRecognizer</moduleName>
-    <description>Takes the parameterized phrase from speech parser and tries to best identify what the correct response for that phrase would be based on previous phrases. 
-
-Sallie understands / has the following vocabulary for now:
-
-Directive:      Go To
-Directive:      Look At
-Directive:      Point At
-Directive:      Good
-Directive:      No
-Directive:      Stop
-Directive:      Dont Do That
-
-Declaration:    This Is
-Declaration:    Is A
-Declaration:    Can
-
-Query:          What Is This
-Query:          What Is Behind You
-Query:          What Is Left Of You
-Query:          What Is Right Of You
-Query:          What Is
-Query:          How Many
-Query:          How Do You Feel
-
-Response:       I Do Not Understand
-Response:       This Is
-Response:       There Is
-Response:       Nothing Is Behind Me
-Response:       Behind Me Is A
-Response:       I Feel
-Response:       OK
-Response:       I Do Not Know About
-Response:       I Do Not See Anything
-		</description>
-  </ModuleDescription>
-  <ModuleDescription>
     <moduleName>ModuleSpeechInPlus</moduleName>
     <description>Speech input is handled through Azure Cognitive Services Speech to Text, verbal commands have to be prefaced with "Sallie". Text entered via the dialogue box, is inputted directly, doesn't need to include "Sallie."
 
@@ -449,53 +47,50 @@ Open Command File: Opens up a text file. Each line is a seperate phrase. A speci
 Works together with SpeechParser, PhraseRecognizer, QueryResolution and SpeechOut to functions as Sallie's ability to hear and speak.</description>
   </ModuleDescription>
   <ModuleDescription>
-    <moduleName>ModuleWakeUp</moduleName>
-    <description>
-			Among the things it can do:
+    <moduleName>ModuleUKSStatement</moduleName>
+    <description>This dialog adds Things and Relationships to the Universal Knowledge Store (UKS) which is a graph of Things connected by Relationships.  Each Relationship consists of a Source Thing, a Target Thing, connected by a RelationshipType Thing.  Enter Thing labels into the Source, Type, and Target boxes and press Add/Update to create a relationship.
+Example
+          Source: Fido
+          Type: is-a
+          Target: dog
+Would indicate that Fido is a dog. This is shown in the UKS dialog as a parent/child Relationship.  All other relationship types are shown as Source-&gt;Type-&gt;Target. All words in labels are singularized so:
+          Source: dogs
+          Type: have
+          Target: fur
+Is shown as dog-&gt;has-&gt;fur.  In general, Things in the UKS represent abstract singular entities so the Relationship dog-&gt;has.4-&gt;leg would represent that all dogs have 4 legs.
+If the Things in the text boxes do not exist, the boxes will have a yellow background and the Things will be created. If the relationship already exists, no action will be taken. In some cases the target may be omitted as in Mary runs. If a label is entered with an asterisk, it will have digits appended to it to ensure that it is unique. This feature can be used to create sequences in a specific order as in Pi-&gt;hasDigit*-&gt;3,  Pi-&gt;hasDigit*-&gt;., Pi-&gt;hasDigit*-&gt;1,  Pi-&gt;hasDigit*-&gt;4.
 
-			if there is a TurnAround Thing under the Attention root in the UKS, Sallie does a 360 to see what is in her environment.
-		</description>
+Putting multiple labels in the text boxes will add modifiers. 
+Example
+          Source: Fido
+          Type: is-a
+          Target: big dog
+Will create a subclass of dog, big.dog with the Relationship big.dog-&gt;is-&gt;big and make Fido a child of big.dog.  In the Source and Target boxes, modifiers precede the main Thing; in the Type box, modifiers follow the type. 
+Example
+          Source: Mary
+          Type: can play
+          Target: electric violin
+Where the Target creates a subclass of violin with the modifier electric, the Type creates a subclass of can with the modifier play.
+
+Relationship may also have a confidence level and a duration which will be set if the Set Conf. checkbox is checked. Confidences can change automatically under certain conditions. When the duration of a Relationship expires, it will vanish.
+
+</description>
   </ModuleDescription>
   <ModuleDescription>
-    <moduleName>ModuleSpeechParser</moduleName>
-    <description>Gets its text input from the SpeechIn module, and parses the language into parameterized phrases preparing it for phrase recognition.
+    <moduleName>ModuleUKSQuery</moduleName>
+    <description>This dialog queries the UKS content and returns the result.  There are 4 textboxes: 
+ Source
+ Type
+ Target
+ Filter
 
-What is this? - &gt; What is ObjectReference?
-This is an orange sphere. = ObjectReference is ObjectReference.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleQueryResolution</moduleName>
-    <description />
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleSituation</moduleName>
-    <description>Sallie's current situation is defined by the nearest group of objects she can see. Situations are saved as landmarks in the "Behavior" section of the UKS.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleSituationNavigation</moduleName>
-    <description>Working in conjuction with the "Situation" module, saves paths from one landmark to another. Directions and distances between landmarks are saved as "Events" in the "Behavior" section of the UKS when explore mode is activated. 
+Each of these can be filled in with one or more Thing labels separated by spaces. Text which is not a Thing label is ignored. Searches are case-insensitive and singularized.
 
-Explore mode is activated by adding "FindLandmaks" as a child of "Attention" in the UKS or by clicking the "Start Exploring" button. While exploring Sallie will move to any landmark she sees, look around to find paths to other landmarks, then move to another landmark.
+If Source or Target alone, the system will respond with all relationships which match. If any two of Source, Target, and Type are provided, the system will respond with the data which would fill in the empty item.  If you fill in all three, the system will respond with the Relationship (if any) which matches.
 
-To start navigation to a known landmark, add "GoToLandmark" as a child of "Attention" in the UKS then add a reference from that thing to a landmark thing. Alternatively, enter the name of a landmark and click the  "Go Toward Goal" button.</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleIntegratedVision</moduleName>
-    <description>The input image is converted int LAB and HSL image formats and split into six separate channels (L, A, B, Lightness, Saturation and Hue. Checkboxes control whether the channel is included in the mask, and if the threshold function is Binary or BinaryInverted. The sliders control the threshold value from 0 to 255.
+The system first searches for a sequence of inputs.  Entering 3 . 1 4 (with intervening spaces) will respond with data about Pi as it matches the sequences.  If there is no sequence, the system attempts to find a Thing which has attributes matchings all the given Things.  As such, big.dog and big dog will have equivalent meaning. The first is a single Thing label which the second is two Thing labels of which only matching Thing is big.dog.
 
-Images are saved to 
-"Documents\\FutureAI\\BrainSimulator3\\ImageProcessingOutput"</description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModulePremise</moduleName>
-    <description>This module is currently being worked on.  In its current state it takes in a thing (eg. animal) for the (1) box , known as a term, and another thing (eg. lifeform) in box (2), a copula (verb) is selected (--&gt; or &lt;-&gt;) as a whole statement or relationship.  Then the "Get Syllogism" button is clicked to retrieve the resulting statement.  NOTE:  Not all the boxes and buttons do something.  This is due to a previous itteration.  However, they will not break the system and they may be used again in the future.
-
-The way all this currently works is that a relationship is created from the input text and copula, then it is put through ModulePremise (see line 106 of the Dlg).  From here, each thing in the Object tree is then itterated over the input relationship and then the reasoning steps are performed and stored in a Syllogism table from GeneratePremise.  GeneratePremise takes in two relationships and generates a list of syllogisms by way of the reasoning steps (like deduction, abduciton, ..., etc.).  Each sysllogism will be generated for a given relationship, but some will be null because they did not meet the syllogism requirements.  Null syllogisms will be discarded while all other syllogisms will be stored in the list for each relationship within the list for each thing.  All these will then be outputed into the text box underneath statement #1 and #2.  </description>
-  </ModuleDescription>
-  <ModuleDescription>
-    <moduleName>ModuleAvoidanceScanner</moduleName>
-    <description>AvoidanceScanner is a module that attempts to discover which route ahead is the one without obstacles. It reports the percentage of depth the Pod can travel, and the direction in which this is possible.
-
-Depth goes from 0-100%, direction from -100 to 100.</description>
+After the query is performed, any Things in the Filter box will limit the result to items which have Filter Things as ancestors.
+</description>
   </ModuleDescription>
 </ArrayOfModuleDescription>

@@ -10,21 +10,16 @@
         <Label Content="Source"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
         <Label Content="Type"        HorizontalAlignment="Left"   Height="33"   Margin="10,70,0,0"    FontSize="16" Width="68" VerticalAlignment="Top"/>
         <Label Content="Target"      HorizontalAlignment="Left"   Height="33"   Margin="10,120,0,0"   FontSize="16" Width="68" VerticalAlignment="Top"/>
-        <Label Content="Filter"      HorizontalAlignment="Left"   Height="33"   Margin="10,200,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
+        <Label Content="Filter"      HorizontalAlignment="Left"   Height="33"   Margin="10,170,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
         <Label Content="Result"      HorizontalAlignment="Left"   Height="33"   Margin="10,280,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
 
         <TextBox  x:Name="sourceText"    TabIndex="1"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,0,0" TextChanged="thingText_TextChanged" HorizontalAlignment="Left" Width="278"/>
         <TextBox  x:Name="typeText"      TabIndex="2"  Height="33" VerticalAlignment="Top"   FontSize="16"     Margin="78,70,0,0" TextChanged="thingText_TextChanged" HorizontalAlignment="Left" Width="278"/>
         <TextBox  x:Name="targetText"    TabIndex="3"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,120,0,0" TextChanged="thingText_TextChanged" HorizontalAlignment="Left" Width="278" RenderTransformOrigin="0.454,1.602"/>
-        <TextBox  x:Name="filterText"    TabIndex="4"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,200,0,0" TextChanged="relationshipText_TextChanged" HorizontalAlignment="Left" Width="278"/>
+        <TextBox  x:Name="filterText"    TabIndex="4"  Height="32" VerticalAlignment="Top"   FontSize="16"   Margin="78,170,0,0" TextChanged="relationshipText_TextChanged" HorizontalAlignment="Left" Width="278"/>
         <TextBox  x:Name="resultText"    TabIndex="5"   FontSize="16" Margin="78,280,36,60"  TextWrapping="Wrap"/>
-
-        <Button x:Name="BtnTransitive"    IsDefault="False" Content="Transitive" Height="32" VerticalAlignment="Top" FontSize="16" Margin="386,21,0,0" Click="BtnTransitive_Click" HorizontalAlignment="Left" Width="84"/>
-        <Button x:Name="BtnAncestors"     IsDefault="False" Content="Ancestors" Height="32" VerticalAlignment="Top" FontSize="16" Margin="491,21,0,0" Click="BtnAncestors_Click" HorizontalAlignment="Left" Width="84" RenderTransformOrigin="1.838,0.82"/>
-        <Button x:Name="BtnChildren"      IsDefault="False" Content="Children" Height="32" VerticalAlignment="Top" FontSize="16" Margin="491,71,0,0" Click="BtnChildren_Click" HorizontalAlignment="Left" Width="84" RenderTransformOrigin="1.838,0.82"/>
-        <Button x:Name="BtnRelationships" IsDefault="True" Content="Relationships" Height="32" VerticalAlignment="Top" FontSize="16" Margin="491,120,0,0" Click="BtnRelationships_Click" HorizontalAlignment="Left" Width="84" RenderTransformOrigin="1.838,0.82"/>
-        <Button x:Name="BtnSequence"      IsDefault="False" Content="Sequence" Height="32" VerticalAlignment="Top" FontSize="16" Margin="386,200,0,0" Click="BtnSequence_Click" HorizontalAlignment="Left" Width="84"/>
-        <Button x:Name="BtnFilter"        IsDefault="False" Content="Filter" Height="32" VerticalAlignment="Top" FontSize="16" Margin="491,201,0,0" Click="BtnSequence_Click" HorizontalAlignment="Left" Width="84"/>
+        
+        <Button x:Name="BtnRelationships" IsDefault="True" Content="Query" Height="32" VerticalAlignment="Top" FontSize="16" Margin="400,120,0,0" Click="BtnRelationships_Click" HorizontalAlignment="Left" Width="120" RenderTransformOrigin="1.838,0.82"/>
 
         <Label  x:Name="errorText"            Content=""   HorizontalContentAlignment="Center"   FontSize="16" Margin="0,0,20,22" Background="Gray" Foreground="#FFF80902" Height="33" VerticalAlignment="Bottom"/>
 

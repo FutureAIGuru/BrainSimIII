@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Pluralize.NET;
 using static BrainSimulator.Modules.ModuleUKS;
 
@@ -14,104 +15,128 @@ namespace BrainSimulator.Modules
 {
     public class ModuleUKSQuery : ModuleBase
     {
-        //any public variable you create here will automatically be saved and restored  with the network
-        //unless you precede it with the [XmlIgnore] directive
-
         public ModuleUKSQuery()
         {
         }
-
-        //fill this method in with code which will execute
-        //once for each cycle of the engine
         public override void Fire()
         {
             Init();  //be sure to leave this here
-
-            // if you want the dlg to update, use the following code whenever any parameter changes
-            // UpdateDialog();
         }
-
-        // fill this method in with code which will execute once
-        // when the module is added, when "initialize" is selected from the context menu,
-        // or when the engine restart button is pressed
         public override void Initialize()
         {
         }
 
-        // the following can be used to massage public data to be different in the xml file
-        // delete if not needed
-        public override void SetUpBeforeSave()
+        /*
+        Conventions [hard-coded relationships]:
+
+All Thing labels are sigularized. Case is preserved but all searches are case-insensitive.
+is-a = has parent of (inverse of has-child)
+is = has attribute of
+has = has a part of  (arm has elbow) (al
+owns = possesses  (Mary owns red hat)
+goes = implies location in target
+can = implies action possibility
+
+Every item can have subclasses with attributes.
+In source and target, attributes precede the class, in type, attributes follow the class. “red hat” “big brown dog” “can play”  “has 5”
+When adding:
+Hand has 5 fingers creates subclass of has with the attribute of 5 [has->has-child->has.5  has.5->is->5, hand->has.5->fingers
+Every subclass will match the search of its parents (searching for has fingers)
+
+When searching, text field may contain:
+Item label 
+Subclass label (with dots)  has.5
+Label and list of attribute labels has 5
+List of attributes labels  (resolves to items containing all attributes)
+Sequence of labels (resolves to items containing the labels in order)
+
+
+
+Query type
+Source
+Source + type
+Source + type + target
+Type + target
+Target only (handled as source)
+
+Always follow is-a relationships for inheritance
+Follow has ONLY if called out in type
+
+         */
+
+        public List<ThingWithQueryParams> QueryUKS(string sourceIn, string relTypeIn, string targetIn,
+                string filter, out List<Thing> thingResult, out List<Relationship> relationships)
         {
-        }
-
-        public override void SetUpAfterLoad()
-        {
-        }
-
-        // called whenever the size of the module rectangle changes
-        // for example, you may choose to reinitialize whenever size changes
-        // delete if not needed
-        public override void SizeChanged()
-        {
-            
-        }
-
-        // return true if thing was added
-        public bool AddChildButton(string newThing, string parent)
-        {
-            GetUKS();
-            if (UKS == null) return true;
-
-            UKS.GetOrAddThing(newThing, parent);
-            return true;
-        }
-
-        public List<ThingWithQueryParams> QueryUKS(string source)
-        {
-            GetUKS();
-            if (UKS == null) return null;
-            IPluralize pluralizer = new Pluralizer();
-
-
-            source = source.Trim();
-            string[] tempStringArray = source.Split(' ');
-            List<Thing> sourceModifiers = new();
-            source = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
-            Thing tSource = ThingLabels.GetThing(source);
-            if (tSource == null) return null;
-
-            for (int i = 0; i < tempStringArray.Length - 1; i++)
-            {
-                Thing t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
-                if (t == null) return null;
-                sourceModifiers.Add(t);
-            }
-
-            Thing t1 = UKS.SubclassExists(ThingLabels.GetThing(source), sourceModifiers);
-            if (t1 == null)
-            {
-                sourceModifiers.Add(tSource);
-                var x = UKS.FindThingsWithAttributes(sourceModifiers);
-            }
-
-            List<ThingWithQueryParams> retVal = UKS.Query(source);
-
-            return retVal;
-        }
-        public IList<Thing> QueryAncestors(string source)
-        {
+            thingResult = new();
+            relationships = new();
             GetUKS();
             if (UKS == null) return null;
-            IPluralize pluralizer = new Pluralizer();
+            string source = sourceIn.Trim();
+            string relType = relTypeIn.Trim();
+            string target = targetIn.Trim();
 
-            source = source.Trim();
-            source = pluralizer.Singularize(source);
+            bool reverse = false;
+            if (source == "" && target == "") return null;
+            int paramCount = 0;
+            if (source != "") paramCount++;
+            if (relType != "") paramCount++;
+            if (target != "") paramCount++;
 
-            Thing t = ThingLabels.GetThing(source);
+            if (source == "")
+            {
+                (source, target) = (target, source);
+                reverse = true;
+            }
 
-            List<Thing> retVal = new();
-            if (t != null)
-                retVal = t.AncestorList().ToList();
+            //TODO build the search list(s)
+            List<Thing> searchList = ThingListFromString(source);
+            if (searchList.Count == 0) return null;
+
+            //Handle is-a queries as a special case
+            if (relType.Contains("is-a") && reverse ||
+                relType.Contains("has-child") && !reverse)
+            {
+                thingResult = searchList[0].Children.ToList();
+                return null;
+            }
+            if (relType.Contains("is-a") && !reverse ||
+                relType.Contains("has-child") && reverse)
+            {
+                thingResult = searchList[0].Ancestors.ToList();
+                return null;
+            }
+
+            List<ThingWithQueryParams> retVal = UKS.BuildSearchList(searchList, reverse);
+
+            if (reverse) (source, target) = (target, source);
+
+
+            relationships = UKS.GetAllRelationships(retVal);
+
+            for (int i = 0; i < relationships.Count; i++)
+            {
+                Relationship r = relationships[i];
+                if (target != "" && !r.target.HasAncestorLabeled(target))
+                { relationships.RemoveAt(i); i--; continue; }
+                if (relType != "" && !r.reltype.HasAncestorLabeled(relType))
+                { relationships.RemoveAt(i); i--; continue; }
+            }
+
+            if (filter != "")
+            {
+                List<Thing> filterThings = ThingListFromString(filter);
+                relationships = UKS.FilterResults(relationships, filterThings).ToList();
+            }
+
+            if (paramCount == 2)
+            {
+                foreach (Relationship r in relationships)
+                {
+                    if (sourceIn == "") thingResult.Add(r.source);
+                    if (targetIn == "") thingResult.Add(r.target);
+                    if (relTypeIn == "") thingResult.Add(r.relType);
+                }
+            }
 
             return retVal;
         }
@@ -119,43 +144,39 @@ namespace BrainSimulator.Modules
         {
             GetUKS();
             if (UKS == null) return null;
-            IPluralize pluralizer = new Pluralizer();
             List<Thing> retVal = new();
 
-            source = source.Trim();
-            string[] tempStringArray = source.Split(' ');
-            List<Thing> sourceModifiers = new();
-            for (int i = 0; i < tempStringArray.Length; i++)
-            {
-                if (tempStringArray[i] == "") continue;
-                Thing t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
-                if (t == null) return null;
-                sourceModifiers.Add(t);
-            }
-
+            List<Thing> sourceModifiers = ThingListFromString(source);
+            if (sourceModifiers == null) return null;
             retVal = UKS.HasSequence(sourceModifiers);
 
             return retVal;
         }
-        public List<Relationship> QueryRelationships(List<ThingWithQueryParams> thingsToExamine, Relationship.Part p)
+
+        public List<Thing> ThingListFromString(string source)
         {
-            GetUKS();
-            if (UKS == null) return null;
-            if (thingsToExamine == null) return null;
-
-            List<Relationship> retVal = UKS.GetAllRelationships(thingsToExamine, p);
-
-            return retVal;
-        }
-        public IList<Thing> QueryChildren(string label)
-        {
-            GetUKS();
-            if (UKS == null) return null;
-            if (label == "") return null;
-            Thing t = ThingLabels.GetThing(label);
-            if (t == null) return null;
-
-            IList<Thing> retVal = t.Children;
+            List<Thing> retVal = new();
+            IPluralize pluralizer = new Pluralizer();
+            source = source.Trim();
+            string[] tempStringArray = source.Split(' ');
+            //first, build a list of all the things in the list
+            for (int i = 0; i < tempStringArray.Length; i++)
+            {
+                if (tempStringArray[i] == "") continue;
+                Thing t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
+                if (t == null) continue;
+                retVal.Add(t);
+            }
+            //is this a sequence?
+            List<Thing> tSequence = UKS.HasSequence(retVal);
+            if (tSequence != null && tSequence.Count > 0)
+            {
+                retVal = tSequence;
+            }
+            else if (retVal.Count > 1)
+            {
+                retVal = UKS.FindThingsWithAttributes(retVal);
+            }
 
             return retVal;
         }

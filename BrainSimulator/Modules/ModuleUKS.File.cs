@@ -17,21 +17,80 @@ namespace BrainSimulator.Modules
         {
             GetUKS();
             UKSList.Clear();
-            Thing ThingRoot = AddThing("Thing", null);
-            Thing ObjectRoot = AddThing("Object", ThingRoot);
-            AddThing("unknownObject", ObjectRoot);
+            AddThing("Thing", null);
+            GetOrAddThing("Object", "Thing");
+            GetOrAddThing("unknownObject", "Object");
             GetOrAddThing("is-a", "RelationshipType");
             GetOrAddThing("inverseOf", "RelationshipType");
             GetOrAddThing("hasProperty", "RelationshipType");
             GetOrAddThing("is", "RelationshipType");
             AddStatement("is-a", "inverseOf", "has-child");
-            AddStatement("isexclusive", "is-a", "RelationshipType");
+            AddStatement("isExclusive", "is-a", "RelationshipType");
+            AddStatement("has-child", "hasProperty", "transitiveUp");
+            AddStatement("has", "is-a", "RelationshipType");
+            AddStatement("has", "hasProperty", "transitiveDown");
 
             //This hack is here because some Things created at startup don't get put into the UKS List.
             foreach (Thing t in ThingLabels.AllThingsInLabelList())
                 if (!UKSList.Contains(t))
                     UKSList.Add(t);
+            SetupNumbers();
         }
+
+        public void SetupNumbers()
+        {
+            GetOrAddThing("number", "Object");
+            AddStatement("greaterThan", "is-a", "RelationshipType");
+            AddStatement("lessThan", "inverseOf", "greaterThan");
+            AddStatement("lessThan", "is-a", "RelationshipType");
+            AddStatement("number", "hasProperty", "isExclusive");
+            GetOrAddThing("digit", "number");
+            GetOrAddThing("isSimilarTo", "RelationshipType");
+            GetOrAddThing("commutative", "RelationshipType");
+            AddStatement("isSimilarTo", "hasProperty", "commutative");
+            AddStatement("hasDigit", "is-a", "has");
+
+
+            //put in digits
+            GetOrAddThing(".", "digit");
+            GetOrAddThing("0", "digit");
+            GetOrAddThing("2", "digit");
+            GetOrAddThing("1", "digit");
+            GetOrAddThing("3", "digit");
+            GetOrAddThing("4", "digit");
+            GetOrAddThing("5", "digit");
+            GetOrAddThing("6", "digit");
+            GetOrAddThing("7", "digit");
+            GetOrAddThing("8", "digit");
+            GetOrAddThing("9", "digit");
+            GetOrAddThing("some", "number");
+            GetOrAddThing("many", "number");
+            GetOrAddThing("none", "number");
+
+            //AddStatement("none", "isSimilarTo", "0");
+            //AddStatement("1", "greaterThan", "0");
+            //AddStatement("2", "greaterThan", "1");
+            //AddStatement("3", "greaterThan", "2");
+            //AddStatement("4", "greaterThan", "3");
+            //AddStatement("5", "greaterThan", "4");
+            //AddStatement("6", "greaterThan", "5");
+            //AddStatement("7", "greaterThan", "6");
+            //AddStatement("8", "greaterThan", "7");
+            //AddStatement("9", "greaterThan", "8");
+
+            //AddStatement("some", "greaterThan", "1");
+            //AddStatement("many", "greaterThan", "4");
+
+            AddStatement("pi", "is-a", "number");
+            AddStatement("pi", "hasDigit*", "3");
+            AddStatement("pi", "hasDigit*", ".");
+            AddStatement("pi", "hasDigit*", "1");
+            AddStatement("pi", "hasDigit*", "4");
+            AddStatement("pi", "hasDigit*", "1");
+            AddStatement("pi", "hasDigit*", "5");
+            AddStatement("pi", "hasDigit*", "9");
+        }
+
 
 
         /// <summary>
@@ -73,18 +132,8 @@ namespace BrainSimulator.Modules
         {
             UKSTemp.Clear();
 
-            // Wipe transient data from Vision root...
+            // TODO: Wipe transient data ...
             GetUKS();
-            //Thing VisionRoot = UKS.GetOrAddThing("Sense", "FrameNow");
-            //if (VisionRoot != null)
-            //{
-            //    UKS.DeleteAllChildren(VisionRoot);
-            //}
-            //Thing KnownRoot = UKS.GetOrAddThing("KnownAreas", "Visual");
-            //if (KnownRoot != null)
-            //{
-            //    UKS.DeleteAllChildren(KnownRoot);
-            //}
             foreach (Thing t in UKSList)
             {
                 SThing st = new()
@@ -108,7 +157,7 @@ namespace BrainSimulator.Modules
             if (l.clauses.Count > 0) clauseList = new();
             foreach (ClauseType c in l.clauses)
             {
-                SClauseType ct = new() { a = c.a, r = ConvertRelationship(c.clause) };
+                SClauseType ct = new() { clauseType = c.a, r = ConvertRelationship(c.clause) };
                 clauseList.Add(ct);
             }
 
@@ -248,7 +297,7 @@ namespace BrainSimulator.Modules
             {
                 foreach (SClauseType sc in p.clauses)
                 {
-                    r.clauses.Add(new ClauseType() { a = sc.a, clause = UnConvertRelationship(sc.r) });
+                    r.clauses.Add(new ClauseType() { a = sc.clauseType, clause = UnConvertRelationship(sc.r) });
                 }
             }
             return r;

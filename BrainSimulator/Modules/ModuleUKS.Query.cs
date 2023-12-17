@@ -1,16 +1,14 @@
-﻿using Catalyst.Models;
-using OpenAI.GPT3.ObjectModels.ResponseModels;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Windows.Forms.VisualStyles;
+using System.Speech.Synthesis;
 
 namespace BrainSimulator.Modules
 {
     public partial class ModuleUKS
     {
+        List<Relationship> failedConditions = new();
+        List<Relationship> succeededConditions = new();
 
         public List<ThingWithQueryParams> Query(
                 object source, object relationshipType = null, object target = null,
@@ -58,36 +56,40 @@ namespace BrainSimulator.Modules
             public int haveCount = 1;
             public int hitCount = 1;
             public float weight;
-            public ThingWithQueryParams(Thing t, int h, float weight)
+            public Thing reachedWith = null;
+            public bool corner = false;
+            public override string ToString()
             {
-                thing = t;
-                hopCount = h;
-                this.weight = weight;
-            }
-            public string ToString()
-            {
-                return (thing.Label + "  : " + hopCount + " : " + weight + "  Count: " + haveCount + " Hits: " + hitCount);
+                return (thing.Label + "  : " + hopCount + " : " + weight + "  Count: " + 
+                    haveCount + " Hits: " + hitCount + " Corner: " + corner);
             }
         }
 
-        private List<ThingWithQueryParams> BuildSearchList(List<Thing> q)
+        public List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
         {
             List<ThingWithQueryParams> thingsToExamine = new();
             int maxHops = 20;
             int hopCount = 0;
             foreach (Thing t in q)
-                thingsToExamine.Add(new ThingWithQueryParams(t, hopCount, 1));
+                thingsToExamine.Add(new ThingWithQueryParams
+                {
+                    thing = t,
+                    hopCount = hopCount,
+                    weight = 1,
+                    reachedWith = null
+                }); ;
             hopCount++;
             int currentEnd = thingsToExamine.Count;
             for (int i = 0; i < thingsToExamine.Count; i++)
             {
                 Thing t = thingsToExamine[i].thing;
-                //weights are multipled
                 float curWeight = thingsToExamine[i].weight;
                 int curCount = thingsToExamine[i].haveCount;
+                Thing reachedWith = thingsToExamine[i].reachedWith;
 
                 foreach (Relationship r in t.RelationshipsFrom)  //has-child et al
-                    if (r.relType == Thing.HasChild)
+                    if ((r.relType.HasAncestorLabeled("has-child") && !reverse) ||
+                        (r.relType.HasAncestorLabeled("has") && reverse))
                     {
                         if (thingsToExamine.FindFirst(x => x.thing == r.source) is ThingWithQueryParams twgp)
                         {
@@ -95,7 +97,18 @@ namespace BrainSimulator.Modules
                         }
                         else
                         {
-                            ThingWithQueryParams thingToAdd = new ThingWithQueryParams(r.source, hopCount, curWeight * r.weight);
+                            bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
+                                thingsToExamine[i].reachedWith != null;
+                            if (corner)
+                            { }
+                            thingsToExamine[i].corner |= corner;
+                            ThingWithQueryParams thingToAdd = new ThingWithQueryParams
+                            {
+                                thing = r.source,
+                                hopCount = hopCount,
+                                weight = curWeight * r.weight,
+                                reachedWith = r.relType,
+                            };
                             thingsToExamine.Add(thingToAdd);
                             //if things have counts, they are multiplied
                             int val = GetCount(r.reltype);
@@ -104,7 +117,8 @@ namespace BrainSimulator.Modules
                     }
 
                 foreach (Relationship r in t.Relationships) //has-a et al
-                    if (r.relType.HasAncestorLabeled("has-a"))
+                    if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
+                        (r.relType.HasAncestorLabeled("has") && !reverse))
                     {
                         if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twqp)
                         {
@@ -112,7 +126,18 @@ namespace BrainSimulator.Modules
                         }
                         else
                         {
-                            ThingWithQueryParams thingToAdd = new ThingWithQueryParams(r.target, hopCount, curWeight * r.weight);
+                            bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
+                                thingsToExamine[i].reachedWith != null;
+                            if (corner)
+                            { }
+                            thingsToExamine[i].corner |= corner;
+                            ThingWithQueryParams thingToAdd = new ThingWithQueryParams
+                            {
+                                thing = r.target,
+                                hopCount = hopCount,
+                                weight = curWeight * r.weight,
+                                reachedWith = r.relType,
+                            };
                             thingsToExamine.Add(thingToAdd);
                             //if things have counts, they are multiplied
                             int val = GetCount(r.reltype);
@@ -129,21 +154,20 @@ namespace BrainSimulator.Modules
             return thingsToExamine;
         }
 
-        public List<Relationship> GetAllRelationships(List<ThingWithQueryParams> thingsToExamine,Relationship.Part p)
+        public List<Relationship> GetAllRelationships(List<ThingWithQueryParams> thingsToExamine)
         {
             List<Relationship> result = new();
             for (int i = 0; i < thingsToExamine.Count; i++)
             {
                 Thing t = thingsToExamine[i].thing;
+                if (t == null) continue;
                 int haveCount = thingsToExamine[i].haveCount;
-                IList<Relationship> relationshipsToAdd = null;
-                switch (p)
-                {
-                    case Relationship.Part.source: relationshipsToAdd = t.Relationships; break;
-                    case Relationship.Part.target: relationshipsToAdd = t.RelationshipsFrom; break;
-                    case Relationship.Part.type: relationshipsToAdd = t.RelationshipsAsTypeWriteable; break;
-                }
-                foreach (Relationship r in relationshipsToAdd) 
+                List<Relationship> relationshipsToAdd = null;
+                relationshipsToAdd = new();
+                relationshipsToAdd.AddRange(t.Relationships);
+                relationshipsToAdd.AddRange(t.RelationshipsFrom);
+                relationshipsToAdd.AddRange(t.RelationshipsAsTypeWriteable);
+                foreach (Relationship r in relationshipsToAdd)
                 {
                     if (r.reltype == Thing.HasChild) continue;
 
@@ -208,6 +232,28 @@ namespace BrainSimulator.Modules
             }
         }
 
+        public IList<Relationship> FilterResults(List<Relationship> result, List<Thing> ancestors)
+        {
+            List<Relationship> retVal = new();
+            if (ancestors == null || ancestors.Count == 0)
+                return result;
+            foreach (Relationship r in result)
+                if (RelationshipHasAncestor(r, ancestors))
+                    retVal.Add(r);
+            return retVal;
+        }
+
+        private bool RelationshipHasAncestor(Relationship r, List<Thing> ancestors)
+        {
+            foreach (Thing ancestor in ancestors)
+            {
+                if (r.source.HasAncestor(ancestor)) return true;
+                if (r.relType.HasAncestor(ancestor)) return true;
+                if (r.target.HasAncestor(ancestor)) return true;
+            }
+            return false;
+        }
+
         int GetCount(Thing t)
         {
             int retVal = 1;
@@ -218,23 +264,32 @@ namespace BrainSimulator.Modules
             return retVal;
         }
 
-        public bool HasSequence (IList<Relationship> relationships, List<Thing> targetAttributes)
+        //determine if a single thing's relationships contain the sequence
+        public bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
         {
-            //TODO modify to find closest match
+            //TODO modify to find closest match, return the matching score instead of bool
+            //TODO this requires that all entries in a sequence must be adjascent without any intervening extraneous relationships
+            //TODO some sequences (spatial) are circular and the search must loop back to the beginning (not for anything temporal)
             IList<Relationship> sortedReferences = relationships.OrderBy(x => x.relType.Label).ToList();
-            for (int i = 0; i < sortedReferences.Count - targetAttributes.Count + 1; i++)
+            
+            //TODO the for loop below allows for matching a partial which does not start at the beginning of the stored sequence
+            int i = 0;
+            //for (int i = 0; i < sortedReferences.Count - targetAttributes.Count + 1; i++)
             {
                 for (int j = 0; j < targetAttributes.Count; j++)
                 {
-                    if (sortedReferences[i+j].target != targetAttributes[j]) goto misMatch;
+                    if (sortedReferences[i + j].target != targetAttributes[j]) goto misMatch;
                 }
                 return true;
-            misMatch: continue;
+            misMatch: ;
             }
             return false;
         }
+
+        //find all the things containing the sequence of attributes
         public List<Thing> HasSequence(List<Thing> targetAttributes)
         {
+            //get a list of all things with the given attributes
             List<Thing> retVal = new();
             foreach (Thing t in targetAttributes)
                 foreach (Relationship r in t.RelationshipsFrom)
@@ -242,9 +297,10 @@ namespace BrainSimulator.Modules
                         if (!retVal.Contains(r.source))
                             retVal.Add(r.source);
 
-            for (int i = 0; i <retVal.Count;i++)
+            //remove the onew without the sequence
+            for (int i = 0; i < retVal.Count; i++)
             {
-                if (!HasSequence(retVal[i].Relationships,targetAttributes))
+                if (!HasSequence(retVal[i].Relationships, targetAttributes))
                 {
                     retVal.RemoveAt(i);
                     if (i != 0)
@@ -254,12 +310,12 @@ namespace BrainSimulator.Modules
             return retVal;
         }
 
-        public List<Thing> GetAllAttributes(Thing t)
+        public List<Thing> GetAllAttributes(Thing t) //with inheritance, conflicts, etc
         {
             List<Thing> retVal = new();
 
             var temp1 = BuildSearchList(new List<Thing>() { t });
-            var temp2 = GetAllRelationships(temp1, Relationship.Part.source);
+            var temp2 = GetAllRelationships(temp1);
             foreach (Relationship r in temp2)
                 if (r.relType.Label == "is")
                     retVal.Add(r.target);
@@ -289,140 +345,13 @@ namespace BrainSimulator.Modules
             List<ThingWithQueryParams> results = BuildSearchList(attribOwners);
             foreach (var t in results)
             {
-                if (HasAllAttributes(t.thing,attributes))
+                if (HasAllAttributes(t.thing, attributes))
                     retVal.Add(t.thing);
             }
             return retVal;
         }
 
 
-        //IList<Relationship> SearchRelationships(QueryRelationship searchMask, bool doInheritance = true, bool checkConditions = true)
-        //{
-        //    List<Relationship> queryResult = new();
-        //    //HandlePronouns(searchMask);
-        //    Thing invType = CheckForInverse(searchMask.relType);
-        //    //if this relationship has an inverse, switcheroo so we are storing consistently in one direction
-        //    if (invType != null)
-        //    {
-        //        (searchMask.source, searchMask.target) = (searchMask.target, searchMask.source);
-        //        (searchMask.sourceProperties, searchMask.targetProperties) = (searchMask.targetProperties, searchMask.sourceProperties);
-        //        (searchMask.relType, invType) = (invType, searchMask.relType);
-        //    }
-
-        //    //handle pronouns in statements
-        //    //if (HandlePronouns(searchMask)) return queryResult;
-
-        //    //first get all the relationships from the given source or target (whichever is specified)
-        //    if (searchMask.source != null)
-        //    {
-        //        if (doInheritance)
-        //            queryResult = RelationshipWithInheritance(searchMask.source); //searches parents
-        //        else
-        //            queryResult = (List<Relationship>)searchMask.source.Relationships;
-        //        //List<Relationship> hasProperties = new List<Relationship>();
-        //        //foreach (Relationship q in queryResult)
-        //        //{
-        //        //    hasProperties.AddRange(RelationshipByWithInheritance(q.target));
-        //        //}
-        //        //for (int i = 0; i < hasProperties.Count; i++)
-        //        //{
-        //        //    Relationship r = hasProperties[i];
-        //        //    if (r.target != searchMask.target)
-        //        //    {
-        //        //        hasProperties.RemoveAt(i);
-        //        //        i--;
-        //        //    }
-        //        //}
-        //        //if (hasProperties.Count > 0)
-        //        //    queryResult.AddRange(hasProperties);
-        //    }
-        //    else if (searchMask.target != null)
-        //    {
-        //        if (doInheritance)
-        //            queryResult = RelationshipByWithInheritance(searchMask.target); //searches children
-        //        else
-        //            queryResult = (List<Relationship>)searchMask.target.RelationshipsFrom;
-        //    }
-        //    else if (searchMask.relType != null) //both source and target are null
-        //    {
-        //        queryResult = RelationshipByWithInheritance(searchMask.relType, null, 4, true);
-        //    }
-        //    else
-        //    {
-        //        return null;
-        //    }
-        //    if (checkConditions)
-        //    {
-        //        //handle conditionals
-        //        var listOfFalseConditions = queryResult.FindAll(r => !ConditionsAreMet(r.clauses, searchMask));
-        //        if (listOfFalseConditions.Count > 0)
-        //        {
-        //            foreach (Relationship condition in listOfFalseConditions)
-        //            {
-        //                queryResult.RemoveAll(r => r == condition);
-        //            }
-        //        }
-        //        //queryResult.RemoveAll(r => r.clauses.FindFirst(c => c.a == AppliesTo.condition) != null);
-        //    }
-
-        //    //then remove the ones which don't match the search criteria
-        //    for (int i = queryResult.Count - 1; i >= 0; i--)
-        //    {
-        //        Relationship r = queryResult[i];
-        //        //if (searchMask.relType != null && HasProperty(searchMask.relType, "transitive") &&
-        //        //    r.relType != null && HasProperty(r.relType, "transitive")) continue;
-        //        if (r.weight < 0.5)
-        //        {
-        //            queryResult.RemoveAt(i);
-        //        }
-        //        else if (searchMask.source != null && r.source != null && !ThingInTree(r.source, searchMask.source))
-        //        {
-        //            queryResult.RemoveAt(i);
-        //        }
-        //        else if (searchMask.source == null && searchMask.target != null && searchMask.target != r.target &&
-        //            Relationship.TrimDigits(r.target?.Label) != searchMask.target?.Label)
-        //        {
-        //            queryResult.RemoveAt(i);
-        //        }
-        //        else if (searchMask.sourceProperties.Count > 0 && r.source != null && !ModifiersMatch(searchMask.sourceProperties, r.source))
-        //        {
-        //            queryResult.RemoveAt(i);
-        //        }
-        //        else if (searchMask.target != null && !ThingInTree(r.target, searchMask.target))
-        //        {
-        //            queryResult.RemoveAt(i);
-        //        }
-        //        else if (searchMask.targetProperties.Count > 0 && r.target != null && !ModifiersMatch(searchMask.targetProperties, r.target))
-        //        {
-        //            queryResult.RemoveAt(i);
-        //        }
-        //        else if (searchMask.reltype != null && r.reltype != null && !ThingInTree(r.reltype, searchMask.reltype))
-        //        {
-        //            queryResult.RemoveAt(i);
-        //        }
-        //        else if (searchMask.typeProperties.Count > 0 && r.reltype != null && !ModifiersMatch(searchMask.typeProperties, r.reltype))
-        //        {
-        //            queryResult.RemoveAt(i);
-        //        }
-        //        else if (!doInheritance && searchMask.target != r.target)
-        //        {
-        //            queryResult.RemoveAt(i);
-        //        }
-        //    }
-
-        //    //handle transitive relationships
-        //    int paramCount = 0;
-        //    if (searchMask.relType != null) paramCount++;
-        //    if (searchMask.source != null) paramCount++;
-        //    if (searchMask.target != null) paramCount++;
-        //    if (paramCount > 1 && (searchMask.relType == null || (searchMask.relType != null && HasProperty(searchMask.relType, "transitive"))))
-        //        queryResult = HandleTransitivieRelatinships(searchMask, invType, queryResult);
-
-        //    queryResult = queryResult.OrderByDescending(x => x.lastUsed).ToList();
-        //    return queryResult;
-        //}
-        List<Relationship> failedConditions = new();
-        List<Relationship> succeededConditions = new();
 
         public static bool StackContains(string target, int count = 0)
         {
@@ -449,7 +378,7 @@ namespace BrainSimulator.Modules
             //if (StackContains("ConditionsAreMet",1)) return true;
             foreach (ClauseType c in clauses)
             {
-                if (c.a != AppliesTo.condition) continue;
+                if (c.a != ClsType.condition) continue;
                 Relationship r = c.clause;
                 QueryRelationship q = new(r);
                 if (query.source != null && query.source.AncestorList().Contains(q.source))
@@ -479,89 +408,5 @@ namespace BrainSimulator.Modules
         {
             return succeededConditions;
         }
-        //private List<Relationship> RelationshipByWithInheritance(Thing t, List<Relationship> relationshipList = null, int depthLimit = 4, bool sourceIsNull = false)
-        //{
-        //    depthLimit--;
-        //    if (depthLimit == 0)
-        //        return relationshipList;
-
-        //    bool firstTime = false;
-        //    if (relationshipList == null)
-        //    {
-        //        firstTime = true;
-        //        relationshipList = new List<Relationship>();
-        //    }
-
-        //    bool ignoreSourceInternal = (depthLimit < 2); //do not add inherited relationships which differ only in source
-        //    if (sourceIsNull) ignoreSourceInternal = false;
-        //    foreach (Relationship r in t.RelationshipsFrom)
-        //    {
-        //        if (firstTime)
-        //            relationshipList.Add(r);
-        //        else
-        //        {
-        //            if (r.relType?.Label != "has-child")
-        //                AddRelationshipToList(r, relationshipList, false, ignoreSourceInternal);
-        //        }
-        //    }
-        //    foreach (Thing t2 in t.Children)  //search the instances of
-        //    {
-        //        RelationshipByWithInheritance(t2, relationshipList, depthLimit, sourceIsNull);
-        //    }
-
-        //    return relationshipList;
-        //}
-
-
-
-        //private List<Relationship> RelationshipWithInheritance(Thing t, List<Relationship> relationshipList = null, int depthLimit = 8)
-        //{
-        //    depthLimit--;
-        //    if (depthLimit == 0)
-        //        return relationshipList;
-        //    bool firstTime = false;
-        //    if (relationshipList == null)
-        //    {
-        //        firstTime = true;
-        //        relationshipList = new List<Relationship>();
-        //    }
-        //    foreach (Relationship r in t.Relationships)
-        //    {
-        //        if (firstTime)
-        //            relationshipList.Add(r);
-        //        else
-        //        {
-        //            bool ignoreSource = depthLimit < 7;
-        //            if (r.relType?.Label != "has-child")
-        //                AddRelationshipToList(r, relationshipList, true, ignoreSource);
-        //        }
-        //    }
-        //    foreach (Thing t2 in t.Parents)
-        //    {
-        //        RelationshipWithInheritance(t2, relationshipList, depthLimit);
-        //    }
-        //    return relationshipList;
-        //}
-        //void AddRelationshipToList(Relationship r, List<Relationship> relations, bool checkExclusion = true, bool ignoreSource = false)
-        //{
-        //    //only add the new property to the list if it does not conflict with one already in the list
-        //    //don't add if it already exists
-        //    Relationship existing = relations.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));
-        //    if (existing == null)
-        //    {
-        //        if (checkExclusion)
-        //        {
-        //            foreach (Relationship r1 in relations)
-        //            {
-        //                if (RelationshipsAreExclusive(r, r1))
-        //                    goto cantAdd1;
-        //            }
-        //        }
-        //        relations.Add(r);
-        //    cantAdd1:
-        //        { }
-        //    }
-        //}
-
     }
 }

@@ -234,8 +234,8 @@ public partial class ModuleUKS : ModuleBase
             //if one of the reltypes contains negation and not the other
             Thing r1Not = r1RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
             Thing r2Not = r2RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
-            if ((r1.source.Ancestors.Contains(r2.source) || 
-                r2.source.Ancestors.Contains(r1.source)) && 
+            if ((r1.source.Ancestors.Contains(r2.source) ||
+                r2.source.Ancestors.Contains(r1.source)) &&
                 r1.target == r2.target &&
                 (r1Not == null && r2Not != null || r1Not != null && r2Not == null))
                 return true;
@@ -329,7 +329,7 @@ public partial class ModuleUKS : ModuleBase
             {
                 GetOrAddThing(defaultParent, Labeled("Object"), source);
             }
-            t = GetOrAddThing(label, defaultParent,source);
+            t = GetOrAddThing(label, defaultParent, source);
         }
         return t;
     }
@@ -444,50 +444,6 @@ public partial class ModuleUKS : ModuleBase
         thingToReturn = AddThing(label, correctParent);
         return thingToReturn;
     }
-
-    
-    public void SetupNumbers()
-    {
-        AddStatement("isexclusive", "is-a", "RelationshipType");
-        AddStatement("with", "is-a", "RelationshipType");
-        AddStatement("and", "is-a", "Relationship");
-        AddStatement("isSimilarTo", "is-a", "RelationshipType");
-        AddStatement("greaterThan", "is-a", "RelationshipType");
-
-
-        //put in numbers 1-4
-        GetOrAddThing("zero", "number").V = (int)0;
-        GetOrAddThing("one", "number").V = (int)1;
-        GetOrAddThing("two", "number").V = (int)2;
-        GetOrAddThing("three", "number").V = (int)3;
-        GetOrAddThing("four", "number").V = (int)4;
-        GetOrAddThing("ten", "number").V = (int)10;
-        Thing some = GetOrAddThing("some", "number");
-        Thing many = GetOrAddThing("many", "number");
-        Thing none = GetOrAddThing("none", "number");
-        AddStatement("number","is-a", "Object");
-        none.V = (int)0;
-
-        AddStatement("10", "isSimilarTo", "ten");
-        AddStatement("10", "is-a", "number");
-        AddStatement("4", "isSimilarTo", "four");
-        AddStatement("4", "is-a", "number");
-        AddStatement("3", "isSimilarTo", "three");
-        AddStatement("3", "is-a", "number");
-        AddStatement("2", "isSimilarTo", "two");
-        AddStatement("2", "is-a", "number");
-        AddStatement("1", "isSimilarTo", "one");
-        AddStatement("1", "is-a", "number");
-        AddStatement("0", "isSimilarTo", "zero");
-        AddStatement("0", "is-a", "number");
-
-        AddStatement("one", "greaterThan", "none");
-        AddStatement("two", "greaterThan", "one");
-        AddStatement("three", "greaterThan", "two");
-        AddStatement("four", "greaterThan", "three");
-        AddStatement("many", "greaterThan", "four");
-        AddStatement("many", "greaterThan", "some");
-        AddStatement("some", "greaterThan", "none");
-        AddStatement("number", "hasProperty", "isexclusive");
-    }
 }
+    
+ 
