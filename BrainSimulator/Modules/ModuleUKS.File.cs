@@ -28,8 +28,9 @@ namespace BrainSimulator.Modules
             AddStatement("is-a", "inverseOf", "has-child");
             AddStatement("isExclusive", "is-a", "RelationshipType");
             AddStatement("has", "is-a", "RelationshipType");
+            AddStatement("ClauseType", "is-a", "RelationshipType");
 
-            //This hack is here because some Things created at startup don't get put into the UKS List.
+            //This hack is here because at startup some Things don't get put into the UKS List.
             foreach (Thing t in ThingLabels.AllThingsInLabelList())
                 if (!UKSList.Contains(t))
                     UKSList.Add(t);
