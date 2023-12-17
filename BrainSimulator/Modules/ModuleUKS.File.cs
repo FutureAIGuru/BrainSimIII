@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Windows;
 using System.Diagnostics;
+using static BrainSimulator.Modules.ModuleOnlineInfo;
 
 namespace BrainSimulator.Modules
 {
@@ -26,9 +27,7 @@ namespace BrainSimulator.Modules
             GetOrAddThing("is", "RelationshipType");
             AddStatement("is-a", "inverseOf", "has-child");
             AddStatement("isExclusive", "is-a", "RelationshipType");
-            AddStatement("has-child", "hasProperty", "transitiveUp");
             AddStatement("has", "is-a", "RelationshipType");
-            AddStatement("has", "hasProperty", "transitiveDown");
 
             //This hack is here because some Things created at startup don't get put into the UKS List.
             foreach (Thing t in ThingLabels.AllThingsInLabelList())
@@ -157,7 +156,8 @@ namespace BrainSimulator.Modules
             if (l.clauses.Count > 0) clauseList = new();
             foreach (ClauseType c in l.clauses)
             {
-                SClauseType ct = new() { clauseType = c.a, r = ConvertRelationship(c.clause) };
+                int clauseType = UKSList.FindIndex(x => x == c.clauseType);
+                SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause) };
                 clauseList.Add(ct);
             }
 
@@ -297,7 +297,7 @@ namespace BrainSimulator.Modules
             {
                 foreach (SClauseType sc in p.clauses)
                 {
-                    r.clauses.Add(new ClauseType() { a = sc.clauseType, clause = UnConvertRelationship(sc.r) });
+                    r.clauses.Add(new ClauseType() { clauseType = UKSList[sc.clauseType], clause = UnConvertRelationship(sc.r) });
                 }
             }
             return r;

@@ -11,10 +11,10 @@ using System.Windows.Media;
 
 namespace BrainSimulator.Modules
 {
-    public partial class ModuleUKSEventDlg : ModuleBaseDlg
+    public partial class ModuleUKSClauseDlg : ModuleBaseDlg
     {
         // Constructor of the ModuleUKSStatement dialog
-        public ModuleUKSEventDlg()
+        public ModuleUKSClauseDlg()
         {
             InitializeComponent();
         }
@@ -33,23 +33,19 @@ namespace BrainSimulator.Modules
             string newThing = sourceText.Text;
             string targetThing = targetText.Text;
             string relationType = relationshipText.Text;
+            string clauseType = clauseTypeText.Text;
 
             if (!AddRelationshipChecks()) return;
 
-            //NEW APPROACH
-            //"Mary can play outside IF weather is sunny"
-            //the first clause is:  reltype is potential, CAN ->  Can.Potentially (subclass with link(s) to condition(s)
-            //the second clause is: weather is sunny, weather is not current weather -> weather.hypothetical.sunny is sunny
-            //    weather implies cuurent weather  weather.hypothetical (like weather.dubai) is not current
+            ModuleUKSClause UKSClause = (ModuleUKSClause)ParentModule;
+            Relationship r1 = UKSClause.AddRelationship(newThing, targetThing, relationType);
 
-            ModuleUKSEvent UKSEvent = (ModuleUKSEvent)ParentModule;
-            Relationship r1 = UKSEvent.AddRelationship(newThing, targetThing, relationType);
-
+            Thing theClauseType = UKSClause.GetClauseType(clauseType);
             string newThing2 = sourceText2.Text;
             string targetThing2 = targetText2.Text;
             string relationType2 = relationshipText2.Text;
-            Relationship r2 = UKSEvent.AddRelationship(newThing2, targetThing2, relationType2);
-            r1.AddClause("condition", r2);
+            Relationship r2 = UKSClause.AddRelationship(newThing2, targetThing2, relationType2);
+            r1.AddClause(theClauseType, r2);
         }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.
@@ -57,7 +53,7 @@ namespace BrainSimulator.Modules
         {
             if (sender is TextBox tb)
             {
-                ModuleUKSEvent UKSEvent = (ModuleUKSEvent)ParentModule;
+                ModuleUKSClause UKSEvent = (ModuleUKSClause)ParentModule;
 
                 if (tb.Text == "" && !tb.Name.Contains("arget"))
                 {
@@ -114,7 +110,7 @@ namespace BrainSimulator.Modules
         private bool CheckAddRelationshipFieldsFilled()
         {
             SetError("");
-            ModuleUKSEvent UKSEvent = (ModuleUKSEvent)ParentModule;
+            ModuleUKSClause UKSEvent = (ModuleUKSClause)ParentModule;
 
             if (sourceText.Text == "")
             {

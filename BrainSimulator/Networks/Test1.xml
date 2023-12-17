@@ -6,12 +6,12 @@
       <isEnabled>true</isEnabled>
       <Label>UKS_1</Label>
       <dlgPos>
-        <X>1234</X>
-        <Y>347</Y>
+        <X>1229</X>
+        <Y>128</Y>
       </dlgPos>
       <dlgSize>
         <X>800</X>
-        <Y>450</Y>
+        <Y>888</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
       <UKSTemp />
@@ -22,12 +22,12 @@
       <isEnabled>true</isEnabled>
       <Label>UKSStatement_1</Label>
       <dlgPos>
-        <X>689</X>
-        <Y>149</Y>
+        <X>711</X>
+        <Y>130</Y>
       </dlgPos>
       <dlgSize>
-        <X>500</X>
-        <Y>270</Y>
+        <X>530</X>
+        <Y>300</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
     </ModuleBase>
@@ -36,28 +36,28 @@
       <isEnabled>true</isEnabled>
       <Label>UKSQuery_1</Label>
       <dlgPos>
-        <X>605</X>
-        <Y>657</Y>
+        <X>631</X>
+        <Y>420</Y>
       </dlgPos>
       <dlgSize>
-        <X>628</X>
-        <Y>566</Y>
+        <X>630</X>
+        <Y>500</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
     </ModuleBase>
-    <ModuleBase xsi:type="ModuleUKSEvent">
+    <ModuleBase xsi:type="ModuleUKSClause">
       <initialized>true</initialized>
       <isEnabled>true</isEnabled>
-      <Label>UKSEvent_1</Label>
+      <Label>UKSClause_1</Label>
       <dlgPos>
-        <X>643</X>
-        <Y>127</Y>
+        <X>711</X>
+        <Y>874</Y>
       </dlgPos>
       <dlgSize>
-        <X>530</X>
+        <X>480</X>
         <Y>479</Y>
       </dlgSize>
-      <dlgIsOpen>false</dlgIsOpen>
+      <dlgIsOpen>true</dlgIsOpen>
     </ModuleBase>
   </modules>
 </BrainSim3Data>

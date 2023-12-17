@@ -237,7 +237,8 @@ namespace BrainSimulator.Modules
                 lock (r.source.RelationshipsWriteable)
                     lock (r.relType.RelationshipsFromWriteable)
                     {
-                        r.source.RelationshipsWriteable.Add(r);
+                        if (!r.source.RelationshipsWriteable.Contains(r))
+                            r.source.RelationshipsWriteable.Add(r);
                         if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
                             r.reltype.RelationshipsAsTypeWriteable.Add(r);
                     }
@@ -247,28 +248,31 @@ namespace BrainSimulator.Modules
                 lock (r.target.RelationshipsWriteable)
                     lock (r.relType.RelationshipsFromWriteable)
                     {
-                        r.target.RelationshipsFromWriteable.Add(r);
+                        if (!r.target.RelationshipsWriteable.Contains(r))
+                            r.target.RelationshipsFromWriteable.Add(r);
                         if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
                             r.reltype.RelationshipsAsTypeWriteable.Add(r);
                     }
             }
-            else if (r.relType == null)
-            {
-                lock (r.target.RelationshipsWriteable)
-                    lock (r.source.RelationshipsFromWriteable)
-                    {
-                        r.target.RelationshipsFromWriteable.Add(r);
-                        r.source.RelationshipsWriteable.Add(r);
-                    }
-            }
+            //else if (r.relType == null)
+            //{ //this case is not allowed
+            //    lock (r.target.RelationshipsWriteable)
+            //        lock (r.source.RelationshipsFromWriteable)
+            //        {
+            //            r.target.RelationshipsFromWriteable.Add(r);
+            //            r.source.RelationshipsWriteable.Add(r);
+            //        }
+            //}
             else
             {
                 lock (r.source.RelationshipsWriteable)
                     lock (r.target.RelationshipsFromWriteable)
                         lock (r.relType.RelationshipsFromWriteable)
                         {
-                            r.source.RelationshipsWriteable.Add(r);
-                            r.target.RelationshipsFromWriteable.Add(r);
+                            if (!r.source.RelationshipsWriteable.Contains(r))
+                                r.source.RelationshipsWriteable.Add(r);
+                            if (!r.target.RelationshipsWriteable.Contains(r))
+                                r.target.RelationshipsFromWriteable.Add(r);
                             if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
                                 r.reltype.RelationshipsAsTypeWriteable.Add(r);
                         }

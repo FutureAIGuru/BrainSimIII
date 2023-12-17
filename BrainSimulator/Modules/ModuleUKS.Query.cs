@@ -378,7 +378,7 @@ namespace BrainSimulator.Modules
             //if (StackContains("ConditionsAreMet",1)) return true;
             foreach (ClauseType c in clauses)
             {
-                if (c.a != ClsType.condition) continue;
+                if (c.clauseType.Label.ToLower() != "if") continue;
                 Relationship r = c.clause;
                 QueryRelationship q = new(r);
                 if (query.source != null && query.source.AncestorList().Contains(q.source))
@@ -389,7 +389,7 @@ namespace BrainSimulator.Modules
                     q.source = query.target;
                 var qResult = Relationship.GetRelationship(q);
                 if (qResult != null && qResult.weight < 0.8)
-                    return false; ;
+                    return false; 
                 if (qResult == null)
                 {
                     failedConditions.Add(q);

@@ -10,12 +10,12 @@ using Pluralize.NET;
 
 namespace BrainSimulator.Modules
 {
-    public class ModuleUKSEvent: ModuleBase
+    public class ModuleUKSClause: ModuleBase
     {
         //any public variable you create here will automatically be saved and restored  with the network
         //unless you precede it with the [XmlIgnore] directive
 
-        public ModuleUKSEvent()
+        public ModuleUKSClause()
         {
         }
 
@@ -55,13 +55,12 @@ namespace BrainSimulator.Modules
         }
 
         // return true if thing was added
-        public bool AddChildButton(string newThing, string parent)
+        public Thing GetClauseType(string newThing)
         {
             GetUKS();
-            if (UKS == null) return true;
+            if (UKS == null) return null;
 
-            UKS.GetOrAddThing(newThing, parent);
-            return true;
+            return UKS.GetOrAddThing(newThing, "ClauseType");
         }
 
         public Relationship AddRelationship(string source, string target, string relationshipType)
