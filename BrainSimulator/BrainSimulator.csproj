@@ -53,7 +53,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="BrainSimv2.bmp" />
+		<None Remove="BrainSim3SplashScreen.jpg" />
 		<None Remove="Networks\3DSim.xml" />
 		<None Remove="Networks\BabyTalk.xml" />
 		<None Remove="Networks\BasicNeurons.xml" />
@@ -213,6 +213,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Resource Include="BrainSim3SplashScreen.jpg" />
 		<Content Include="Iconsmall.ico" />
 		<Content Include="Resources\Fonts\OpenSans-Bold.ttf">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -259,7 +260,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Resource Include="BrainSimv2.bmp" />
 		<Resource Include="Resources\charactergrowfont.png" />
 		<Resource Include="Resources\charactershrinkfont.png" />
 		<Resource Include="Resources\ClearHistory.png" />
@@ -490,12 +490,6 @@
 		  <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
 		  <SubType>Designer</SubType>
 		</Page>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="Networks\KnowledgeFiles\Test1.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
 	</ItemGroup>
 
 </Project>

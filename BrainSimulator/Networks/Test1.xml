@@ -6,28 +6,28 @@
       <isEnabled>true</isEnabled>
       <Label>UKS_1</Label>
       <dlgPos>
-        <X>1234</X>
-        <Y>347</Y>
+        <X>1229</X>
+        <Y>128</Y>
       </dlgPos>
       <dlgSize>
         <X>800</X>
-        <Y>450</Y>
+        <Y>888</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
       <UKSTemp />
-      <fileName>C:\Users\c_sim\source\repos\BrainSimIIINEW\BrainSimulator\Networks\KnowledgeFiles\Test1.xml</fileName>
+      <fileName>C:\Users\c_sim\source\repos\BrainSimIIINEW\BrainSimulator\Networks\KnowledgeFiles\Knowledge1.xml</fileName>
     </ModuleBase>
     <ModuleBase xsi:type="ModuleUKSStatement">
       <initialized>true</initialized>
       <isEnabled>true</isEnabled>
       <Label>UKSStatement_1</Label>
       <dlgPos>
-        <X>609</X>
-        <Y>368</Y>
+        <X>711</X>
+        <Y>130</Y>
       </dlgPos>
       <dlgSize>
-        <X>500</X>
-        <Y>270</Y>
+        <X>530</X>
+        <Y>300</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
     </ModuleBase>
@@ -36,12 +36,26 @@
       <isEnabled>true</isEnabled>
       <Label>UKSQuery_1</Label>
       <dlgPos>
-        <X>605</X>
-        <Y>657</Y>
+        <X>631</X>
+        <Y>420</Y>
       </dlgPos>
       <dlgSize>
-        <X>628</X>
-        <Y>300</Y>
+        <X>630</X>
+        <Y>500</Y>
+      </dlgSize>
+      <dlgIsOpen>true</dlgIsOpen>
+    </ModuleBase>
+    <ModuleBase xsi:type="ModuleUKSClause">
+      <initialized>true</initialized>
+      <isEnabled>true</isEnabled>
+      <Label>UKSClause_1</Label>
+      <dlgPos>
+        <X>711</X>
+        <Y>874</Y>
+      </dlgPos>
+      <dlgSize>
+        <X>480</X>
+        <Y>479</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
     </ModuleBase>

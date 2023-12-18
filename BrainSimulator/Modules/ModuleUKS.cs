@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace BrainSimulator.Modules;
@@ -42,16 +41,16 @@ public partial class ModuleUKS : ModuleBase
         return UKSList;
     }
 
-    public virtual Thing AddThing(string label, Thing parent, object value = null)
+    public virtual Thing AddThing(string label, Thing parent)
     {
-        Thing newThing = new() { V = value };
+        Thing newThing = new();
+        newThing.Label = label;
         if (parent is not null)
         {
             newThing.AddParent(parent);
         }
         lock (UKSList)
         {
-            newThing.Label = label;
             UKSList.Add(newThing);
         }
         return newThing;
@@ -158,165 +157,6 @@ public partial class ModuleUKS : ModuleBase
     }
 
 
-    private List<Relationship> HandleTransitivieRelatinships(QueryRelationship searchMask, Thing invType, List<Relationship> queryResult)
-    {
-        //this is a special case because the relType might be an invers
-        if (searchMask.relType == null)
-        {
-            List<Thing> typesToSearch = new();
-            foreach (Relationship r in searchMask.source.Relationships)
-            {
-                if (HasProperty(r.reltype, "transitive") && !typesToSearch.Contains(r.reltype))
-                    typesToSearch.Add(r.reltype);
-            }
-            foreach (Relationship r in searchMask.source.RelationshipsFrom)
-            {
-                if (HasProperty(r.reltype, "transitive") && !typesToSearch.Contains(r.reltype))
-                    typesToSearch.Add(r.reltype);
-            }
-            foreach (Relationship r in searchMask.target.Relationships)
-            {
-                if (HasProperty(r.reltype, "transitive") && !typesToSearch.Contains(r.reltype))
-                    typesToSearch.Add(r.reltype);
-            }
-            foreach (Relationship r in searchMask.target.RelationshipsFrom)
-            {
-                if (HasProperty(r.reltype, "transitive") && !typesToSearch.Contains(r.reltype))
-                    typesToSearch.Add(r.reltype);
-            }
-            //we are guaranteed that both the source and the target are non-null
-            foreach (Thing relType in typesToSearch)
-            {
-                var forward = GetTransitiveTargetChain(searchMask.source, relType);
-                if (forward.Contains(searchMask.target))
-                {
-                    queryResult.Clear();
-                    Relationship newR = new Relationship { source = searchMask.source, T = searchMask.T, reltype = relType };
-                    if (!ContainsRelationshipValue(queryResult, newR))
-                        queryResult.Add(newR);
-                }
-                var reverse = GetTransitiveSourceChain(searchMask.source, relType);
-                if (reverse.Contains(searchMask.target))
-                {
-                    //get the inverse relationship
-                    invType = CheckForInverse(relType);
-                    if (invType != null)
-                    {
-                        queryResult.Clear();
-                        Relationship newR = new Relationship { source = searchMask.source, T = searchMask.T, reltype = invType };
-                        if (!ContainsRelationshipValue(queryResult, newR))
-                            queryResult.Add(newR);
-                    }
-                }
-            }
-            return queryResult; ;
-        }
-
-        for (int i = 0; i < queryResult.Count; i++)
-        {
-            Relationship r = queryResult[i];
-            if (!HasProperty(r.reltype, "transitive")) continue;
-            if (searchMask.source != null)
-            {
-                //if the source is defined, get transitive relationships going forward.
-                var forward = GetTransitiveTargetChain(r.target, r.relType);
-                forward.Remove(r.source);
-                if (searchMask.target != null)
-                {
-                    queryResult.RemoveAt(i);
-                    if (forward.Contains(searchMask.target))
-                    {
-                        Relationship newR = new Relationship { source = r.source, T = searchMask.T, reltype = r.reltype };
-                        if (!ContainsRelationshipValue(queryResult, newR))
-                            queryResult.Add(newR);
-                    }
-                }
-                else
-                {
-                    foreach (Thing t in forward)
-                    {
-                        Relationship newR = new Relationship { source = r.source, T = t, reltype = r.reltype };
-                        if (!ContainsRelationshipValue(queryResult, newR))
-                            queryResult.Add(newR);
-                    }
-                    break;
-                }
-            }
-            else if (searchMask.target != null)
-            {
-                //if the is defined, get transitive relationships going backward.
-                var reverse = GetTransitiveSourceChain(r.source, r.relType);
-                reverse.Remove(r.target);
-                if (searchMask.source != null)
-                {
-                    queryResult.RemoveAt(i);
-                    if (reverse.Contains(searchMask.source))
-                    {
-                        Relationship newR = new Relationship { source = r.source, T = searchMask.T, reltype = r.reltype };
-                        if (!ContainsRelationshipValue(queryResult, newR))
-                            queryResult.Add(newR);
-                    }
-                }
-                else
-                {
-                    foreach (Thing t in reverse)
-                    {
-                        Relationship newR = new Relationship { source = t, T = searchMask.T, reltype = r.reltype };
-                        if (!ContainsRelationshipValue(queryResult, newR))
-                            queryResult.Add(newR);
-                    }
-                    break;
-                }
-            }
-        }
-        //if the relationship has an inverse, do the inversion
-        if (invType != null)
-        {
-            for (int i = 0; i < queryResult.Count; i++)
-            {
-                Relationship r = queryResult[i];
-                Relationship newR = new Relationship { source = r.T, T = r.source, reltype = invType };
-                queryResult.RemoveAt(i);
-                queryResult.Insert(i, newR);
-            }
-        }
-
-        return queryResult;
-    }
-
-    bool ContainsRelationshipValue(List<Relationship> rl, Relationship newR)
-    {
-        foreach (Relationship r in rl)
-        {
-            if (r.source == newR.source && r.reltype == newR.reltype && r.target == newR.target) return true;
-        }
-        return false;
-    }
-
-    public List<Relationship> GetAllRelationships(Thing t, int depth, List<Relationship> currentList = null)
-    {
-        if (currentList == null) currentList = new();
-        if (t == null) return currentList;
-        foreach (Relationship r in t.Relationships)
-            if (!currentList.Contains(r)) currentList.Add(r);
-        foreach (Relationship r in t.RelationshipsFrom)
-            if (!currentList.Contains(r)) currentList.Add(r);
-        if (depth > 0)
-        {
-            depth--;
-            foreach (Relationship r in t.Relationships)
-            {
-                GetAllRelationships(r.source, depth, currentList);
-                GetAllRelationships(r.target, depth, currentList);
-            }
-            foreach (Relationship r in t.RelationshipsFrom)
-            {
-                GetAllRelationships(r.source, depth, currentList);
-                GetAllRelationships(r.target, depth, currentList);
-            }
-        }
-        return currentList;
-    }
 
     public bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
     {
@@ -394,8 +234,8 @@ public partial class ModuleUKS : ModuleBase
             //if one of the reltypes contains negation and not the other
             Thing r1Not = r1RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
             Thing r2Not = r2RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
-            if ((r1.source.Ancestors.Contains(r2.source) || 
-                r2.source.Ancestors.Contains(r1.source)) && 
+            if ((r1.source.Ancestors.Contains(r2.source) ||
+                r2.source.Ancestors.Contains(r1.source)) &&
                 r1.target == r2.target &&
                 (r1Not == null && r2Not != null || r1Not != null && r2Not == null))
                 return true;
@@ -429,8 +269,8 @@ public partial class ModuleUKS : ModuleBase
     bool HasProperty(Thing t, string propertyName)
     {
         if (t == null) return false;
-        var v = RelationshipWithInheritance(t);
-        if (v.FindFirst(x => x.T?.Label.ToLower() == propertyName.ToLower() && x.reltype.Label == "hasProperty") != null) return true;
+        //var v = RelationshipWithInheritance(t);
+        //if (v.FindFirst(x => x.T?.Label.ToLower() == propertyName.ToLower() && x.reltype.Label == "hasProperty") != null) return true;
         return false;
     }
     bool HasDirectProperty(Thing t, string propertyName)
@@ -478,29 +318,29 @@ public partial class ModuleUKS : ModuleBase
         return retVal;
     }
 
-    private Thing ThingFromString(string s, string defaultParent)
+    private Thing ThingFromString(string label, string defaultParent, Thing source = null)
     {
-        if (string.IsNullOrEmpty(s)) return null;
-        Thing t = Labeled(s);
+        if (string.IsNullOrEmpty(label)) return null;
+        Thing t = Labeled(label);
 
         if (t == null)
         {
             if (Labeled(defaultParent) == null)
             {
-                GetOrAddThing(defaultParent, Labeled("Object"));
+                GetOrAddThing(defaultParent, Labeled("Object"), source);
             }
-            t = GetOrAddThing(s, defaultParent);
+            t = GetOrAddThing(label, defaultParent, source);
         }
         return t;
     }
 
     //temporarily public for testing
-    private Thing ThingFromObject(object o, string parentLabel = "")
+    private Thing ThingFromObject(object o, string parentLabel = "", Thing source = null)
     {
         if (parentLabel == "")
             parentLabel = "unknownObject";
         if (o is string s3)
-            return ThingFromString(s3.Trim(), parentLabel);
+            return ThingFromString(s3.Trim(), parentLabel, source);
         else if (o is Thing t3)
             return t3;
         else if (o is null)
@@ -564,7 +404,7 @@ public partial class ModuleUKS : ModuleBase
 
     // If a thing exists, return it.  If not, create it.
     // If it is currently an unknown, defining the parent can make it known
-    public Thing GetOrAddThing(string label, object parent = null)
+    public Thing GetOrAddThing(string label, object parent = null, Thing source = null)
     {
         Thing thingToReturn = null;
 
@@ -583,59 +423,27 @@ public partial class ModuleUKS : ModuleBase
 
         if (correctParent is null) throw new ArgumentException("GetOrAddThing: could not find parent");
 
+        if (label.EndsWith("*"))
+        {
+            string baseLabel = label.Substring(0, label.Length - 1);
+            Thing newParent = ThingLabels.GetThing(baseLabel);
+            //instead of creating a new label, see if the next label for this item already exists and can be reused
+            if (source != null)
+            {
+                int digit = 0;
+                while (source.Relationships.FindFirst(x => x.reltype.Label == baseLabel + digit) != null) digit++;
+                Thing labeled = ThingLabels.GetThing(baseLabel + digit);
+                if (labeled != null)
+                    return labeled;
+            }
+            if (newParent == null)
+                newParent = AddThing(baseLabel, correctParent);
+            correctParent = newParent;
+        }
+
         thingToReturn = AddThing(label, correctParent);
         return thingToReturn;
     }
-
-    
-    public void SetupNumbers()
-    {
-        GetOrAddThing("is-a", "RelationshipType");
-        GetOrAddThing("inverseOf", "RelationshipType");
-        GetOrAddThing("hasProperty", "RelationshipType");
-        GetOrAddThing("is", "RelationshipType");
-
-        AddStatement("is-a", "inverseOf", "has-child");
-        AddStatement("isexclusive", "is-a", "RelationshipType");
-        AddStatement("with", "is-a", "RelationshipType");
-        AddStatement("and", "is-a", "Relationship");
-        AddStatement("isSimilarTo", "is-a", "RelationshipType");
-        AddStatement("greaterThan", "is-a", "RelationshipType");
-
-
-        //put in numbers 1-4
-        GetOrAddThing("zero", "number").V = (int)0;
-        GetOrAddThing("one", "number").V = (int)1;
-        GetOrAddThing("two", "number").V = (int)2;
-        GetOrAddThing("three", "number").V = (int)3;
-        GetOrAddThing("four", "number").V = (int)4;
-        GetOrAddThing("ten", "number").V = (int)10;
-        Thing some = GetOrAddThing("some", "number");
-        Thing many = GetOrAddThing("many", "number");
-        Thing none = GetOrAddThing("none", "number");
-        AddStatement("number","is-a", "Object");
-        none.V = (int)0;
-
-        AddStatement("10", "isSimilarTo", "ten");
-        AddStatement("10", "is-a", "number");
-        AddStatement("4", "isSimilarTo", "four");
-        AddStatement("4", "is-a", "number");
-        AddStatement("3", "isSimilarTo", "three");
-        AddStatement("3", "is-a", "number");
-        AddStatement("2", "isSimilarTo", "two");
-        AddStatement("2", "is-a", "number");
-        AddStatement("1", "isSimilarTo", "one");
-        AddStatement("1", "is-a", "number");
-        AddStatement("0", "isSimilarTo", "zero");
-        AddStatement("0", "is-a", "number");
-
-        AddStatement("one", "greaterThan", "none");
-        AddStatement("two", "greaterThan", "one");
-        AddStatement("three", "greaterThan", "two");
-        AddStatement("four", "greaterThan", "three");
-        AddStatement("many", "greaterThan", "four");
-        AddStatement("many", "greaterThan", "some");
-        AddStatement("some", "greaterThan", "none");
-        AddStatement("number", "hasProperty", "isexclusive");
-    }
 }
+    
+ 

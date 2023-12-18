@@ -16,22 +16,24 @@ namespace BrainSimulator.Modules
     {
         private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
         private List<Relationship> relationshipsFrom = new List<Relationship>(); //synapses from
+        private List<Relationship> relationshipsAsType = new List<Relationship>(); //nodes which use this as a relationshipType
         public IList<Relationship> RelationshipsNoCount { get { lock (relationships) { return new List<Relationship>(relationships.AsReadOnly()); } } }
         public List<Relationship> RelationshipsWriteable { get => relationships; }
         public IList<Relationship> RelationshipsFrom { get { lock (relationshipsFrom) { return new List<Relationship>(relationshipsFrom.AsReadOnly()); } } }
         public List<Relationship> RelationshipsFromWriteable { get => relationshipsFrom; }
+        public List<Relationship> RelationshipsAsTypeWriteable { get => relationshipsAsType; }
 
-        private string label = ""; 
+        private string label = "";
         object value;
         public int useCount = 0;
         public DateTime lastFiredTime = new();
-
+        
         public object V
         {
             get => value;
             set
             {
-                if ( value is not null && !value.GetType().IsSerializable)
+                if (value is not null && !value.GetType().IsSerializable)
                     throw new ArgumentException("Cannot set nonserializable value");
                 this.value = value;
             }
@@ -41,8 +43,13 @@ namespace BrainSimulator.Modules
         //even with no references, don't delete ToString  because the debugger uses it
         public override string ToString()
         {
-            string retVal = label + ": " + useCount;
-            if (Relationships.Count > 0)
+            string retVal = label;
+            return retVal;
+        }
+        public string ToString(bool showProperties = false)
+        {
+            string retVal = label;// + ": " + useCount;
+            if (Relationships.Count > 0 && showProperties)
             {
                 retVal += " {";
                 foreach (Relationship l in Relationships)
@@ -137,12 +144,13 @@ namespace BrainSimulator.Modules
         public bool HasAncestorLabeled(string label)
         {
             Thing t = ThingLabels.GetThing(label);
-            if (t == null) return false;    
+            if (t == null) return false;
             return HasAncestor(t);
         }
         public bool HasAncestor(Thing t)
         {
-            return FollowTransitiveRelationships(hasChildType, true, t).Count != 0;
+            var x = FollowTransitiveRelationships(hasChildType, true, t);
+            return x.Count != 0;
         }
 
         public int GetDescendentsCount()
@@ -173,19 +181,22 @@ namespace BrainSimulator.Modules
         {
             List<Thing> retVal = new();
             retVal.Add(this);
+            if (this == searchTarget) return retVal;
+
             for (int i = 0; i < retVal.Count; i++)
             {
                 Thing t = retVal[i];
-                IList<Relationship> relationshipsToFollow = followUpwards?t.RelationshipsFrom:t.Relationships;
+                IList<Relationship> relationshipsToFollow = followUpwards ? t.RelationshipsFrom : t.Relationships;
                 foreach (Relationship r in relationshipsToFollow)
                 {
                     Thing thingToAdd = followUpwards ? r.source : r.target;
                     if (r.reltype == relType)
-                    { 
-                        if (searchTarget == thingToAdd) return retVal;
+                    {
                         if (!retVal.Contains(thingToAdd))
                             retVal.Add(thingToAdd);
                     }
+                    if (searchTarget == thingToAdd)
+                        return retVal;
                 }
             }
             if (searchTarget != null) retVal.Clear();
@@ -233,20 +244,22 @@ namespace BrainSimulator.Modules
             {
                 lock (relationships)
                     lock (target.relationshipsFrom)
-                        lock (relationshipType.relationshipsFrom)
+                        lock (relationshipType.relationshipsAsType)
                         {
                             RelationshipsWriteable.Add(r);
                             target.RelationshipsFromWriteable.Add(r);
-                            relationshipType.RelationshipsFromWriteable.Add(r);
+                            if (!relationshipType.RelationshipsAsTypeWriteable.Contains(r))
+                                relationshipType.RelationshipsAsTypeWriteable.Add(r);
                         }
             }
             else
             {
                 lock (relationships)
-                    lock (relationshipType.relationshipsFrom)
+                    lock (relationshipType.relationshipsAsType)
                     {
                         RelationshipsWriteable.Add(r);
-                        relationshipType.RelationshipsFromWriteable.Add(r);
+                        if (!relationshipType.RelationshipsAsTypeWriteable.Contains(r))
+                            relationshipType.RelationshipsAsTypeWriteable.Add(r);
                     }
             }
             return r;
@@ -295,7 +308,7 @@ namespace BrainSimulator.Modules
                     {
                         lock (r.target.RelationshipsFromWriteable)
                         {
-                            r.source.RelationshipsWriteable.RemoveAll(x=>x.source ==r.source && x.reltype == r.reltype && x.target == r.target);
+                            r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
                             r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
                             r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
                         }
@@ -308,8 +321,8 @@ namespace BrainSimulator.Modules
 
         public Relationship HasRelationship(Thing t)
         {
-            foreach (Relationship L in Relationships)
-                if (L.T == t) return L;
+            foreach (Relationship r in Relationships)
+                if (r.target == t) return r;
             return null;
         }
 
@@ -395,6 +408,18 @@ namespace BrainSimulator.Modules
         {
             Relationship r = new() { source = this, reltype = hasChildType, target = t };
             RemoveRelationship(r);
+        }
+
+        public bool HasPropertyLabeled(string label)
+        {
+            foreach (Relationship r in relationships)
+                if (r.reltype.Label.ToLower() == "hasproperty" && r.target.Label.ToLower() == label.ToLower())
+                    return true;
+            foreach (Thing t in Parents)
+            {
+                return t.HasPropertyLabeled(label);
+            }
+            return false;
         }
     }
 }

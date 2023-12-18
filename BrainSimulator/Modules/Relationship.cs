@@ -35,17 +35,16 @@ namespace BrainSimulator.Modules
 
     public class ClauseType
     {
-        public AppliesTo a;
+        public Thing clauseType;
         public Relationship clause;
         public ClauseType() { }
-        public ClauseType(AppliesTo a1, Relationship clause1)
+        public ClauseType(Thing theType, Relationship clause1)
         {
-            a = a1;
+            clauseType = theType;
             clause = clause1;
         }
 
     };
-    public enum AppliesTo { all, source, type, target, condition };
 
     public class QueryRelationship : Relationship
     {
@@ -70,7 +69,7 @@ namespace BrainSimulator.Modules
         public Thing source
         {
             get => s;
-            set {s = value;}
+            set { s = value; }
         }
         public Thing reltype = null;
         public Thing relType
@@ -159,45 +158,25 @@ namespace BrainSimulator.Modules
 
         public int count
         {
-            get=>-1;
-            set{}
+            get => -1;
+            set { }
         }
 
-        public Relationship AddClause(string clauseType, Relationship r2)
+        public Relationship AddClause(Thing clauseType, Relationship r2)
         {
-            Relationship r = null;
-            ClauseType theClause = null;
-            switch (clauseType.ToLower())
+            ClauseType theClause = new();
+
+            theClause.clause = r2;
+            theClause.clauseType = clauseType;
+            if (clauses.FindFirst(x => x.clauseType == theClause.clauseType && x.clause == r2) == null)
             {
-                case "condition":
-                    theClause = new ClauseType { a = AppliesTo.condition};
-                    break;
-                case "source":
-                    theClause = new ClauseType { a = AppliesTo.source};
-                    break;
-                case "target":
-                    theClause = new ClauseType { a = AppliesTo.target};
-                    break;
-                case "type":
-                    theClause = new ClauseType { a = AppliesTo.type};
-                    break;
-                case "all":
-                    theClause = new ClauseType { a = AppliesTo.all};
-                    break;
-            }
-            if (theClause != null)
-            {
-                theClause.clause = r2;
-                if (clauses.FindFirst(x => x.a == theClause.a && x.clause == r2) == null)
-                {
-                    clauses.Add(theClause);
-                    r2.clausesFrom.Add(this);
-                }
+                clauses.Add(theClause);
+                r2.clausesFrom.Add(this);
             }
 
-            return r;
+            return this;
         }
-            
+
 
         public override string ToString()
         {
@@ -208,34 +187,7 @@ namespace BrainSimulator.Modules
             string allModifierString = "";
             foreach (ClauseType c in clauses)
             {
-                switch (c.a)
-                {
-                    case AppliesTo.source:
-                        {
-                            sourceModifierString += " AND " + c.clause.source;
-                            break;
-                        }
-                    case AppliesTo.type:
-                        {
-                            typeModifierString += " AND " + c.clause.relType;
-                            break;
-                        }
-                    case AppliesTo.target:
-                        {
-                            targetModifierString += " AND  " + c.clause.target;
-                            break;
-                        }
-                    case AppliesTo.all:
-                        {
-                            targetModifierString += " AND " + c.clause;
-                            break;
-                        }
-                    case AppliesTo.condition:
-                        {
-                            targetModifierString += " IF " + c.clause;
-                            break;
-                        }
-                }
+                allModifierString += c.clauseType.Label + " " + c.clause.ToString();
             }
 
             if (!string.IsNullOrEmpty(source?.Label))
@@ -249,14 +201,14 @@ namespace BrainSimulator.Modules
                 retVal += targetModifierString;
             if (allModifierString != "")
             {
-                retVal += " IF " + allModifierString;
+                retVal += " " + allModifierString;
             }
             return retVal;
         }
         public static string TrimDigits(string s)
         {
             if (s is null) return null;
-            while (s.Length > 0 && char.IsDigit(s[s.Length - 1])) 
+            while (s.Length > 0 && char.IsDigit(s[s.Length - 1]))
                 s = s.Substring(0, s.Length - 1);
             return s;
         }
@@ -266,7 +218,7 @@ namespace BrainSimulator.Modules
             foreach (Relationship r in t.Relationships)
             {
                 if (r.reltype == Thing.HasChild) continue;
-                if (t.Label.Contains("." + r.T?.Label))continue;
+                if (t.Label.Contains("." + r.target?.Label)) continue;
                 if (r.relType?.Label == "is")
                 {
                     if (retVal == null) retVal += "(";
@@ -336,7 +288,7 @@ namespace BrainSimulator.Modules
 
         private void ForgetTransientRelationships(object sender, EventArgs e)
         {
-            
+
             for (int i = transientRelationships.Count - 1; i >= 0; i--)
             {
                 Relationship r = transientRelationships[i];
@@ -360,7 +312,7 @@ namespace BrainSimulator.Modules
     //this is a non-pointer representation of a relationship needed for XML storage
     public class SClauseType
     {
-        public AppliesTo a;
+        public int clauseType = -1;
         public SRelationship r;
     }
 

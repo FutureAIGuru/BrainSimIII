@@ -12,7 +12,6 @@
         <Label x:Name="targetLabel"                Content="Target"        HorizontalAlignment="Left"   Height="33"   Margin="10,100,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
         <Label x:Name="conficenceLabel"            Content="Confidence"    HorizontalAlignment="Left"   Height="33"   Margin="362,14,0,0"   FontSize="16"  Width="100" VerticalAlignment="Top"/>
         <Label x:Name="durationLabel"              Content="Duration"      HorizontalAlignment="Left"   Height="33"   Margin="369,71,0,0"   FontSize="16"  Width="100" VerticalAlignment="Top"/>
-        <Label x:Name="connectorLabel"             Content="Dependency"    HorizontalAlignment="Left"   Height="33"   Margin="369,121,0,0"   FontSize="16"  Width="100" VerticalAlignment="Top"/>
 
         <TextBox  x:Name="sourceText"               TabIndex="1"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,174,0" TextChanged="thingText_TextChanged"/>
         <TextBox  x:Name="relationshipText"         TabIndex="2"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,60,174,0" TextChanged="relationshipText_TextChanged"/>
@@ -31,6 +30,5 @@
         <CheckBox x:Name="setConfCB" Content="Set Conf." IsChecked="True" FontSize="16" Height="22" Margin="265,153,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104"/>
 
         <Label  x:Name="errorText"            Content=""   HorizontalContentAlignment="Center"   Height="33"   FontSize="16" Margin="10,195,10,0" VerticalAlignment="Top" Background="Gray" Foreground="#FFF80902"/>
-
     </Grid>
 </local:ModuleBaseDlg>

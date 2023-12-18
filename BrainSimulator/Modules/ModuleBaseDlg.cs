@@ -7,7 +7,10 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -21,29 +24,44 @@ namespace BrainSimulator.Modules
         private DateTime dt;
         private DispatcherTimer timer;
         public int UpdateMS = 100;
+
+        public ModuleBaseDlg()
+        {
+            this.Loaded += ModuleBaseDlg_Loaded;
+        }
+
+        private void ModuleBaseDlg_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Create a button and add it to the panel
+            Button button = new Button
+            {
+                Content = "?",
+                FontSize = 24,
+                Width = 20,
+                Height = 25,
+                Margin = new Thickness(5),
+                Padding = new Thickness(0,-6,0,0),
+                Name = "helpButton",
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Bottom
+            };
+            button.Click += HelpButton_Click;
+
+            // Add the button to the dialog
+            ((Panel)this.Content).Children.Add(button);
+        }
+
+        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            string theModuleType = this.GetType().Name.ToString();
+            theModuleType = theModuleType.Replace("Dlg", "");
+            ModuleDescriptionDlg md = new ModuleDescriptionDlg(theModuleType);
+            md.Show();
+        }
+
         virtual public bool Draw(bool checkDrawTimer)
         {
             if (!checkDrawTimer) return true;
-            /*
-            // only actually update the screen every 100ms
-            TimeSpan ts = DateTime.Now - dt;
-            if (ts < new TimeSpan(0, 0, 0, 0, 500))
-            {
-                //if we're not drawing this time, start a timer which will do a final draw
-                //after a 1/4 second of inactivity
-                if (timer == null)
-                {
-                    timer = new DispatcherTimer();
-                    timer.Interval = new TimeSpan(0, 0, 0, 0, 250);
-                    timer.Tick += Timer_Tick;
-                }
-                timer.Stop();
-                timer.Start();
-                return false;
-            }
-            dt = DateTime.Now;
-            if (timer != null) timer.Stop();
-            */
             return true;
         }
 
@@ -53,6 +71,7 @@ namespace BrainSimulator.Modules
             if (Application.Current == null) return;
             if (this != null)
                 Draw(false);
+
         }
 
         //this picks up a final draw after 1/4 second 
@@ -62,37 +81,6 @@ namespace BrainSimulator.Modules
             if (Application.Current == null) return;
             if (this != null)
                 Draw(false);
-        }
-
-        public Bitmap theBitMap1 = null;
-        public Bitmap theBitMap2 = null;
-
-        public void GetBitMap()
-        {
-            System.Windows.Size size = new System.Windows.Size(ActualWidth, ActualHeight);
-            Measure(size);
-            Arrange(new Rect(size));
-            // Create a render bitmap and push the surface to it
-            RenderTargetBitmap renderBitmap =
-              new RenderTargetBitmap(
-                (int)size.Width,
-                (int)size.Height,
-                96d,
-                96d,
-                PixelFormats.Default);
-            renderBitmap.Render(this);
-
-            //Convert the RenderBitmap to a real bitmap
-            MemoryStream stream = new MemoryStream();
-            BitmapEncoder encoder = new BmpBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
-            encoder.Save(stream);
-
-            if (theBitMap1 == null)
-                theBitMap1 = new Bitmap(stream);
-            else if (theBitMap2 == null)
-                theBitMap2 = new Bitmap(stream);
-            //((Module3DSim)ParentModule).renderDone = true;
         }
 
     }

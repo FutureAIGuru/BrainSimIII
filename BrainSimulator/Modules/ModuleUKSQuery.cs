@@ -6,81 +6,178 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using Pluralize.NET;
+using static BrainSimulator.Modules.ModuleUKS;
 
 namespace BrainSimulator.Modules
 {
     public class ModuleUKSQuery : ModuleBase
     {
-        //any public variable you create here will automatically be saved and restored  with the network
-        //unless you precede it with the [XmlIgnore] directive
-
         public ModuleUKSQuery()
         {
         }
-
-        //fill this method in with code which will execute
-        //once for each cycle of the engine
         public override void Fire()
         {
             Init();  //be sure to leave this here
-
-            // if you want the dlg to update, use the following code whenever any parameter changes
-            // UpdateDialog();
         }
-
-        // fill this method in with code which will execute once
-        // when the module is added, when "initialize" is selected from the context menu,
-        // or when the engine restart button is pressed
         public override void Initialize()
         {
         }
 
-        // the following can be used to massage public data to be different in the xml file
-        // delete if not needed
-        public override void SetUpBeforeSave()
-        {
-        }
+        /*
+        Conventions [hard-coded relationships]:
 
-        public override void SetUpAfterLoad()
-        {
-        }
+All Thing labels are sigularized. Case is preserved but all searches are case-insensitive.
+is-a = has parent of (inverse of has-child)
+is = has attribute of
+has = has a part of  (arm has elbow) (al
+owns = possesses  (Mary owns red hat)
+goes = implies location in target
+can = implies action possibility
 
-        // called whenever the size of the module rectangle changes
-        // for example, you may choose to reinitialize whenever size changes
-        // delete if not needed
-        public override void SizeChanged()
-        {
-            
-        }
+Every item can have subclasses with attributes.
+In source and target, attributes precede the class, in type, attributes follow the class. “red hat” “big brown dog” “can play”  “has 5”
+When adding:
+Hand has 5 fingers creates subclass of has with the attribute of 5 [has->has-child->has.5  has.5->is->5, hand->has.5->fingers
+Every subclass will match the search of its parents (searching for has fingers)
 
-        // return true if thing was added
-        public bool AddChildButton(string newThing, string parent)
+When searching, text field may contain:
+Item label 
+Subclass label (with dots)  has.5
+Label and list of attribute labels has 5
+List of attributes labels  (resolves to items containing all attributes)
+Sequence of labels (resolves to items containing the labels in order)
+
+
+
+Query type
+Source
+Source + type
+Source + type + target
+Type + target
+Target only (handled as source)
+
+Always follow is-a relationships for inheritance
+Follow has ONLY if called out in type
+
+         */
+
+        public List<ThingWithQueryParams> QueryUKS(string sourceIn, string relTypeIn, string targetIn,
+                string filter, out List<Thing> thingResult, out List<Relationship> relationships)
         {
+            thingResult = new();
+            relationships = new();
             GetUKS();
-            if (UKS == null) return true;
+            if (UKS == null) return null;
+            string source = sourceIn.Trim();
+            string relType = relTypeIn.Trim();
+            string target = targetIn.Trim();
 
-            UKS.GetOrAddThing(newThing, parent);
-            return true;
+            bool reverse = false;
+            if (source == "" && target == "") return null;
+            int paramCount = 0;
+            if (source != "") paramCount++;
+            if (relType != "") paramCount++;
+            if (target != "") paramCount++;
+
+            if (source == "")
+            {
+                (source, target) = (target, source);
+                reverse = true;
+            }
+
+            //TODO build the search list(s)
+            List<Thing> searchList = ThingListFromString(source);
+            if (searchList.Count == 0) return null;
+
+            //Handle is-a queries as a special case
+            if (relType.Contains("is-a") && reverse ||
+                relType.Contains("has-child") && !reverse)
+            {
+                thingResult = searchList[0].Children.ToList();
+                return null;
+            }
+            if (relType.Contains("is-a") && !reverse ||
+                relType.Contains("has-child") && reverse)
+            {
+                thingResult = searchList[0].Ancestors.ToList();
+                return null;
+            }
+
+            List<ThingWithQueryParams> retVal = UKS.BuildSearchList(searchList, reverse);
+
+            if (reverse) (source, target) = (target, source);
+
+
+            relationships = UKS.GetAllRelationships(retVal);
+
+            for (int i = 0; i < relationships.Count; i++)
+            {
+                Relationship r = relationships[i];
+                if (target != "" && !r.target.HasAncestorLabeled(target))
+                { relationships.RemoveAt(i); i--; continue; }
+                if (relType != "" && !r.reltype.HasAncestorLabeled(relType))
+                { relationships.RemoveAt(i); i--; continue; }
+            }
+
+            if (filter != "")
+            {
+                List<Thing> filterThings = ThingListFromString(filter);
+                relationships = UKS.FilterResults(relationships, filterThings).ToList();
+            }
+
+            if (paramCount == 2)
+            {
+                foreach (Relationship r in relationships)
+                {
+                    if (sourceIn == "") thingResult.Add(r.source);
+                    if (targetIn == "") thingResult.Add(r.target);
+                    if (relTypeIn == "") thingResult.Add(r.relType);
+                }
+            }
+
+            return retVal;
         }
-
-        public IList<Relationship> QueryUKS(string source, string filter)
+        public IList<Thing> QuerySequence(string source)
         {
             GetUKS();
             if (UKS == null) return null;
+            List<Thing> retVal = new();
+
+            List<Thing> sourceModifiers = ThingListFromString(source);
+            if (sourceModifiers == null) return null;
+            retVal = UKS.HasSequence(sourceModifiers);
+
+            return retVal;
+        }
+
+        public List<Thing> ThingListFromString(string source)
+        {
+            List<Thing> retVal = new();
             IPluralize pluralizer = new Pluralizer();
-
-
             source = source.Trim();
-            filter = filter.Trim();
-
             string[] tempStringArray = source.Split(' ');
-            List<string> sourceModifiers = new();
-            source = pluralizer.Singularize(tempStringArray[tempStringArray.Length-1]);
-            for (int i = 0; i < tempStringArray.Length-1; i++) sourceModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+            //first, build a list of all the things in the list
+            for (int i = 0; i < tempStringArray.Length; i++)
+            {
+                if (tempStringArray[i] == "") continue;
+                Thing t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
+                if (t == null) continue;
+                retVal.Add(t);
+            }
+            //is this a sequence?
+            List<Thing> tSequence = UKS.HasSequence(retVal);
+            if (tSequence != null && tSequence.Count > 0)
+            {
+                retVal = tSequence;
+            }
+            else if (retVal.Count > 1)
+            {
+                retVal = UKS.FindThingsWithAttributes(retVal);
+            }
 
-            IList<Relationship> retVal = UKS.Query(source, filter);
-            
             return retVal;
         }
     }
