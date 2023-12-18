@@ -41,6 +41,10 @@ namespace BrainSimulator
 
             try
             {
+                SplashScreeen sp = new SplashScreeen();
+                sp.Show();
+
+
                 string fileName = ""; //if the load is successful, currentfile will be set by the load process
                 //if (App.StartupString != "")
                 //    fileName = App.StartupString;

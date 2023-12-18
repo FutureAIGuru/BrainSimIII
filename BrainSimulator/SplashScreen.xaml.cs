@@ -4,7 +4,10 @@
 // © 2022 FutureAI, Inc., all rights reserved
 // 
 
+
+using System;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace BrainSimulator
 {
@@ -16,6 +19,15 @@ namespace BrainSimulator
         public SplashScreeen()
         {
             InitializeComponent();
+            DispatcherTimer dt = new();
+            dt.Tick += Dt_Tick;
+            dt.Interval = TimeSpan.FromSeconds(4);
+            dt.Start();
+        }
+
+        private void Dt_Tick(object sender, System.EventArgs e)
+        {
+            this.Close();
         }
     }
 }
