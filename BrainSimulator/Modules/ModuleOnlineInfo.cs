@@ -846,14 +846,12 @@ namespace BrainSimulator.Modules
         public enum QueryType { general, isa, hasa, can, count, list, listCount, types, partsOf };
         public async void GetChatGPTData(string textIn, QueryType qtIn = QueryType.isa, string altLabel = "")
         {
-            //Original API Key: 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
-            //Update 4/5 sk - GAyHuyKv6OzH4L45w6ndT3BlbkFJ1DZfTZFkFwtAQWaZgWWX
             try
             {
                 QueryType qType = qtIn;
                 if (altLabel == "") altLabel = textIn;
                 string prompt;
-                string apiKey = "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";
+                string apiKey = "PUT API KEY HERE";
                 var client = new HttpClient();
                 var url = "https://api.openai.com/v1/chat/completions";
                 string queryText = textIn;
