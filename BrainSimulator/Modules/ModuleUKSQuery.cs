@@ -64,19 +64,19 @@ Follow has ONLY if called out in type
 
          */
 
-        public List<ThingWithQueryParams> QueryUKS(string sourceIn, string relTypeIn, string targetIn,
+        public void QueryUKS(string sourceIn, string relTypeIn, string targetIn,
                 string filter, out List<Thing> thingResult, out List<Relationship> relationships)
         {
             thingResult = new();
             relationships = new();
             GetUKS();
-            if (UKS == null) return null;
+            if (UKS == null) return;
             string source = sourceIn.Trim();
             string relType = relTypeIn.Trim();
             string target = targetIn.Trim();
 
             bool reverse = false;
-            if (source == "" && target == "") return null;
+            if (source == "" && target == "") return;
             int paramCount = 0;
             if (source != "") paramCount++;
             if (relType != "") paramCount++;
@@ -88,30 +88,34 @@ Follow has ONLY if called out in type
                 reverse = true;
             }
 
-            //TODO build the search list(s)
-            List<Thing> searchList = ThingListFromString(source);
-            if (searchList.Count == 0) return null;
+            //TODO build the search list(s) better
+            List<Thing> searchList = ModuleUKSStatement.ThingListFromString(source);
+            if (searchList.Count == 0) return;
 
             //Handle is-a queries as a special case
             if (relType.Contains("is-a") && reverse ||
                 relType.Contains("has-child") && !reverse)
             {
                 thingResult = searchList[0].Children.ToList();
-                return null;
+                return;
             }
             if (relType.Contains("is-a") && !reverse ||
                 relType.Contains("has-child") && reverse)
             {
                 thingResult = searchList[0].Ancestors.ToList();
-                return null;
+                return;
             }
 
-            List<ThingWithQueryParams> retVal = UKS.BuildSearchList(searchList, reverse);
+            relationships = UKS.GetAllRelationships(searchList, reverse);
 
+            //unreverse the source and target
             if (reverse) (source, target) = (target, source);
 
 
-            relationships = UKS.GetAllRelationships(retVal);
+            //handle compound relationship types
+            List<Thing> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
+            if (relTypeList.Count == 0) return;
+            relType = relTypeList[0].Label;
 
             for (int i = 0; i < relationships.Count; i++)
             {
@@ -124,7 +128,7 @@ Follow has ONLY if called out in type
 
             if (filter != "")
             {
-                List<Thing> filterThings = ThingListFromString(filter);
+                List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
                 relationships = UKS.FilterResults(relationships, filterThings).ToList();
             }
 
@@ -137,48 +141,6 @@ Follow has ONLY if called out in type
                     if (relTypeIn == "") thingResult.Add(r.relType);
                 }
             }
-
-            return retVal;
-        }
-        public IList<Thing> QuerySequence(string source)
-        {
-            GetUKS();
-            if (UKS == null) return null;
-            List<Thing> retVal = new();
-
-            List<Thing> sourceModifiers = ThingListFromString(source);
-            if (sourceModifiers == null) return null;
-            retVal = UKS.HasSequence(sourceModifiers);
-
-            return retVal;
-        }
-
-        public List<Thing> ThingListFromString(string source)
-        {
-            List<Thing> retVal = new();
-            IPluralize pluralizer = new Pluralizer();
-            source = source.Trim();
-            string[] tempStringArray = source.Split(' ');
-            //first, build a list of all the things in the list
-            for (int i = 0; i < tempStringArray.Length; i++)
-            {
-                if (tempStringArray[i] == "") continue;
-                Thing t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
-                if (t == null) continue;
-                retVal.Add(t);
-            }
-            //is this a sequence?
-            List<Thing> tSequence = UKS.HasSequence(retVal);
-            if (tSequence != null && tSequence.Count > 0)
-            {
-                retVal = tSequence;
-            }
-            else if (retVal.Count > 1)
-            {
-                retVal = UKS.FindThingsWithAttributes(retVal);
-            }
-
-            return retVal;
         }
     }
 }

@@ -32,6 +32,9 @@ namespace BrainSimulator.Modules
         protected bool allowMultipleDialogs = false;
         private List<ModuleBaseDlg> dlgList = null;
 
+        [XmlIgnore]
+        public static ModuleUKS UKS = null;
+
         public ModuleBase() 
         {
             string moduleName = this.GetType().Name;
@@ -54,10 +57,10 @@ namespace BrainSimulator.Modules
 
         public void UKSInitialized()
         {
-            foreach (ModuleBase na1 in MainWindow.BrainSim3Data.modules)
+            foreach (ModuleBase module in MainWindow.BrainSim3Data.modules)
             {
-                if (na1.isEnabled)
-                    na1.UKSInitializedNotification();
+                if (module.isEnabled)
+                    module.UKSInitializedNotification();
             }
         }
 
@@ -67,15 +70,13 @@ namespace BrainSimulator.Modules
 
         public void UKSReloaded()
         {
-            foreach (ModuleBase na1 in MainWindow.BrainSim3Data.modules)
+            foreach (ModuleBase module in MainWindow.BrainSim3Data.modules)
             {
-                if (na1.isEnabled)
-                    na1.UKSReloadedNotification();
+                if (module.isEnabled)
+                    module.UKSReloadedNotification();
             }
         }
 
-        [XmlIgnore]
-        public  ModuleUKS UKS = null;
         public void GetUKS()
         {
             if (UKS is null)

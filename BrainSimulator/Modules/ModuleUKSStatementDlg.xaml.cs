@@ -5,6 +5,8 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -34,7 +36,8 @@ namespace BrainSimulator.Modules
             string targetThing = targetText.Text;
             string relationType = relationshipText.Text;
 
-            if (!AddRelationshipChecks()) return;
+            if (!CheckAddRelationshipFieldsFilled()) return;
+
             TimeSpan duration = TimeSpan.MaxValue;
             string durationText = ((ComboBoxItem)durationCombo.SelectedItem).Content.ToString();
             switch (durationText)
@@ -51,34 +54,40 @@ namespace BrainSimulator.Modules
 
             ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
             Relationship r1 = UKSStatement.AddRelationship(newThing, targetThing, relationType);
-            if (setConfCB.IsChecked == true)
+            if (r1 != null && setConfCB.IsChecked == true)
             {
                 r1.weight = confidence;
                 r1.TimeToLive = duration;
             }
+
+            CheckThingExistence(targetText);
+            CheckThingExistence(sourceText);
+            CheckThingExistence(relationshipText);
         }
 
         // Check for thing existence and set background color of the textbox and the error message accordingly.
         private bool CheckThingExistence(object sender)
         {
+            //TODO rewrite to handle multiple-word entries & pluralization
             if (sender is TextBox tb)
             {
-                ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
+                string text = tb.Text.Trim();
 
-                if (tb.Text == "" && !tb.Name.Contains("arget"))
+                if (text == "" && !tb.Name.Contains("arget"))
                 {
                     tb.Background = new SolidColorBrush(Colors.Pink);
                     SetError("Source and type cannot be empty");
                     return false;
                 }
-                if (UKSStatement.SearchLabelUKS(tb.Text) == null)
+                List<Thing> tl = ModuleUKSStatement.ThingListFromString(text);
+                if (tl == null || tl.Count ==0)
                 {
-                    tb.Background = new SolidColorBrush(Colors.Yellow);
+                    tb.Background = new SolidColorBrush(Colors.LemonChiffon);
                     SetError("");
                     return false;
                 }
                 tb.Background = new SolidColorBrush(Colors.White);
-                SetError("Thing exists in UKS.");
+                SetError("");
                 return true;
             }
             return false;
@@ -89,7 +98,6 @@ namespace BrainSimulator.Modules
         private void TheGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Draw(false);
-            //FillRelationshipsComboBox();
         }
 
         // thingText_TextChanged is called when the thing textbox changes
@@ -99,12 +107,6 @@ namespace BrainSimulator.Modules
         }
 
         private void relationshipText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CheckThingExistence(sender);
-        }
-
-        // parentText_TextChanged is called when the parent textbox changes
-        private void parentText_TextChanged(object sender, TextChangedEventArgs e)
         {
             CheckThingExistence(sender);
         }
@@ -142,27 +144,9 @@ namespace BrainSimulator.Modules
             if (string.IsNullOrEmpty(message))
                 errorText.Background = new SolidColorBrush(Colors.Gray);
             else
-                errorText.Background = new SolidColorBrush(Colors.Yellow);
+                errorText.Background = new SolidColorBrush(Colors.LemonChiffon);
 
             errorText.Content = message;
-        }
-
-        // Checks the relevant fields for AddRelationship, 
-        private bool AddRelationshipChecks()
-        {
-            return CheckAddRelationshipFieldsFilled();
-        }
-
-        private void connectorCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is ComboBox c)
-            {
-                string selector = ((ComboBoxItem)c.SelectedItem).Content as string;
-                if (selector != "")
-                    this.Height = 450;
-                else
-                    this.Height = 270;
-            }
         }
     }
 }

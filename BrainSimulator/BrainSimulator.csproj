@@ -39,6 +39,8 @@
 		<Compile Remove="Modules\ModuleMove.cs" />
 		<Compile Remove="Modules\ModuleObject.cs" />
 		<Compile Remove="Modules\ModuleObjectDlg.xaml.cs" />
+		<Compile Remove="Modules\ModuleOnlineInfo.cs" />
+		<Compile Remove="Modules\ModuleOnlineInfoDlg.xaml.cs" />
 		<Compile Remove="Modules\ModulePodArmExtension.cs" />
 		<Compile Remove="Modules\ModulePremise.cs" />
 		<Compile Remove="Modules\ModulePremiseDlg.xaml.cs" />
@@ -209,6 +211,7 @@
 	<ItemGroup>
 	  <Page Remove="Modules\Module2DSimDlg.xaml" />
 	  <Page Remove="Modules\ModuleObjectDlg.xaml" />
+	  <Page Remove="Modules\ModuleOnlineInfoDlg.xaml" />
 	  <Page Remove="Modules\ModulePremiseDlg.xaml" />
 	</ItemGroup>
 

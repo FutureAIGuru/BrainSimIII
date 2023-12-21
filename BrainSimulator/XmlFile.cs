@@ -43,7 +43,7 @@ namespace BrainSimulator
             //list.Add(typeof(UnknownArea));
             //list.Add(typeof(Wall));
             //list.Add(typeof(Triangle2D));
-            list.Add(typeof(ModuleOnlineInfo.KidsWord));
+            //list.Add(typeof(ModuleOnlineInfo.KidsWord));
             return list.ToArray();
         }
 

@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.IO;
 using System.Windows;
-using System.Diagnostics;
-using static BrainSimulator.Modules.ModuleOnlineInfo;
 
 namespace BrainSimulator.Modules
 {
@@ -34,7 +29,7 @@ namespace BrainSimulator.Modules
             foreach (Thing t in ThingLabels.AllThingsInLabelList())
                 if (!UKSList.Contains(t))
                     UKSList.Add(t);
-            SetupNumbers();
+            //SetupNumbers();
         }
 
         public void SetupNumbers()
@@ -179,6 +174,7 @@ namespace BrainSimulator.Modules
 
         public override void SetUpAfterLoad()
         {
+            GetUKS();
             base.SetUpAfterLoad();
             if (!string.IsNullOrEmpty(fileName))
             {

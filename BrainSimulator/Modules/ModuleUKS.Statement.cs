@@ -137,7 +137,6 @@ namespace BrainSimulator.Modules
                 sourceProperties = (sourceProperties is null) ? new() : sourceProperties,
                 targetProperties = (targetProperties is null) ? new() : targetProperties,
                 typeProperties = (typeProperties is null) ? new() : typeProperties,
-                //sentencetype = new SentenceType(),
             };
 
             //handle pronouns in statements
@@ -168,15 +167,17 @@ namespace BrainSimulator.Modules
             {
                 //does the parent of this thing already reference some sort of target?
                 //if a dog has a specific kind of tail, we need to create an instance of that specific
-                foreach (Thing t in r.source.Parents)
-                {
-                    foreach (Relationship r1 in t.Relationships)
-                        if (r1.source.Parents.Contains(r.source))
-                        {
-                            r.source = r1.source;
-                        }
-                }
-                r.source = CreateInstanceOf(r.source, r.sourceProperties);
+                //foreach (Thing t in r.source.Parents)
+                //{
+                //    foreach (Relationship r1 in t.Relationships)
+                //        if (r1.source.Parents.Contains(r.source))
+                //        {
+                //            r.source = r1.source;
+                //        }
+                //}
+                Thing newInstance = CreateInstanceOf(r.source, r.sourceProperties);
+                if(r.target != newInstance)
+                    r.source = newInstance; 
             }
 
             if (r.reltype != null && typeProperties != null && typeProperties.Count > 0)
@@ -282,6 +283,8 @@ namespace BrainSimulator.Modules
         void ClearExtraneousParents(Thing t)
         {
             if (t == null) return;
+            //if a thing has more than one parent and one of them is unkonwnObject, 
+            //then the unknownObject relationship is unnedessary
             if (t != null && t.Parents.Count > 1)
                 t.RemoveParent(ThingLabels.GetThing("unknownObject"));
         }
@@ -305,17 +308,17 @@ namespace BrainSimulator.Modules
         }
 
 
-        Thing CreateInstanceOf(Thing t, List<Thing> targetModifiers)
+        Thing CreateInstanceOf(Thing t, List<Thing> modifiers)
         {
-            Thing t2 = SubclassExists(t, targetModifiers);
+            Thing t2 = SubclassExists(t, modifiers);
             if (t2 != null) return t2;
 
             string newLabel = t.Label;
-            foreach (Thing t1 in targetModifiers)
+            foreach (Thing t1 in modifiers)
                 newLabel += "." + t1.Label;
 
             Thing retVal = GetOrAddThing(newLabel, t);
-            foreach (Thing t1 in targetModifiers)
+            foreach (Thing t1 in modifiers)
             {
                 AddStatement(retVal, "is", t1);
             }

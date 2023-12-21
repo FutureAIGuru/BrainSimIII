@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Speech.Synthesis;
 
 namespace BrainSimulator.Modules
 {
@@ -10,46 +9,31 @@ namespace BrainSimulator.Modules
         List<Relationship> failedConditions = new();
         List<Relationship> succeededConditions = new();
 
-        public List<ThingWithQueryParams> Query(
-                object source, object relationshipType = null, object target = null,
-                object sourceModifiers = null, object relationshipModifiers = null, object targetModifiers = null
-                )
+        //TODO This is hard-codedd to "is" relationships
+        public List<Thing> GetAllAttributes(Thing t) //with inheritance, conflicts, etc
         {
-            //Thing Source = ThingFromObject(source);
-            //Thing RelationshipType = ThingFromObject(relationshipType);
-            //Thing Target = ThingFromObject(target);
-            //List<Thing> SourceModifiers = ThingListFromObject(sourceModifiers);
-            //List<Thing> RelationshipTypeModifiers = ThingListFromObject(relationshipModifiers, "action");
-            //List<Thing> TargetModifiers = ThingListFromObject(targetModifiers);
+            List<Thing> retVal = new();
 
-            //QueryRelationship q = new QueryRelationship
-            //{
-            //    source = Source,
-            //    relType = RelationshipType,
-            //    target = Target,
-            //    sourceProperties = SourceModifiers,
-            //    typeProperties = RelationshipTypeModifiers,
-            //    targetProperties = TargetModifiers,
-            //};
+            var temp1 = BuildSearchList(new List<Thing>() { t });
+            var temp2 = GetAllRelationshipsInt(temp1);
+            foreach (Relationship r in temp2)
+                if (r.relType.Label == "is")
+                    retVal.Add(r.target);
+            return retVal;
+        }
+        public List<Relationship> GetAllRelationships(List<Thing> sources, bool reverse) //with inheritance, conflicts, etc
+        {
+            var result1 = BuildSearchList(sources, reverse);
+            List<Relationship> result2 = GetAllRelationshipsInt(result1);
+            RemoveConflictingResults(result2);
+            RemoveFalseConditionals(result2);
 
-            if (source is string s)
-            {
-                string[] sources = s.Split(' ');
-                List<Thing> q = new();
-                foreach (string s1 in sources)
-                {
-                    Thing t = ThingLabels.GetThing(s1);
-                    if (t != null)
-                        q.Add(t);
-                }
-                var queryResult = BuildSearchList(q);
-                return queryResult;
-            }
-            return null;
+            return result2;
         }
 
+
         //This is used to store temporary content during queries
-        public class ThingWithQueryParams
+        private class ThingWithQueryParams
         {
             public Thing thing;
             public int hopCount;
@@ -60,12 +44,13 @@ namespace BrainSimulator.Modules
             public bool corner = false;
             public override string ToString()
             {
-                return (thing.Label + "  : " + hopCount + " : " + weight + "  Count: " + 
+                return (thing.Label + "  : " + hopCount + " : " + weight + "  Count: " +
                     haveCount + " Hits: " + hitCount + " Corner: " + corner);
             }
         }
 
-        public List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
+        //TODO This is hardcoded to only follow "has" and "has-child" transitive relationships
+        private  List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
         {
             List<ThingWithQueryParams> thingsToExamine = new();
             int maxHops = 20;
@@ -154,7 +139,7 @@ namespace BrainSimulator.Modules
             return thingsToExamine;
         }
 
-        public List<Relationship> GetAllRelationships(List<ThingWithQueryParams> thingsToExamine)
+        private List<Relationship> GetAllRelationshipsInt(List<ThingWithQueryParams> thingsToExamine)
         {
             List<Relationship> result = new();
             for (int i = 0; i < thingsToExamine.Count; i++)
@@ -165,8 +150,8 @@ namespace BrainSimulator.Modules
                 List<Relationship> relationshipsToAdd = null;
                 relationshipsToAdd = new();
                 relationshipsToAdd.AddRange(t.Relationships);
-                relationshipsToAdd.AddRange(t.RelationshipsFrom);
-                relationshipsToAdd.AddRange(t.RelationshipsAsTypeWriteable);
+                //relationshipsToAdd.AddRange(t.RelationshipsFrom);
+                //relationshipsToAdd.AddRange(t.RelationshipsAsTypeWriteable);
                 foreach (Relationship r in relationshipsToAdd)
                 {
                     if (r.reltype == Thing.HasChild) continue;
@@ -190,10 +175,6 @@ namespace BrainSimulator.Modules
                         result.Add(r);
                 }
             }
-
-            RemoveConflictingResults(result);
-            RemoveFalseConditionals(result);
-
             return result;
         }
 
@@ -208,7 +189,7 @@ namespace BrainSimulator.Modules
                     if (RelationshipsAreExclusive(r1, r2))
                     {
                         result.RemoveAt(j);
-                        if (j > 0) j--;
+                        j--;
                     }
 
                 }
@@ -223,7 +204,7 @@ namespace BrainSimulator.Modules
                 {
                     failedConditions.Add(r1);
                     result.RemoveAt(i);
-                    if (i > 0) i--;
+                    i--;
                 }
                 else
                 {
@@ -271,7 +252,7 @@ namespace BrainSimulator.Modules
             //TODO this requires that all entries in a sequence must be adjascent without any intervening extraneous relationships
             //TODO some sequences (spatial) are circular and the search must loop back to the beginning (not for anything temporal)
             IList<Relationship> sortedReferences = relationships.OrderBy(x => x.relType.Label).ToList();
-            
+
             //TODO the for loop below allows for matching a partial which does not start at the beginning of the stored sequence
             int i = 0;
             //for (int i = 0; i < sortedReferences.Count - targetAttributes.Count + 1; i++)
@@ -281,7 +262,7 @@ namespace BrainSimulator.Modules
                     if (sortedReferences[i + j].target != targetAttributes[j]) goto misMatch;
                 }
                 return true;
-            misMatch: ;
+            misMatch:;
             }
             return false;
         }
@@ -307,18 +288,6 @@ namespace BrainSimulator.Modules
                         i--;
                 }
             }
-            return retVal;
-        }
-
-        public List<Thing> GetAllAttributes(Thing t) //with inheritance, conflicts, etc
-        {
-            List<Thing> retVal = new();
-
-            var temp1 = BuildSearchList(new List<Thing>() { t });
-            var temp2 = GetAllRelationships(temp1);
-            foreach (Relationship r in temp2)
-                if (r.relType.Label == "is")
-                    retVal.Add(r.target);
             return retVal;
         }
 
@@ -389,7 +358,7 @@ namespace BrainSimulator.Modules
                     q.source = query.target;
                 var qResult = Relationship.GetRelationship(q);
                 if (qResult != null && qResult.weight < 0.8)
-                    return false; 
+                    return false;
                 if (qResult == null)
                 {
                     failedConditions.Add(q);

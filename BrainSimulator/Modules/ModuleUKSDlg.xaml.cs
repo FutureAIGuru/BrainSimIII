@@ -52,32 +52,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         return true;
     }
 
-    //this is here because clearing just the top-level tree creates a big memory leak.
-    private static void ClearTreeViewItems(TreeViewItem t)
-    {
-        foreach (TreeViewItem t1 in t.Items)
-            ClearTreeViewItems(t1);
-        t.Items.Clear();
-    }
-
-    private void RefreshSetUp()
-    {
-        busy = true;
-        //theTreeView.FontSize = 18; //use up/down arrows in the "Root" textbox
-
-        //figure out how wide the treeview is so we can wrap the text reasonably
-        Typeface typeFace = new(theTreeView.FontFamily.ToString());
-        FormattedText ft = new("xxxxxxxxxx", System.Globalization.
-            CultureInfo.CurrentCulture,
-            theTreeView.FlowDirection,
-            typeFace,
-            theTreeView.FontSize,
-            theTreeView.Foreground,
-            VisualTreeHelper.GetDpi(this).PixelsPerDip);
-        charsPerLine = (int)(10 * theTreeView.ActualWidth / ft.Width);
-        charsPerLine -= 20; //leave a little margin...the indent is calculated for individual entries
-    }
-
     private void UpdateStatusLabel()
     {
         int childCount = 0;
@@ -92,14 +66,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 t = t1;
                 childCount += t1.Children.Count;
                 refCount += t1.Relationships.Count - t1.Children.Count;
-                if (refCount < 0)
-                { }
             }
         }
 
         catch (Exception ex)
         {
-            return;  //don't update counts display if they are wrong
+            //you might get this exception if there is a collision
+            return;
         }
         statusLabel.Content = uks.Count + " Things  " + (childCount + refCount) + " Relationships";
         Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.fileName);
@@ -163,12 +136,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             int descCount = child.GetDescendentsCount();
             string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
             string header = child.Label;
-            if (r.weight != 1 && checkBoxNARS.IsChecked == true) //prepend weight for probabilistic children
+            if (r.weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
                 header = "<" + r.weight.ToString("f2") + ">" + header;
             if (r.reltype.HasRelationship(UKS.Labeled("not")) != null) //prepend ! for negative  children
                 header = "!" + header;
-
-            header += ":" + child.Children.Count + "," + descCountStr;
+            if (detailsCB.IsChecked == true)
+                header += ":" + child.Children.Count + "," + descCountStr;
             if (child.RelationshipsNoCount.Count > 0)
             {
                 header = ChildHasReferences(UKS, child, header, depth);
@@ -226,7 +199,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void AddRelationships(Thing t, TreeViewItem tvi, string parentLabel)
     {
         if (CountNonChildRelationships(t.RelationshipsNoCount) == 0) return;
-        TreeViewItem tviRefLabel = new() { Header = "Relationships: " + CountNonChildRelationships(t.RelationshipsNoCount).ToString() };
+        TreeViewItem tviRefLabel = new() { Header = "Relationships: " };
+        if (detailsCB.IsChecked == true)
+            tviRefLabel.Header += CountNonChildRelationships(t.RelationshipsNoCount).ToString();
 
         string fullString = "|" + parentLabel + "|" + t.Label + "|:Relationships";
         if (expandedItems.Contains(fullString))
@@ -274,7 +249,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void AddRelationshipsFrom(Thing t, TreeViewItem tvi, string parentLabel)
     {
         if (CountNonChildRelationships(t.RelationshipsFrom) == 0) return;
-        TreeViewItem tviRefLabel = new() { Header = "RelationshipsFrom: " + CountNonChildRelationships(t.RelationshipsFrom).ToString() };
+        TreeViewItem tviRefLabel = new() { Header = "RelationshipsFrom: " };
+        if (detailsCB.IsChecked == true)
+            tviRefLabel.Header += CountNonChildRelationships(t.RelationshipsFrom).ToString();
 
         string fullString = "|" + parentLabel + "|" + t.Label + "|:RelationshipsFrom";
         if (expandedItems.Contains(fullString))
@@ -383,6 +360,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         mi.Click += Mi_Click;
         mi.Header = "Show All";
         menu.Items.Add(mi);
+        //these are used with the onlineinfo module (currently excluded)
         //mi = new();
         //mi.Click += Mi_Click;
         //mi.Header = "Add Types";
@@ -503,7 +481,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     expandAll = t.Label;
                     expandedItems.Clear();
                     expandedItems.Add("|Thing|Object");
-                    updateFailed = true; //this forces the expanded items not to rebuild
+                    updateFailed = true; //this forces the expanded items list not to rebuild
                     break;
                 case "Collapse All":
                     expandAll = "";
@@ -511,24 +489,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     expandedItems.Add("|Thing|Object");
                     updateFailed = true;
                     break;
-                case "Show All":
+                case "Show All": //make "Thing" the root
                     textBoxRoot.Text = "Thing";
                     RefreshButton_Click(null, null);
-                    break;
-                case "Add Types":
-                    ModuleOnlineInfo moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
-                    if (moi != null)
-                        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.types);
-                    break;
-                case "Add Parts":
-                    moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
-                    if (moi != null)
-                        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.partsOf);
-                    break;
-                case "Add Actions":
-                    moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
-                    if (moi != null)
-                        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.can);
                     break;
                 case "Delete":
                     uks.DeleteAllChildren(t);
@@ -538,26 +501,42 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     textBoxRoot.Text = t.Label;
                     RefreshButton_Click(null, null);
                     break;
-                case "Remove Hits and Access Count":
-                    foreach (Relationship relationship in t.Relationships)
-                    {
-                        relationship.ClearHits();
-                        relationship.ClearAccessCount();
-                    }
-                    break;
+
+                    //used by the onlineinfo module
+                    //case "Add Types":
+                    //    ModuleOnlineInfo moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
+                    //    if (moi != null)
+                    //        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.types);
+                    //    break;
+                    //case "Add Parts":
+                    //    moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
+                    //    if (moi != null)
+                    //        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.partsOf);
+                    //    break;
+                    //case "Add Actions":
+                    //    moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
+                    //    if (moi != null)
+                    //        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.can);
+                    //    break;
+                    //case "Remove Hits and Access Count":
+                    //    foreach (Relationship relationship in t.Relationships)
+                    //    {
+                    //        relationship.ClearHits();
+                    //        relationship.ClearAccessCount();
+                    //    }
+                    //    break;
             }
             //force a repaint
             RefreshButton_Click(null, null);
         }
     }
 
+    //if things are expanded and the details are displayed, this gets the thing name out of the header
     public static string LeftOfColon(string s)
     {
         int i = s.IndexOf(':');
         if (i != -1)
-        {
             s = s[..i];
-        }
         return s;
     }
 
@@ -591,7 +570,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         int count = child.Relationships.Count - childCount;
         if (count > 0)
         {
-            header += " Rels:" + count;
+            if (detailsCB.IsChecked == true)
+                header += " Rels:" + count;
         }
         return header;
     }
@@ -602,7 +582,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         string retVal = "";
         if (r.relType is null || r.relType.Label != "has-child")
             retVal = r.ToString() + " ";
-        if (checkBoxNARS.IsChecked == true  &&  (r.weight != 1 || r.inferred))
+        if (detailsCB.IsChecked == true  &&  (r.weight != 1 || r.inferred))
             retVal = "<" + r.weight.ToString("f2") + "> " + retVal;
         return retVal;
     }
@@ -618,6 +598,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         }
         return retVal;
     }
+
     int CountNonChildRelationships(IList<Relationship> list)
     {
         return list.Count - list.Count(x => x.relType?.Label == "has-child");
@@ -628,6 +609,24 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void TheTreeView_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         Draw(true);
+    }
+
+    //this changes the font-size (for demos) by detecting up and down arrow keys
+    private void TextBoxRoot_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Return)
+        {
+            RefreshButton_Click(null, null);
+        }
+        if (e.Key == Key.Up)
+        {
+            theTreeView.FontSize += 2;
+        }
+        if (e.Key == Key.Down)
+        {
+            if (theTreeView.FontSize > 2)
+                theTreeView.FontSize -= 2;
+        }
     }
 
     private void CheckBoxAuto_Checked(object sender, RoutedEventArgs e)
@@ -651,29 +650,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         dt.Stop();
     }
 
-    private void TextBoxRoot_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Return)
-        {
-            RefreshButton_Click(null, null);
-        }
-        if (e.Key == Key.Up)
-        {
-            theTreeView.FontSize += 2;
-        }
-        if (e.Key == Key.Down)
-        {
-            if (theTreeView.FontSize > 2)
-                theTreeView.FontSize -= 2;
-        }
-    }
-
-    private void CheckBoxSort_Checked(object sender, RoutedEventArgs e)
+    private void CheckBoxDetails_Checked(object sender, RoutedEventArgs e)
     {
         Draw(false);
     }
 
-    private void CheckBoxSort_Unchecked(object sender, RoutedEventArgs e)
+    private void CheckBoxDetails_Unchecked(object sender, RoutedEventArgs e)
     {
         Draw(false);
     }
@@ -683,11 +665,15 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         mouseInTree = true;
         theTreeView.Background = new SolidColorBrush(Colors.LightSteelBlue);
     }
+    private void TheTreeView_MouseLeave(object sender, MouseEventArgs e)
+    {
+        mouseInTree = false;
+        theTreeView.Background = new SolidColorBrush(Colors.LightGray);
+    }
+
 
     private void RefreshButton_Click(object sender, RoutedEventArgs e)
     {
-        RefreshSetUp();
-
         try
         {
             if (!updateFailed)
@@ -711,12 +697,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         busy = false;
     }
 
-    private void TheTreeView_MouseLeave(object sender, MouseEventArgs e)
-    {
-        mouseInTree = false;
-        theTreeView.Background = new SolidColorBrush(Colors.LightGray);
-    }
-
     private void InitializeButton_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
@@ -736,7 +716,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.FolderKnowledgeFiles),
         };
 
-        // Show the Dialog.  
+        // Show the file Dialog.  
         // If the user clicked OK in the dialog and  
         System.Windows.Forms.DialogResult result = saveFileDialog.ShowDialog();
         if (result == System.Windows.Forms.DialogResult.OK)
@@ -749,6 +729,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         saveFileDialog.Dispose();
     }
 
+    //this handles both the load and the merge buttons
     private void LoadButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button btn)
@@ -762,9 +743,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.FolderKnowledgeFiles),
             };
 
-            // Show the Dialog.  
-            // If the user clicked OK in the dialog and  
+            // Show the file Dialog.  
             System.Windows.Forms.DialogResult result = openFileDialog.ShowDialog();
+            // If the user clicked OK in the dialog and  
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 parent.fileName = openFileDialog.FileName;

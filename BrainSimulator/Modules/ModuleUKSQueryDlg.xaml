@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
-        Title="UKS Query" Height="500" Width="630" Background="Gray" ShowInTaskbar="False"  >
+        Title="UKS Query" Height="450" Width="630" Background="Gray" ShowInTaskbar="False"  >
     <Grid Name="theGrid" Margin="0,0,0,0" >
         <Label Content="Source"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
         <Label Content="Type"        HorizontalAlignment="Left"   Height="33"   Margin="10,70,0,0"    FontSize="16" Width="68" VerticalAlignment="Top"/>
@@ -13,15 +13,13 @@
         <Label Content="Filter"      HorizontalAlignment="Left"   Height="33"   Margin="10,170,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
         <Label Content="Result"      HorizontalAlignment="Left"   Height="33"   Margin="10,280,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
 
-        <TextBox  x:Name="sourceText"    TabIndex="1"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,0,0" TextChanged="thingText_TextChanged" HorizontalAlignment="Left" Width="278"/>
-        <TextBox  x:Name="typeText"      TabIndex="2"  Height="33" VerticalAlignment="Top"   FontSize="16"     Margin="78,70,0,0" TextChanged="thingText_TextChanged" HorizontalAlignment="Left" Width="278"/>
-        <TextBox  x:Name="targetText"    TabIndex="3"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,120,0,0" TextChanged="thingText_TextChanged" HorizontalAlignment="Left" Width="278" RenderTransformOrigin="0.454,1.602"/>
-        <TextBox  x:Name="filterText"    TabIndex="4"  Height="32" VerticalAlignment="Top"   FontSize="16"   Margin="78,170,0,0" TextChanged="relationshipText_TextChanged" HorizontalAlignment="Left" Width="278"/>
+        <TextBox  x:Name="sourceText"    TabIndex="1"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,0,0" HorizontalAlignment="Left" Width="278"/>
+        <TextBox  x:Name="typeText"      TabIndex="2"  Height="33" VerticalAlignment="Top"   FontSize="16"     Margin="78,70,0,0" HorizontalAlignment="Left" Width="278"/>
+        <TextBox  x:Name="targetText"    TabIndex="3"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,120,0,0" HorizontalAlignment="Left" Width="278" RenderTransformOrigin="0.454,1.602"/>
+        <TextBox  x:Name="filterText"    TabIndex="4"  Height="32" VerticalAlignment="Top"   FontSize="16"   Margin="78,170,0,0" HorizontalAlignment="Left" Width="278"/>
         <TextBox  x:Name="resultText"    TabIndex="5"   FontSize="16" Margin="78,280,36,60"  TextWrapping="Wrap"/>
         
         <Button x:Name="BtnRelationships" IsDefault="True" Content="Query" Height="32" VerticalAlignment="Top" FontSize="16" Margin="400,120,0,0" Click="BtnRelationships_Click" HorizontalAlignment="Left" Width="120" RenderTransformOrigin="1.838,0.82"/>
-
-        <Label  x:Name="errorText"            Content=""   HorizontalContentAlignment="Center"   FontSize="16" Margin="0,0,20,22" Background="Gray" Foreground="#FFF80902" Height="33" VerticalAlignment="Bottom"/>
 
     </Grid>
 </local:ModuleBaseDlg>

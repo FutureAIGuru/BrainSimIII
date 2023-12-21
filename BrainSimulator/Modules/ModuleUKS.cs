@@ -218,7 +218,7 @@ public partial class ModuleUKS : ModuleBase
                         List<Thing> commonParents = FindCommonParents(t1, t2);
                         foreach (Thing t3 in commonParents)
                         {
-                            if (HasDirectProperty(t3, "isexclusive") || HasDirectProperty(t3, "allowMultiple"))
+                            if (HasProperty(t3, "isexclusive") || HasProperty(t3, "allowMultiple"))
                                 return true;
                         }
                     }
@@ -269,8 +269,9 @@ public partial class ModuleUKS : ModuleBase
     bool HasProperty(Thing t, string propertyName)
     {
         if (t == null) return false;
-        //var v = RelationshipWithInheritance(t);
-        //if (v.FindFirst(x => x.T?.Label.ToLower() == propertyName.ToLower() && x.reltype.Label == "hasProperty") != null) return true;
+        if (HasDirectProperty(t, propertyName) )return true;
+        foreach (Thing p in t.Parents)
+            return HasProperty(p, propertyName);
         return false;
     }
     bool HasDirectProperty(Thing t, string propertyName)
@@ -287,23 +288,10 @@ public partial class ModuleUKS : ModuleBase
             (r1.source == r2.source || ignoreSource) &&
             r1.target == r2.target &&
             r1.relType == r2.relType
-          //ListsAreEqual(r1.typeProperties, r2.typeProperties) &&
-          //ListsAreEqual(r1.targetProperties, r2.targetProperties)
           ) return true;
         return false;
     }
 
-
-    //every Thing in the first list MUST occur in the 2nd
-    bool ModifiersMatch(List<Thing> l1, Thing t)
-    {
-        foreach (Thing t1 in l1)
-        {
-            if (t.Relationships.FindFirst(x => x.reltype != null && x.reltype.Label == "is" && x.T == t1) == null)
-                return false;
-        }
-        return true;
-    }
 
 
     private List<Thing> ThingListFromStringList(List<string> modifiers, string defaultParent)

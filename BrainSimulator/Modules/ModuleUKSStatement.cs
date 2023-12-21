@@ -95,36 +95,34 @@ namespace BrainSimulator.Modules
             return r;
         }
 
-        public Thing GetUKSThing(string thing, string parent)
+
+        public static List<Thing> ThingListFromString(string source)
         {
-            GetUKS();
-            if (UKS == null) return null;
-
-            return UKS.GetOrAddThing(thing, parent);
-        }
-
-        public Thing SearchLabelUKS(string label)
-        {
-            GetUKS();
-            if (UKS == null) return null;
-
-            return UKS.Labeled(label);
-        }
-
-        public List<string> RelationshipTypes()
-        {
-            GetUKS();
-            if (UKS == null) return null;
-
-            Thing relParent = UKS.GetOrAddThing("RelationshipType", "Thing");
-            List<string> relTypes = new();
-
-            foreach (Thing relationshipType in relParent.Children)
+            List<Thing> retVal = new();
+            IPluralize pluralizer = new Pluralizer();
+            source = source.Trim();
+            string[] tempStringArray = source.Split(' ');
+            //first, build a list of all the things in the list
+            for (int i = 0; i < tempStringArray.Length; i++)
             {
-                relTypes.Add(relationshipType.Label);
+                if (tempStringArray[i] == "") continue;
+                Thing t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
+                if (t == null) return null;
+                retVal.Add(t);
+            }
+            //is this a sequence?
+            List<Thing> tSequence = UKS.HasSequence(retVal);
+            if (tSequence != null && tSequence.Count > 0)
+            {
+                retVal = tSequence;
+            }
+            else if (retVal.Count > 1) //do things represent a list of attributes
+            {
+                retVal = UKS.FindThingsWithAttributes(retVal);
             }
 
-            return relTypes;
+            return retVal;
         }
+
     }
 }
