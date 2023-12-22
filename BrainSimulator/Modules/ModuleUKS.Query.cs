@@ -167,7 +167,7 @@ namespace BrainSimulator.Modules
                         //this (transient) relationshiop doesn't exist in the UKS
                         Relationship r1 = new Relationship(r);
                         Thing newCountType = GetOrAddThing((GetCount(r.reltype) * haveCount).ToString(), "number");
-                        Thing newRelType = CreateInstanceOf(r1.reltype, new List<Thing> { newCountType });
+                        Thing newRelType = CreateSubclass(r1.reltype, new List<Thing> { newCountType });
                         r1.reltype = newRelType;
                         result.Add(r1);
                     }

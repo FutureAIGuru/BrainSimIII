@@ -29,7 +29,8 @@ namespace BrainSimulator.Modules
             foreach (Thing t in ThingLabels.AllThingsInLabelList())
                 if (!UKSList.Contains(t))
                     UKSList.Add(t);
-            //SetupNumbers();
+            
+            SetupNumbers();
         }
 
         public void SetupNumbers()
@@ -62,19 +63,6 @@ namespace BrainSimulator.Modules
             GetOrAddThing("many", "number");
             GetOrAddThing("none", "number");
 
-            //AddStatement("none", "isSimilarTo", "0");
-            //AddStatement("1", "greaterThan", "0");
-            //AddStatement("2", "greaterThan", "1");
-            //AddStatement("3", "greaterThan", "2");
-            //AddStatement("4", "greaterThan", "3");
-            //AddStatement("5", "greaterThan", "4");
-            //AddStatement("6", "greaterThan", "5");
-            //AddStatement("7", "greaterThan", "6");
-            //AddStatement("8", "greaterThan", "7");
-            //AddStatement("9", "greaterThan", "8");
-
-            //AddStatement("some", "greaterThan", "1");
-            //AddStatement("many", "greaterThan", "4");
 
             AddStatement("pi", "is-a", "number");
             AddStatement("pi", "hasDigit*", "3");
@@ -166,7 +154,6 @@ namespace BrainSimulator.Modules
                 hits = l.hits,
                 misses = l.misses,
                 count = l.count,
-                //sentencetype = l.sentencetype,
                 clauses = clauseList,
             };
             return sR;

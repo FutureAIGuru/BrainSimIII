@@ -47,7 +47,9 @@ namespace BrainSimulator.Modules
         {
             if (source == null || relType == null) return null;
 
-            QueryRelationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
+            ////if (HandlePronouns(r)) return r;
+
+            Relationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
 
             //does this relationship already exist (without conditions)?
             Relationship existing = Relationship.GetRelationship(r);
@@ -57,11 +59,6 @@ namespace BrainSimulator.Modules
                 existing.Fire();
                 return existing;
             }
-
-            //fire all parents 
-            //var y = SearchRelationships(r, true,false);
-            //foreach (Relationship r2 in y)
-            //    r2.Fire();
 
             //will this cause a circular relationship?
             if (r.reltype?.Label == "has-child")
@@ -75,16 +72,7 @@ namespace BrainSimulator.Modules
 
             WeakenConflictingRelationships(source, r);
 
-            //var x = SearchRelationships(r, false);
-            //if (x == null) return null;
-            //if (x.Count > 0) return x[0];
-
-            r.targetProperties = new();
-            r.typeProperties = new();
-            r.sourceProperties = new();
-
             Relationship rSave = new Relationship(r);
-
             WriteTheRelationship(rSave);
             if (rSave.relType != null && HasProperty(rSave.relType, "commutative"))
             {
@@ -102,6 +90,7 @@ namespace BrainSimulator.Modules
 
             return rSave;
         }
+
         void ClearRedundancyInAncestry(Thing t)
         {
             if (t == null) return;
@@ -119,7 +108,12 @@ namespace BrainSimulator.Modules
             }
         }
 
-        public QueryRelationship CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target, ref List<Thing> sourceProperties, List<Thing> typeProperties, ref List<Thing> targetProperties)
+        //these are used by the subclass searching system to report back the closest match and what attributes are missing
+        private Thing bestMatch = null;
+        private List<Thing> missingAttributes;
+
+        public Relationship  CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target, 
+            ref List<Thing> sourceProperties, List<Thing> typeProperties, ref List<Thing> targetProperties)
         {
             Thing inverseType1 = CheckForInverse(relType);
             //if this relationship has an inverse, switcheroo so we are storing consistently in one direction
@@ -129,100 +123,62 @@ namespace BrainSimulator.Modules
                 (sourceProperties, targetProperties) = (targetProperties, sourceProperties);
                 relType = inverseType1;
             }
-            QueryRelationship r = new()
-            {
-                relType = relType,
-                source = source,
-                T = target,
-                sourceProperties = (sourceProperties is null) ? new() : sourceProperties,
-                targetProperties = (targetProperties is null) ? new() : targetProperties,
-                typeProperties = (typeProperties is null) ? new() : typeProperties,
-            };
 
-            //handle pronouns in statements
-            //if (HandlePronouns(r)) return r;
+            //CAUTION: this code is not multithreadable
+            source = SubclassExists(source, sourceProperties);
+            if (source == null)
+                source = CreateSubclass(bestMatch, missingAttributes);
+            target = SubclassExists(target, targetProperties);
+            if (target == null)
+                target = CreateSubclass(bestMatch, missingAttributes);
+            relType = SubclassExists(relType, typeProperties);
+            if (relType == null)
+                relType = CreateSubclass(bestMatch, missingAttributes);
 
-            //if this is a "has" relationship see if a new instance of the objecte is needed?
-            //TODO properly find if the target already exists or needs to have an instance created
-            if (r.relType != null && HasProperty(r.reltype, "makeInstance") && r.T != null || r.targetProperties.Count > 0)
-            {
-                //does the parent of this thing already reference some sort of target?
-                //if a dog has a specific kind of tail, we need to create an instance of that specific dog
-                //TODO properly find if the target already exists or needs a new instance
-                if (r.source != null)
-                {
-                    foreach (Thing t in r.target.Parents)
-                    {
-                        foreach (Relationship r1 in t.Relationships)
-                            if (r1.target.Parents.Contains(r.T))
-                            {
-                                r.T = r1.target;
-                            }
-                    }
-                }
-                r.T = CreateInstanceOf(r.T, r.targetProperties);
-            }
+            Relationship r = new Relationship()
+            { source = source, reltype = relType , target = target};
 
-            if (r.sourceProperties.Count > 0 && r.source != null)
-            {
-                //does the parent of this thing already reference some sort of target?
-                //if a dog has a specific kind of tail, we need to create an instance of that specific
-                //foreach (Thing t in r.source.Parents)
-                //{
-                //    foreach (Relationship r1 in t.Relationships)
-                //        if (r1.source.Parents.Contains(r.source))
-                //        {
-                //            r.source = r1.source;
-                //        }
-                //}
-                Thing newInstance = CreateInstanceOf(r.source, r.sourceProperties);
-                if(r.target != newInstance)
-                    r.source = newInstance; 
-            }
-
-            if (r.reltype != null && typeProperties != null && typeProperties.Count > 0)
-            {
-                r.reltype = CreateInstanceOf(r.relType, r.typeProperties);
-            }
             r.source?.SetFired();
             r.target?.SetFired();
             r.relType?.SetFired();
 
-
             return r;
         }
 
-        private void WeakenConflictingRelationships(Thing source, Relationship r1)
+        private void WeakenConflictingRelationships(Thing newSource, Relationship existingRelationship)
         {
             //does this new relationship conflict with an existing relationship)?
-            for (int i = 0; i < source?.Relationships.Count; i++)
+            for (int i = 0; i < newSource?.Relationships.Count; i++)
             {
-                Relationship sourceRel = source.Relationships[i];
-                if (sourceRel == r1)
+                Relationship sourceRel = newSource.Relationships[i];
+                if (sourceRel == existingRelationship)
                 {
                     //strengthen this relationship
-                    //sourceRel.weight = 1;
-                    r1.weight +=  (1-r1.weight)/2.0f;
-                    //sourceRel.weight = Math.Clamp(sourceRel.weight + .2f, -1f, 1f);
-                    r1.Fire();
+                    existingRelationship.weight +=  (1-existingRelationship.weight)/2.0f;
+                    existingRelationship.Fire();
                 }
-                else if (RelationshipsAreExclusive(r1, sourceRel))
+                else if (RelationshipsAreExclusive(existingRelationship, sourceRel))
                 {
-                    //special case for "not"
-                    if (GetAttributes(r1.reltype)?.FindFirst(x => x.Label == "not") != null)
+                    //special cases for "not" so we delete rather than weakening
+                    if (existingRelationship.reltype.Children.Contains(sourceRel.relType) && HasAttribute(sourceRel.relType, "not"))
                     {
-                        source.RemoveRelationship(sourceRel);
+                        newSource.RemoveRelationship(sourceRel);
+                        i--;
+                    }
+                    if (sourceRel.reltype.Children.Contains(existingRelationship.relType) && HasAttribute(existingRelationship.relType, "not"))
+                    {
+                        newSource.RemoveRelationship(sourceRel);
                         i--;
                     }
                     else
                     {
-                        if (r1.weight == 1 && sourceRel.weight == 1)
+                        if (existingRelationship.weight == 1 && sourceRel.weight == 1)
                             sourceRel.weight = .5f;
                         else
                             sourceRel.weight = Math.Clamp(sourceRel.weight - .2f, -1, 1);
                         if (sourceRel.weight <= 0)
                         {
-                            source.RemoveRelationship(sourceRel);
+                            newSource.RemoveRelationship(sourceRel);
                             i--;
                         }
                     }
@@ -230,6 +186,113 @@ namespace BrainSimulator.Modules
             }
         }
 
+        void ClearExtraneousParents(Thing t)
+        {
+            if (t == null) return;
+            //if a thing has more than one parent and one of them is unkonwnObject, 
+            //then the unknownObject relationship is unnedessary
+            if (t != null && t.Parents.Count > 1)
+                t.RemoveParent(ThingLabels.GetThing("unknownObject"));
+        }
+
+        public Thing SubclassExists(Thing t,List<Thing> thingAttributes)
+        {
+            //TODO this doesn't work as needed if some attributes are inherited from an ancestor
+            if (t == null) return null;
+
+            bestMatch = t;
+            missingAttributes = thingAttributes;
+            //there are no attributes specified
+            if (thingAttributes.Count == 0) return t;
+
+            List<Thing> attrs = new List<Thing>(thingAttributes);
+
+            //get the attributes of t
+            var existingRelationships = GetAllRelationships(new List<Thing> { t }, false);
+            foreach (Relationship r in existingRelationships)
+            {
+                if (attrs.Contains(r.target)) attrs.Remove(r.target);
+                if (attrs.Contains(r.relType)) attrs.Remove(r.relType);
+            }
+
+            //t already has these attributes
+            if (attrs.Count == 0) 
+                return t;
+
+            //attrs now contains the remaing attributes we need to find in a descendent
+            return ChildContainsAttrs(t, attrs);
+        }
+
+        private Thing ChildContainsAttrs(Thing t, List<Thing> attrs, List<Thing>alreadyVisited = null)
+        {
+            //circular reference protection
+            if (alreadyVisited == null) alreadyVisited = new List<Thing>();
+            if (alreadyVisited.Contains(t)) return null;
+ 
+            //Localattrs lets us remove attrs from the required list without clobbering the parent list
+            List<Thing> localAttrs = new List<Thing>(attrs);
+            foreach (Thing child in t.Children)
+            {
+                List<Thing> childAttrs = GetAllAttributes(child);
+                foreach (Thing t3 in childAttrs)
+                    localAttrs.Remove(t3);
+
+                if (localAttrs.Count == 0) //have all the attributes been found?
+                    return child;
+
+                if (localAttrs.Count < missingAttributes.Count)
+                {
+                    missingAttributes = new List<Thing>(localAttrs);
+                    bestMatch = child;
+                }
+                //search any children with the remaining needed attributes
+                Thing retVal = ChildContainsAttrs(child, localAttrs);
+                if (retVal != null)
+                    return retVal;
+                localAttrs = new List<Thing>(attrs);
+            }
+            alreadyVisited.Add(t);
+            return null;
+        }
+
+        Thing CreateSubclass(Thing t, List<Thing> attributes)
+        {
+            Thing t2 = SubclassExists(t, attributes);
+            if (t2 != null) return t2;
+
+            string newLabel = t.Label;
+            foreach (Thing t1 in attributes)
+                newLabel += "." + t1.Label;
+
+            //create the new thing which is child of the original
+            Thing retVal = GetOrAddThing(newLabel, t);
+            //add the attributes
+            foreach (Thing t1 in attributes)
+            {
+                Relationship r1 = new Relationship()
+                { source = retVal, reltype = ThingLabels.GetThing("is"), target = t1 };
+                WriteTheRelationship(r1);
+            }
+            return retVal;
+        }
+        private Thing CheckForInverse(Thing relationshipType)
+        {
+            if (relationshipType == null) return null;
+            Relationship inverse = relationshipType.Relationships.FindFirst(x => x.reltype.Label == "inverseOf");
+            if (inverse != null) return inverse.target;
+            //use the bwlow if inverses are 2-way.  Without this, there is a one-way translation
+            //inverse = relationshipType.RelationshipsBy.FindFirst(x => x.reltype.Label == "inverseOf");
+            //if (inverse != null) return inverse.source;
+            return null;
+        }
+        public static List<Thing> FindCommonParents(Thing t, Thing t1)
+        {
+            List<Thing> commonParents = new List<Thing>();
+            foreach (Thing p in t.Parents)
+                if (t1.Parents.Contains(p))
+                    commonParents.Add(p);
+            return commonParents;
+        }
         public static void WriteTheRelationship(Relationship r)
         {
             if (r.source == null && r.target == null) return;
@@ -255,15 +318,6 @@ namespace BrainSimulator.Modules
                             r.reltype.RelationshipsAsTypeWriteable.Add(r);
                     }
             }
-            //else if (r.relType == null)
-            //{ //this case is not allowed
-            //    lock (r.target.RelationshipsWriteable)
-            //        lock (r.source.RelationshipsFromWriteable)
-            //        {
-            //            r.target.RelationshipsFromWriteable.Add(r);
-            //            r.source.RelationshipsWriteable.Add(r);
-            //        }
-            //}
             else
             {
                 lock (r.source.RelationshipsWriteable)
@@ -280,69 +334,6 @@ namespace BrainSimulator.Modules
             }
         }
 
-        void ClearExtraneousParents(Thing t)
-        {
-            if (t == null) return;
-            //if a thing has more than one parent and one of them is unkonwnObject, 
-            //then the unknownObject relationship is unnedessary
-            if (t != null && t.Parents.Count > 1)
-                t.RemoveParent(ThingLabels.GetThing("unknownObject"));
-        }
-
-        public Thing SubclassExists(Thing t,List<Thing> targetModifiers)
-        {
-            //if instance already exists, return it
-            if (t == null) return null;
-            foreach (Thing t2 in t.Descendents)
-            {
-                foreach (Thing t3 in targetModifiers)
-                {
-                    if (t2.Relationships.FindFirst(x => x.T == t3) == null)
-                        goto notFound;
-                }
-                return t2;
-            notFound:
-                continue;
-            }
-            return null;
-        }
-
-
-        Thing CreateInstanceOf(Thing t, List<Thing> modifiers)
-        {
-            Thing t2 = SubclassExists(t, modifiers);
-            if (t2 != null) return t2;
-
-            string newLabel = t.Label;
-            foreach (Thing t1 in modifiers)
-                newLabel += "." + t1.Label;
-
-            Thing retVal = GetOrAddThing(newLabel, t);
-            foreach (Thing t1 in modifiers)
-            {
-                AddStatement(retVal, "is", t1);
-            }
-            ClearExtraneousParents(t);
-            return retVal;
-        }
-        private Thing CheckForInverse(Thing relationshipType)
-        {
-            if (relationshipType == null) return null;
-            Relationship inverse = relationshipType.Relationships.FindFirst(x => x.reltype.Label == "inverseOf");
-            if (inverse != null) return inverse.target;
-            //use the bwlow if inverses ae 2-way.  Without this, there is a one-way translation
-            //inverse = relationshipType.RelationshipsBy.FindFirst(x => x.reltype.Label == "inverseOf");
-            //if (inverse != null) return inverse.source;
-            return null;
-        }
-        public static List<Thing> FindCommonParents(Thing t, Thing t1)
-        {
-            List<Thing> commonParents = new List<Thing>();
-            foreach (Thing p in t.Parents)
-                if (t1.Parents.Contains(p))
-                    commonParents.Add(p);
-            return commonParents;
-        }
 
     }
 }

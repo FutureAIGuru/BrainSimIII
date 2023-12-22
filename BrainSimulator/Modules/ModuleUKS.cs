@@ -194,7 +194,7 @@ public partial class ModuleUKS : ModuleBase
                         List<Thing> commonParents = FindCommonParents(t1, t2);
                         foreach (Thing t3 in commonParents)
                         {
-                            if (HasDirectProperty(t3, "isexclusive") || HasDirectProperty(t3, "allowMultiple"))
+                            if (HasProperty(t3, "isexclusive") || HasProperty(t3, "allowMultiple"))
                                 return true;
                         }
                     }
@@ -205,7 +205,7 @@ public partial class ModuleUKS : ModuleBase
                 List<Thing> commonParents = FindCommonParents(r1.target, r2.target);
                 foreach (Thing t3 in commonParents)
                 {
-                    if (HasDirectProperty(t3, "isexclusive") || HasDirectProperty(t3, "allowMultiple"))
+                    if (HasProperty(t3, "isexclusive") || HasProperty(t3, "allowMultiple"))
                         return true;
                 }
             }
@@ -227,7 +227,7 @@ public partial class ModuleUKS : ModuleBase
             // fido has a leg -> fido has 1 leg
             bool hasNumber1 = (r1RelProps.FindFirst(x => x.HasAncestorLabeled("number")) != null);
             bool hasNumber2 = (r2RelProps.FindFirst(x => x.HasAncestorLabeled("number")) != null);
-            if (r1.source == r2.source && r1.target == r2.target &&
+            if (r1.target == r2.target &&
                 (hasNumber1 || hasNumber2))
                 return true;
 
@@ -245,9 +245,9 @@ public partial class ModuleUKS : ModuleBase
             List<Thing> commonParents = FindCommonParents(r1.target, r2.target);
             foreach (Thing t3 in commonParents)
             {
-                if (HasDirectProperty(t3, "isexclusive"))
+                if (HasProperty(t3, "isexclusive"))
                     return true;
-                if (HasDirectProperty(t3, "allowMultiple") && r1.source != r2.source)
+                if (HasProperty(t3, "allowMultiple") && r1.source != r2.source)
                     return true;
             }
 
@@ -266,15 +266,27 @@ public partial class ModuleUKS : ModuleBase
         }
         return retVal;
     }
-    bool HasProperty(Thing t, string propertyName)
+
+    public bool HasAttribute(Thing t, string name)
     {
         if (t == null) return false;
-        if (HasDirectProperty(t, propertyName) )return true;
+        foreach (Relationship r in t.Relationships)
+        {
+            if (r.reltype != null && r.reltype.Label == "is"  && r.target.Label == name)
+                return true;
+        }
+        return false;
+    }
+
+    bool HasDirectProperty(Thing t, string propertyName)
+    {
+        if (t == null) return false;
+        if (HasProperty(t, propertyName) )return true;
         foreach (Thing p in t.Parents)
             return HasProperty(p, propertyName);
         return false;
     }
-    bool HasDirectProperty(Thing t, string propertyName)
+    bool HasProperty(Thing t, string propertyName)
     {
         if (t == null) return false;
         var v = t.Relationships;

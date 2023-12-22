@@ -190,7 +190,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     tviChild.Expanded += EmptyChild_Expanded;
                 }
                 else {
-                    Debug.Write("x");
+                    //not expandable
+                    //Debug.Write("x");
                 }
             }
         }
@@ -702,7 +703,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
         parent.Initialize();
         textBoxRoot.Text = "Thing";
-        expandAll = "";
+        //expandAll = "";
         RefreshButton_Click(null, null);
     }
 
