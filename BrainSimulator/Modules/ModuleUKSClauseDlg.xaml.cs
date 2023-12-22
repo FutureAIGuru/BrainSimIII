@@ -5,6 +5,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -35,7 +36,7 @@ namespace BrainSimulator.Modules
             string relationType = relationshipText.Text;
             string clauseType = clauseTypeText.Text;
 
-            if (!AddRelationshipChecks()) return;
+            if (!CheckAddRelationshipFieldsFilled()) return;
 
             ModuleUKSClause UKSClause = (ModuleUKSClause)ParentModule;
             Relationship r1 = UKSClause.AddRelationship(newThing, targetThing, relationType);
@@ -48,62 +49,39 @@ namespace BrainSimulator.Modules
             r1.AddClause(theClauseType, r2);
         }
 
-        // Check for thing existence and set background color of the textbox and the error message accordingly.
+        // thingText_TextChanged is called when the thing textbox changes
+        private void Text_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CheckThingExistence(sender);
+        }
+
+        //copied from UKSStatementDlg.cs
         private bool CheckThingExistence(object sender)
         {
             if (sender is TextBox tb)
             {
-                ModuleUKSClause UKSEvent = (ModuleUKSClause)ParentModule;
+                string text = tb.Text.Trim();
 
-                if (tb.Text == "" && !tb.Name.Contains("arget"))
+                if (text == "" && !tb.Name.Contains("arget"))
                 {
                     tb.Background = new SolidColorBrush(Colors.Pink);
                     SetError("Source and type cannot be empty");
                     return false;
                 }
-                if (UKSEvent.SearchLabelUKS(tb.Text) == null)
+                List<Thing> tl = ModuleUKSStatement.ThingListFromString(text);
+                if (tl == null || tl.Count == 0)
                 {
-                    tb.Background = new SolidColorBrush(Colors.Yellow);
+                    tb.Background = new SolidColorBrush(Colors.LemonChiffon);
                     SetError("");
                     return false;
                 }
                 tb.Background = new SolidColorBrush(Colors.White);
-                SetError("Thing exists in UKS.");
+                SetError("");
                 return true;
             }
             return false;
         }
 
-
-        // TheGrid_SizeChanged is called when the dialog is sized
-        private void TheGrid_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            Draw(false);
-            //FillRelationshipsComboBox();
-        }
-
-        // thingText_TextChanged is called when the thing textbox changes
-        private void thingText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CheckThingExistence(sender);
-        }
-
-        private void relationshipText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CheckThingExistence(sender);
-        }
-
-        // parentText_TextChanged is called when the parent textbox changes
-        private void parentText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CheckThingExistence(sender);
-        }
-
-        // referenceText_TextChanged is called when the reference textbox changes
-        private void targetText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CheckThingExistence(sender);
-        }
 
 
         // Check for parent existence and set background color of the textbox and the error message accordingly.
@@ -122,6 +100,21 @@ namespace BrainSimulator.Modules
                 SetError("Type not provided");
                 return false;
             }
+            if (clauseTypeText.Text == "")
+            {
+                SetError("Clause type not provided");
+                return false;
+            }
+            if (sourceText2.Text == "")
+            {
+                SetError("Clause source not provided");
+                return false;
+            }
+            if (relationshipText2.Text == "")
+            {
+                SetError("Clause type not provided");
+                return false;
+            }
             return true;
         }
 
@@ -135,20 +128,6 @@ namespace BrainSimulator.Modules
                 errorText.Background = new SolidColorBrush(Colors.Yellow);
 
             errorText.Content = message;
-        }
-
-        // Checks the relevant fields for AddRelationship, 
-        private bool AddRelationshipChecks()
-        {
-            return CheckAddRelationshipFieldsFilled();
-        }
-
-        private void connectorCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is ComboBox c)
-            {
-                string selector = ((ComboBoxItem)c.SelectedItem).Content as string;
-            }
         }
     }
 }

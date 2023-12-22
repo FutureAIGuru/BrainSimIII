@@ -185,26 +185,37 @@ namespace BrainSimulator.Modules
             string typeModifierString = "";
             string targetModifierString = "";
             string allModifierString = "";
+
+            retVal = BasicRelationshipToString(retVal, sourceModifierString, typeModifierString, targetModifierString);
+
+            //handle Clauses
+            //TODO prevent general circular reference stack overflow
             foreach (ClauseType c in clauses)
             {
-                allModifierString += c.clauseType.Label + " " + c.clause.ToString();
+                if (c.clause != this)
+                    allModifierString += c.clauseType.Label + " " + c.clause.ToString();
+                else //hack to prevent self-reference stack overflow
+                    allModifierString += c.clauseType.Label + " " + retVal;
             }
+            if (allModifierString != "")
+                retVal += " " + allModifierString;
 
+            return retVal;
+        }
+
+        private string BasicRelationshipToString(string retVal, string sourceModifierString, string typeModifierString, string targetModifierString)
+        {
             if (!string.IsNullOrEmpty(source?.Label))
-                retVal += TrimDigits(source?.Label) + /*ThingProperties(source) +*/ sourceModifierString;
+                retVal += TrimDigits(source?.Label) + sourceModifierString;
             if (!string.IsNullOrEmpty(relType?.Label))
                 retVal += ((retVal == "") ? "" : "->") + relType?.Label + ThingProperties(relType) + typeModifierString;
             if (!string.IsNullOrEmpty(target?.Label))
-                //                retVal += ((retVal == "") ? "" : "->") + TrimDigits(T?.Label) + ThingProperties(target) + string.Join(", ", targetModifierString);
                 retVal += ((retVal == "") ? "" : "->") + target?.Label + ThingProperties(target) + string.Join(", ", targetModifierString);
             else if (targetModifierString.Length > 0)
                 retVal += targetModifierString;
-            if (allModifierString != "")
-            {
-                retVal += " " + allModifierString;
-            }
             return retVal;
         }
+
         public static string TrimDigits(string s)
         {
             if (s is null) return null;

@@ -68,7 +68,6 @@ namespace BrainSimulator.Modules
         // Check for thing existence and set background color of the textbox and the error message accordingly.
         private bool CheckThingExistence(object sender)
         {
-            //TODO rewrite to handle multiple-word entries & pluralization
             if (sender is TextBox tb)
             {
                 string text = tb.Text.Trim();
@@ -101,22 +100,10 @@ namespace BrainSimulator.Modules
         }
 
         // thingText_TextChanged is called when the thing textbox changes
-        private void thingText_TextChanged(object sender, TextChangedEventArgs e)
+        private void Text_TextChanged(object sender, TextChangedEventArgs e)
         {
             CheckThingExistence(sender);
         }
-
-        private void relationshipText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CheckThingExistence(sender);
-        }
-
-        // referenceText_TextChanged is called when the reference textbox changes
-        private void targetText_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            CheckThingExistence(sender);
-        }
-
 
         // Check for parent existence and set background color of the textbox and the error message accordingly.
         private bool CheckAddRelationshipFieldsFilled()
