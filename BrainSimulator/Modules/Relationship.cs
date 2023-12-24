@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -177,9 +178,11 @@ namespace BrainSimulator.Modules
             return this;
         }
 
-
-        public override string ToString()
+        public  string ToString(List<Relationship> stack)
         {
+            if (stack.Contains(this))
+                return "";
+            stack.Add(this);
             string retVal = "";
             string sourceModifierString = "";
             string typeModifierString = "";
@@ -191,15 +194,17 @@ namespace BrainSimulator.Modules
             //handle Clauses
             //TODO prevent general circular reference stack overflow
             foreach (ClauseType c in clauses)
-            {
-                if (c.clause != this)
-                    allModifierString += c.clauseType.Label + " " + c.clause.ToString();
-                else //hack to prevent self-reference stack overflow
-                    allModifierString += c.clauseType.Label + " " + retVal;
-            }
+                    allModifierString += c.clauseType.Label + " " + c.clause.ToString(stack);
+
             if (allModifierString != "")
                 retVal += " " + allModifierString;
 
+            return retVal;
+        }
+
+        public override string ToString()
+        {
+            string retVal = this.ToString(new List<Relationship>());
             return retVal;
         }
 
@@ -242,6 +247,12 @@ namespace BrainSimulator.Modules
             return retVal;
         }
 
+        public override bool Equals(Object o)
+        {
+            if (o is Relationship r)     
+                return r == this;
+            return false;
+        }
         public static bool operator ==(Relationship a, Relationship b)
         {
             if (a is null && b is null)

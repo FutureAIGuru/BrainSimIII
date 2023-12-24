@@ -114,6 +114,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void AddChildren(Thing t, TreeViewItem tvi, int depth, string parentLabel)
     {
         if (totalItemCount > 3000) return;
+        if (t.Label == "fido")
+        { }
 
         List<Relationship> theChildren = new();
         foreach (Relationship r in t.Relationships)
@@ -127,8 +129,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         ModuleUKS UKS = (ModuleUKS)ParentModule;
 
-        if (t.Label == "weather")
-        { }
 
         foreach (Relationship r in theChildren)
         {
@@ -143,15 +143,10 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (detailsCB.IsChecked == true)
                 header += ":" + child.Children.Count + "," + descCountStr;
             if (child.RelationshipsNoCount.Count > 0)
-            {
                 header = ChildHasReferences(UKS, child, header, depth);
-            }
-            //potentially display the Valur of the node
-            if (child.V is not null)
-            {
-            }
 
             TreeViewItem tviChild = new() { Header = header };
+
             //change color of things which just fired or are about to expire
             tviChild.SetValue(ThingObjectProperty, child);
             if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
@@ -161,7 +156,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
             if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
                 tviChild.IsExpanded = true;
-            if (r.target.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
+            if (r.target.AncestorList().Contains(ThingLabels.GetThing(expandAll)) &&
+                !parentLabel.Contains("|"+child.Label))
                 tviChild.IsExpanded = true;
 
             tvi.Items.Add(tviChild);
@@ -361,23 +357,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         mi.Click += Mi_Click;
         mi.Header = "Show All";
         menu.Items.Add(mi);
-        //these are used with the onlineinfo module (currently excluded)
-        //mi = new();
-        //mi.Click += Mi_Click;
-        //mi.Header = "Add Types";
-        //menu.Items.Add(mi);
-        //mi = new();
-        //mi.Click += Mi_Click;
-        //mi.Header = "Add Actions";
-        //menu.Items.Add(mi);
-        //mi = new();
-        //mi.Click += Mi_Click;
-        //mi.Header = "Add Parts";
-        //menu.Items.Add(mi);
-        //mi = new();
-        //mi.Click += Mi_Click;
-        //mi.Header = "Remove Hits and Access Count";
-        //menu.Items.Add(mi);
         mi = new();
         mi.Header = "Parents:";
         if (t.Parents.Count == 0)
@@ -408,6 +387,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         //when the context menu opens, focus on the label and position text cursor to end
         if (sender is ContextMenu cm)
         {
+            cm.IsOpen = true;
             Control cc = Utils.FindByName(cm, "RenameBox");
             if (cc is TextBox tb)
             {
@@ -502,30 +482,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     textBoxRoot.Text = t.Label;
                     RefreshButton_Click(null, null);
                     break;
-
-                    //used by the onlineinfo module
-                    //case "Add Types":
-                    //    ModuleOnlineInfo moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
-                    //    if (moi != null)
-                    //        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.types);
-                    //    break;
-                    //case "Add Parts":
-                    //    moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
-                    //    if (moi != null)
-                    //        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.partsOf);
-                    //    break;
-                    //case "Add Actions":
-                    //    moi = (ModuleOnlineInfo)MainWindow.BrainSim3Data.modules.FindFirst(x => x.Label == "OnlineInfo");
-                    //    if (moi != null)
-                    //        moi.GetChatGPTData(t.Label, ModuleOnlineInfo.QueryType.can);
-                    //    break;
-                    //case "Remove Hits and Access Count":
-                    //    foreach (Relationship relationship in t.Relationships)
-                    //    {
-                    //        relationship.ClearHits();
-                    //        relationship.ClearAccessCount();
-                    //    }
-                    //    break;
             }
             //force a repaint
             RefreshButton_Click(null, null);
@@ -754,6 +710,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 MainWindow.ResumeEngine();
             }
             openFileDialog.Dispose();
+            updateFailed = true; //this forces the expanded items list not to rebuild
+            //force a repaint
+            RefreshButton_Click(null, null);
             MainWindow.ResumeEngine();
         }
     }

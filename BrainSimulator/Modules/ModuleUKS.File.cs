@@ -127,21 +127,23 @@ namespace BrainSimulator.Modules
                 };
                 foreach (Relationship l in t.Relationships)
                 {
-                    SRelationship sR = ConvertRelationship(l);
+                    SRelationship sR = ConvertRelationship(l,new List<Relationship>());
                     st.relationships.Add(sR);
                 }
                 UKSTemp.Add(st);
             }
         }
 
-        private SRelationship ConvertRelationship(Relationship l)
+        private SRelationship ConvertRelationship(Relationship l,List<Relationship> stack)
         {
+            if (stack.Contains(l))return null;
+            stack.Add(l);
             List<SClauseType> clauseList = null;
             if (l.clauses.Count > 0) clauseList = new();
             foreach (ClauseType c in l.clauses)
             {
                 int clauseType = UKSList.FindIndex(x => x == c.clauseType);
-                SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause) };
+                SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause,stack) };
                 clauseList.Add(ct);
             }
 
@@ -219,9 +221,9 @@ namespace BrainSimulator.Modules
             {
                 foreach (SRelationship p in UKSTemp[i].relationships)
                 {
-                    Relationship r = UnConvertRelationship(p);
-
-                    UKSList[i].RelationshipsWriteable.Add(r);
+                    Relationship r = UnConvertRelationship(p,new List<SRelationship>());
+                    if (r != null)
+                        UKSList[i].RelationshipsWriteable.Add(r);
                 }
             }
             //rebuild all the reverse linkages
@@ -231,32 +233,35 @@ namespace BrainSimulator.Modules
                 {
                     Thing t1 = r.T;
                     if (t1 != null)
-                        t1.RelationshipsFromWriteable.Add(r);
+                        if (!t1.RelationshipsFromWriteable.Contains(r))
+                            t1.RelationshipsFromWriteable.Add(r);
                     if (r.relType != null)
-                        r.relType.RelationshipsAsTypeWriteable.Add(r);
-                    AddClauses(r);
+                        if (!r.relType.RelationshipsAsTypeWriteable.Contains(r))
+                            r.relType.RelationshipsAsTypeWriteable.Add(r);
+                    AddClauses(r,new List<Relationship>());
                 }
             }
         }
 
-        private void AddClauses(Relationship r)
+        private void AddClauses(Relationship r,List<Relationship>stack)
         {
+            if (stack.Contains(r)) return;
+            stack.Add(r);
             foreach (ClauseType c in r.clauses)
-            {
-                Relationship r1 = c.clause;
-                if (r1.source != null)
-                    r1.source.RelationshipsWriteable.Add(r1);
-                if (r1.target != null)
-                    r1.target.RelationshipsFromWriteable.Add(r1);
-                if (r1.relType != null)
-                    r1.relType.RelationshipsFromWriteable.Add(r1);
-                c.clause.clausesFrom.Add(r);
-                AddClauses(r1);
+            { 
+                if (!c.clause.clausesFrom.Contains(r))
+                    c.clause.clausesFrom.Add(r);
+                AddClauses(c.clause,stack);
             }
         }
 
-        private Relationship UnConvertRelationship(SRelationship p)
+        private Relationship UnConvertRelationship(SRelationship p,List<SRelationship>stack)
         {
+            if (p == null) 
+                return null;
+            if (stack.Contains(p)) 
+                return null;
+            stack.Add(p);
             Thing source = null;
             if (p.source != -1)
                 source = UKSList[p.source];
@@ -281,7 +286,9 @@ namespace BrainSimulator.Modules
             {
                 foreach (SClauseType sc in p.clauses)
                 {
-                    r.clauses.Add(new ClauseType() { clauseType = UKSList[sc.clauseType], clause = UnConvertRelationship(sc.r) });
+                    ClauseType ct = new ClauseType() { clauseType = UKSList[sc.clauseType], clause = UnConvertRelationship(sc.r, stack) };
+                    if (ct.clause != null)
+                        r.clauses.Add(ct);
                 }
             }
             return r;

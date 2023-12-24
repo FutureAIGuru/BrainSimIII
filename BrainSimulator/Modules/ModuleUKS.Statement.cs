@@ -47,6 +47,7 @@ namespace BrainSimulator.Modules
         {
             if (source == null || relType == null) return null;
 
+            //this replaces pronouns with antecedents
             ////if (HandlePronouns(r)) return r;
 
             Relationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
@@ -60,35 +61,24 @@ namespace BrainSimulator.Modules
                 return existing;
             }
 
-            //will this cause a circular relationship?
-            if (r.reltype?.Label == "has-child")
-            {
-                if (r.source.AncestorList().Contains(target) || r.source == r.target)
-                {
-                    Debug.WriteLine($"Circular Reference: {r.ToString()}");
-                    return null;
-                }
-            }
-
             WeakenConflictingRelationships(source, r);
 
-            Relationship rSave = new Relationship(r);
-            WriteTheRelationship(rSave);
-            if (rSave.relType != null && HasProperty(rSave.relType, "commutative"))
+            WriteTheRelationship(r);
+            if (r.relType != null && HasProperty(r.relType, "commutative"))
             {
-                Relationship rSave1 = new Relationship(rSave);
-                (rSave1.source, rSave1.target) = (rSave1.target, rSave1.source);
-                rSave1.clauses.Clear();
-                WriteTheRelationship(rSave1);
+                Relationship rReverse = new Relationship(r);
+                (rReverse.source, rReverse.target) = (rReverse.target, rReverse.source);
+                rReverse.clauses.Clear();
+                WriteTheRelationship(rReverse);
             }
 
             //if this is adding a child relationship, remove any unknownObject parent
-            ClearExtraneousParents(rSave.source);
-            ClearExtraneousParents(rSave.T);
-            ClearExtraneousParents(rSave.relType);
-            ClearRedundancyInAncestry(rSave.target);
+            ClearExtraneousParents(r.source);
+            ClearExtraneousParents(r.T);
+            ClearExtraneousParents(r.relType);
+            //ClearRedundancyInAncestry(r.target);
 
-            return rSave;
+            return r;
         }
 
         void ClearRedundancyInAncestry(Thing t)
@@ -190,9 +180,12 @@ namespace BrainSimulator.Modules
         {
             if (t == null) return;
             //if a thing has more than one parent and one of them is unkonwnObject, 
-            //then the unknownObject relationship is unnedessary
+            //then the unknownObject relationship is unnecessary
             if (t != null && t.Parents.Count > 1)
                 t.RemoveParent(ThingLabels.GetThing("unknownObject"));
+            //if this disconnects the Thing from the tree, reconnect it as a Unknown
+            if (!t.HasAncestor(ThingLabels.GetThing("Thing")))
+                t.AddParent(ThingLabels.GetThing("unknownObject"));
         }
 
         public Thing SubclassExists(Thing t,List<Thing> thingAttributes)

@@ -62,17 +62,12 @@ public partial class ModuleUKS : ModuleBase
         if (t.Children.Count != 0)
             return; //can't delete something with children...must delete all children first.
         foreach (Relationship r in t.Relationships)
-        {
             t.RemoveRelationship(r);
-        }
         foreach (Relationship r in t.RelationshipsFrom)
-        {
             r.source.RemoveRelationship(r);
-        }
+        ThingLabels.RemoveThingLabel(t.Label);
         lock (UKSList)
-        {
             UKSList.Remove(t);
-        }
     }
 
     //returns the thing with the given label

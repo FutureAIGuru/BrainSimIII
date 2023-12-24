@@ -85,6 +85,11 @@ namespace BrainSimulator.Modules
             foreach (Thing thing in labelList.Values) { retVal.Add(thing); }
             return retVal;
         }
+        public static void RemoveThingLabel(string existingLabel)
+        {
+            if (existingLabel == "") return;
+            labelList.Remove(existingLabel,out Thing oldThing);
+        }
 
     }
 
