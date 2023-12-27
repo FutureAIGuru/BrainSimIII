@@ -137,7 +137,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
             string header = child.Label;
             if (r.weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
-                header = "<" + r.weight.ToString("f2") + ">" + header;
+                header = "<" + r.weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.lastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
             if (r.reltype.HasRelationship(UKS.Labeled("not")) != null) //prepend ! for negative  children
                 header = "!" + header;
             if (detailsCB.IsChecked == true)
@@ -205,12 +205,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRefLabel.IsExpanded = true;
         if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
             tviRefLabel.IsExpanded = true;
-
-        tviRefLabel.ContextMenu = new ContextMenu() { Visibility = Visibility.Hidden };
         tvi.Items.Add(tviRefLabel);
-
-        if (t.Label == "weather")
-        { }
 
         totalItemCount++;
         IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => x.relType.Label).ToList();
@@ -255,7 +250,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRefLabel.IsExpanded = true;
         if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
             tviRefLabel.IsExpanded = true;
-        tvi.ContextMenu.Visibility = Visibility.Hidden;
         tvi.Items.Add(tviRefLabel);
 
         IList<Relationship> sortedReferencedBy = t.RelationshipsFrom.OrderBy(x => -x.Value).ToList();
@@ -264,10 +258,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (r.relType?.Label == "has-child") continue;
             TreeViewItem tviRef;
             string headerstring1 = GetRelationshipString(r);
-            tviRef = new TreeViewItem
-            {
-                Header = headerstring1
-            };
+            tviRef = new TreeViewItem {Header = headerstring1};
             tviRef.ContextMenu = GetRelationshipContextMenu(r);
             tviRefLabel.Items.Add(tviRef);
             if (r.lastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
@@ -387,7 +378,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         //when the context menu opens, focus on the label and position text cursor to end
         if (sender is ContextMenu cm)
         {
-            cm.IsOpen = true;
             Control cc = Utils.FindByName(cm, "RenameBox");
             if (cc is TextBox tb)
             {
@@ -540,7 +530,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         if (r.relType is null || r.relType.Label != "has-child")
             retVal = r.ToString() + " ";
         if (detailsCB.IsChecked == true  &&  (r.weight != 1 || r.inferred))
-            retVal = "<" + r.weight.ToString("f2") + "> " + retVal;
+            retVal = "<" + r.weight.ToString("f2")+","+(r.TimeToLive==TimeSpan.MaxValue?"∞": (r.lastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
         return retVal;
     }
 

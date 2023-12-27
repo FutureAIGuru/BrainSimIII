@@ -88,25 +88,25 @@ Follow has ONLY if called out in type
                 reverse = true;
             }
 
-            //TODO build the search list(s) better
-            List<Thing> searchList = ModuleUKSStatement.ThingListFromString(source);
-            if (searchList.Count == 0) return;
+            List<Thing> sourceList = ModuleUKSStatement.ThingListFromString(source);
+            if (sourceList.Count == 0) return;
+            List<Thing> targetList = ModuleUKSStatement.ThingListFromString(target);
 
             //Handle is-a queries as a special case
             if (relType.Contains("is-a") && reverse ||
                 relType.Contains("has-child") && !reverse)
             {
-                thingResult = searchList[0].Children.ToList();
+                thingResult = sourceList[0].Children.ToList();
                 return;
             }
             if (relType.Contains("is-a") && !reverse ||
                 relType.Contains("has-child") && reverse)
             {
-                thingResult = searchList[0].Ancestors.ToList();
+                thingResult = sourceList[0].Ancestors.ToList();
                 return;
             }
 
-            relationships = UKS.GetAllRelationships(searchList, reverse);
+            relationships = UKS.GetAllRelationships(sourceList, reverse);
 
             //unreverse the source and target
             if (reverse) (source, target) = (target, source);
@@ -114,13 +114,14 @@ Follow has ONLY if called out in type
 
             //handle compound relationship types
             List<Thing> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
-            if (relTypeList.Count == 0) return;
-            relType = relTypeList[0].Label;
+            if (relTypeList.Count > 0) 
+                relType = relTypeList[0].Label;
 
+            //filter the relationships
             for (int i = 0; i < relationships.Count; i++)
             {
                 Relationship r = relationships[i];
-                if (target != "" && !r.target.HasAncestorLabeled(target))
+                if (target != "" && !r.target.HasAncestor(targetList[0]))
                 { relationships.RemoveAt(i); i--; continue; }
                 if (relType != "" && !r.reltype.HasAncestorLabeled(relType))
                 { relationships.RemoveAt(i); i--; continue; }

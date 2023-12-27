@@ -15,6 +15,7 @@ namespace BrainSimulator.Modules
             UKSList.Clear();
             AddThing("Thing", null);
             GetOrAddThing("Object", "Thing");
+            GetOrAddThing("Action", "Thing");
             GetOrAddThing("unknownObject", "Object");
             GetOrAddThing("is-a", "RelationshipType");
             GetOrAddThing("inverseOf", "RelationshipType");

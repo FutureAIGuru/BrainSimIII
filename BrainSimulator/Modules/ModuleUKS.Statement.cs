@@ -26,7 +26,7 @@ namespace BrainSimulator.Modules
                 Thing target = ThingFromObject(oTarget);
 
                 List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
-                List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "RelationshipType");
+                List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "Action");
                 List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
 
                 Relationship theRelationship = AddStatement(source, relationshipType, target, sourceModifiers, relationshipTypeModifiers, targetModifiers);

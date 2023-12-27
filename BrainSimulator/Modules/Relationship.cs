@@ -259,7 +259,7 @@ namespace BrainSimulator.Modules
                 return true;
             if (a is null || b is null)
                 return false;
-            if (a.T == b.T && a.source == b.source && a.relType == b.relType)
+            if (a.target == b.target && a.source == b.source && a.relType == b.relType)
                 return true;
             return false;
         }
