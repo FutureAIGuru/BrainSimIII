@@ -76,7 +76,7 @@ Follow has ONLY if called out in type
             string target = targetIn.Trim();
 
             bool reverse = false;
-            if (source == "" && target == "") return;
+            //if (source == "" && target == "") return;
             int paramCount = 0;
             if (source != "") paramCount++;
             if (relType != "") paramCount++;
@@ -89,7 +89,7 @@ Follow has ONLY if called out in type
             }
 
             List<Thing> sourceList = ModuleUKSStatement.ThingListFromString(source);
-            if (sourceList.Count == 0) return;
+            //if (sourceList.Count == 0) return;
             List<Thing> targetList = ModuleUKSStatement.ThingListFromString(target);
 
             //Handle is-a queries as a special case
@@ -109,8 +109,11 @@ Follow has ONLY if called out in type
             relationships = UKS.GetAllRelationships(sourceList, reverse);
 
             //unreverse the source and target
-            if (reverse) (source, target) = (target, source);
-
+            if (reverse)
+            {
+                (source, target) = (target, source);
+                (sourceList, targetList) = (targetList, sourceList);
+            }
 
             //handle compound relationship types
             List<Thing> relTypeList = ModuleUKSStatement.ThingListFromString(relType);

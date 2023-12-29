@@ -35,7 +35,7 @@ namespace BrainSimulator.Modules
             string source = sourceText.Text;
             string type = typeText.Text;
             string target = targetText.Text;
-            string filter= filterText.Text;
+            string filter = filterText.Text;
 
             List<Thing> things;
             List<Relationship> relationships;
@@ -44,19 +44,31 @@ namespace BrainSimulator.Modules
 
             if (things.Count > 0)
                 OutputResults(things);
-            else 
-                OutputResults(relationships);
+            else
+                OutputResults(relationships,target=="",source=="");
 
         }
 
-        private void OutputResults<T>(IList<T> r)
+        private void OutputResults<T>(IList<T> r, bool noSource = false,bool noTarget = false)
         {
             string resultString = "";
             if (r == null || r.Count == 0)
                 resultString = "No Results";
             else
                 foreach (var r1 in r)
-                    resultString += r1.ToString() + "\n";
+                {
+                    if (r1 is Relationship r2)
+                    {
+                        if (noSource && r2.clauses.Count == 0 && fullCB.IsChecked == false)
+                            resultString += r2.relType.ToString() + " " + r2.target.ToString() + "\n";
+                        else if (noTarget&& r2.clauses.Count == 0 && fullCB.IsChecked == false)
+                            resultString += r2.source.ToString() + " " + r2.relType.ToString() + "\n";
+                        else
+                            resultString += r2.ToString() + "\n";
+                    }
+                    else
+                        resultString += r1.ToString() + "\n";
+                }
             resultText.Text = resultString;
         }
     }

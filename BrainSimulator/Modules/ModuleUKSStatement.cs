@@ -107,7 +107,7 @@ namespace BrainSimulator.Modules
             {
                 if (tempStringArray[i] == "") continue;
                 Thing t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
-                if (t == null) return null;
+                if (t == null) return retVal;
                 retVal.Add(t);
             }
             //is this a sequence?

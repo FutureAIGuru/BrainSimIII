@@ -5,9 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800" >
+        Title="MainWindow" Height="600" Width="800" WindowState="Maximized">
+    <Window.Background>
+        <ImageBrush ImageSource="/brainsim3splashscreen.jpg" Opacity="0.5" />
+    </Window.Background>
     <DockPanel Margin="0,0,0,0" >
-        <Menu DockPanel.Dock="Top" x:Name="MainMenu" Height="26" Margin="0,0" VerticalAlignment="Top" >
+        <Menu DockPanel.Dock="Top" x:Name="MainMenu" Height="26" Margin="0,0" VerticalAlignment="Top" Background="LightGray" >
             <MenuItem Header="_File">
                 <MenuItem Header="_New" Click="button_FileNew_Click" InputGestureText="Ctrl-N">
                     <MenuItem.Icon>
@@ -144,7 +147,7 @@
                 <Label Visibility="Hidden" Width="30"></Label>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Label Content="Add Module:"/>
+                    <Label Content="Add Module:" Foreground="White"/>
                     <ComboBox x:Name="ModuleListComboBox" SelectionChanged="ModuleList_SelectionChanged" VerticalContentAlignment="Center" Width="271" Height="26" IsEditable="True"/>
                 </StackPanel>
             </DockPanel>

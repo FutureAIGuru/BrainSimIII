@@ -178,7 +178,7 @@ namespace BrainSimulator.Modules
             return this;
         }
 
-        public  string ToString(List<Relationship> stack)
+        public string ToString(List<Relationship> stack)
         {
             if (stack.Contains(this))
                 return "";
@@ -239,7 +239,7 @@ namespace BrainSimulator.Modules
                 {
                     if (retVal == null) retVal += "(";
                     else retVal += ", ";
-                    retVal += r.T?.Label;
+                    retVal += r.target?.Label;
                 }
             }
             if (retVal != null)

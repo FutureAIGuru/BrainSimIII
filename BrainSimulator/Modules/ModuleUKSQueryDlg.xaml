@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
-        Title="UKS Query" Height="450" Width="630" Background="Gray" ShowInTaskbar="False"  >
+        Title="UKS Query" Height="550" Width="530" Background="Gray" ShowInTaskbar="False"  >
     <Grid Name="theGrid" Margin="0,0,0,0" >
         <Label Content="Source"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
         <Label Content="Type"        HorizontalAlignment="Left"   Height="33"   Margin="10,70,0,0"    FontSize="16" Width="68" VerticalAlignment="Top"/>
@@ -19,7 +19,8 @@
         <TextBox  x:Name="filterText"    TabIndex="4"  Height="32" VerticalAlignment="Top"   FontSize="16"   Margin="78,170,0,0" HorizontalAlignment="Left" Width="278"/>
         <TextBox  x:Name="resultText"    TabIndex="5"   FontSize="16" Margin="78,280,36,60"  TextWrapping="Wrap"/>
         
-        <Button x:Name="BtnRelationships" IsDefault="True" Content="Query" Height="32" VerticalAlignment="Top" FontSize="16" Margin="400,120,0,0" Click="BtnRelationships_Click" HorizontalAlignment="Left" Width="120" RenderTransformOrigin="1.838,0.82"/>
+        <Button x:Name="BtnRelationships" IsDefault="True" Content="Query" Height="32" VerticalAlignment="Top" FontSize="16" Margin="375,120,0,25" Click="BtnRelationships_Click" HorizontalAlignment="Left" Width="120" RenderTransformOrigin="1.838,0.82"/>
+        <CheckBox x:Name="fullCB" Content="Full Relationships" FontSize="16" HorizontalAlignment="Left" Height="22" Margin="78,220,0,0" VerticalAlignment="Top" Width="226"/>
 
     </Grid>
 </local:ModuleBaseDlg>

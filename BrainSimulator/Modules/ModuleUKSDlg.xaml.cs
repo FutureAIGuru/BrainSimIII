@@ -31,10 +31,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private bool mouseInTree; //prevent auto-update while the mouse is in the tree
     private bool busy;
     private List<string> expandedItems = new();
-    private int charsPerLine = 60;
     private bool updateFailed;
     private List<Thing> uks;
-    private int maxChildrenWhenCollapsed = 20;
     private DispatcherTimer dt;
     private string expandAll = "";  //all the children below this named node will be expanded
 
@@ -174,7 +172,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     // load children and references
                     AddChildren(child, tviChild, depth + 1, parentLabel + "|" + child.Label);
                     AddRelationships(child, tviChild, parentLabel);
-                    AddRelationshipsFrom(child, tviChild, parentLabel);
+                    if (reverseCB.IsChecked == true)
+                        AddRelationshipsFrom(child, tviChild, parentLabel);
                 }
                 else if (child.Children.Count > 0 ||
                     CountNonChildRelationships(child.RelationshipsNoCount) > 0
@@ -303,7 +302,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 tvi.Items.Clear(); // delete empty child
                 AddChildren(t, tvi, depth, parentLabel);
                 AddRelationships(t, tvi, parentLabel);
-                AddRelationshipsFrom(t, tvi, parentLabel);
+                if (reverseCB.IsChecked == true)
+                    AddRelationshipsFrom(t, tvi, parentLabel);
             }
         }
     }
@@ -346,7 +346,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         menu.Items.Add(mi);
         mi = new();
         mi.Click += Mi_Click;
-        mi.Header = "Show All";
+        mi.Header = "Show All (make \"Thing\" root)";
         menu.Items.Add(mi);
         mi = new();
         mi.Header = "Parents:";
@@ -460,7 +460,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     expandedItems.Add("|Thing|Object");
                     updateFailed = true;
                     break;
-                case "Show All": //make "Thing" the root
+                case "Show All (make \"Thing\" root)": //make "Thing" the root
                     textBoxRoot.Text = "Thing";
                     RefreshButton_Click(null, null);
                     break;

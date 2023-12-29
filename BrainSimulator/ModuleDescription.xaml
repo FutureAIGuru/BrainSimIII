@@ -8,11 +8,11 @@
         Background="LightGray"
         Title=" Description" Height="400" Width="600">
     <Grid >
-        <TextBox x:Name="Description" VerticalScrollBarVisibility="Auto" Margin="20,49,38,99" TextWrapping="Wrap" Text="Description Text" AcceptsReturn="True" />
+        <TextBox x:Name="Description" VerticalScrollBarVisibility="Auto" Margin="20,49,38,99" TextWrapping="Wrap" Text="Description Text" AcceptsReturn="True" Background="LightBlue"/>
         <Button x:Name="buttonSave" Content="Save" Margin="189,0,303,27" Click="Button_Click" Height="34" VerticalAlignment="Bottom" />
         <Button x:Name="buttonClose" Content="Close" Click="buttonClose_Click"  Margin="318,0,174,27" Height="34" VerticalAlignment="Bottom" />
         <TextBlock Text="Description:" HorizontalAlignment="Left" Margin="20,28,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="0.859,1.19"/>
         <ComboBox x:Name="moduleSelector" HorizontalAlignment="Left" Margin="368,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="moduleSelector_SelectionChanged"/>
-        <TextBlock HorizontalAlignment="Left" Margin="248,10,0,0" TextWrapping="Wrap" Text="Select Module Type:" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="248,10,0,0" TextWrapping="Wrap" Text="Select Module Type:" VerticalAlignment="Top" />
     </Grid>
 </Window>

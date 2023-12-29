@@ -74,7 +74,8 @@ namespace BrainSimulator.Modules
 
                 foreach (Relationship r in t.RelationshipsFrom)  //has-child et al
                     if ((r.relType.HasAncestorLabeled("has-child") && !reverse) ||
-                        (r.relType.HasAncestorLabeled("has") && reverse))
+                        (r.relType.HasAncestorLabeled("has") && reverse) ||
+                       (r.relType.HasAncestorLabeled("is") && reverse))
                     {
                         if (thingsToExamine.FindFirst(x => x.thing == r.source) is ThingWithQueryParams twgp)
                         {

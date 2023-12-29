@@ -22,7 +22,7 @@ namespace BrainSimulator.Modules
             try
             {
                 Thing source = ThingFromObject(oSource);
-                Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType",source);
+                Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
                 Thing target = ThingFromObject(oTarget);
 
                 List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
@@ -102,7 +102,7 @@ namespace BrainSimulator.Modules
         private Thing bestMatch = null;
         private List<Thing> missingAttributes;
 
-        public Relationship  CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target, 
+        public Relationship CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target,
             ref List<Thing> sourceProperties, List<Thing> typeProperties, ref List<Thing> targetProperties)
         {
             Thing inverseType1 = CheckForInverse(relType);
@@ -115,18 +115,36 @@ namespace BrainSimulator.Modules
             }
 
             //CAUTION: this code is not multithreadable
-            source = SubclassExists(source, sourceProperties);
-            if (source == null)
-                source = CreateSubclass(bestMatch, missingAttributes);
-            target = SubclassExists(target, targetProperties);
-            if (target == null)
-                target = CreateSubclass(bestMatch, missingAttributes);
-            relType = SubclassExists(relType, typeProperties);
-            if (relType == null)
-                relType = CreateSubclass(bestMatch, missingAttributes);
+            //CREATE new subclasses if needed
+            Thing source1 = SubclassExists(source, sourceProperties);
+            if (source1 == null)
+            {
+                if (bestMatch == null) bestMatch = source;
+                if (missingAttributes.Count == 0) missingAttributes = new List<Thing>(sourceProperties);
+                source1 = CreateSubclass(bestMatch, missingAttributes);
+            }
+            source = source1;
+
+            Thing target1 = SubclassExists(target, targetProperties);
+            if (target1 == null)
+            {
+                if (bestMatch == null) bestMatch = target;
+                if (missingAttributes.Count == 0) missingAttributes = new List<Thing>(targetProperties);
+                target1 = CreateSubclass(bestMatch, missingAttributes);
+            }
+            target = target1;
+
+            Thing relType1 = SubclassExists(relType, typeProperties);
+            if (relType1 == null)
+            {
+                if (bestMatch == null) bestMatch = relType;
+                if (missingAttributes.Count == 0) missingAttributes = new List<Thing>(typeProperties);
+                relType1 = CreateSubclass(bestMatch, missingAttributes);
+            }
+            relType = relType1;
 
             Relationship r = new Relationship()
-            { source = source, reltype = relType , target = target};
+            { source = source, reltype = relType, target = target };
 
             r.source?.SetFired();
             r.target?.SetFired();
@@ -144,7 +162,7 @@ namespace BrainSimulator.Modules
                 if (sourceRel == existingRelationship)
                 {
                     //strengthen this relationship
-                    existingRelationship.weight +=  (1-existingRelationship.weight)/2.0f;
+                    existingRelationship.weight += (1 - existingRelationship.weight) / 2.0f;
                     existingRelationship.Fire();
                 }
                 else if (RelationshipsAreExclusive(existingRelationship, sourceRel))
@@ -188,7 +206,7 @@ namespace BrainSimulator.Modules
                 t.AddParent(ThingLabels.GetThing("unknownObject"));
         }
 
-        public Thing SubclassExists(Thing t,List<Thing> thingAttributes)
+        public Thing SubclassExists(Thing t, List<Thing> thingAttributes)
         {
             //TODO this doesn't work as needed if some attributes are inherited from an ancestor
             if (t == null) return null;
@@ -209,19 +227,21 @@ namespace BrainSimulator.Modules
             }
 
             //t already has these attributes
-            if (attrs.Count == 0) 
+            if (attrs.Count == 0)
                 return t;
 
             //attrs now contains the remaing attributes we need to find in a descendent
+            bestMatch = null;
+            missingAttributes = new List<Thing>();
             return ChildContainsAttrs(t, attrs);
         }
 
-        private Thing ChildContainsAttrs(Thing t, List<Thing> attrs, List<Thing>alreadyVisited = null)
+        private Thing ChildContainsAttrs(Thing t, List<Thing> attrs, List<Thing> alreadyVisited = null)
         {
             //circular reference protection
             if (alreadyVisited == null) alreadyVisited = new List<Thing>();
             if (alreadyVisited.Contains(t)) return null;
- 
+
             //Localattrs lets us remove attrs from the required list without clobbering the parent list
             List<Thing> localAttrs = new List<Thing>(attrs);
             foreach (Thing child in t.Children)
@@ -250,13 +270,15 @@ namespace BrainSimulator.Modules
 
         Thing CreateSubclass(Thing t, List<Thing> attributes)
         {
+            if (t == null) return null;
             Thing t2 = SubclassExists(t, attributes);
             if (t2 != null) return t2;
 
             string newLabel = t.Label;
             foreach (Thing t1 in attributes)
+            {
                 newLabel += "." + t1.Label;
-
+            }
             //create the new thing which is child of the original
             Thing retVal = GetOrAddThing(newLabel, t);
             //add the attributes
@@ -289,6 +311,7 @@ namespace BrainSimulator.Modules
         public static void WriteTheRelationship(Relationship r)
         {
             if (r.source == null && r.target == null) return;
+            if (r.reltype == null) return;
             if (r.target == null)
             {
                 lock (r.source.RelationshipsWriteable)
