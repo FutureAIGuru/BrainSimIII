@@ -76,7 +76,7 @@ namespace BrainSimulator.Modules
             ClearExtraneousParents(r.source);
             ClearExtraneousParents(r.T);
             ClearExtraneousParents(r.relType);
-            //ClearRedundancyInAncestry(r.target);
+            ClearRedundancyInAncestry(r.target);
 
             return r;
         }

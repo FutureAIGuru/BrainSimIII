@@ -194,7 +194,7 @@ namespace BrainSimulator.Modules
             //handle Clauses
             //TODO prevent general circular reference stack overflow
             foreach (ClauseType c in clauses)
-                    allModifierString += c.clauseType.Label + " " + c.clause.ToString(stack);
+                    allModifierString += c.clauseType.Label + " " + c.clause.ToString(stack)+" ";
 
             if (allModifierString != "")
                 retVal += " " + allModifierString;
