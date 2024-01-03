@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using System.Xml.Serialization;
@@ -50,6 +51,8 @@ namespace BrainSimulator
                 //    fileName = App.StartupString;
                 if (fileName == "")
                     fileName = (string)Properties.Settings.Default["CurrentFile"];
+                if (fileName == "")  //hack to make first-time operation smoother
+                    fileName = Path.GetFullPath(@"..\..\..\networks\demo1.xml");
                 if (fileName != "")
                 {
                     LoadFile(fileName);
