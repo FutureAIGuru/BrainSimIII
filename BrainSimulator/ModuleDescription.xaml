@@ -6,11 +6,11 @@
         xmlns:local="clr-namespace:BrainSimulator"
         mc:Ignorable="d"
         Background="LightGray"
-        Title=" Description" Height="400" Width="600">
+        Title=" Description" Height="800" Width="1200">
     <Grid >
         <TextBox x:Name="Description" VerticalScrollBarVisibility="Auto" Margin="20,49,38,99" TextWrapping="Wrap" Text="Description Text" AcceptsReturn="True" Background="LightBlue"/>
-        <Button x:Name="buttonSave" Content="Save" Margin="0,0,154,27" Click="Button_Click" Width="100" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
-        <Button x:Name="buttonClose" Content="Close" Click="buttonClose_Click"  Margin="0,0,38,27" Width="100" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+        <Button x:Name="buttonSave" Content="Save" Margin="0,0,154,27" Click="Button_Click" Width="100" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" ToolTip="Saves the edited text, but does not close the dialog." />
+        <Button x:Name="buttonClose" Content="Close" Click="buttonClose_Click"  Margin="0,0,38,27" Width="100" Height="34" VerticalAlignment="Bottom" HorizontalAlignment="Right" ToolTip="Closes the dialog, without saving any changes."/>
         <TextBlock Text="Description:" HorizontalAlignment="Left" Margin="20,28,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="0.859,1.19"/>
         <ComboBox x:Name="moduleSelector" HorizontalAlignment="Left" Margin="368,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="moduleSelector_SelectionChanged"/>
         <TextBlock HorizontalAlignment="Left" Margin="248,10,0,0" TextWrapping="Wrap" Text="Select Module Type:" VerticalAlignment="Top" />

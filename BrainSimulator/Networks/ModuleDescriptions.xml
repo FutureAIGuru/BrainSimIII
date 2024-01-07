@@ -2,15 +2,17 @@
 <ArrayOfModuleDescription xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <ModuleDescription>
     <moduleName>ModuleUKS</moduleName>
-    <description>This dialog shows the content of the Universal Knowledge Store (UKS) which is a graph composed of Things and Relationships which connect them.  Unlike most modules, you may have any number of UKS dialogs open for multiple views into the same data.  You can expand items in the tree view.
+    <description>This dialog shows the content of the Universal Knowledge Store (UKS) which is a graph composed of Things and Relationships which connect them.  Unlike most modules, you may have any number of UKS dialogs open for multiple views into the same data.  You can expand items in the tree view.   
 
 Thing/Relationship Display: 
-          Each Thing has a small triangle which will expand it. 
-          After the Thing’s name, the first number is the number of children and the total number of descendants. 
-          Color: Green: Thing or Relationship has recently been accessed/added/changed. Yellow: Relationship is about to be deleted.
+          Each Thing with children has a small triangle which will expand it. 
+          After the Thing’s name, the first number is the number of children and the second one is the total number of descendants. 
+          Color: 
+                    Green: Thing or Relationship has recently been accessed/added/changed. 
+                    Yellow: Relationship is about to be deleted.
 
 Buttons:
-          Initialize: Creates a UKS with just a few elements.
+          Initialize: Creates a UKS with just a few basic elements.
           Load: Loads UKS content from an XML file.
           Save: Saves UKS content to an XML file.
           Merge: Loads UKS content from an XML file and merges it with existing UKS content based on Thing labels.
@@ -23,7 +25,7 @@ For a Thing, options are:
           Delete: Deletes the Thing and all its children
           Make Root: Makes this Thing the root of the tree view.
           Show All: Makes the Thing labeled “Thing” the root of the tree view.
-          Parents: All parents are show.  Clicking on one makes it the root of the tree view.
+          Parents: All parents are shown.  Clicking on one makes it the root of the tree view.
 
 Bottom Panel:
           Root: Type in the name of the Thing to be the root of the Tree view. Setting this to blank shows any Things which have no parents (for debugging).
