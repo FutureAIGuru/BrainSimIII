@@ -316,6 +316,7 @@ public partial class ModuleUKS : ModuleBase
     private Thing ThingFromString(string label, string defaultParent, Thing source = null)
     {
         if (string.IsNullOrEmpty(label)) return null;
+        if (label == "") return null;
         Thing t = Labeled(label);
 
         if (t == null)

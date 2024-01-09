@@ -533,7 +533,7 @@
     <useCount>1</useCount>
   </SThing>
   <SThing>
-    <label>commutative</label>
+    <label>isCommutative</label>
     <relationships>
       <SRelationship>
         <source>16</source>

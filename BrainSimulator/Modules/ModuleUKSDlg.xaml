@@ -11,7 +11,9 @@
                   SizeChanged="TheTreeView_SizeChanged" 
                   Background="LightGray" Foreground="Black" Margin="0,0,0,65" 
                   MouseEnter="TheTreeView_MouseEnter" 
-                  MouseLeave="TheTreeView_MouseLeave">
+                  MouseLeave="TheTreeView_MouseLeave"
+                  PreviewMouseWheel="theTreeView_MouseWheel"
+                  >
 
         </TreeView>
         <Button x:Name="refreshButton" Content="Refresh" HorizontalAlignment="Left" Margin="20,0,0,19" Width="79" Height="27" RenderTransformOrigin="0.519,5.667" VerticalAlignment="Bottom" Click="RefreshButton_Click" FontSize="16" />

@@ -21,16 +21,22 @@ namespace BrainSimulator.Modules
             GetOrAddThing("inverseOf", "RelationshipType");
             GetOrAddThing("hasProperty", "RelationshipType");
             GetOrAddThing("is", "RelationshipType");
-            AddStatement("is-a", "inverseOf", "has-child");
-            AddStatement("isExclusive", "is-a", "RelationshipType");
-            AddStatement("has", "is-a", "RelationshipType");
-            AddStatement("ClauseType", "is-a", "RelationshipType");
 
             //This hack is here because at startup some Things don't get put into the UKS List.
             foreach (Thing t in ThingLabels.AllThingsInLabelList())
                 if (!UKSList.Contains(t))
                     UKSList.Add(t);
-            
+
+
+            AddStatement("is-a", "inverseOf", "has-child");
+            AddStatement("isExclusive", "is-a", "RelationshipType");
+            AddStatement("isTransitive", "is-a", "RelationshipType");
+            AddStatement("has", "is-a", "RelationshipType");
+            AddStatement("ClauseType", "is-a", "RelationshipType");
+            AddStatement("has", "hasProperty", "isTransitive");
+            AddStatement("has-child", "hasProperty", "isTransitive");
+
+
             SetupNumbers();
         }
 
@@ -38,13 +44,14 @@ namespace BrainSimulator.Modules
         {
             GetOrAddThing("number", "Object");
             AddStatement("greaterThan", "is-a", "RelationshipType");
+            AddStatement("greaterThan", "hasProperty", "isTransitive");
             AddStatement("lessThan", "inverseOf", "greaterThan");
             AddStatement("lessThan", "is-a", "RelationshipType");
             AddStatement("number", "hasProperty", "isExclusive");
             GetOrAddThing("digit", "number");
             GetOrAddThing("isSimilarTo", "RelationshipType");
-            GetOrAddThing("commutative", "RelationshipType");
-            AddStatement("isSimilarTo", "hasProperty", "commutative");
+            GetOrAddThing("isCommutative", "RelationshipType");
+            AddStatement("isSimilarTo", "hasProperty", "isCommutative");
             AddStatement("hasDigit", "is-a", "has");
 
 
@@ -65,14 +72,14 @@ namespace BrainSimulator.Modules
             GetOrAddThing("none", "number");
 
 
-            AddStatement("pi", "is-a", "number");
-            AddStatement("pi", "hasDigit*", "3");
-            AddStatement("pi", "hasDigit*", ".");
-            AddStatement("pi", "hasDigit*", "1");
-            AddStatement("pi", "hasDigit*", "4");
-            AddStatement("pi", "hasDigit*", "1");
-            AddStatement("pi", "hasDigit*", "5");
-            AddStatement("pi", "hasDigit*", "9");
+            //AddStatement("pi", "is-a", "number");
+            //AddStatement("pi", "hasDigit*", "3");
+            //AddStatement("pi", "hasDigit*", ".");
+            //AddStatement("pi", "hasDigit*", "1");
+            //AddStatement("pi", "hasDigit*", "4");
+            //AddStatement("pi", "hasDigit*", "1");
+            //AddStatement("pi", "hasDigit*", "5");
+            //AddStatement("pi", "hasDigit*", "9");
         }
 
 

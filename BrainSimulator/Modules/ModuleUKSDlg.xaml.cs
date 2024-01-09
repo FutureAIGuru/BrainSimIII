@@ -112,7 +112,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void AddChildren(Thing t, TreeViewItem tvi, int depth, string parentLabel)
     {
         if (totalItemCount > 3000) return;
-        if (t.Label == "fido")
+        if (t.Label == "dog")
         { }
 
         List<Relationship> theChildren = new();
@@ -127,13 +127,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         ModuleUKS UKS = (ModuleUKS)ParentModule;
 
-
         foreach (Relationship r in theChildren)
         {
             Thing child = r.target;
             int descCount = child.GetDescendentsCount();
             string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
             string header = child.Label;
+            if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 
             if (r.weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
                 header = "<" + r.weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.lastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
             if (r.reltype.HasRelationship(UKS.Labeled("not")) != null) //prepend ! for negative  children
@@ -154,8 +154,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
             if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
                 tviChild.IsExpanded = true;
-            if (r.target.AncestorList().Contains(ThingLabels.GetThing(expandAll)) &&
-                !parentLabel.Contains("|"+child.Label))
+            if (r.target.AncestorList().Contains(ThingLabels.GetThing(expandAll)) && 
+                (child.Label == "" ||!parentLabel.Contains("|"+child.Label)))
                 tviChild.IsExpanded = true;
 
             tvi.Items.Add(tviChild);
@@ -529,7 +529,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         string retVal = "";
         if (r.relType is null || r.relType.Label != "has-child")
             retVal = r.ToString() + " ";
-        if (detailsCB.IsChecked == true  &&  (r.weight != 1 || r.inferred))
+        if (detailsCB.IsChecked == true)
             retVal = "<" + r.weight.ToString("f2")+","+(r.TimeToLive==TimeSpan.MaxValue?"∞": (r.lastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
         return retVal;
     }
@@ -558,21 +558,28 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         Draw(true);
     }
 
-    //this changes the font-size (for demos) by detecting up and down arrow keys
     private void TextBoxRoot_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Return)
         {
             RefreshButton_Click(null, null);
         }
-        if (e.Key == Key.Up)
+    }
+
+    //using the mouse-wheel while pressing ctrl key changes the font size
+    private void theTreeView_MouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        if ((Keyboard.GetKeyStates(Key.LeftCtrl) & KeyStates.Down | Keyboard.GetKeyStates(Key.RightCtrl) & KeyStates.Down) != 0)
         {
-            theTreeView.FontSize += 2;
-        }
-        if (e.Key == Key.Down)
-        {
-            if (theTreeView.FontSize > 2)
-                theTreeView.FontSize -= 2;
+            if (e.Delta > 0)
+            {
+                if (theTreeView.FontSize > 1)
+                    theTreeView.FontSize -= 1;
+            }
+            else if (e.Delta < 0)
+            {
+                theTreeView.FontSize += 1;
+            }
         }
     }
 
@@ -648,9 +655,29 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
         parent.Initialize();
+        CollapseAll();
         textBoxRoot.Text = "Thing";
         //expandAll = "";
         RefreshButton_Click(null, null);
+    }
+
+    private void CollapseAll()
+    {
+        foreach (TreeViewItem item in theTreeView.Items)
+            CollapseTreeviewItems(item);
+    }
+
+    private void CollapseTreeviewItems(TreeViewItem Item)
+    {
+        Item.IsExpanded = false;
+
+        foreach (TreeViewItem item in Item.Items)
+        {
+            item.IsExpanded = false;
+
+            if (item.HasItems)
+                CollapseTreeviewItems(item);
+        }
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -706,4 +733,5 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             MainWindow.ResumeEngine();
         }
     }
+
 }
