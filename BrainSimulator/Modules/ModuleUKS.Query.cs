@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -27,8 +28,13 @@ namespace BrainSimulator.Modules
             List<Relationship> result2 = GetAllRelationshipsInt(result1);
             RemoveConflictingResults(result2);
             RemoveFalseConditionals(result2);
-
+            AlphabetizeRelationships(ref result2);
             return result2;
+        }
+
+        private void AlphabetizeRelationships(ref List<Relationship> result2)
+        {
+            result2 = result2.OrderBy(x => x.ToString()).ToList();
         }
 
 
@@ -168,7 +174,13 @@ namespace BrainSimulator.Modules
                         //this (transient) relationshiop doesn't exist in the UKS
                         Relationship r1 = new Relationship(r);
                         Thing newCountType = GetOrAddThing((GetCount(r.reltype) * haveCount).ToString(), "number");
-                        Thing newRelType = CreateSubclass(r1.reltype, new List<Thing> { newCountType });
+
+                        //hack for numeric labels
+                        Thing rootThing = r1.reltype;
+                        string[] parts = r.relType.Label.Split('.');
+                        if (parts.Length == 2 && int.TryParse(parts[1], out int x))
+                            rootThing = GetOrAddThing(parts[0]);
+                        Thing newRelType = CreateSubclass(rootThing, new List<Thing> { newCountType });
                         r1.reltype = newRelType;
                         result.Add(r1);
                     }

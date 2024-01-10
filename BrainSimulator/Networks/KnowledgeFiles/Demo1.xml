@@ -442,7 +442,7 @@
     <useCount>1</useCount>
   </SThing>
   <SThing>
-    <label>commutative</label>
+    <label>isCommutative</label>
     <relationships />
     <useCount>1</useCount>
   </SThing>

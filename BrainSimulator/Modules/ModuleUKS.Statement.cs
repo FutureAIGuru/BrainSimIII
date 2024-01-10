@@ -64,7 +64,7 @@ namespace BrainSimulator.Modules
             WeakenConflictingRelationships(source, r);
 
             WriteTheRelationship(r);
-            if (r.relType != null && HasProperty(r.relType, "commutative"))
+            if (r.relType != null && HasProperty(r.relType, "isCommutative"))
             {
                 Relationship rReverse = new Relationship(r);
                 (rReverse.source, rReverse.target) = (rReverse.target, rReverse.source);
@@ -197,12 +197,15 @@ namespace BrainSimulator.Modules
         void ClearExtraneousParents(Thing t)
         {
             if (t == null) return;
+
+            bool reconnectNeeded = t.HasAncestorLabeled("Thing");
             //if a thing has more than one parent and one of them is unkonwnObject, 
             //then the unknownObject relationship is unnecessary
-            if (t != null && t.Parents.Count > 1)
+            if (t.Parents.Count > 1)
                 t.RemoveParent(ThingLabels.GetThing("unknownObject"));
             //if this disconnects the Thing from the tree, reconnect it as a Unknown
-            if (!t.HasAncestor(ThingLabels.GetThing("Thing")))
+            //this may happen in the case of a circular reference.
+            if (reconnectNeeded && !t.HasAncestor(ThingLabels.GetThing("Thing")))
                 t.AddParent(ThingLabels.GetThing("unknownObject"));
         }
 
@@ -290,6 +293,7 @@ namespace BrainSimulator.Modules
             }
             return retVal;
         }
+
         private Thing CheckForInverse(Thing relationshipType)
         {
             if (relationshipType == null) return null;
