@@ -10,9 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using System.Xml.Serialization;
-using Emgu.CV;
 using System.Windows.Threading;
-using System.Windows.Media;
 
 namespace BrainSimulator.Modules
 {
@@ -47,9 +45,6 @@ namespace BrainSimulator.Modules
         abstract public void Fire();
 
         abstract public void Initialize();
-        public virtual void SetInputImage(Mat inputImage, string inputFilename)
-        {
-        }
         
         public virtual void UKSInitializedNotification()
         {

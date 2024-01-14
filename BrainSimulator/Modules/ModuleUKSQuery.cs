@@ -7,9 +7,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using Pluralize.NET;
-using static BrainSimulator.Modules.ModuleUKS;
 
 namespace BrainSimulator.Modules
 {
