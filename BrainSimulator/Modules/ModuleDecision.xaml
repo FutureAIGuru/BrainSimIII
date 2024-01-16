@@ -18,7 +18,7 @@
         <Slider   x:Name="confidenceSlider"         Minimum="0" Maximum="1" IsMoveToPointEnabled="True" TickFrequency="0.1"   TickPlacement="Both" Value=".9" HorizontalAlignment="Left" Height="25" Margin="349,24,0,0" VerticalAlignment="Top" Width="100"/>
 
         <Label Content="Action(s) to take: "        HorizontalAlignment="Left"   Height="33"   Margin="10,188,0,0"   FontSize="16"  Width="130" VerticalAlignment="Top"/>
-        <Label x:Name="actionLabel " Content="No Action"        HorizontalAlignment="Left"   Height="33"   Margin="140,188,0,0"   FontSize="16"  Width="365" VerticalAlignment="Top"/>
+        <Label x:Name="actionLabel" Content="No Action"        HorizontalAlignment="Left"   Height="33"   Margin="140,188,0,0"   FontSize="16"  Width="365" VerticalAlignment="Top"/>
 
         <Button x:Name="BtnGetAction"   IsDefault="True" Content="Choose Best Action" Height="32" VerticalAlignment="Top" FontSize="16" Margin="253,144,0,0" Click="BtnAddRelationship_Click" HorizontalAlignment="Left" Width="159"/>
         <Button x:Name="BtnAddDecision"   IsDefault="True" Content="Add Decision Pt" Height="32" VerticalAlignment="Top" FontSize="16" Margin="66,144,0,0" Click="BtnAddRelationship_Click" HorizontalAlignment="Left" Width="159" RenderTransformOrigin="0.506,0.394"/>
