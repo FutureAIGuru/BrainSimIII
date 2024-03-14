@@ -1,0 +1,25 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleOnlineInfoDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="ModuleDlgConceptNet Module Dialog" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
+    <Grid Name="theGrid" SizeChanged="TheCanvas_SizeChanged" >
+        <TextBox x:Name="txtInput" Text="Single-Word" FontSize="16" TextWrapping="Wrap" Margin="58,62,319,0" PreviewKeyDown="txtInput_PreviewKeyDown" Height="37" VerticalAlignment="Top" />
+        <TextBox x:Name="txtOutput" FontSize="14" TextWrapping="Wrap" Text="TextBox" Margin="58,133,79,54" />
+        <ComboBox x:Name="comboSelection" SelectedIndex="0" FontSize="18" Height="37" Margin="0,62,79,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="211" SelectionChanged="comboSelection_SelectionChanged">
+            <ComboBoxItem>ChatGPT</ComboBoxItem>
+            <ComboBoxItem>CSKG</ComboBoxItem>
+            <ComboBoxItem>ConceptNet</ComboBoxItem>
+            <ComboBoxItem>WikiData</ComboBoxItem>
+            <ComboBoxItem>Wiktionary</ComboBoxItem>
+            <ComboBoxItem>Free Dictionary</ComboBoxItem>
+            <ComboBoxItem>Webster's Elementary</ComboBoxItem>
+            <ComboBoxItem>Kid's Definition</ComboBoxItem>
+            <ComboBoxItem>Oxford Word List</ComboBoxItem>
+        </ComboBox>
+        <Button Content="Clear" Height="29" Margin="0,0,152,10" VerticalAlignment="Bottom" Click="ClearButton_Click" HorizontalAlignment="Right" Width="102"/>
+    </Grid>
+</local:ModuleBaseDlg>
