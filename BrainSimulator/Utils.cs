@@ -83,6 +83,13 @@ namespace BrainSimulator
             }
             catch { }
         }
+        public HSLColor (byte a, byte r, byte g, byte b)
+        {
+            System.Drawing.Color c1 = System.Drawing.Color.FromArgb(255, r, g, b);
+            hue = c1.GetHue();
+            saturation = c1.GetSaturation();
+            luminance = c1.GetBrightness();
+        }
         public HSLColor(Color c)
         {
             System.Drawing.Color c1 = System.Drawing.Color.FromArgb(255, c.R, c.G, c.B);

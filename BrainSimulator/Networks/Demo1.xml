@@ -6,12 +6,12 @@
       <isEnabled>true</isEnabled>
       <Label>UKS_1</Label>
       <dlgPos>
-        <X>1223.3333333333333</X>
-        <Y>133.33333333333331</Y>
+        <X>1223</X>
+        <Y>133</Y>
       </dlgPos>
       <dlgSize>
         <X>800</X>
-        <Y>841.3333333333333</Y>
+        <Y>841</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
       <UKSTemp />
@@ -23,35 +23,21 @@
       <Label>UKSStatement_1</Label>
       <dlgPos>
         <X>706</X>
-        <Y>131.33333333333331</Y>
+        <Y>131</Y>
       </dlgPos>
       <dlgSize>
         <X>530</X>
         <Y>300</Y>
       </dlgSize>
-      <dlgIsOpen>true</dlgIsOpen>
+      <dlgIsOpen>false</dlgIsOpen>
     </ModuleBase>
-    <ModuleBase xsi:type="ModuleUKSQuery">
+    <ModuleBase xsi:type="ModuleVision">
       <initialized>true</initialized>
       <isEnabled>true</isEnabled>
-      <Label>UKSQuery_1</Label>
+      <Label>Vision_1</Label>
       <dlgPos>
-        <X>705.3333333333333</X>
-        <Y>423.3333333333333</Y>
-      </dlgPos>
-      <dlgSize>
-        <X>530</X>
-        <Y>550</Y>
-      </dlgSize>
-      <dlgIsOpen>true</dlgIsOpen>
-    </ModuleBase>
-    <ModuleBase xsi:type="ModuleUKSClause">
-      <initialized>true</initialized>
-      <isEnabled>true</isEnabled>
-      <Label>UKSClause_1</Label>
-      <dlgPos>
-        <X>187.33333333333331</X>
-        <Y>129.33333333333331</Y>
+        <X>250</X>
+        <Y>250</Y>
       </dlgPos>
       <dlgSize>
         <X>530</X>
