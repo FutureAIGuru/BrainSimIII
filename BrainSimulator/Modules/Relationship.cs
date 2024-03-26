@@ -33,12 +33,16 @@ namespace BrainSimulator.Modules
         }
     }
 
-    public class ClauseType
+    /// <summary>
+    /// In the same way a Relationship relates 2 Things (the "source" and the "target") with a relationship type, a Clause relates two Relationsips 
+    /// with a clauseType. Every Relationship has a list of clauses with the Relationship representing source and the Clause containing its type and target.
+    /// </summary>
+    public class Clause
     {
         public Thing clauseType;
         public Relationship clause;
-        public ClauseType() { }
-        public ClauseType(Thing theType, Relationship clause1)
+        public Clause() { }
+        public Clause(Thing theType, Relationship clause1)
         {
             clauseType = theType;
             clause = clause1;
@@ -46,6 +50,9 @@ namespace BrainSimulator.Modules
 
     };
 
+    /// <summary>
+    /// This is used internally during query processing
+    /// </summary>
     public class QueryRelationship : Relationship
     {
         public List<Thing> typeProperties = new();
@@ -55,23 +62,28 @@ namespace BrainSimulator.Modules
         public QueryRelationship(Relationship r)
         {
             source = r.source;
-            reltype = r.reltype;
+            relType = r.relType;
             target = r.target;
-            foreach (ClauseType c in r.clauses)
-                clauses.Add(c);
+            foreach (Clause c in r.Clauses)
+                Clauses.Add(c);
         }
     }
 
-    //a relationship is a weighted link to a thing and has a type
+    /// <summary>
+    /// In the lexicon of graphs, a Relationship is an "edge".
+    /// A Relationship is a weighted link between two Things, the "source" and the "target". The Relationship has a type which is also a Thing. Various other
+    /// properties are used to track the usage of a Relationship which is used to help determine the most likely result of a query.
+    /// Each relationship also maintains a list of "Clause"s which are relationships to other Relationships. 
+    /// </summary>
     public class Relationship
     {
-        public Thing s = null;
+        private Thing s = null;
         public Thing source
         {
             get => s;
             set { s = value; }
         }
-        public Thing reltype = null;
+        private Thing reltype = null;
         public Thing relType
         {
             get { return reltype; }
@@ -80,30 +92,34 @@ namespace BrainSimulator.Modules
                 reltype = value;
             }
         }
-        public Thing target = null;
-        public Thing T
+        private Thing targ = null;
+        public Thing target
         {
-            get { hits++; lastUsed = DateTime.Now; return target; }
+            get { return targ; }
             set
             {
-                target = value;
+                targ = value;
             }
         }
 
-        public bool inferred = false;
-        public List<ClauseType> clauses = new();
-        public List<Relationship> clausesFrom = new();
+        private bool inferred = false;
+        private List<Clause> clauses = new();
+        private List<Relationship> clausesFrom = new();
 
-        public float weight = 1;
-        public int hits = 0;
-        public int misses = 0;
-        public DateTime lastUsed = DateTime.Now;
-        public DateTime created = DateTime.Now;
+        private float weight = 1;
+        private int hits = 0;
+        private int misses = 0;
+        private DateTime lastUsed = DateTime.Now;
+        private DateTime created = DateTime.Now;
 
         //TimeToLive processing for relationships
         static private List<Relationship> transientRelationships = new List<Relationship>();
         static private DispatcherTimer transientTimer;
         private TimeSpan timeToLive = TimeSpan.MaxValue;
+
+        /// <summary>
+        /// When set, makes a Relationship transient
+        /// </summary>
         public TimeSpan TimeToLive
         {
             get { return timeToLive; }
@@ -114,6 +130,14 @@ namespace BrainSimulator.Modules
                     AddToTransientList();
             }
         }
+
+        public float Weight { get => weight; set => weight = value; }
+        public int Hits { get => hits; set => hits = value; }
+        public int Misses { get => misses; set => misses = value; }
+        public DateTime LastUsed { get => lastUsed; set => lastUsed = value; }
+        public DateTime Created { get => created; set => created = value; }
+        public List<Clause> Clauses { get => clauses; set => clauses = value; }
+        public List<Relationship> ClausesFrom { get => clausesFrom; set => clausesFrom = value; }
 
         public Relationship()
         { }
@@ -127,57 +151,60 @@ namespace BrainSimulator.Modules
             return null;
         }
 
+        /// <summary>
+        /// Updates the lastUsed time to the current time
+        /// </summary>
         public void Fire()
         {
-            lastUsed = DateTime.Now;
+            LastUsed = DateTime.Now;
         }
         public Relationship(Relationship r)
         {
-            count = r.count;
-            misses = r.misses;
+            Misses = r.Misses;
             relType = r.relType;
             source = r.source;
-            weight = r.weight;
-            hits = r.hits++;
-            target = r.target;
+            Weight = r.Weight;
+            Hits = r.Hits++;
+            targ = r.targ;
             inferred = r.inferred;
-            if (r.clauses == null) clauses = new();
-            else clauses = new(r.clauses);
-            if (r.clausesFrom == null) clausesFrom = new();
-            else clausesFrom = new(r.clausesFrom);
+            if (r.Clauses == null) Clauses = new();
+            else Clauses = new(r.Clauses);
+            if (r.ClausesFrom == null) ClausesFrom = new();
+            else ClausesFrom = new(r.ClausesFrom);
         }
 
         public void ClearHits()
         {
-            hits = 0;
+            Hits = 0;
         }
         public void ClearAccessCount()
         {
-            misses = 0;
+            Misses = 0;
         }
 
-        public int count
-        {
-            get => -1;
-            set { }
-        }
 
+        /// <summary>
+        /// Adds a Clause to the Relationship
+        /// </summary>
+        /// <param name="clauseType">Thing e.g. "if", "because"... </param>
+        /// <param name="r2">The dependent clause</param>
+        /// <returns>The Relationship</returns>
         public Relationship AddClause(Thing clauseType, Relationship r2)
         {
-            ClauseType theClause = new();
+            Clause theClause = new();
 
             theClause.clause = r2;
             theClause.clauseType = clauseType;
-            if (clauses.FindFirst(x => x.clauseType == theClause.clauseType && x.clause == r2) == null)
+            if (Clauses.FindFirst(x => x.clauseType == theClause.clauseType && x.clause == r2) == null)
             {
-                clauses.Add(theClause);
-                r2.clausesFrom.Add(this);
+                Clauses.Add(theClause);
+                r2.ClausesFrom.Add(this);
             }
 
             return this;
         }
 
-        public string ToString(List<Relationship> stack)
+        private string ToString(List<Relationship> stack)
         {
             if (stack.Contains(this))
                 return "";
@@ -192,7 +219,7 @@ namespace BrainSimulator.Modules
 
             //handle Clauses
             //TODO prevent general circular reference stack overflow
-            foreach (ClauseType c in clauses)
+            foreach (Clause c in Clauses)
                     allModifierString += c.clauseType.Label + " " + c.clause.ToString(stack)+" ";
 
             if (allModifierString != "")
@@ -201,6 +228,11 @@ namespace BrainSimulator.Modules
             return retVal;
         }
 
+
+        /// <summary>
+        /// Formats a string representing the Relationship (and its clauses)
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             string retVal = this.ToString(new List<Relationship>());
@@ -210,35 +242,28 @@ namespace BrainSimulator.Modules
         private string BasicRelationshipToString(string retVal, string sourceModifierString, string typeModifierString, string targetModifierString)
         {
             if (!string.IsNullOrEmpty(source?.Label))
-                retVal += TrimDigits(source?.Label) + sourceModifierString;
+                retVal += source?.Label + sourceModifierString;
             if (!string.IsNullOrEmpty(relType?.Label))
                 retVal += ((retVal == "") ? "" : "->") + relType?.Label + ThingProperties(relType) + typeModifierString;
-            if (!string.IsNullOrEmpty(target?.Label))
-                retVal += ((retVal == "") ? "" : "->") + target?.Label + ThingProperties(target) + string.Join(", ", targetModifierString);
+            if (!string.IsNullOrEmpty(targ?.Label))
+                retVal += ((retVal == "") ? "" : "->") + targ?.Label + ThingProperties(targ) + string.Join(", ", targetModifierString);
             else if (targetModifierString.Length > 0)
                 retVal += targetModifierString;
             return retVal;
         }
 
-        public static string TrimDigits(string s)
-        {
-            if (s is null) return null;
-            while (s.Length > 0 && char.IsDigit(s[s.Length - 1]))
-                s = s.Substring(0, s.Length - 1);
-            return s;
-        }
         string ThingProperties(Thing t)
         {
             string retVal = null;
             foreach (Relationship r in t.Relationships)
             {
                 if (r.reltype == Thing.HasChild) continue;
-                if (t.Label.Contains("." + r.target?.Label)) continue;
+                if (t.Label.Contains("." + r.targ?.Label)) continue;
                 if (r.relType?.Label == "is")
                 {
                     if (retVal == null) retVal += "(";
                     else retVal += ", ";
-                    retVal += r.target?.Label;
+                    retVal += r.targ?.Label;
                 }
             }
             if (retVal != null)
@@ -246,19 +271,13 @@ namespace BrainSimulator.Modules
             return retVal;
         }
 
-        public override bool Equals(Object o)
-        {
-            if (o is Relationship r)     
-                return r == this;
-            return false;
-        }
         public static bool operator ==(Relationship a, Relationship b)
         {
             if (a is null && b is null)
                 return true;
             if (a is null || b is null)
                 return false;
-            if (a.target == b.target && a.source == b.source && a.relType == b.relType)
+            if (a.targ == b.targ && a.source == b.source && a.relType == b.relType)
                 return true;
             return false;
         }
@@ -268,26 +287,8 @@ namespace BrainSimulator.Modules
                 return false;
             if (a is null || b is null)
                 return true;
-            if (a.T == b.T && a.source == b.source && a.relType == b.relType) return false;
+            if (a.target == b.target && a.source == b.source && a.relType == b.relType) return false;
             return true;
-        }
-
-
-        public float Value
-        {
-            get
-            {
-                //need a way to track how confident we should be
-                float retVal = weight;
-                if (hits != 0 && misses != 0)
-                {
-                    //replace with more robust algorithm
-                    float denom = misses;
-                    if (denom == 0) denom = .1f;
-                    retVal = hits / denom;
-                }
-                return retVal;
-            }
         }
 
 
@@ -314,13 +315,13 @@ namespace BrainSimulator.Modules
             {
                 Relationship r = transientRelationships[i];
                 //check to see if the relationship has expired
-                if (r.timeToLive != TimeSpan.MaxValue && r.lastUsed + r.timeToLive < DateTime.Now)
+                if (r.timeToLive != TimeSpan.MaxValue && r.LastUsed + r.timeToLive < DateTime.Now)
                 {
                     r.source.RemoveRelationship(r);
                     //if this leaves an orphan thing, delete the thing
-                    if (r.reltype.Label == "has-child" && r.target?.Parents.Count == 0)
+                    if (r.reltype.Label == "has-child" && r.targ?.Parents.Count == 0)
                     {
-                        r.target.AddParent(ThingLabels.GetThing("unknownObject"));
+                        r.targ.AddParent(ThingLabels.GetThing("unknownObject"));
                     }
                     transientRelationships.Remove(r);
                 }
@@ -331,7 +332,7 @@ namespace BrainSimulator.Modules
     }
 
     //this is a non-pointer representation of a relationship needed for XML storage
-    public class SClauseType
+    public class SClause
     {
         public int clauseType = -1;
         public SRelationship r;
@@ -346,7 +347,7 @@ namespace BrainSimulator.Modules
         public float weight = 0;
         public int relationshipType = -1;
         public int count = -1;
-        public List<SClauseType> clauses = new();
+        public List<SClause> clauses = new();
     }
 
 }

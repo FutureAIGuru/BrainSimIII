@@ -11,16 +11,34 @@ using System.Linq;
 
 namespace BrainSimulator.Modules
 {
-    //a thing is anything, physical object, attribute, word, action, etc.
+    /// <summary>
+    /// In the lexicon of graphs, a Thing is a "node".  A Thing can represent anything, physical object, attribute, word, action, etc.
+    /// </summary>
     public partial class Thing
     {
         private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
         private List<Relationship> relationshipsFrom = new List<Relationship>(); //synapses from
         private List<Relationship> relationshipsAsType = new List<Relationship>(); //nodes which use this as a relationshipType
+        /// <summary>
+        /// Only used by the tree control
+        /// </summary>
         public IList<Relationship> RelationshipsNoCount { get { lock (relationships) { return new List<Relationship>(relationships.AsReadOnly()); } } }
+        /// <summary>
+        /// Get an "unsafe" writeable list of a Thing's Relationships.
+        /// This list may change while it is in use and so should not be used as a foreach iterator
+        /// </summary>
         public List<Relationship> RelationshipsWriteable { get => relationships; }
+        /// <summary>
+        /// Get a "safe" list of relationships which target this Thing
+        /// </summary>
         public IList<Relationship> RelationshipsFrom { get { lock (relationshipsFrom) { return new List<Relationship>(relationshipsFrom.AsReadOnly()); } } }
+        /// <summary>
+        /// Get an "unsafe" writeable list of Relationships which target this Thing
+        /// </summary>
         public List<Relationship> RelationshipsFromWriteable { get => relationshipsFrom; }
+        /// <summary>
+        /// Get an "unsafe" writeable list of Relationships for which this Thing is the relationship type
+        /// </summary>
         public List<Relationship> RelationshipsAsTypeWriteable { get => relationshipsAsType; }
 
         private string label = "";
@@ -28,6 +46,9 @@ namespace BrainSimulator.Modules
         public int useCount = 0;
         public DateTime lastFiredTime = new();
         
+        /// <summary>
+        /// Any serializable object can be attached to a Thing
+        /// </summary>
         public object V
         {
             get => value;
@@ -40,12 +61,21 @@ namespace BrainSimulator.Modules
         }
 
 
-        //even with no references, don't delete ToString  because the debugger uses it
+        /// <summary>
+        /// Returns a Thing's label
+        /// don't delete this ToString because the debugger uses it when mousing over a Thing
+        /// </summary>
+        /// <returns>the Thing's label</returns>
         public override string ToString()
         {
             string retVal = label;
             return retVal;
         }
+        /// <summary>
+        /// Formats a displayable Thing as a string
+        /// </summary>
+        /// <param name="showProperties">Appends a parenthetical list of relationships to the label</param>
+        /// <returns>The string to display</returns>
         public string ToString(bool showProperties = false)
         {
             string retVal = label;// + ": " + useCount;
@@ -53,12 +83,15 @@ namespace BrainSimulator.Modules
             {
                 retVal += " {";
                 foreach (Relationship l in Relationships)
-                    retVal += l.T?.label + ",";
+                    retVal += l.target?.label + ",";
                 retVal += "}";
             }
             return retVal;
         }
 
+        /// <summary>
+        /// Manages a Thing's label and maintais a hash table
+        /// </summary>
         public string Label
         {
             get => label;
@@ -101,10 +134,19 @@ namespace BrainSimulator.Modules
         }
 
 
+        /// <summary>
+        /// "Safe" list of direct ancestors
+        /// </summary>
         public IList<Thing> Parents { get => RelationshipsOfType(HasChild, true); }
 
+        /// <summary>
+        /// "Safe" list of direct descendants
+        /// </summary>
         public IList<Thing> Children { get => RelationshipsOfType(HasChild, false); }
 
+        /// <summary>
+        /// Full "Safe" list or relationships
+        /// </summary>
         public IList<Relationship> Relationships
         {
             get
@@ -112,7 +154,7 @@ namespace BrainSimulator.Modules
                 lock (relationships)
                 {
                     foreach (Relationship r in relationships)
-                        r.misses++;
+                        r.Misses++;
                     return new List<Relationship>(relationships.AsReadOnly());
                 }
             }
@@ -126,6 +168,9 @@ namespace BrainSimulator.Modules
             return FollowTransitiveRelationships(hasChildType, true);
         }
 
+        /// <summary>
+        /// Recursively gets all the ancestors of a Thing
+        /// </summary>
         public IEnumerable<Thing> Ancestors
         {
             get
@@ -160,7 +205,9 @@ namespace BrainSimulator.Modules
             return FollowTransitiveRelationships(hasChildType, false);
         }
 
-        //recursively gets all descendents
+        /// <summary>
+        /// Rrecursively gets all descendents of a Thing. Use with caution as this might be a large list
+        /// </summary>
         public IEnumerable<Thing> Descendents
         {
             get
@@ -188,7 +235,7 @@ namespace BrainSimulator.Modules
                 foreach (Relationship r in relationshipsToFollow)
                 {
                     Thing thingToAdd = followUpwards ? r.source : r.target;
-                    if (r.reltype == relType)
+                    if (r.relType == relType)
                     {
                         if (!retVal.Contains(thingToAdd))
                             retVal.Add(thingToAdd);
@@ -236,7 +283,7 @@ namespace BrainSimulator.Modules
             {
                 relType = relationshipType,
                 source = this,
-                T = target,
+                target = target,
             };
             if (target != null)
             {
@@ -266,24 +313,36 @@ namespace BrainSimulator.Modules
         {
             foreach (Relationship r in relationships)
             {
-                if (r.source == this && r.target == target && r.reltype == relationshipType)
+                if (r.source == this && r.target == target && r.relType == relationshipType)
                     return r;
             }
             return null;
+        }
+        public Relationship HasRelationship(Thing t)
+        {
+            foreach (Relationship r in Relationships)
+                if (r.target == t) return r;
+            return null;
+        }
+
+        public void RemoveRelationship(Thing t2, Thing relationshipType)
+        {
+            Relationship r = new() { source = this, relType = relationshipType, target = t2 };
+            RemoveRelationship(r);
         }
 
         public void RemoveRelationship(Relationship r)
         {
             if (r == null) return;
-            if (r.reltype == null) return;
+            if (r.relType == null) return;
             if (r.source == null)
             {
                 lock (r.relType.RelationshipsFromWriteable)
                 {
                     lock (r.target.RelationshipsFromWriteable)
                     {
-                        r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
-                        r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
+                        r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.relType == r.relType && x.target == r.target);
+                        r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.relType == r.relType && x.target == r.target);
                     }
                 }
             }
@@ -293,8 +352,8 @@ namespace BrainSimulator.Modules
                 {
                     lock (r.relType.RelationshipsFromWriteable)
                     {
-                        r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
-                        r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
+                        r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.relType == r.relType && x.target == r.target);
+                        r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.relType == r.relType && x.target == r.target);
                     }
                 }
             }
@@ -306,28 +365,21 @@ namespace BrainSimulator.Modules
                     {
                         lock (r.target.RelationshipsFromWriteable)
                         {
-                            r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
-                            r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
-                            r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
+                            r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.relType == r.relType && x.target == r.target);
+                            r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.relType == r.relType && x.target == r.target);
+                            r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.relType == r.relType && x.target == r.target);
                         }
                     }
                 }
             }
-            foreach (ClauseType c in r.clauses)
+            foreach (Clause c in r.Clauses)
                 RemoveRelationship(c.clause);
-        }
-
-        public Relationship HasRelationship(Thing t)
-        {
-            foreach (Relationship r in Relationships)
-                if (r.target == t) return r;
-            return null;
         }
 
         public Thing HasRelationshipWithParent(Thing t)
         {
             foreach (Relationship L in Relationships)
-                if (L.T.Parents.Contains(t)) return L.T;
+                if (L.target.Parents.Contains(t)) return L.target;
             return null;
         }
 
@@ -335,51 +387,13 @@ namespace BrainSimulator.Modules
         {
             foreach (Relationship L in Relationships)
             {
-                if (L.T != null)
+                if (L.target != null)
                 {
-                    Thing t = L.T.AncestorList().FindFirst(x => x.Label == s);
-                    if (t != null) return L.T;
+                    Thing t = L.target.AncestorList().FindFirst(x => x.Label == s);
+                    if (t != null) return L.target;
                 }
             }
             return null;
-        }
-
-
-        public void RemoveRelationship(Thing t2, Thing relationshipType)
-        {
-            Relationship r = new() { source = this, reltype = relationshipType, target = t2 };
-            RemoveRelationship(r);
-        }
-
-
-        //returns all the matching refrences
-        public List<Relationship> GetRelationshipsWithAncestor(Thing t)
-        {
-            List<Relationship> retVal = new List<Relationship>();
-            lock (relationships)
-            {
-                for (int i = 0; i < Relationships.Count; i++)
-                {
-                    if (Relationships[i].T.HasAncestor(t))
-                    {
-                        retVal.Add(Relationships[i]);
-                    }
-                }
-                return retVal.OrderBy(x => -x.Value).ToList();
-            }
-        }
-
-        public List<Relationship> GetRelationshipByWithAncestor(Thing t)
-        {
-            List<Relationship> retVal = new List<Relationship>();
-            for (int i = 0; i < relationshipsFrom.Count; i++)
-            {
-                if (relationshipsFrom[i].source.HasAncestor(t))
-                {
-                    retVal.Add(relationshipsFrom[i]);
-                }
-            }
-            return retVal.OrderBy(x => -x.Value).ToList();
         }
 
         public void AddParent(Thing newParent)
@@ -390,28 +404,28 @@ namespace BrainSimulator.Modules
                 newParent.AddRelationship(this, HasChild);
             }
         }
-
-        public void RemoveParent(Thing t)
-        {
-            Relationship r = new() { source = t, reltype = hasChildType, target = this };
-            t.RemoveRelationship(r);
-        }
-
         public Relationship AddChild(Thing t)
         {
             return AddRelationship(t, HasChild);
         }
 
+
+        public void RemoveParent(Thing t)
+        {
+            Relationship r = new() { source = t,relType = hasChildType, target = this };
+            t.RemoveRelationship(r);
+        }
+
         public void RemoveChild(Thing t)
         {
-            Relationship r = new() { source = this, reltype = hasChildType, target = t };
+            Relationship r = new() { source = this, relType = hasChildType, target = t };
             RemoveRelationship(r);
         }
 
         public bool HasPropertyLabeled(string label)
         {
             foreach (Relationship r in relationships)
-                if (r.reltype.Label.ToLower() == "hasproperty" && r.target.Label.ToLower() == label.ToLower())
+                if (r.relType.Label.ToLower() == "hasproperty" && r.target.Label.ToLower() == label.ToLower())
                     return true;
             foreach (Thing t in Parents)
             {
