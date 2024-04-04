@@ -36,14 +36,16 @@
       <isEnabled>true</isEnabled>
       <Label>Vision_1</Label>
       <dlgPos>
-        <X>250</X>
-        <Y>250</Y>
+        <X>142</X>
+        <Y>172</Y>
       </dlgPos>
       <dlgSize>
-        <X>530</X>
-        <Y>500</Y>
+        <X>1024</X>
+        <Y>1050</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
+      <currentFilePath>C:\Users\c_sim\Documents\BrainSim\Images\A1.png</currentFilePath>
+      <previousFilePath>C:\Users\c_sim\Documents\BrainSim\Images\A1.png</previousFilePath>
     </ModuleBase>
   </modules>
 </BrainSim3Data>

@@ -11,12 +11,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 
 using System.Windows.Shapes;
-using System.Windows.Ink;
 
 namespace BrainSimulator.Modules
 {
@@ -35,27 +32,117 @@ namespace BrainSimulator.Modules
 
             ModuleVision parent = (ModuleVision)base.ParentModule;
 
-            imageDisplay.Source =  (ImageSource)parent.bitmap;
+            if (parent.bitmap == null) return false;
+            labelProperties.Content = "Image: " + Math.Round(parent.bitmap.Width) + "x" + Math.Round(parent.bitmap.Height) +
+                "\r\nBit Depth: " + parent.bitmap.Format.BitsPerPixel +
+                "\r\nSegments: " + parent.segments.Count +
+                "\r\nCorners: " + parent.corners.Count;
+
 
             theCanvas.Children.Clear();
 
-            if (parent.boundaryArray != null) 
+            int pixelSize = 6;
+            int scale = (int)(theCanvas.ActualHeight / parent.boundaryArray.GetLength(1));
+
+            if (cbShowImage.IsChecked == true && parent.bitmap != null)
             {
-                float scale = (float) (theCanvas.ActualWidth/ parent.boundaryArray.GetLength(0));
+                //TODO: images with bit depth < 32 display at slightly wrong scale
+                Image i = new Image
+                {
+                    Height = parent.bitmap.Height * scale,
+                    Width = parent.bitmap.Width * scale,
+                    Source = (ImageSource)parent.bitmap,
+                };
+                Canvas.SetLeft(i, 0);
+                Canvas.SetTop(i, 0);
+                theCanvas.Children.Add(i);
+            }
+
+            if (cbShowBoundaries.IsChecked == true && parent.boundaryArray != null)
+            {
                 for (int x = 0; x < parent.boundaryArray.GetLength(0); x++)
                     for (int y = 0; y < parent.boundaryArray.GetLength(1); y++)
                     {
-                        if (parent.boundaryArray[x,y] != 0)
+                        if (parent.boundaryArray[x, y] != 0)
                         {
-                            Ellipse e = new Ellipse() {
-                                Height = 3, Width = 3,
-                             Stroke = Brushes.Black,
-                         };
-                            Canvas.SetTop(e,y * scale);
-                            Canvas.SetLeft(e,x * scale);
+                            Ellipse e = new Ellipse()
+                            {
+                                Height = pixelSize,
+                                Width = pixelSize,
+                                Stroke = Brushes.Black,
+                                Fill = Brushes.Black,
+                                ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y})" },
+                            };
+                            Canvas.SetLeft(e, x * scale - pixelSize / 2);
+                            Canvas.SetTop(e, y * scale - pixelSize / 2);
                             theCanvas.Children.Add(e);
                         }
                     }
+            }
+            if (cbShowSegments.IsChecked == true && parent.segments != null & parent.segments.Count > 0)
+            {
+                foreach (var segment in parent.segments)
+                {
+                    {
+                        Line l = new Line()
+                        {
+                            X1 = segment.P1.X * scale,
+                            X2 = segment.P2.X * scale,
+                            Y1 = segment.P1.Y * scale,
+                            Y2 = segment.P2.Y * scale,
+                            Stroke = Brushes.Red,
+                        };
+                        theCanvas.Children.Add(l);
+                    }
+                }
+            }
+            if (cbShowPixels.IsChecked == true && parent.imageArray != null)
+            {
+                for (int x = 0; x < parent.imageArray.GetLength(0); x++)
+                    for (int y = 0; y < parent.imageArray.GetLength(1); y++)
+                    {
+                        {
+                            var pixel = new HSLColor( parent.imageArray[x, y]);
+
+                            if (pixel != null)
+                            {
+                                pixel.luminance /= 2;
+                                SolidColorBrush b = new SolidColorBrush(pixel.ToColor());
+                                Ellipse e = new Ellipse()
+                                {
+                                    Height = pixelSize,
+                                    Width = pixelSize,
+                                    Stroke = b,
+                                    ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y})" },
+                                };
+                                Canvas.SetLeft(e, x * scale - pixelSize / 2);
+                                Canvas.SetTop(e, y * scale - pixelSize / 2);
+                                theCanvas.Children.Add(e);
+                            }
+                        }
+                    }
+            }
+
+
+            if (cbShowCorners.IsChecked == true && parent.corners != null && parent.corners.Count > 0)
+            {
+                foreach (var corner in parent.corners)
+                {
+                    float size = 15;
+                    Brush b = Brushes.White;
+                    if (corner.angle == 0)
+                        b = Brushes.Pink;
+                    Ellipse e = new Ellipse()
+                    {
+                        Height = size,
+                        Width = size,
+                        Stroke = b,
+                        Fill = b
+                    };
+                    Canvas.SetTop(e, corner.location.Y * scale - size / 2);
+                    Canvas.SetLeft(e, corner.location.X * scale - size / 2);
+                    theCanvas.Children.Add(e);
+                }
             }
 
             return true;
@@ -104,13 +191,24 @@ namespace BrainSimulator.Modules
         private List<string> GetFileList(string filePath)
         {
             SearchOption subFolder = SearchOption.AllDirectories;
-            if (!(bool)cbSubFolders.IsChecked)
-                subFolder = SearchOption.TopDirectoryOnly;
+            //if (!(bool)cbSubFolders.IsChecked)
+            //    subFolder = SearchOption.TopDirectoryOnly;
             string dir = filePath;
             FileAttributes attr = File.GetAttributes(filePath);
             if ((attr & FileAttributes.Directory) != FileAttributes.Directory)
                 dir = System.IO.Path.GetDirectoryName(filePath);
             return new List<string>(Directory.EnumerateFiles(dir, "*.png", subFolder));
+        }
+
+        private void cb_Checked(object sender, RoutedEventArgs e)
+        {
+            Draw(false);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ModuleVision parent = (ModuleVision)base.ParentModule;
+            parent.previousFilePath = "";
         }
     }
 }

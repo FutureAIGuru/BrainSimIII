@@ -84,7 +84,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         if (thing is not null)
         {
             totalItemCount = 0;
-            TreeViewItem tvi = new() { Header = thing.Label };
+            TreeViewItem tvi = new() { Header = thing.ToString()};
             tvi.ContextMenu = GetContextMenu(thing);
             tvi.IsExpanded = true; //always expand the top-level item
             theTreeView.Items.Add(tvi);
@@ -132,7 +132,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             Thing child = r.target;
             int descCount = child.GetDescendentsCount();
             string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
-            string header = child.Label;
+            string header = child.ToString();
             if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 
             if (r.weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
                 header = "<" + r.weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.lastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
