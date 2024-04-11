@@ -16,7 +16,6 @@ using System.Windows.Input;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media.Media3D;
-using System.Diagnostics;
 using System.IO;
 using System.Windows.Navigation;
 using System.Net.Http.Headers;

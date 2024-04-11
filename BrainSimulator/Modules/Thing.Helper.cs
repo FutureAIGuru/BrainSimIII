@@ -6,7 +6,6 @@
 
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using Newtonsoft.Json.Serialization;
 
 namespace BrainSimulator.Modules
 {
