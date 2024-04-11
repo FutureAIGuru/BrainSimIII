@@ -111,8 +111,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void AddChildren(Thing t, TreeViewItem tvi, int depth, string parentLabel)
     {
         if (totalItemCount > 3000) return;
-        if (t.Label == "dog")
-        { }
 
         List<Relationship> theChildren = new();
         foreach (Relationship r in t.Relationships)
