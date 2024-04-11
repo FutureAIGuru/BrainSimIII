@@ -33,8 +33,10 @@ namespace BrainSimulator.Modules
             get => value;
             set
             {
-                if (value is not null && !value.GetType().IsSerializable)
-                    throw new ArgumentException("Cannot set nonserializable value");
+                //Object x = value;
+                //var v = x.GetType();
+                //if (value is not null && !value.GetType().IsSerializable)
+                //    throw new ArgumentException("Cannot set nonserializable value");
                 this.value = value;
             }
         }
@@ -44,11 +46,15 @@ namespace BrainSimulator.Modules
         public override string ToString()
         {
             string retVal = label;
+            if (V != null)
+                retVal += " V: " + V.ToString();
             return retVal;
         }
         public string ToString(bool showProperties = false)
         {
             string retVal = label;// + ": " + useCount;
+            if (V != null)
+                retVal += " V: " + V.ToString();
             if (Relationships.Count > 0 && showProperties)
             {
                 retVal += " {";

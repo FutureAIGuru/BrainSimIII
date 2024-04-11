@@ -199,13 +199,6 @@ namespace BrainSimulator.Modules
                 dlg.Height = dlgSize.Y;
             }
 
-            // if (mainWindow.ActualWidth > 800) //try to keep dialogs on the screen
-            // {
-            //     if (dlg.Width + dlg.Left > mainWindow.ActualWidth)
-            //         dlg.Left = mainWindow.ActualWidth - dlg.Width;
-            //     if (dlg.Height + dlg.Top > mainWindow.ActualHeight)
-            //         dlg.Top = mainWindow.ActualHeight - dlg.Height;
-            //}
 
 
 #if !DEBUG
