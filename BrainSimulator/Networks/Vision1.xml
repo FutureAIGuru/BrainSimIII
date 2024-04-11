@@ -29,35 +29,23 @@
         <X>530</X>
         <Y>300</Y>
       </dlgSize>
-      <dlgIsOpen>true</dlgIsOpen>
+      <dlgIsOpen>false</dlgIsOpen>
     </ModuleBase>
-    <ModuleBase xsi:type="ModuleUKSQuery">
+    <ModuleBase xsi:type="ModuleVision">
       <initialized>true</initialized>
       <isEnabled>true</isEnabled>
-      <Label>UKSQuery_1</Label>
+      <Label>Vision_1</Label>
       <dlgPos>
-        <X>704</X>
-        <Y>440</Y>
+        <X>142</X>
+        <Y>172</Y>
       </dlgPos>
       <dlgSize>
-        <X>530</X>
-        <Y>550</Y>
+        <X>1024</X>
+        <Y>1050</Y>
       </dlgSize>
       <dlgIsOpen>true</dlgIsOpen>
-    </ModuleBase>
-    <ModuleBase xsi:type="ModuleUKSClause">
-      <initialized>true</initialized>
-      <isEnabled>true</isEnabled>
-      <Label>UKSClause_1</Label>
-      <dlgPos>
-        <X>168</X>
-        <Y>213</Y>
-      </dlgPos>
-      <dlgSize>
-        <X>530</X>
-        <Y>500</Y>
-      </dlgSize>
-      <dlgIsOpen>true</dlgIsOpen>
+      <currentFilePath>C:\Users\c_sim\Documents\BrainSim\Images\A1.png</currentFilePath>
+      <previousFilePath>C:\Users\c_sim\Documents\BrainSim\Images\A1.png</previousFilePath>
     </ModuleBase>
   </modules>
 </BrainSim3Data>

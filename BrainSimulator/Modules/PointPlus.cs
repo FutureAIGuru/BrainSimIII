@@ -154,10 +154,6 @@ namespace BrainSimulator.Modules
             }
             return false;
         }
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
     }
 
     // this is an extension of a 3D position point which allows access via both polar and cartesian coordinates
@@ -440,7 +436,18 @@ namespace BrainSimulator.Modules
         public ColorInt theColor;
 
         public Segment() { }
+        public override string ToString()
+        {
+            string retVal = $"Length: {(int)Length} ({(int)P1.X},{(int)P1.Y}) : ({(int)P2.X},{(int)P2.Y}) A: {Angle}";
+            return retVal;
+        }
 
+        public Segment(PointPlus P1i, PointPlus P2i)
+        {
+            P1 = P1i;
+            P2 = P2i;
+            theColor = 0xffffff;
+        }
         public Segment(PointPlus P1i, PointPlus P2i, ColorInt theColori)
         {
             P1 = P1i;
@@ -532,10 +539,6 @@ namespace BrainSimulator.Modules
         {
             get { return theAngle * 180 / (float)PI; }
             set { theAngle = (float)(value * PI / 180.0); }
-        }
-        public float ToDegrees()
-        {
-            return theAngle * 180 / (float)PI;
         }
         public static Angle FromDegrees(float degrees)
         {
