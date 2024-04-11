@@ -5,15 +5,12 @@
 //
 
 using BrainSimulator.Modules.Vision;
-using NAudio.Dmo.Effect;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
+using System.Diagnostics;
 using static System.Math;
 
 namespace BrainSimulator.Modules
@@ -34,14 +31,16 @@ namespace BrainSimulator.Modules
         public List<Segment> segments;
         [XmlIgnore]
         public HSLColor[,] imageArray;
-        HoughTransform segmentFinder;
+        [XmlIgnore]
+        public HoughTransform segmentFinder;
         public class Corner
         {
             public PointPlus location;
             public Angle angle;
+            public Angle orientation;
             public override string ToString()
             {
-                return $" ({(int)Round(location.X)},{(int)Round(location.Y)}) {angle}";
+                return $" ({(int)Round(location.X)},{(int)Round(location.Y)}) A: {angle}";// O: {orientation}";
             }
         }
 
@@ -72,9 +71,17 @@ namespace BrainSimulator.Modules
             catch (Exception ex)
             {
                 // Handle exceptions such as file not found or invalid file format
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                Debug.WriteLine($"An error occurred: {ex.Message}");
                 return;
             }
+
+
+            if (bitmap.Width > 200 || bitmap.Height > 200)
+            {
+                Debug.WriteLine($"Image too large for current implementation");
+                return;
+            }
+
 
             HSLColor[,] imageArray;
             imageArray = GetImageArrayFromBitmapImage();
@@ -95,6 +102,130 @@ namespace BrainSimulator.Modules
 
         }
 
+        private HSLColor[,] GetImageArrayFromBitmapImage()
+        {
+            imageArray = new HSLColor[(int)bitmap.Width, (int)bitmap.Height];
+            int stride = (bitmap.PixelWidth * bitmap.Format.BitsPerPixel + 7) / 8;
+            byte[] pixelBuffer = new byte[stride * bitmap.PixelHeight];
+            bitmap.CopyPixels(pixelBuffer, stride, 0);
+            for (int i = 0; i < imageArray.GetLength(0); i++)
+            {
+                for (int j = 0; j < imageArray.GetLength(1); j++)
+                {
+                    //upper for jpeg, lower for png
+                    int index = j * stride + i * 4; // Assuming 32 bits per pixel (4 bytes: BGRA)
+                    if (bitmap.Format.BitsPerPixel == 8)
+                        index = j * stride * 3 + i * 3;
+
+                    if (bitmap.Format.BitsPerPixel != 8 && index < pixelBuffer.Length - 3)
+                    {
+                        byte blue = pixelBuffer[index];
+                        byte green = pixelBuffer[index + 1];
+                        byte red = pixelBuffer[index + 2];
+                        byte alpha = pixelBuffer[index + 3];
+                        HSLColor pixelColor = new HSLColor(1, red, green, blue);
+                        imageArray[i, j] = pixelColor;
+                    }
+                    else
+                    {
+                        var c = bitmap.Palette.Colors[pixelBuffer[index]];
+                        byte blue = c.B;
+                        byte red = c.R;
+                        byte green = c.G;
+                        HSLColor pixelColor = new HSLColor(1, red, green, blue);
+                        imageArray[i, j] = pixelColor;
+
+                    }
+                }
+            }
+
+            return imageArray;
+        }
+
+        private float[,] FindBoundaries(HSLColor[,] imageArray)
+        {
+            float[,] boundaryArray = new float[imageArray.GetLength(0), imageArray.GetLength(1)];
+
+            float dx = 1;
+            float dy = 0;
+            int sx = 0; int sy = 0;
+            for (sy = 0; sy < imageArray.GetLength(1); sy++)
+            {
+                int[] bRay = new int[imageArray.GetLength(0)];
+                var rayThruImage = LineThroughArray(dx, dy, sx, sy, imageArray);
+                FindBoundariesInRay(bRay, rayThruImage);
+                for (int i = 0; i < bRay.GetLength(0); i++)
+                {
+                    boundaryArray[i, sy] = bRay[i];
+                }
+            }
+            dx = 0;
+            dy = 1;
+            sy = 0;
+            for (sx = 0; sx < imageArray.GetLength(1); sx++)
+            {
+                int[] bRay = new int[imageArray.GetLength(1)];
+                var rayThruImage = LineThroughArray(dx, dy, sx, sy, imageArray);
+                FindBoundariesInRay(bRay, rayThruImage);
+                for (int i = 0; i < bRay.GetLength(0); i++)
+                {
+                    if (boundaryArray[sx, i] != 1)
+                        boundaryArray[sx, i] = bRay[i];
+                }
+            }
+            return boundaryArray;
+        }
+
+        private void FindBoundariesInRay(int[] bRay, List<HSLColor> rayThruImage)
+        {
+            //todo: filter out noisy areas in the ray
+            //todo: handle boundaries which fade over a few pixels
+            for (int i = 0; i < rayThruImage.Count - 1; i++)
+            {
+                float diff = PixelDifference(rayThruImage[i], rayThruImage[i + 1]);
+                if (diff > 0.4)
+                    bRay[i] = 1;
+            }
+            //combine/remove nearby boundary points
+            for (int i = 0; i < bRay.GetLength(0) - 3; i++)
+            {
+                if (bRay[i] == 1 && bRay[i + 1] == 1)
+                    bRay[i] = 0;
+                else if (bRay[i] == 1 && bRay[i + 2] == 1)
+                {
+                    bRay[i] = 0;
+                    bRay[i + 1] = 1;
+                    bRay[i + 2] = 0;
+                }
+            }
+        }
+
+        List<HSLColor> LineThroughArray(float dx, float dy, int startX, int startY, HSLColor[,] imageArray)
+        {
+            List<HSLColor> retVal = new();
+            float x = startX; float y = startY;
+
+            while (x < imageArray.GetLength(0) && y < imageArray.GetLength(1))
+            {
+                HSLColor c = imageArray[(int)x, (int)y];
+                if (c != null)
+                    retVal.Add(c);
+                x += dx;
+                y += dy;
+            }
+            return retVal;
+        }
+
+        float PixelDifference(HSLColor c1, HSLColor c2)
+        {
+            float hueWeight = .2f;
+            float satWeight = .2f;
+            float lumWeight = 1.0f;
+            float retVal = Abs(c1.hue - c2.hue) * hueWeight + Abs(c1.saturation - c2.saturation) * satWeight +
+                Abs(c1.luminance - c2.luminance) * lumWeight;
+            return retVal;
+        }
+
         private void FindCorners(List<Segment> segmentsIn)
         {
             //first lengthen the segments
@@ -108,6 +239,7 @@ namespace BrainSimulator.Modules
                 while (boundaryArray[(int)Round(segment.P1.X), (int)Round(segment.P1.Y)] > .1)
                 {
                     PointPlus p = Utils.ExtendSegment(segment.P1, segment.P2, 1, true);
+                    if (p.X < 0 || p.Y < 0 || Round(p.X) >= boundaryArray.GetLength(0) || Round(p.Y) >= boundaryArray.GetLength(1)) break;
                     if (boundaryArray[(int)Round(p.X), (int)Round(p.Y)] > .1)
                         segment.P1 = p;
                     else
@@ -116,6 +248,7 @@ namespace BrainSimulator.Modules
                 while (boundaryArray[(int)Round(segment.P2.X), (int)Round(segment.P2.Y)] > .1)
                 {
                     PointPlus p = Utils.ExtendSegment(segment.P1, segment.P2, 1, false);
+                    if (p.X < 0 || p.Y < 0 || Round(p.X) >= boundaryArray.GetLength(0) || Round(p.Y) >= boundaryArray.GetLength(1)) break;
                     if (boundaryArray[(int)Round(p.X), (int)Round(p.Y)] > .1)
                         segment.P2 = p;
                     else
@@ -142,18 +275,24 @@ namespace BrainSimulator.Modules
                     Segment s2 = segments[j];
                     if (Utils.FindIntersection(s1, s2, out PointPlus intersection, out Angle angle))
                     {
+                        //ignore angles whih are nearly straight
                         //if the segments are short, the angle between them must be larger
                         Angle minAngle = new Angle();
                         minAngle.Degrees = 10;
                         if (s1.Length < 20 || s2.Length < 20) minAngle.Degrees = 20;
 
+
                         if (Abs(angle.Degrees) > minAngle.Degrees && 180 - Abs(angle.Degrees) > minAngle.Degrees)
                         {
-                            Corner alreadyInList = corners.FindFirst(x => Abs(x.location.X - intersection.X) < 4 &&
-                                Abs(x.location.Y - intersection.Y) < 4);
+                            Angle cornerOrientation = ((s1.Angle - s2.Angle) > 0) ? s1.Angle : s2.Angle + (s1.Angle + s2.Angle) / 2;
+
+                            Corner alreadyInList = corners.FindFirst(x =>
+                                Abs(x.location.X - intersection.X) < 4 &&
+                                Abs(x.location.Y - intersection.Y) < 4 &&
+                                Abs(x.orientation - cornerOrientation) > 15);
                             if (alreadyInList == null)
                             {
-                                corners.Add(new Corner { location = intersection, angle = angle, });
+                                corners.Add(new Corner { location = intersection, angle = Abs(angle), orientation = cornerOrientation });
                             }
                         }
                     }
@@ -214,29 +353,38 @@ namespace BrainSimulator.Modules
             UKS.DeleteAllChildren(tCorners);
 
             if (corners.Count == 0) return;
+
+            //for convenience in debugging
             corners = corners.OrderBy(x => x.location.X).OrderBy(x => x.location.Y).ToList();
-            Corner currCorner = corners[0];
-            outline.Add(currCorner);
-            bool done = false;
-            while (!done)
-            {
-                //find the next corner which is connected by a boundary which is not already in the outline
-                foreach (Corner corner in corners)
-                {
-                    if (outline.Contains(corner)) continue;
-                    float dist = (currCorner.location - corner.location).R;
-                    float weight = segmentFinder.SegmentWeight(
-                        new Segment { P1 = corner.location, P2 = currCorner.location, });
-                    if (weight > dist /32)
-                    {
-                        currCorner = corner;
-                        outline.Add(currCorner);
-                        goto PointAdded;
-                    }
-                }
-                done = true;
-            PointAdded: continue;
-            }
+
+            ////here's a list of which corners are connected to which others
+            ////this is used to be able to find shared corners easily
+            //List<int>[] connectedCorners = new List<int>[corners.Count];
+            //for (int i = 0; i < connectedCorners.GetLength(0); i++) connectedCorners[i] = new();
+
+            ////find the next corner which is connected by a boundary which is not already in the outline
+            //for (int i = 0; i < corners.Count; i++)
+            //{
+            //    for (int j = i+1; j < corners.Count; j++)
+            //    {
+            //        Corner corner1 = corners[i];
+            //        Corner corner2 = corners[j];
+            //        float dist = (corner1.location - corner2.location).R;
+            //        float weight = segmentFinder.SegmentWeight(
+            //            new Segment { P1 = corner1.location, P2 = corner2.location, });
+            //        if (weight > dist / 3)
+            //        {
+            //            if (!connectedCorners[i].Contains(j))
+            //                connectedCorners[i].Add(j);
+            //            if (!connectedCorners[j].Contains(i))
+            //                connectedCorners[j].Add(i);
+            //        }
+            //        else { }
+            //    }
+            //}
+
+            for (int i = 0; i < corners.Count; i++)
+                outline.Add(corners[i]);
 
             //make this a right-handed list of points  
             double sum = 0;
@@ -259,154 +407,8 @@ namespace BrainSimulator.Modules
                 corner.V = c;
                 UKS.AddStatement(currOutline, "has*", corner);
             }
-
-
-
         }
 
-
-        private HSLColor[,] GetImageArrayFromBitmapImage()
-        {
-            imageArray = new HSLColor[(int)bitmap.Width, (int)bitmap.Height];
-            int stride = (bitmap.PixelWidth * bitmap.Format.BitsPerPixel + 7) / 8;
-            byte[] pixelBuffer = new byte[stride * bitmap.PixelHeight];
-            bitmap.CopyPixels(pixelBuffer, stride, 0);
-            for (int i = 0; i < imageArray.GetLength(0); i++)
-            {
-                for (int j = 0; j < imageArray.GetLength(1); j++)
-                {
-                    //upper for jpeg, lower for png
-                    int index = j * stride + i * 4; // Assuming 32 bits per pixel (4 bytes: BGRA)
-                    if (bitmap.Format.BitsPerPixel == 8)
-                        index = j * stride * 3 + i * 3;
-
-                    if (bitmap.Format.BitsPerPixel != 8 && index < pixelBuffer.Length - 3)
-                    {
-                        byte blue = pixelBuffer[index];
-                        byte green = pixelBuffer[index + 1];
-                        byte red = pixelBuffer[index + 2];
-                        byte alpha = pixelBuffer[index + 3];
-                        HSLColor pixelColor = new HSLColor(1, red, green, blue);
-                        imageArray[i, j] = pixelColor;
-                    }
-                    else
-                    {
-                        var c = bitmap.Palette.Colors[pixelBuffer[index]];
-                        byte blue = c.B;
-                        byte red = c.R;
-                        byte green = c.G;
-                        HSLColor pixelColor = new HSLColor(1, red, green, blue);
-                        imageArray[i, j] = pixelColor;
-
-                    }
-                }
-            }
-
-            return imageArray;
-        }
-        private int IRound(double d)
-        {
-            return (int)Round(d);
-        }
-
-        private float[,] FindBoundaries(HSLColor[,] imageArray)
-        {
-            float[,] boundaryArray = new float[imageArray.GetLength(0), imageArray.GetLength(1)];
-
-            float dx = 1;
-            float dy = 0;
-            int sx = 0; int sy = 0;
-            for (sy = 0; sy < imageArray.GetLength(1); sy++)
-            {
-                int [] bRay = new int[imageArray.GetLength(0)];
-                var rayThruImage = LineThroughArray(dx, dy, sx, sy, imageArray);
-                //todo: filter out noisy areas in the ray
-                //todo: handle boundaries which fade over a few pixels
-                for (int i = 0; i < rayThruImage.Count - 1; i++)
-                {
-                    float diff = PixelDifference(rayThruImage[i], rayThruImage[i + 1]);
-                    if (diff > 0.4)
-                        bRay[i] = 1;
-                }
-                //combine/remove nearby boundary points
-                for (int i = 0; i < bRay.GetLength(0) - 3; i++)
-                {
-                    if (bRay[i] == 1 && bRay[i + 1] == 1)
-                        bRay[i] = 0;
-                    else if (bRay[i] == 1 && bRay[i + 2] == 1)
-                    {
-                        bRay[i] = 0;
-                        bRay[i+1] = 1;
-                        bRay[i+2] = 0;
-                    }
-                }
-                for (int i = 0; i < bRay.GetLength(0); i++)
-                {
-                    boundaryArray[i, sy] = bRay[i];
-                }
-            }
-            dx = 0;
-            dy = 1;
-            sy = 0;
-            for (sx = 0; sx < imageArray.GetLength(1); sx++)
-            {
-                int[] bRay = new int[imageArray.GetLength(1)];
-                var rayThruImage = LineThroughArray(dx, dy, sx, sy, imageArray);
-                //todo: filter out noisy areas in the ray
-                //todo: handle boundaries which fade over a few pixels
-                for (int i = 0; i < rayThruImage.Count - 1; i++)
-                {
-                    float diff = PixelDifference(rayThruImage[i], rayThruImage[i + 1]);
-                    if (diff > 0.4)
-                        bRay[i] = 1;
-                }
-                //combine/remove nearby boundary points
-                for (int i = 0; i < bRay.GetLength(0) - 3; i++)
-                {
-                    if (bRay[i] == 1 && bRay[i + 1] == 1)
-                        bRay[i] = 0;
-                    else if (bRay[i] == 1 && bRay[i + 2] == 1)
-                    {
-                        bRay[i] = 0;
-                        bRay[i + 1] = 1;
-                        bRay[i + 2] = 0;
-                    }
-                }
-                for (int i = 0; i < bRay.GetLength(0); i++)
-                {
-                    if (boundaryArray[sx,i] != 1)
-                        boundaryArray[sx,i] = bRay[i];
-                }
-            }
-            return boundaryArray;
-        }
-
-
-        List<HSLColor> LineThroughArray(float dx, float dy, int startX, int startY, HSLColor[,] imageArray)
-        {
-            List<HSLColor> retVal = new();
-            float x = startX; float y = startY;
-
-            while (x < imageArray.GetLength(0) && y < imageArray.GetLength(1))
-            {
-                HSLColor c = imageArray[(int)x, (int)y];
-                if (c != null)
-                    retVal.Add(c);
-                x += dx;
-                y += dy;
-            }
-            return retVal;
-        }
-
-        float PixelDifference(HSLColor c1, HSLColor c2)
-        {
-            float hueWeight = .2f;
-            float satWeight = .2f;
-            float lumWeight = 1.0f;
-            float retVal = Abs(c1.hue - c2.hue) * hueWeight + Abs(c1.saturation - c2.saturation) * satWeight +
-                Abs(c1.luminance - c2.luminance) * lumWeight;
-            return retVal;
-        }
 
 
         // fill this method in with code which will execute once

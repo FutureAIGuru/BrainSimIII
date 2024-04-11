@@ -13,10 +13,10 @@ namespace BrainSimulator.Modules.Vision
         private int numAngles = 180; // Number of angles to consider (e.g., 180 degrees)
         private double angleStep; // Angle step size
         private double rhoStep = 1; // Rho step size (can be adjusted based on image resolution)
-        private int maxDistance; // Maximum possible distance from the origin to the image corner
+        public int maxDistance; // Maximum possible distance from the origin to the image corner
         private List<Point>[,] accumulator; // Accumulator array
-        private List<Tuple<int, int, int>> localMaxima;
-        private float[,] edges;
+        public List<Tuple<int, int, int>> localMaxima;
+        private float[,] boundaries;
 
         // Constructor
         public HoughTransform(int width, int height)
@@ -29,38 +29,40 @@ namespace BrainSimulator.Modules.Vision
 
             // Initialize accumulator array
             accumulator = new List<Point>[maxDistance * 2, numAngles]; // Double the size for negative rho values
-            for (int rhoIndex = 0; rhoIndex < accumulator.GetLength(0); rhoIndex++)
+            for (int rIndex = 0; rIndex < accumulator.GetLength(0); rIndex++)
                 for (int thetaIndex = 0; thetaIndex < accumulator.GetLength(1); thetaIndex++)
-                    accumulator[rhoIndex, thetaIndex] = new List<Point>();
+                    accumulator[rIndex, thetaIndex] = new List<Point>();
         }
         // Perform Hough Transform
         public void Transform(float[,] edges1)
         {
-            edges = edges1;
-            for (int x = 0; x < edges.GetLength(0); x++)
+            boundaries = edges1;
+            //check every point in the boundary array
+            for (int x = 0; x < boundaries.GetLength(0); x++)
             {
-                for (int y = 0; y < edges.GetLength(1); y++)
+                for (int y = 0; y < boundaries.GetLength(1); y++)
                 {
-                    float pixel = edges[x, y];
-                    if (pixel == 1) // Edges == 1 indicates boundary
+                    //is that point a boundary?
+                    float pixel = boundaries[x, y];
+                    if (pixel == 1) 
                     {
-                        // Loop over possible lines passing through the edge pixel
+                        // Loop over all possible lines passing through the edge pixel
                         for (int thetaIndex = 0; thetaIndex < numAngles; thetaIndex++)
                         {
                             double theta = thetaIndex * angleStep;
                             double rho = x * Cos(theta) + y * Sin(theta);
-                            int rhoIndex = (int)Round(rho / rhoStep + maxDistance); // Offset by maxDistance for negative values
+                            int rhoIndex = (int)Round(rho / rhoStep + maxDistance); 
+
                             accumulator[rhoIndex, thetaIndex].Add(new Point(x, y));
                         }
                     }
                 }
             }
-            FindMaxima(edges);
+            FindMaxima(boundaries);
         }
 
         private void FindMaxima(float[,] edges)
         {
-            //TODO: eliminate votes which don't lie between endpoints?  
             //find the top vote-getters
             localMaxima = new List<Tuple<int, int, int>>();
 
@@ -70,10 +72,9 @@ namespace BrainSimulator.Modules.Vision
                     int votes = accumulator[rhoIndex, thetaIndex].Count;
                     var points = accumulator[rhoIndex, thetaIndex]; //for debug only
                     if (votes < 5) continue;
-                    if (thetaIndex < 5 || thetaIndex > 170)
-                    { }
+
                     bool isLocalMaximum = true;
-                    int distToSearch = 20;
+                    int distToSearch = 3;
                     for (int x = -distToSearch; x <= distToSearch; x++)
                     {
                         for (int y = -distToSearch; y <= distToSearch; y++)
@@ -102,8 +103,6 @@ namespace BrainSimulator.Modules.Vision
                         }
                         if (!isLocalMaximum) break;
                     }
-                    if (rhoIndex == 135 && thetaIndex == 138)
-                    { }
                     if (isLocalMaximum)
                         localMaxima.Add(new Tuple<int, int, int>(votes, rhoIndex, thetaIndex));
                 }
@@ -119,11 +118,12 @@ namespace BrainSimulator.Modules.Vision
             float dy = s.P2.Y - s.P1.Y;
             //bounds checking
             if (s.P1.X < 1 || s.P1.Y < 1 || s.P2.X < 1 || s.P2.Y < 1 ||
-                s.P1.X > edges.GetLength(0) - 2 ||
-                s.P1.Y > edges.GetLength(1) - 2 ||
-                s.P2.X > edges.GetLength(0) - 2 ||
-                s.P2.Y > edges.GetLength(1) - 2) return 0;
+                s.P1.X > boundaries.GetLength(0) - 2 ||
+                s.P1.Y > boundaries.GetLength(1) - 2 ||
+                s.P2.X > boundaries.GetLength(0) - 2 ||
+                s.P2.Y > boundaries.GetLength(1) - 2) return 0;
 
+            int missCount = 0;
             if (Abs(dx) > Abs(dy))
             {
                 //step out in the X direction
@@ -133,18 +133,20 @@ namespace BrainSimulator.Modules.Vision
                     //if curPos is exactly on a boundary point OR curPos,
                     //OR curPos is between two boundary points, Add 1
                     //Otherwise, add 1-distance away from the nearest boundary point
-                    if (curPos.Y == Round(curPos.Y) && edges[(int)curPos.X, (int)curPos.Y] ==1)
+                    if (curPos.Y == Round(curPos.Y) && boundaries[(int)curPos.X, (int)curPos.Y] == 1)
                         retVal += 1;
                     else if (curPos.Y > Round(curPos.Y) &&
-                        edges[(int)curPos.X, (int)curPos.Y] > 0 &&
-                        edges[(int)curPos.X, (int)curPos.Y + 1] > 0)
+                        boundaries[(int)curPos.X, (int)curPos.Y] > 0 &&
+                        boundaries[(int)curPos.X, (int)curPos.Y + 1] > 0)
                         retVal += 1;
                     else if (curPos.Y < Round(curPos.Y) &&
-                        edges[(int)curPos.X, (int)curPos.Y] > 0 &&
-                        edges[(int)curPos.X, (int)curPos.Y - 1] > 0)
+                        boundaries[(int)curPos.X, (int)curPos.Y] > 0 &&
+                        boundaries[(int)curPos.X, (int)curPos.Y - 1] > 0)
                         retVal += 1;
-                    else if (edges[(int)curPos.X, (int)curPos.Y] == 1)
+                    else if (boundaries[(int)curPos.X, (int)curPos.Y] == 1)
                         retVal += 1 - (float)Abs(curPos.Y - Round(curPos.Y));
+                    else 
+                        missCount++;
                     curPos += step;
                 }
             }
@@ -154,21 +156,24 @@ namespace BrainSimulator.Modules.Vision
                 PointPlus step = new PointPlus(dx / Abs(dy), (dy > 0) ? 1f : -1f);
                 for (int y = 0; y < Abs(dy); y++)
                 {
-                    if (curPos.X == Round(curPos.X) && edges[(int)curPos.X, (int)curPos.Y] == 1)
+                    if (curPos.X == Round(curPos.X) && boundaries[(int)curPos.X, (int)curPos.Y] == 1)
                         retVal += 1;
                     else if (curPos.X > Round(curPos.X) &&
-                        edges[(int)curPos.X, (int)curPos.Y] > 0 &&
-                        edges[(int)curPos.X + 1, (int)curPos.Y] > 0)
+                        boundaries[(int)curPos.X, (int)curPos.Y] > 0 &&
+                        boundaries[(int)curPos.X + 1, (int)curPos.Y] > 0)
                         retVal += 1;
                     else if (curPos.X < Round(curPos.X) &&
-                        edges[(int)curPos.X, (int)curPos.X] > 0 &&
-                        edges[(int)curPos.X - 1, (int)curPos.Y] > 0)
+                        boundaries[(int)curPos.X, (int)curPos.Y] > 0 &&
+                        boundaries[(int)curPos.X - 1, (int)curPos.Y] > 0)
                         retVal += 1;
-                    else if(edges[(int)Round(curPos.X), (int)Round(curPos.Y)] == 1)
+                    else if (boundaries[(int)Round(curPos.X), (int)Round(curPos.Y)] == 1)
                         retVal += 1 - (float)Abs(curPos.X - Round(curPos.X));
+                    else
+                        missCount++;
                     curPos += step;
                 }
             }
+            if (missCount > 3) retVal = 0;
             return retVal;
         }
 
@@ -180,15 +185,9 @@ namespace BrainSimulator.Modules.Vision
             foreach (var max in localMaxima)
             {
                 List<Point> points = accumulator[max.Item2, max.Item3];
-
-                //Point pTemp = points.FindFirst(x => x.X == 47 && x.Y == 30 && max.Item1 == 9);
-                //if (pTemp != null && pTemp != new Point(0, 0))
-                //{ }
                 int votes = points.Count;
                 if (votes > 4)
                 {
-                    if (points.First() == new Point(27,31))
-                    { }
                     Point p1 = points.First();
                     Point p2 = points.Last();
                     if (p1.Y > p2.Y)
@@ -211,7 +210,7 @@ namespace BrainSimulator.Modules.Vision
                     {
                         Point current = points[i];
                         float dist = (float)DistanceBetweenPoints(prev, current);
-                        if (dist < maximumGapSize && edges[(int)current.X,(int)current.Y] == 1)
+                        if (dist < maximumGapSize && boundaries[(int)current.X,(int)current.Y] == 1)
                         { //points are contignous
                             prev = current;
                             end = current;
@@ -248,8 +247,6 @@ namespace BrainSimulator.Modules.Vision
                     float newW = SegmentWeight(newSegment);
                     if (newW > w && Abs(newSegment.Length - s.Length) < 5)
                         segments[i] = newSegment;
-                    //                    if (newSegment.Length > s.Length)
-                    //                        segments[i] = newSegment;
                     return;
                 }
             }
@@ -260,7 +257,6 @@ namespace BrainSimulator.Modules.Vision
             double deltaX = point2.X - point1.X;
             double deltaY = point2.Y - point1.Y;
             return Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-
         }
     }
 }

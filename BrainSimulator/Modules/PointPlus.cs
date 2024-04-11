@@ -438,7 +438,7 @@ namespace BrainSimulator.Modules
         public Segment() { }
         public override string ToString()
         {
-            string retVal = $"Length: {(int)Length}  ({(int)P1.X},{(int)P1.Y}) : ({(int)P2.X},{(int)P2.Y})";
+            string retVal = $"Length: {(int)Length} ({(int)P1.X},{(int)P1.Y}) : ({(int)P2.X},{(int)P2.Y}) A: {Angle}";
             return retVal;
         }
 

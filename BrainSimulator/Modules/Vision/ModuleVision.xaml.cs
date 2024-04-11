@@ -79,21 +79,63 @@ namespace BrainSimulator.Modules
                         }
                     }
             }
+            if (cbShowLines.IsChecked == true && parent.segments != null & parent.segments.Count > 0)
+            {
+                foreach (var line in parent.segmentFinder.localMaxima)
+                {
+                    float maxVotes = parent.segmentFinder.localMaxima[0].Item1;
+                    float votes = line.Item1;
+                    float intensity = votes / maxVotes;
+                    HSLColor hSLColor = new HSLColor(Colors.Green);
+                    hSLColor.luminance = intensity;
+                    Brush brush = new SolidColorBrush(hSLColor.ToColor());
+                    int rho = line.Item2 - parent.segmentFinder.maxDistance;
+                    int theta = line.Item3;
+                    if (theta == 0 || theta == 180) //line is vertical
+                    {
+                        Line l = new Line()
+                        {
+                            X1 = rho * scale,
+                            X2 = rho * scale,
+                            Y1 = 0 * scale,
+                            Y2 = theCanvas.ActualHeight * scale,
+                            Stroke = brush,
+                        };
+                        theCanvas.Children.Add(l);
+                    }
+                    else
+                    {
+                        if (line.Item1 < 15) continue;
+                        //y = mx+b
+                        double fTheta = theta * Math.PI / 180;
+                        double m = -Math.Cos(fTheta) / Math.Sin(fTheta);
+                        double b = rho / Math.Sin(fTheta);
+                        Line l = new Line()
+                        {
+                            X1 = 0,
+                            X2 = 1000 * scale,
+                            Y1 = b * scale,
+                            Y2 = (b+m*1000)* scale,
+                            Stroke = brush,
+                        };
+                        theCanvas.Children.Add(l);
+                    }
+                }
+            }
             if (cbShowSegments.IsChecked == true && parent.segments != null & parent.segments.Count > 0)
             {
                 foreach (var segment in parent.segments)
                 {
+                    Line l = new Line()
                     {
-                        Line l = new Line()
-                        {
-                            X1 = segment.P1.X * scale,
-                            X2 = segment.P2.X * scale,
-                            Y1 = segment.P1.Y * scale,
-                            Y2 = segment.P2.Y * scale,
-                            Stroke = Brushes.Red,
-                        };
-                        theCanvas.Children.Add(l);
-                    }
+                        X1 = segment.P1.X * scale,
+                        X2 = segment.P2.X * scale,
+                        Y1 = segment.P1.Y * scale,
+                        Y2 = segment.P2.Y * scale,
+                        Stroke = Brushes.Red,
+                        StrokeThickness = 4,
+                    };
+                    theCanvas.Children.Add(l);
                 }
             }
             if (cbShowPixels.IsChecked == true && parent.imageArray != null)
