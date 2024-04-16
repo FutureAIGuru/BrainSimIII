@@ -47,5 +47,19 @@
       <currentFilePath>C:\Users\c_sim\Documents\BrainSim\Images\A1.png</currentFilePath>
       <previousFilePath>C:\Users\c_sim\Documents\BrainSim\Images\A1.png</previousFilePath>
     </ModuleBase>
+    <ModuleBase xsi:type="ModuleShape">
+      <initialized>true</initialized>
+      <isEnabled>true</isEnabled>
+      <Label>Shape_1</Label>
+      <dlgPos>
+        <X>1243</X>
+        <Y>958</Y>
+      </dlgPos>
+      <dlgSize>
+        <X>800</X>
+        <Y>450</Y>
+      </dlgSize>
+      <dlgIsOpen>true</dlgIsOpen>
+    </ModuleBase>
   </modules>
 </BrainSim3Data>

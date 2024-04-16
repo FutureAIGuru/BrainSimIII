@@ -400,7 +400,7 @@ public partial class ModuleUKS : ModuleBase
 
     // If a thing exists, return it.  If not, create it.
     // If it is currently an unknown, defining the parent can make it known
-    public Thing GetOrAddThing(string label, object parent = null, Thing source = null)
+    public Thing GetOrAddThing(string label, object parent = null, Thing source = null )
     {
         Thing thingToReturn = null;
 
@@ -423,7 +423,7 @@ public partial class ModuleUKS : ModuleBase
         {
             string baseLabel = label.Substring(0, label.Length - 1);
             Thing newParent = ThingLabels.GetThing(baseLabel);
-            //instead of creating a new label, see if the next label for this item already exists and can be reused
+            //instead of creating a new Thing, see if the next label for this item already exists and can be reused
             if (source != null)
             {
                 int digit = 0;

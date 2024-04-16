@@ -154,22 +154,25 @@ namespace BrainSimulator.Modules
                 int[] bRay = new int[imageArray.GetLength(0)];
                 var rayThruImage = LineThroughArray(dx, dy, sx, sy, imageArray);
                 FindBoundariesInRay(bRay, rayThruImage);
+                if (sy == 57)
+                { }
                 for (int i = 0; i < bRay.GetLength(0); i++)
                 {
-                    boundaryArray[i, sy] = bRay[i];
+                    if (boundaryArray[i,sy] == 0)
+                        boundaryArray[i, sy] = bRay[i];
                 }
             }
             dx = 0;
             dy = 1;
             sy = 0;
-            for (sx = 0; sx < imageArray.GetLength(1); sx++)
+            for (sx = 0; sx < imageArray.GetLength(0); sx++)
             {
                 int[] bRay = new int[imageArray.GetLength(1)];
                 var rayThruImage = LineThroughArray(dx, dy, sx, sy, imageArray);
                 FindBoundariesInRay(bRay, rayThruImage);
                 for (int i = 0; i < bRay.GetLength(0); i++)
                 {
-                    if (boundaryArray[sx, i] != 1)
+                    if (boundaryArray[sx,i] == 0)
                         boundaryArray[sx, i] = bRay[i];
                 }
             }
@@ -178,24 +181,48 @@ namespace BrainSimulator.Modules
 
         private void FindBoundariesInRay(int[] bRay, List<HSLColor> rayThruImage)
         {
+            //given a ray of color values through an image, find the boundaries
             //todo: filter out noisy areas in the ray
-            //todo: handle boundaries which fade over a few pixels
+            float boundaryThreshold = 0.5f;
+
+            int start = -1;
             for (int i = 0; i < rayThruImage.Count - 1; i++)
             {
                 float diff = PixelDifference(rayThruImage[i], rayThruImage[i + 1]);
-                if (diff > 0.4)
-                    bRay[i] = 1;
-            }
-            //combine/remove nearby boundary points
-            for (int i = 0; i < bRay.GetLength(0) - 3; i++)
-            {
-                if (bRay[i] == 1 && bRay[i + 1] == 1)
-                    bRay[i] = 0;
-                else if (bRay[i] == 1 && bRay[i + 2] == 1)
+                if (diff < boundaryThreshold)
                 {
-                    bRay[i] = 0;
+                    //pixels are the same...could be the start of a boundary
+                    start = i;
+                }
+                else if (i < rayThruImage.Count - 2 &&
+                    PixelDifference(rayThruImage[i], rayThruImage[i + 2]) < boundaryThreshold)
+                {
+                    //there is a single-pixel blip
                     bRay[i + 1] = 1;
-                    bRay[i + 2] = 0;
+                    start = -1;
+                }
+                else if (i < rayThruImage.Count - 3 &&
+                    PixelDifference(rayThruImage[i], rayThruImage[i + 3]) < boundaryThreshold)
+                {
+                    //there is a stwo-pixel blip
+                    bRay[i + 2] = 1;
+                    start = -1;
+                }
+                else
+                if (start != -1 && diff > boundaryThreshold)
+                {
+                    //find the end of the boundary and enter it
+                    for (int j = i + 1; j < rayThruImage.Count - 1; j++)
+                    {
+                        float diffEnd = PixelDifference(rayThruImage[j], rayThruImage[j + 1]);
+                        if (diffEnd < boundaryThreshold)
+                        {
+                            bRay[(int)Round((start + j) / 2.0)] = 1;
+                            i = j;
+                            start = -1;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -218,7 +245,7 @@ namespace BrainSimulator.Modules
 
         float PixelDifference(HSLColor c1, HSLColor c2)
         {
-            float hueWeight = .2f;
+            float hueWeight = .05f;
             float satWeight = .2f;
             float lumWeight = 1.0f;
             float retVal = Abs(c1.hue - c2.hue) * hueWeight + Abs(c1.saturation - c2.saturation) * satWeight +
@@ -275,28 +302,27 @@ namespace BrainSimulator.Modules
                     Segment s2 = segments[j];
                     if (Utils.FindIntersection(s1, s2, out PointPlus intersection, out Angle angle))
                     {
-                        //ignore angles whih are nearly straight
-                        //if the segments are short, the angle between them must be larger
-                        Angle minAngle = new Angle();
-                        minAngle.Degrees = 10;
-                        if (s1.Length < 20 || s2.Length < 20) minAngle.Degrees = 20;
-
-
-                        if (Abs(angle.Degrees) > minAngle.Degrees && 180 - Abs(angle.Degrees) > minAngle.Degrees)
-                        {
-                            Angle cornerOrientation = ((s1.Angle - s2.Angle) > 0) ? s1.Angle : s2.Angle + (s1.Angle + s2.Angle) / 2;
-
-                            Corner alreadyInList = corners.FindFirst(x =>
-                                Abs(x.location.X - intersection.X) < 4 &&
-                                Abs(x.location.Y - intersection.Y) < 4 &&
-                                Abs(x.orientation - cornerOrientation) > 15);
-                            if (alreadyInList == null)
-                            {
-                                corners.Add(new Corner { location = intersection, angle = Abs(angle), orientation = cornerOrientation });
-                            }
-                        }
+                        AddCornerToList(s1, s2, intersection, angle);
                     }
                 }
+            }
+        }
+
+        private void AddCornerToList(Segment s1, Segment s2, PointPlus intersection, Angle angle)
+        {
+            //ignore angles whih are nearly straight
+            //if the segments are short, the angle between them must be larger
+            Angle minAngle = new Angle();
+            minAngle.Degrees = 10;
+            if (s1.Length < 20 || s2.Length < 20) minAngle.Degrees = 20;
+
+
+            if (Abs(angle.Degrees) > minAngle.Degrees && 180 - Abs(angle.Degrees) > minAngle.Degrees)
+            {
+                Angle cornerOrientation = ((s1.Angle - s2.Angle) > 0) ? s1.Angle : s2.Angle + (s1.Angle + s2.Angle) / 2;
+                Corner alreadyInList = corners.FindFirst(x => (x.location - intersection).R < 4);
+                if (alreadyInList == null)
+                    corners.Add(new Corner { location = intersection, angle = Abs(angle), orientation = cornerOrientation });
             }
         }
 
@@ -323,9 +349,9 @@ namespace BrainSimulator.Modules
                     {
                         float d1 = Utils.DistancePointToSegment(s1, s.P1);
                         float d2 = Utils.DistancePointToSegment(s1, s.P2);
-                        if (d1 < 3)
+                        if (d1 < 4)
                             p1isOrphanEnd = false;
-                        if (d2 < 3)
+                        if (d2 < 4)
                             p2isOrphanEnd = false;
                     }
                 }
@@ -348,7 +374,7 @@ namespace BrainSimulator.Modules
             UKS.GetOrAddThing("Sense", "Thing");
             UKS.GetOrAddThing("Visual", "Sense");
             Thing outlines = UKS.GetOrAddThing("Outline", "Visual");
-            Thing tCorners = UKS.GetOrAddThing("Corners", "Visual");
+            Thing tCorners = UKS.GetOrAddThing("corner", "Visual");
             UKS.DeleteAllChildren(outlines);
             UKS.DeleteAllChildren(tCorners);
 
@@ -357,32 +383,7 @@ namespace BrainSimulator.Modules
             //for convenience in debugging
             corners = corners.OrderBy(x => x.location.X).OrderBy(x => x.location.Y).ToList();
 
-            ////here's a list of which corners are connected to which others
-            ////this is used to be able to find shared corners easily
-            //List<int>[] connectedCorners = new List<int>[corners.Count];
-            //for (int i = 0; i < connectedCorners.GetLength(0); i++) connectedCorners[i] = new();
-
-            ////find the next corner which is connected by a boundary which is not already in the outline
-            //for (int i = 0; i < corners.Count; i++)
-            //{
-            //    for (int j = i+1; j < corners.Count; j++)
-            //    {
-            //        Corner corner1 = corners[i];
-            //        Corner corner2 = corners[j];
-            //        float dist = (corner1.location - corner2.location).R;
-            //        float weight = segmentFinder.SegmentWeight(
-            //            new Segment { P1 = corner1.location, P2 = corner2.location, });
-            //        if (weight > dist / 3)
-            //        {
-            //            if (!connectedCorners[i].Contains(j))
-            //                connectedCorners[i].Add(j);
-            //            if (!connectedCorners[j].Contains(i))
-            //                connectedCorners[j].Add(i);
-            //        }
-            //        else { }
-            //    }
-            //}
-
+            //perhaps there are multiple shapes?
             for (int i = 0; i < corners.Count; i++)
                 outline.Add(corners[i]);
 
@@ -396,13 +397,12 @@ namespace BrainSimulator.Modules
             }
             if (sum > 0) outline.Reverse();
 
-            //we now have an ordered, right-handed outline
             //let's add it to the UKS
-
-            //TODO: here's where we'll have a loop for multiple outlines
-            Thing currOutline = UKS.GetOrAddThing("Outline*", "Outlines");
+            //TODO: here's where we'll possibly add have a loop for multiple outlines
+            Thing currOutline = UKS.GetOrAddThing("outline*", "Outlines");
             foreach (Corner c in outline)
             {
+                if (c.angle > PI / 2) c.angle = PI - c.angle;
                 Thing corner = UKS.GetOrAddThing("corner*", tCorners);
                 corner.V = c;
                 UKS.AddStatement(currOutline, "has*", corner);

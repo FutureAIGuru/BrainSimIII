@@ -10,7 +10,7 @@ namespace BrainSimulator.Modules.Vision
     public class HoughTransform
     {
         // Hough Transform parameters
-        private int numAngles = 180; // Number of angles to consider (e.g., 180 degrees)
+        public int numAngles = 720; // Number of angles to consider (e.g., 180 degrees)
         private double angleStep; // Angle step size
         private double rhoStep = 1; // Rho step size (can be adjusted based on image resolution)
         public int maxDistance; // Maximum possible distance from the origin to the image corner
@@ -44,14 +44,14 @@ namespace BrainSimulator.Modules.Vision
                 {
                     //is that point a boundary?
                     float pixel = boundaries[x, y];
-                    if (pixel == 1) 
+                    if (pixel == 1)
                     {
                         // Loop over all possible lines passing through the edge pixel
                         for (int thetaIndex = 0; thetaIndex < numAngles; thetaIndex++)
                         {
                             double theta = thetaIndex * angleStep;
                             double rho = x * Cos(theta) + y * Sin(theta);
-                            int rhoIndex = (int)Round(rho / rhoStep + maxDistance); 
+                            int rhoIndex = (int)Round(rho / rhoStep + maxDistance);
 
                             accumulator[rhoIndex, thetaIndex].Add(new Point(x, y));
                         }
@@ -64,51 +64,87 @@ namespace BrainSimulator.Modules.Vision
         private void FindMaxima(float[,] edges)
         {
             //find the top vote-getters
-            localMaxima = new List<Tuple<int, int, int>>();
+            localMaxima = new List<Tuple<int, int, int>>(); // (votes,rhoIndex,thetaIndex)
 
             for (int rhoIndex = 0; rhoIndex < accumulator.GetLength(0); rhoIndex++)
                 for (int thetaIndex = 0; thetaIndex < accumulator.GetLength(1); thetaIndex++)
                 {
-                    int votes = accumulator[rhoIndex, thetaIndex].Count;
+                    float votes = accumulator[rhoIndex, thetaIndex].Count;
+                    if (votes < 4) continue;
+
+                    // votes = LineWeight(rhoIndex, thetaIndex);
                     var points = accumulator[rhoIndex, thetaIndex]; //for debug only
-                    if (votes < 5) continue;
 
-                    bool isLocalMaximum = true;
-                    int distToSearch = 3;
-                    for (int x = -distToSearch; x <= distToSearch; x++)
+                    // is there an entry in the maxima list which is near this one?
+                    var alreadyExists = localMaxima.FindAll(x => Abs(x.Item2 - rhoIndex) < 5 &&
+                        Abs(x.Item3 - thetaIndex) < 5);
+                    bool dontAdd = false;
+                    foreach (var already in alreadyExists)
                     {
-                        for (int y = -distToSearch; y <= distToSearch; y++)
+                        //does this line extend an existing line?
+                        var points1 = accumulator[already.Item2, already.Item3];
+                     //   if (DistanceBetweenPoints(points.First(), points1.First()) > 5) break;
+                     //   if (DistanceBetweenPoints(points.Last(), points1.Last()) > 5) break;
+                        float votes1 = already.Item1;
+                    //    votes1 = LineWeight(already.Item2,already.Item3);
+                        if (votes1 <= votes)
                         {
-                            //bounds checking
-                            if (x == 0 && y == 0) continue;
-                            if (x + rhoIndex < 0 || y + thetaIndex < 0) continue;
-                            if (x + rhoIndex >= accumulator.GetLength(0) || y + thetaIndex >= accumulator.GetLength(1)) continue;
-                            //are these setgments nearly colinear but extend one-another?
-                            List<Point> points1 = accumulator[rhoIndex + x, thetaIndex + y];
-                            if (points1.Count < 5) continue;
-                            if (DistanceBetweenPoints(points.First(), points1.First()) > 5) continue;
-                            if (DistanceBetweenPoints(points.Last(), points1.Last()) > 5) continue;
-
-                            int votes1 = points1.Count;
-                            if (votes1 > votes)
-                            {
-                                float w = SegmentWeight(new Segment(points.First(), points.Last()));
-                                float w1 = SegmentWeight(new Segment(points1.First(), points1.Last()));
-                                if (w < w1)
-                                {
-                                    isLocalMaximum = false;
-                                    break;
-                                }
-                            }
+                            localMaxima.Remove(already);
                         }
-                        if (!isLocalMaximum) break;
+                        else
+                        {
+                            dontAdd = true; //nearby max arleady in list
+                        }
                     }
-                    if (isLocalMaximum)
-                        localMaxima.Add(new Tuple<int, int, int>(votes, rhoIndex, thetaIndex));
+                    if (!dontAdd)
+                        localMaxima.Add(new Tuple<int, int, int>((int)votes, rhoIndex, thetaIndex));
                 }
+
+
+            //    bool isLocalMaximum = true;
+            //    int distToSearch = 3;
+            //    for (int x = -distToSearch; x <= distToSearch; x++)
+            //    {
+            //        for (int y = -distToSearch; y <= distToSearch; y++)
+            //        {
+            //            //bounds checking
+            //            if (x == 0 && y == 0) continue;
+            //            if (x + rhoIndex < 0 || y + thetaIndex < 0) continue;
+            //            if (x + rhoIndex >= accumulator.GetLength(0) || y + thetaIndex >= accumulator.GetLength(1)) continue;
+            //            //are these setgments nearly colinear but extend one-another?
+            //            List<Point> points1 = accumulator[rhoIndex + x, thetaIndex + y];
+            //            if (points1.Count < 5) continue;
+            //            if (DistanceBetweenPoints(points.First(), points1.First()) > 5) continue;
+            //            if (DistanceBetweenPoints(points.Last(), points1.Last()) > 5) continue;
+
+            //            int votes1 = points1.Count;
+            //            if (votes1 > votes)
+            //            {
+            //                float w = SegmentWeight(new Segment(points.First(), points.Last()));
+            //                float w1 = SegmentWeight(new Segment(points1.First(), points1.Last()));
+            //                if (w < w1)
+            //                {
+            //                    isLocalMaximum = false;
+            //                    break;
+            //                }
+            //            }
+            //        }
+            //        if (!isLocalMaximum) break;
+            //    }
+            //    if (isLocalMaximum)
+            //        localMaxima.Add(new Tuple<int, int, int>(votes, rhoIndex, thetaIndex));
+            //}
             localMaxima = localMaxima.OrderByDescending(x => x.Item1).ToList();
         }
 
+        public float LineWeight(int rhoIndex, int thetaIndex)
+        {
+            Segment s = new Segment()
+            { P1 = accumulator[rhoIndex, thetaIndex].First(),
+            P2 = accumulator[rhoIndex, thetaIndex].Last(),
+            };
+            return SegmentWeight(s);
+        }
         //how many boundary pixels does a segment "center" on.
         public float SegmentWeight(Segment s)
         {
@@ -145,7 +181,7 @@ namespace BrainSimulator.Modules.Vision
                         retVal += 1;
                     else if (boundaries[(int)curPos.X, (int)curPos.Y] == 1)
                         retVal += 1 - (float)Abs(curPos.Y - Round(curPos.Y));
-                    else 
+                    else
                         missCount++;
                     curPos += step;
                 }
@@ -210,7 +246,7 @@ namespace BrainSimulator.Modules.Vision
                     {
                         Point current = points[i];
                         float dist = (float)DistanceBetweenPoints(prev, current);
-                        if (dist < maximumGapSize && boundaries[(int)current.X,(int)current.Y] == 1)
+                        if (dist < maximumGapSize && boundaries[(int)Round(current.X), (int)Round(current.Y)] == 1)
                         { //points are contignous
                             prev = current;
                             end = current;

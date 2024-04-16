@@ -5,16 +5,6 @@ VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrainSimulator", "BrainSimulator\BrainSimulator.csproj", "{C08F318A-B8E6-4187-9ED4-0A126B3B63A9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{1C458A63-D394-4406-9465-01FA35263D9E}"
-	ProjectSection(SolutionItems) = preProject
-		BrainSimulator\Tools\BrainSimulator Module Dlg.zip = BrainSimulator\Tools\BrainSimulator Module Dlg.zip
-		BrainSimulator\Tools\BrainSimulator Module.zip = BrainSimulator\Tools\BrainSimulator Module.zip
-		BrainSimulator\Tools\Module.cs = BrainSimulator\Tools\Module.cs
-		BrainSimulator\Tools\ModuleDlg.xaml = BrainSimulator\Tools\ModuleDlg.xaml
-		BrainSimulator\Tools\ModuleDlg.xaml.cs = BrainSimulator\Tools\ModuleDlg.xaml.cs
-		BrainSimulator\Tools\VS Templates Readme.txt = BrainSimulator\Tools\VS Templates Readme.txt
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

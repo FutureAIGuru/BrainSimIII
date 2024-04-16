@@ -1,0 +1,15 @@
+<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Item">
+  <TemplateData>
+    <DefaultName>Module1Dlg.xaml</DefaultName>
+    <Name>Module Dlg</Name>
+    <Description>Creates a dialog for a Brain Simulator Module</Description>
+    <ProjectType>CSharp</ProjectType>
+    <SortOrder>10</SortOrder>
+    <Icon>iconsmall1.ico</Icon>
+  </TemplateData>
+  <TemplateContent>
+    <References />
+    <ProjectItem SubType="Designer" TargetFileName="$fileinputname$.xaml" ReplaceParameters="true">ModuleDlg.xaml</ProjectItem>
+    <ProjectItem SubType="" TargetFileName="$fileinputname$.xaml.cs" ReplaceParameters="true">ModuleDlg.xaml.cs</ProjectItem>
+  </TemplateContent>
+</VSTemplate>

@@ -359,14 +359,15 @@ namespace BrainSimulator.Modules
 
 
         //returns all the matching refrences
-        public List<Relationship> GetRelationshipsWithAncestor(Thing t)
+        public List<Relationship> GetRelationshipsWithAncestor(Thing t, bool matchType = false)
         {
             List<Relationship> retVal = new List<Relationship>();
             lock (relationships)
             {
                 for (int i = 0; i < Relationships.Count; i++)
                 {
-                    if (Relationships[i].T.HasAncestor(t))
+                    if ((!matchType && Relationships[i].T.HasAncestor(t)) ||
+                        (matchType && Relationships[i].relType.HasAncestor(t)))
                     {
                         retVal.Add(Relationships[i]);
                     }

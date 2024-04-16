@@ -48,6 +48,8 @@
     <Compile Remove="Modules\WaveMemoryStream.cs" />
     <Compile Remove="Network.cs" />
     <Compile Remove="Sallie.cs" />
+    <Compile Remove="Tools\Module.cs" />
+    <Compile Remove="Tools\ModuleDlg.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="BrainSim3SplashScreen.jpg" />
@@ -207,6 +209,7 @@
     <Page Remove="Modules\ModuleObjectDlg.xaml" />
     <Page Remove="Modules\ModuleOnlineInfoDlg.xaml" />
     <Page Remove="Modules\ModulePremiseDlg.xaml" />
+    <Page Remove="Tools\ModuleDlg.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="BrainSim3SplashScreen.jpg" />
