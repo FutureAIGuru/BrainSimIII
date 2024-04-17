@@ -118,7 +118,7 @@ namespace BrainSimulator.Modules
                     Tuple<int, int, int> line = parent.segmentFinder.localMaxima[i];
                     float maxVotes = parent.segmentFinder.localMaxima[0].Item1;
                     float votes = line.Item1;
-                    int minVodes = 10;
+                    int minVodes = 5;
                     if (votes < minVodes) continue;
                     float intensity = (votes - minVodes) / maxVotes;
                     HSLColor hSLColor = new HSLColor(Colors.Green);

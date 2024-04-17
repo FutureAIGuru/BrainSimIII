@@ -108,13 +108,8 @@ namespace BrainSimulator
             string fileName = Path.GetFullPath(".").ToLower();
             //we're running with source...save to the source version
             if (fileName.Contains("\\bin"))
-            {
-                fileName = fileName.Replace("\\bin", "");
-                fileName = fileName.Replace("\\release", "");
-                fileName = fileName.Replace("\\x64", "");
-                fileName = fileName.Replace("\\debug", "");
-                fileName = fileName.Replace("\\net6.0-windows", "");
-            }
+                fileName = fileName.Substring(0, fileName.IndexOf("\\bin"));
+
             fileName += "\\Networks\\ModuleDescriptions.xml";
             try
             {

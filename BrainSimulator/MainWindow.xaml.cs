@@ -235,7 +235,7 @@ namespace BrainSimulator
 
             foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
             {
-                if (mb != null && mb.dlgIsOpen)
+                if (mb != null)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
                     {

@@ -12,6 +12,9 @@ using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
 using System.Diagnostics;
 using static System.Math;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.Xml;
 
 namespace BrainSimulator.Modules
 {
@@ -148,7 +151,8 @@ namespace BrainSimulator.Modules
 
             float dx = 1;
             float dy = 0;
-            int sx = 0; int sy = 0;
+            int sx = 0;
+            int sy = 0;
             for (sy = 0; sy < imageArray.GetLength(1); sy++)
             {
                 int[] bRay = new int[imageArray.GetLength(0)];
@@ -158,7 +162,7 @@ namespace BrainSimulator.Modules
                 { }
                 for (int i = 0; i < bRay.GetLength(0); i++)
                 {
-                    if (boundaryArray[i,sy] == 0)
+                    if (boundaryArray[i, sy] == 0)
                         boundaryArray[i, sy] = bRay[i];
                 }
             }
@@ -172,7 +176,7 @@ namespace BrainSimulator.Modules
                 FindBoundariesInRay(bRay, rayThruImage);
                 for (int i = 0; i < bRay.GetLength(0); i++)
                 {
-                    if (boundaryArray[sx,i] == 0)
+                    if (boundaryArray[sx, i] == 0)
                         boundaryArray[sx, i] = bRay[i];
                 }
             }
@@ -285,7 +289,7 @@ namespace BrainSimulator.Modules
             for (int i = 0; i < segments.Count; i++)
             {
                 //now extend another 3 or more pixels, just for good measure
-                float distToExtend = (float)Math.Max(3, segments[i].Length * 0.10);
+                float distToExtend = (float)Math.Max(4, segments[i].Length * 0.10);
                 segments[i] = Utils.ExtendSegment(segments[i], distToExtend);
             }
 
@@ -350,10 +354,20 @@ namespace BrainSimulator.Modules
                         float d1 = Utils.DistancePointToSegment(s1, s.P1);
                         float d2 = Utils.DistancePointToSegment(s1, s.P2);
                         if (d1 < 4)
-                            p1isOrphanEnd = false;
+                        {
+                            if (!IsEndPoint((int)s.P1.X, (int)s.P1.Y))
+                                p1isOrphanEnd = false;
+                        }
                         if (d2 < 4)
-                            p2isOrphanEnd = false;
+                        {
+                            if (!IsEndPoint((int)s.P2.X, (int)s.P2.Y))
+                                p2isOrphanEnd = false;
+                        }
                     }
+                    if (!IsEndPoint((int)s.P1.X, (int)s.P1.Y))
+                        p1isOrphanEnd=false;
+                    if (!IsEndPoint((int)s.P2.X, (int)s.P2.Y))
+                        p2isOrphanEnd = false;
                 }
                 if (p1isOrphanEnd)
                     corners.Add(new Corner { location = s.P1, angle = 0 });
@@ -362,11 +376,28 @@ namespace BrainSimulator.Modules
             }
         }
 
+        //this checks the boundary array to see if a point is an orphan
+        bool IsEndPoint(int sx, int sy)
+        {
+            int distanceToCheck = 1;
+            int count = 0;
+            for (int dx = -distanceToCheck; dx <= distanceToCheck; dx++)
+                for (int dy = -distanceToCheck; dy <= distanceToCheck; dy++)
+                {
+                    if (dx == 0 && dy == 0) continue;
+                    int x = sx + dx;
+                    int y = sy + dy;
+                    if (x < 0 || y < 0) return false;
+                    if (x >= boundaryArray.GetLength(0) || y >= boundaryArray.GetLength(1)) return false;
+                    if (boundaryArray[x, y] > 0) count++;
+                    if (count > 1) return false;
+                }
+            return true;
+        }
+
         //trace around an outline to get the order of corners and relative distances
         private void FindOutlines()
         {
-            //TODO modify to handle multiple outlines
-            List<Corner> outline = new();
 
             //set up the UKS structure for outlines
             GetUKS();
@@ -384,28 +415,63 @@ namespace BrainSimulator.Modules
             corners = corners.OrderBy(x => x.location.X).OrderBy(x => x.location.Y).ToList();
 
             //perhaps there are multiple shapes?
+            List<Corner> cornerAvailable = new List<Corner>();
             for (int i = 0; i < corners.Count; i++)
-                outline.Add(corners[i]);
+                cornerAvailable.Add(corners[i]);
 
-            //make this a right-handed list of points  
-            double sum = 0;
-            int cnt = outline.Count;
-            for (int i = 0; i < outline.Count; i++)
+            while (cornerAvailable.Count > 1)
             {
-                sum += (outline[i].location.X - outline[(i + 1) % cnt].location.X) *
-                    (outline[i].location.Y - outline[(i + 1) % cnt].location.Y);
-            }
-            if (sum > 0) outline.Reverse();
+                List<Corner> outline = new();
+                bool outlineClosed = false;
+                Corner start = cornerAvailable[0];
+                Corner curr = cornerAvailable[0];
+                outline.Add(start);
+                cornerAvailable.Remove(start);
+                while (!outlineClosed)
+                {
+                    Corner bestCorner = null;
+                    float bestWeight = 0;
+                    foreach (Corner next in corners)
+                    {
+                        if (outline.Contains(next)) continue;
+                        float connectionWeight = segmentFinder.SegmentWeight(new Segment() { P1 = curr.location, P2 = next.location });
+                        connectionWeight /= (curr.location - next.location).R;
+                        if (connectionWeight > bestWeight)
+                        {
+                            bestCorner = next;
+                            bestWeight = connectionWeight;
+                        }
+                    }
+                    if (bestWeight > .9f)
+                    {
+                        outline.Add(bestCorner);
+                        cornerAvailable.Remove(bestCorner);
+                        curr = bestCorner;
+                        if (curr == start) outlineClosed = true;
+                    }
+                    else 
+                        outlineClosed = true;
+                }
+                //make this a right-handed list of points  
+                double sum = 0;
+                int cnt = outline.Count;
+                for (int i = 0; i < outline.Count; i++)
+                {
+                    sum += (outline[i].location.X - outline[(i + 1) % cnt].location.X) *
+                        (outline[i].location.Y - outline[(i + 1) % cnt].location.Y);
+                }
+                if (sum > 0) outline.Reverse();
 
-            //let's add it to the UKS
-            //TODO: here's where we'll possibly add have a loop for multiple outlines
-            Thing currOutline = UKS.GetOrAddThing("outline*", "Outlines");
-            foreach (Corner c in outline)
-            {
-                if (c.angle > PI / 2) c.angle = PI - c.angle;
-                Thing corner = UKS.GetOrAddThing("corner*", tCorners);
-                corner.V = c;
-                UKS.AddStatement(currOutline, "has*", corner);
+                //let's add it to the UKS
+                //TODO: here's where we'll possibly add have a loop for multiple outlines
+                Thing currOutline = UKS.GetOrAddThing("outline*", "Outline");
+                foreach (Corner c in outline)
+                {
+                    if (c.angle > PI / 2) c.angle = PI - c.angle;
+                    Thing corner = UKS.GetOrAddThing("corner*", tCorners);
+                    corner.V = c;
+                    UKS.AddStatement(currOutline, "has*", corner);
+                }
             }
         }
 

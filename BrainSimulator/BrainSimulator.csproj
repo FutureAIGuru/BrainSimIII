@@ -46,6 +46,7 @@
     <Compile Remove="Modules\PhysicalObject.cs" />
     <Compile Remove="Modules\UnknownArea.cs" />
     <Compile Remove="Modules\WaveMemoryStream.cs" />
+    <Compile Remove="ModuleView.cs" />
     <Compile Remove="Network.cs" />
     <Compile Remove="Sallie.cs" />
     <Compile Remove="Tools\Module.cs" />
