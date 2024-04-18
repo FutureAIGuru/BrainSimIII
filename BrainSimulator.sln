@@ -6,14 +6,8 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrainSimulator", "BrainSimulator\BrainSimulator.csproj", "{C08F318A-B8E6-4187-9ED4-0A126B3B63A9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{1C458A63-D394-4406-9465-01FA35263D9E}"
-	ProjectSection(SolutionItems) = preProject
-		BrainSimulator\Tools\BrainSimulator Module Dlg.zip = BrainSimulator\Tools\BrainSimulator Module Dlg.zip
-		BrainSimulator\Tools\BrainSimulator Module.zip = BrainSimulator\Tools\BrainSimulator Module.zip
-		BrainSimulator\Tools\Module.cs = BrainSimulator\Tools\Module.cs
-		BrainSimulator\Tools\ModuleDlg.xaml = BrainSimulator\Tools\ModuleDlg.xaml
-		BrainSimulator\Tools\ModuleDlg.xaml.cs = BrainSimulator\Tools\ModuleDlg.xaml.cs
-		BrainSimulator\Tools\VS Templates Readme.txt = BrainSimulator\Tools\VS Templates Readme.txt
-	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKS", "UKS\UKS.csproj", "{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +31,18 @@ Global
 		{C08F318A-B8E6-4187-9ED4-0A126B3B63A9}.Release|x64.Build.0 = Release|Any CPU
 		{C08F318A-B8E6-4187-9ED4-0A126B3B63A9}.Release|x86.ActiveCfg = Release|Any CPU
 		{C08F318A-B8E6-4187-9ED4-0A126B3B63A9}.Release|x86.Build.0 = Release|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Debug|x64.Build.0 = Debug|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Debug|x86.Build.0 = Debug|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Release|x64.ActiveCfg = Release|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Release|x64.Build.0 = Release|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Release|x86.ActiveCfg = Release|Any CPU
+		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
