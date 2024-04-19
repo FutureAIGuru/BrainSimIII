@@ -305,6 +305,7 @@ public partial class UKS
             return;
         }
         file.Close();
+        UKSTemp = new();
     }
 
     private static List<Type> GetTypesInUKS()

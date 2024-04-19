@@ -51,9 +51,8 @@ public partial class ModuleUKS : ModuleBase
         base.SetUpBeforeSave();
         if (fileName != null && fileName.Length > 0)
         {
-            theUKS.SaveUKStoXMLFile();
+            //theUKS.SaveUKStoXMLFile();
         }
-        theUKS.UKSTemp = new();
     }
 
     public override void SetUpAfterLoad()
@@ -63,7 +62,7 @@ public partial class ModuleUKS : ModuleBase
         if (!string.IsNullOrEmpty(fileName))
         {
             fileName = Utils.RebaseFolderToCurrentDevEnvironment(fileName);
-            theUKS.LoadUKSfromXMLFile();
+            //theUKS.LoadUKSfromXMLFile();
         }
         else
         {
@@ -75,7 +74,8 @@ public partial class ModuleUKS : ModuleBase
     //this is needed for the dialog treeview
     public List<Thing> GetTheUKS()
     {
-        return theUKS.UKSList;
+        return new List<Thing>();
+//        return theUKS.UKSList;
     }
 
 }

@@ -23,11 +23,21 @@ public partial class UKS
     }
     public List<Relationship> GetAllRelationships(List<Thing> sources, bool reverse) //with inheritance, conflicts, etc
     {
+        Console.WriteLine("Calling GetAllRelationships with count: " + sources.Count);
+        foreach (var x in sources)
+            Console.WriteLine(x.Label);
         var result1 = BuildSearchList(sources, reverse);
+        Console.WriteLine("0: " + result1.Count);
+        foreach (var x in result1)
+            Console.WriteLine(x.ToString());
         List<Relationship> result2 = GetAllRelationshipsInt(result1);
+        Console.WriteLine("1: " + result2.Count);
         RemoveConflictingResults(result2);
+        Console.WriteLine("2: " + result2.Count);
         RemoveFalseConditionals(result2);
+        Console.WriteLine("3: " + result2.Count);
         AlphabetizeRelationships(ref result2);
+        Console.WriteLine("Returning from GetAllRelationships with count: "+ result2.Count);
         return result2;
     }
 
@@ -57,6 +67,8 @@ public partial class UKS
     //TODO This is hardcoded to only follow "has" and "has-child" transitive relationships
     private  List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
     {
+        Console.WriteLine("Calling BuildSearchList with count: " + q.Count);
+
         List<ThingWithQueryParams> thingsToExamine = new();
         int maxHops = 20;
         int hopCount = 0;
@@ -142,6 +154,7 @@ public partial class UKS
                 if (hopCount > maxHops) break;
             }
         }
+        Console.WriteLine("Leaving BuildSearchList with count: " + thingsToExamine.Count);
         return thingsToExamine;
     }
 
@@ -176,9 +189,9 @@ public partial class UKS
 
                     //hack for numeric labels
                     Thing rootThing = r1.reltype;
-                    string[] parts = r.relType.Label.Split('.');
-                    if (parts.Length == 2 && int.TryParse(parts[1], out int x))
-                        rootThing = GetOrAddThing(parts[0]);
+                    //TODO  reenable
+                    if (r.relType.Label.Contains("."))
+                        rootThing = GetOrAddThing(r.relType.Label.Substring(0, r.relType.Label.IndexOf(".")));
                     Thing newRelType = CreateSubclass(rootThing, new List<Thing> { newCountType });
                     r1.reltype = newRelType;
                     result.Add(r1);

@@ -1,5 +1,5 @@
-﻿namespace UKS;
-
+﻿namespace UKS
+    ;
 public partial class UKS
 {
     //This is the actual Universal Knowledge Store
@@ -7,12 +7,13 @@ public partial class UKS
 
     //This is a temporary copy of the UKS which used during the save and restore process to 
     //break circular links by storing index values instead of actual links Note the use of SThing instead of Thing
-    public List<SThing> UKSTemp = new();
+    private  List<SThing> UKSTemp = new();
 
     public List<Thing> UKSList { get => uKSList;}
 
     public UKS()
     {
+        Console.WriteLine("UKS Constructor called");
         UKSList.Clear();
         ThingLabels.ClearLabelList();
 
