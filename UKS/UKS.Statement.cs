@@ -15,7 +15,7 @@ public partial class UKS
         object oTargetProperties = null
                     )
     {
-        try
+//        try
         {
             Thing source = ThingFromObject(oSource);
             Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
@@ -28,10 +28,10 @@ public partial class UKS
             Relationship theRelationship = AddStatement(source, relationshipType, target, sourceModifiers, relationshipTypeModifiers, targetModifiers);
             return theRelationship;
         }
-        catch (Exception ex)
-        {
-            return null;
-        }
+//        catch (Exception ex)
+//        {
+//            return null;
+//        }
     }
 
     public Relationship AddStatement(

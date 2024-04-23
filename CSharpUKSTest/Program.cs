@@ -1,5 +1,15 @@
 ﻿
+using Python.Runtime;
 using UKS;
+
+
+Runtime.PythonDLL = @"C:\Users\c_sim\AppData\Local\Programs\Python\Python310\python310.dll";
+PythonEngine.Initialize();
+using (Py.GIL())
+{
+    var module = PyModule.Import(@"C:\Users\c_sim\source\repos\BrainSimIIINEW\PythonUKSTest\PythonUKSTest.py");
+    var result = module.InvokeMethod("Fire");
+}
 
 Console.WriteLine("Hello, World!");
 

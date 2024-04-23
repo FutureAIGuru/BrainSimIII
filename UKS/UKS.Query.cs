@@ -23,21 +23,11 @@ public partial class UKS
     }
     public List<Relationship> GetAllRelationships(List<Thing> sources, bool reverse) //with inheritance, conflicts, etc
     {
-        Console.WriteLine("Calling GetAllRelationships with count: " + sources.Count);
-        foreach (var x in sources)
-            Console.WriteLine(x.Label);
         var result1 = BuildSearchList(sources, reverse);
-        Console.WriteLine("0: " + result1.Count);
-        foreach (var x in result1)
-            Console.WriteLine(x.ToString());
         List<Relationship> result2 = GetAllRelationshipsInt(result1);
-        Console.WriteLine("1: " + result2.Count);
         RemoveConflictingResults(result2);
-        Console.WriteLine("2: " + result2.Count);
         RemoveFalseConditionals(result2);
-        Console.WriteLine("3: " + result2.Count);
         AlphabetizeRelationships(ref result2);
-        Console.WriteLine("Returning from GetAllRelationships with count: "+ result2.Count);
         return result2;
     }
 
@@ -67,7 +57,6 @@ public partial class UKS
     //TODO This is hardcoded to only follow "has" and "has-child" transitive relationships
     private  List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
     {
-        Console.WriteLine("Calling BuildSearchList with count: " + q.Count);
 
         List<ThingWithQueryParams> thingsToExamine = new();
         int maxHops = 20;
@@ -154,7 +143,6 @@ public partial class UKS
                 if (hopCount > maxHops) break;
             }
         }
-        Console.WriteLine("Leaving BuildSearchList with count: " + thingsToExamine.Count);
         return thingsToExamine;
     }
 

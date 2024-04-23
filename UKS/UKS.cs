@@ -13,7 +13,6 @@ public partial class UKS
 
     public UKS()
     {
-        Console.WriteLine("UKS Constructor called");
         UKSList.Clear();
         ThingLabels.ClearLabelList();
 
