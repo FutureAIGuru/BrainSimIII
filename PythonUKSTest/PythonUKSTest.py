@@ -12,6 +12,7 @@
 #obj = ClassName()
 #xxx = obj.Method(params)
 
+
 #get the correct library
 import pythonnet
 from pythonnet import load
@@ -20,51 +21,51 @@ pythonnet.load("coreclr");
 #v = pythonnet.get_runtime_info()
 #print(v)
 
+
 #load the clr
 import clr
 from clr import *
-from System.Collections.Generic import List
 
-clr.AddReference("..\\UKS\\bin\\Debug\\net6.0\\UKS")
+clr.AddReference("C:\\Users\\c_sim\\source\\repos\\BrainSimIIINEW\\UKS\\bin\\Debug\\net8.0\\UKS")
+print("Hello1")
 from UKS import *
 print ("UKS.dll loaded!")
+from System.Collections.Generic import List
 
 #here's how you can put the UKS call into a try/catch block
 try:
     uks = UKS()
-    uks.AddStatement("Fido","is-a","dog")
 except Exception as e:
     print(f"Something Went wrong. {e.Message}  ")
 
-fidoThing = uks.Labeled("Fido")
-for thing in  fidoThing.Parents:
-    print (thing.ToString())
-
-uks.AddStatement("dog","has","leg","","4")
-uks.AddStatement("dog","has","fur")
-
-dog = uks.Labeled("dog")
-fido = uks.Labeled("Fido")
-print (fido.Label)
-
-listOfParams = List[Thing]()
-listOfParams.Add(dog)
-
-#results = dog.Relationships
-
-results = uks.GetAllRelationships(listOfParams,False);
-
-for relationship in results:
-    print (relationship.ToString())
-
-results = dog.Relationships
-
-for relationship in results:
-    print (relationship.ToString())
-
-
 def Fire():
-    return "hello"   
+    uks.AddStatement("Fido","is-a","dog")
+    fidoThing = uks.Labeled("Fido")
+    for thing in  fidoThing.Parents:
+        print (thing.ToString())
+
+    uks.AddStatement("dog","has","leg","","4")
+    uks.AddStatement("dog","has","fur")
+
+    dog = uks.Labeled("dog")
+    fido = uks.Labeled("Fido")
+    print (fido.Label)
+
+    listOfParams = List[Thing]()
+    listOfParams.Add(dog)
+
+    #results = dog.Relationships
+
+    results = uks.GetAllRelationships(listOfParams,False);
+
+    for relationship in results:
+        print (relationship.ToString())
+
+    results = dog.Relationships
+
+    for relationship in results:
+        print (relationship.ToString())
+
 
 
 

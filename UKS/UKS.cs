@@ -3,7 +3,7 @@
 public partial class UKS
 {
     //This is the actual Universal Knowledge Store
-    private List<Thing> uKSList = new() { Capacity = 1000000, };
+    static private List<Thing> uKSList = new() { Capacity = 1000000, };
 
     //This is a temporary copy of the UKS which used during the save and restore process to 
     //break circular links by storing index values instead of actual links Note the use of SThing instead of Thing
@@ -13,10 +13,11 @@ public partial class UKS
 
     public UKS()
     {
-        UKSList.Clear();
-        ThingLabels.ClearLabelList();
+        //UKSList.Clear();
+        //ThingLabels.ClearLabelList();
 
-        CreateInitialStructure();
+        if (UKSList.Count == 0)
+           CreateInitialStructure();
 
         UKSTemp.Clear();
 

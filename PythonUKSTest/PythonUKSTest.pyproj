@@ -21,7 +21,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="PythonUKSTest.py" />
+    <Content Include="PythonUKSTest.py">
+      <Publish>True</Publish>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UKS\UKS.csproj">
@@ -29,6 +31,9 @@
       <Project>{7c22fbb6-fe12-43d3-9f6f-479e830c94f6}</Project>
       <Private>True</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SpotTest.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
