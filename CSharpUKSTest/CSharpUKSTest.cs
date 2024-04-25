@@ -3,18 +3,21 @@ using Python.Runtime;
 using UKS;
 
 //this is a buffer of python modules so they can be imported once and run many times.
-List<(string,dynamic)> modules = new List<(string,dynamic)>();
+List<(string, dynamic)> modules = new List<(string, dynamic)>();
 
 Console.WriteLine("Hello, World!");
 
 UKS.UKS theUKS = new();
 theUKS.AddStatement("Spot", "is-a", "dog");
 
-//these are the module scripts to be run...they will soon be in a loop
-RunScript("SpotTest", modules);
-RunScript("PythonUKSTest",modules);
-RunScript("SpotTest", modules);
-RunScript("PythonUKSTest", modules);
+var pythonFiles = Directory.EnumerateFiles(".", "*.py").ToList();
+for (int i = 0; i < pythonFiles.Count; i++)
+    pythonFiles[i] = Path.GetFileNameWithoutExtension(pythonFiles[i]);
+
+for (int i = 0; i < 100; i++) //this is the main "Engine" loop 
+    foreach (var pythonFile in pythonFiles)
+        RunScript(pythonFile, modules);
+
 
 
 //here is mix/and/match between c# and python using the UKS
@@ -29,7 +32,7 @@ if (fido != null)
         Console.WriteLine(result);
 }
 
-static void RunScript(string scriptName, List<(string,dynamic)> modules)
+static void RunScript(string scriptName, List<(string, dynamic)> modules)
 {
     if (Runtime.PythonDLL == null)
     {
@@ -38,7 +41,7 @@ static void RunScript(string scriptName, List<(string,dynamic)> modules)
     }
     using (Py.GIL())
     {
-        var theModuleEntry = modules.FirstOrDefault(x=>x.Item1.ToLower() == scriptName.ToLower());
+        var theModuleEntry = modules.FirstOrDefault(x => x.Item1.ToLower() == scriptName.ToLower());
         if (string.IsNullOrEmpty(theModuleEntry.Item1))
         {
             Console.WriteLine("Loading " + scriptName);
@@ -46,7 +49,6 @@ static void RunScript(string scriptName, List<(string,dynamic)> modules)
             theModuleEntry = (scriptName, theModule);
             modules.Add(theModuleEntry);
         }
-        Console.WriteLine("Fire " + scriptName);
         theModuleEntry.Item2.Fire();
     }
 }
