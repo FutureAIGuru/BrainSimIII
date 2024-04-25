@@ -27,9 +27,7 @@ import clr
 from clr import *
 
 clr.AddReference("UKS")
-print("Hello1")
 from UKS import *
-print ("UKS.dll loaded!")
 from System.Collections.Generic import List
 
 #here's how you can put the UKS call into a try/catch block
