@@ -9,7 +9,7 @@ import clr
 from clr import *
 from UKS import *
 print ("UKS.dll loaded!")
-clr.AddReference("C:\\Users\\c_sim\\source\\repos\\BrainSimIIINEW\\UKS\\bin\\Debug\\net8.0\\UKS")
+clr.AddReference("UKS")
 uks = UKS()
 from System.Collections.Generic import List
 

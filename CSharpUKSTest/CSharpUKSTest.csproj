@@ -15,4 +15,19 @@
     <ProjectReference Include="..\UKS\UKS.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="CSharpUKSTest.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="PythonUKSTest.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SpotTest.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

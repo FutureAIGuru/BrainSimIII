@@ -10,7 +10,7 @@ Console.WriteLine("Hello, World!");
 UKS.UKS theUKS = new();
 theUKS.AddStatement("Spot", "is-a", "dog");
 
-//these are the module scripts to be run
+//these are the module scripts to be run...they will soon be in a loop
 RunScript("SpotTest", modules);
 RunScript("PythonUKSTest",modules);
 RunScript("SpotTest", modules);
@@ -33,7 +33,7 @@ static void RunScript(string scriptName, List<(string,dynamic)> modules)
 {
     if (Runtime.PythonDLL == null)
     {
-        Runtime.PythonDLL = @"C:\Users\c_sim\AppData\Local\Programs\Python\Python310\python310.dll";
+        Runtime.PythonDLL = @"Python310.dll";
         PythonEngine.Initialize();
     }
     using (Py.GIL())

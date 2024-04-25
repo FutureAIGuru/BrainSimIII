@@ -26,7 +26,7 @@ pythonnet.load("coreclr");
 import clr
 from clr import *
 
-clr.AddReference("C:\\Users\\c_sim\\source\\repos\\BrainSimIIINEW\\UKS\\bin\\Debug\\net8.0\\UKS")
+clr.AddReference("UKS")
 print("Hello1")
 from UKS import *
 print ("UKS.dll loaded!")
