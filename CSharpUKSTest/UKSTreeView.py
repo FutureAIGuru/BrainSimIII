@@ -14,8 +14,6 @@
 
 
 #get the correct library
-from asyncio.windows_events import NULL
-import glob
 from tkinter.ttk import Treeview
 from turtle import width
 import pythonnet
@@ -69,6 +67,24 @@ def handleOpenEvent(event):
 def handleMotionEvent(event):
     print(event)    
 
+def __init__(self,parent):
+        Tkinter.Frame.__init__(self, parent, relief=Tkinter.SUNKEN, bd=2)
+        self.parent = parent        
+
+        self.menubar = Tkinter.Menu(self)
+        self.parent.winfo_toplevel().configure(menu=self.menubar)
+
+        self.tree = ttk.Treeview(self)
+
+        self.yscrollbar = ttk.Scrollbar(self, orient='vertical', command=self.tree.yview)
+        self.tree.configure(yscrollcommand=self.yscrollbar.set)
+
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        self.yscrollbar.grid(row=0, column=1, sticky='nse')
+        self.yscrollbar.configure(command=self.tree.yview)
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 def main():
     # Create the main window
     global root
@@ -77,7 +93,7 @@ def main():
 
     global theTreeView
     theTreeView = Treeview(root,columns=1)
-    theTreeView.grid(row=0,column=0,padx=20,pady=20,sticky='nsew')
+    theTreeView.grid(row=0,column=0,padx=20,pady=20,sticky="nsew")
     # Inserted at the root, program chooses id:
     iid = theTreeView.insert('', 'end', 'Thing', text='Thing')  
     theTreeView.item(iid,open=True)

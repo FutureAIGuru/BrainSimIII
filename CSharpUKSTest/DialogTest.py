@@ -14,8 +14,6 @@
 
 
 #get the correct library
-from asyncio.windows_events import NULL
-import glob
 import pythonnet
 from pythonnet import load
 pythonnet.load("coreclr");
