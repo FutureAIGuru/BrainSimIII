@@ -15,12 +15,12 @@ from System.Collections.Generic import List
 
     
 def Fire():
-    print("Fire Called in SpotTest")
-    print("Ancestors of SPot")
+    # print("Fire Called in SpotTest")
+    # print("Ancestors of SPot")
 
     fidoThing = uks.Labeled("Spot")
-    for thing in  fidoThing.Ancestors:
-        print (thing.ToString())
+    # for thing in  fidoThing.Ancestors:
+    #     print (thing.ToString())
 
 
 

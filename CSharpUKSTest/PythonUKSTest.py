@@ -38,31 +38,31 @@ except Exception as e:
 
 def Fire():
     uks.AddStatement("Fido","is-a","dog")
-    fidoThing = uks.Labeled("Fido")
-    for thing in  fidoThing.Parents:
-        print (thing.ToString())
+    # fidoThing = uks.Labeled("Fido")
+    # for thing in  fidoThing.Parents:
+    #     print (thing.ToString())
 
-    uks.AddStatement("dog","has","leg","","4")
-    uks.AddStatement("dog","has","fur")
+    # uks.AddStatement("dog","has","leg","","4")
+    # uks.AddStatement("dog","has","fur")
 
-    dog = uks.Labeled("dog")
-    fido = uks.Labeled("Fido")
-    print (fido.Label)
+    # dog = uks.Labeled("dog")
+    # fido = uks.Labeled("Fido")
+    # print (fido.Label)
 
-    listOfParams = List[Thing]()
-    listOfParams.Add(dog)
+    # listOfParams = List[Thing]()
+    # listOfParams.Add(dog)
 
-    #results = dog.Relationships
+    # #results = dog.Relationships
 
-    results = uks.GetAllRelationships(listOfParams,False);
+    # results = uks.GetAllRelationships(listOfParams,False);
 
-    for relationship in results:
-        print (relationship.ToString())
+    # for relationship in results:
+    #     print (relationship.ToString())
 
-    results = dog.Relationships
+    # results = dog.Relationships
 
-    for relationship in results:
-        print (relationship.ToString())
+    # for relationship in results:
+    #     print (relationship.ToString())
 
 
 

@@ -12,7 +12,8 @@ var pythonFiles = Directory.EnumerateFiles(".", "*.py").ToList();
 for (int i = 0; i < pythonFiles.Count; i++)
     pythonFiles[i] = Path.GetFileNameWithoutExtension(pythonFiles[i]);
 
-for (int i = 0; i < 100; i++) //this is the main "Engine" loop 
+//for (int i = 0; i < 100; i++) //this is the main "Engine" loop 
+while (true)
     foreach (var pythonFile in pythonFiles)
         RunScript(pythonFile, modules);
 
@@ -43,6 +44,7 @@ static void RunScript(string scriptName, List<(string, dynamic)> modules)
         catch
         {
             Console.WriteLine("Python engine initialization failed");
+            return;
         }
     }
     using (Py.GIL())
@@ -58,18 +60,23 @@ static void RunScript(string scriptName, List<(string, dynamic)> modules)
                 theModuleEntry = (scriptName, theModule);
                 modules.Add(theModuleEntry);
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine("Load/initialize failed for module: " + theModuleEntry.Item1);
+                Console.WriteLine("Load/initialize failed for module: " + scriptName + "   Reason: " + ex.Message);
+                theModuleEntry = (scriptName, null);
+                modules.Add(theModuleEntry);
             }
         }
-        try
+        if (theModuleEntry.Item2 != null)
         {
-            theModuleEntry.Item2.Fire();
-        }
-        catch
-        {
-            Console.WriteLine("Fire method call failed for module: " + theModuleEntry.Item1);
+            try
+            {
+                theModuleEntry.Item2.Fire();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Fire method call failed for module: " + scriptName + "   Reason: " + ex.Message);
+            }
         }
     }
 }
