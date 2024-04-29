@@ -64,6 +64,8 @@ def textChanged2(sv):
         input_target.configure(bg='pink')
     
 
+def handleReturn(event):
+    submit_input()   
 def submit_input():
     # Process the input from the entry widgets
     source = input_source.get()
@@ -77,6 +79,9 @@ def main():
     global root
     root = tk.Tk()
     root.title = "Add Relationship to UKS"
+    root.geometry("+100+100")
+    #root.overrideredirect(True)
+    #root.deiconify()
 
     #set up a callback
     sv0 = StringVar()
@@ -101,7 +106,8 @@ def main():
     input_target.grid(row=2,column=1,pady=10,padx=10)
     
     submit_button = Button(root, text="Submit", command=lambda:submit_input()).grid(row=3,column=1,sticky="W",pady=20)
-    root.bind('<Return>',submit_input())
+    
+    root.bind('<Return>',handleReturn)
 
 
 main()

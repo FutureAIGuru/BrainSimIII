@@ -1,114 +1,136 @@
-﻿#pip install pythonnet
-#doesn't work with .net 8.0
-#does work with .net 6.0
+﻿#display a dialog with a treeview of the UKS content
 
-#OUTLINE: HOW to setup the dll for a Python Module
-#import pythonnet
-#from pythonnet import load
-#pythonnet.load("coreclr");
-#import clr
-#clr.AddReference("pathToDll\\dllName")
-#from nameSpace import *
-#obj = ClassName()
-#xxx = obj.Method(params)
+#TODO:
+#icon in upper left displays correctly if script is called direclty but not if from c#
+#dialog title never displays correctly
+#UKS load and save should be added
+#dislog should not show in windows titlebar
+#dialog should be a child of the calling window so it will show in front of the command prompt screen
+#get rid of remaining globals
+#only fill in children if they are displayed
+#standardized way of handling height-width-position setup
 
 
-#get the correct library
+#time needed for refresh
+import time
+
+#GUI library
+import tkinter as tk
+from tkinter import StringVar,Label, Entry, Button
+from tkinter import ttk
 from tkinter.ttk import Treeview
-from turtle import width
+
+#for PythonNet
 import pythonnet
 from pythonnet import load
-pythonnet.load("coreclr");
-#you might need the version info for debugging
-#v = pythonnet.get_runtime_info()
-#print(v)
-
-
-#load the clr
 import clr
 from clr import *
+pythonnet.load("coreclr");
 
+#import the UKS
 clr.AddReference("UKS")
 from UKS import *
 from System.Collections.Generic import List
-
-#here's how you can put the UKS call into a try/catch block
 try:
     uks = UKS()
 except Exception as e:
-    print(f"Something Went wrong. {e.Message}  ")
+    print(f"UKS could not be found. {e.Message}  ")
 
 
-#from tkinter import a*
-import tkinter as tk
-from tkinter import StringVar,Label, Entry, Button
-print("Hello from UKSTreeView")
+#keep track of expanded items so refresh can preserve them
+listOfOpenItems = []        
 
-def Refresh_click():
+#pause the refresh if the mouse is inside the control
+updatePaused = False
+
+
+def Refhesh():
     #Clear the treeview list items
     for item in theTreeView.get_children():
        theTreeView.delete(item)    
     iid = theTreeView.insert('', 'end', 'Things', text='Thing')    
+    #build the new tree content
     AddChildren(iid,'Thing')
     
 def AddChildren(parentID,itemLabel):
+    #recursively add children to the treeview
     theParentThing = uks.Labeled(itemLabel)
-    if (theParentThing == None):
+    if (theParentThing == None):  #safety
         return
     children = theParentThing.Children
     for child in children:
         iid = theTreeView.insert(parentID,'end',child.Label,text=child.ToString())
-        theTreeView.item(parentID,open=True)
+        if (parentID in listOfOpenItems):
+            theTreeView.item(parentID,open=True)
         AddChildren(iid,child.Label)
-    
+ 
 def handleOpenEvent(event):
+    #add the open item to the list
     item_id = theTreeView.focus();
-    print(item_id)    
-def handleMotionEvent(event):
-    print(event)    
+    if (item_id not in listOfOpenItems):
+        listOfOpenItems.append(item_id)
+def handleCloseEvent(event):
+    #remove the closed item from the list
+    item_id = theTreeView.focus();
+    if (item_id in listOfOpenItems):
+        listOfOpenItems.remove(item_id)
+def handleMouseEnter(event):
+    #Set color bakcground light blue
+    style.configure("Treeview", background="light blue", fieldbackground="light blue")
+    #pause update
+    updatePaused = True
+def handleMouseLeave(event):
+    #Set color bakcground white
+    style.configure("Treeview", background="white", fieldbackground="white")
+    #resume update
+    updatePaused =False
 
-def __init__(self,parent):
-        Tkinter.Frame.__init__(self, parent, relief=Tkinter.SUNKEN, bd=2)
-        self.parent = parent        
 
-        self.menubar = Tkinter.Menu(self)
-        self.parent.winfo_toplevel().configure(menu=self.menubar)
-
-        self.tree = ttk.Treeview(self)
-
-        self.yscrollbar = ttk.Scrollbar(self, orient='vertical', command=self.tree.yview)
-        self.tree.configure(yscrollcommand=self.yscrollbar.set)
-
-        self.tree.grid(row=0, column=0, sticky="nsew")
-        self.yscrollbar.grid(row=0, column=1, sticky='nse')
-        self.yscrollbar.configure(command=self.tree.yview)
-
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
 def main():
     # Create the main window
     global root
     root = tk.Tk()
     root.title = "View the UKS tree"
+    root.iconbitmap = "iconsmall.ico"    
+    root.geometry("400x400+250+250")
+
+    global style
+    style = ttk.Style(root)
+    style.theme_use("clam")
 
     global theTreeView
-    theTreeView = Treeview(root,columns=1)
-    theTreeView.grid(row=0,column=0,padx=20,pady=20,sticky="nsew")
-    # Inserted at the root, program chooses id:
+    theTreeView = Treeview(root,columns=1,show="tree")
+    theTreeView.pack(expand=True,fill=tk.BOTH,padx=10,pady=10)
+    
+    # Inserted at the root:
     iid = theTreeView.insert('', 'end', 'Thing', text='Thing')  
-    theTreeView.item(iid,open=True)
     AddChildren(iid,'Thing')
     
-    submit_button = Button(root, text="Refresh", command=lambda:Refresh_click()).grid(row=3,column=0,sticky="ws",pady=20)
-    root.bind('<Return>',Refresh_click())
-    #to grab mouse motion
-    #theTreeView.bind('<Motion>',handleMotionEvent)
+    #TODO Add load and save command buttons here
+    #submit_button = Button(root, text="Refresh", command=lambda:Refhesh())
+    #submit_button.pack()
+
+    #set up the Treeview events to handle
     theTreeView.bind('<<TreeviewOpen>>',handleOpenEvent)
+    theTreeView.bind('<<TreeviewClose>>',handleCloseEvent)
+    theTreeView.bind('<Enter>',handleMouseEnter)
+    theTreeView.bind('<Leave>',handleMouseLeave)
     
 
 main()
 
+
 def Fire():
-     root.update()
+    if updatePaused:
+        return
+    global prevTime
+    currTime = time.time() 
+    try:
+        if (currTime > prevTime + 1):
+            Refhesh()
+            prevTime = currTime
+    except NameError:
+        prevTime = currTime
+    root.update()
    
 

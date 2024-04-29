@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpUKSTest", "CSharpUKST
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PythonUKSTest", "PythonUKSTest\PythonUKSTest.pyproj", "{6E7C4795-6A6A-4BDD-AF17-5B440F9CA3EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauiApp2", "MauiApp2\MauiApp2.csproj", "{FA9873FC-AC99-4C8D-A2AD-B2E062F91182}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauiApp2", "MauiApp2\MauiApp2.csproj", "{FA9873FC-AC99-4C8D-A2AD-B2E062F91182}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
