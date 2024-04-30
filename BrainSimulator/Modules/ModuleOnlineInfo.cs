@@ -887,6 +887,7 @@ namespace BrainSimulator.Modules
                     temperature = 0,
                     max_tokens = 200,
                     // IMPORTANT: Add your model here after fine tuning on OpenAI using word_only_dataset.jsonl.
+                    //model = "<YOUR_FINETUNED_MODEL_HERE>",
                     model = "<YOUR_FINETUNED_MODEL_HERE>",
                     messages = new[] {
                         new { role = "system", content = "Provide answers that are common sense seperated by commas." },

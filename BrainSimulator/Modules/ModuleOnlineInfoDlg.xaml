@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="ModuleDlgConceptNet Module Dialog" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
     <Grid Name="theGrid" SizeChanged="TheCanvas_SizeChanged" >
-        <TextBox x:Name="txtInput" Text="Single-Word" FontSize="16" TextWrapping="Wrap" Margin="58,62,319,0" PreviewKeyDown="txtInput_PreviewKeyDown" Height="37" VerticalAlignment="Top" />
+        <TextBox x:Name="txtInput" Text="Single-Word" FontSize="16" TextWrapping="Wrap" Margin="58,62,410,0" PreviewKeyDown="txtInput_PreviewKeyDown" Height="37" VerticalAlignment="Top" />
         <TextBox x:Name="txtOutput" FontSize="14" TextWrapping="Wrap" Text="TextBox" Margin="58,133,79,54" />
         <ComboBox x:Name="comboSelection" SelectedIndex="0" FontSize="18" Height="37" Margin="0,62,79,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="211" SelectionChanged="comboSelection_SelectionChanged">
             <ComboBoxItem>ChatGPT</ComboBoxItem>
@@ -21,5 +21,9 @@
             <ComboBoxItem>Oxford Word List</ComboBoxItem>
         </ComboBox>
         <Button Content="Clear" Height="29" Margin="0,0,152,10" VerticalAlignment="Bottom" Click="ClearButton_Click" HorizontalAlignment="Right" Width="102"/>
+        <ComboBox x:Name="relationshipSelection" SelectedIndex="0" FontSize="18" Height="37" Margin="0,62,309,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="91" SelectionChanged="comboSelection_SelectionChanged">
+            <ComboBoxItem Content="is-a"/>
+            <ComboBoxItem Content="hasa"/>
+        </ComboBox>
     </Grid>
 </local:ModuleBaseDlg>

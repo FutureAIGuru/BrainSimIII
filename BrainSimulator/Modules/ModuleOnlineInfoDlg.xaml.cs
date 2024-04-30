@@ -55,7 +55,19 @@ namespace BrainSimulator.Modules
             {
                 string txt = txtInput.Text;
                 ModuleOnlineInfo mcn = (ModuleOnlineInfo)base.ParentModule;
+                string currentRelationship = ((ComboBoxItem)relationshipSelection.SelectedItem).Content.ToString();
+                ModuleOnlineInfo.QueryType qType = ModuleOnlineInfo.QueryType.isa;
                 string currentSearch = ((ComboBoxItem)comboSelection.SelectedItem).Content.ToString();
+                switch (currentRelationship)
+                {
+                    case "is-a":
+                        qType = ModuleOnlineInfo.QueryType.isa;
+                        break;
+                    case "hasa":
+                        qType = ModuleOnlineInfo.QueryType.hasa;
+                        break;
+                }
+
                 switch (currentSearch)
                 {
                     case "ChatGPT":
@@ -69,7 +81,7 @@ namespace BrainSimulator.Modules
                             mcn.GetChatGPTDataFine(txt.Substring(0,txt.Length-3), ModuleOnlineInfo.QueryType.can);
                         else
                         {
-                            mcn.GetChatGPTDataFine(txt, ModuleOnlineInfo.QueryType.isa);
+                            mcn.GetChatGPTDataFine(txt, qType);
                             //Thread.Sleep(1000);
                             //mcn.GetChatGPTData(txt, ModuleOnlineInfo.QueryType.hasa);
                             //Thread.Sleep(1000);
@@ -107,7 +119,6 @@ namespace BrainSimulator.Modules
                 }
             }
         }
-
         private void comboSelection_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (sender is ComboBox cb)
