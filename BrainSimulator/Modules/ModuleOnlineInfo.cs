@@ -18,6 +18,8 @@ using Pluralize.NET;
 using System.Windows.Xps;
 using static System.Net.Mime.MediaTypeNames;
 using System.ComponentModel;
+using System.Configuration;
+using System.Windows.Documents;
 
 namespace BrainSimulator.Modules
 {
@@ -851,6 +853,100 @@ namespace BrainSimulator.Modules
         }
 
         public enum QueryType { general, isa, hasa, can, count, list, listCount, types, partsOf };
+        public async void GetChatGPTDataFine(string textIn, QueryType qtIn = QueryType.isa, string altLabel = "")
+        {
+            //Original API Key: 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
+            //Update 4/5 sk - GAyHuyKv6OzH4L45w6ndT3BlbkFJ1DZfTZFkFwtAQWaZgWWX
+            try
+            {
+                QueryType qType = qtIn;
+                if (altLabel == "") altLabel = textIn;
+                string prompt;
+                string apiKey = ConfigurationManager.AppSettings["APIKey"];
+                var client = new HttpClient();
+                var url = "https://api.openai.com/v1/chat/completions";
+                string queryText = textIn;
+                textIn = textIn.ToLower();
+
+                switch (qType)
+                {
+                    case QueryType.general:
+                        queryText = textIn;
+                        break;
+                    case QueryType.isa:
+                        queryText = $"Provide is-a answers about the following: {textIn}";
+                        break;
+                    case QueryType.hasa:
+                        queryText = $"Provide has answers about the following: {textIn}";
+                        break;
+                }
+
+                // Define the request body
+                var requestBody = new
+                {
+                    temperature = 0,
+                    max_tokens = 200,
+                    // IMPORTANT: Add your model here after fine tuning on OpenAI using word_only_dataset.jsonl.
+                    model = "<YOUR_FINETUNED_MODEL_HERE>",
+                    messages = new[] {
+                        new { role = "system", content = "Provide answers that are common sense seperated by commas." },
+                        new { role = "user", content = queryText }
+                    },
+                };
+
+                // Serialize the request body to JSON
+                var requestBodyJson = JsonConvert.SerializeObject(requestBody);
+
+                // Create the request message
+                var request = new HttpRequestMessage(HttpMethod.Post, url);
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+                request.Content = new StringContent(requestBodyJson, Encoding.UTF8, "application/json");
+
+                // Send the request and get the response
+                var response = await client.SendAsync(request);
+
+                // Deserialize the response body to a CompletionResult object
+                var responseJson = await response.Content.ReadAsStringAsync();
+                CompletionResult completionResult = JsonConvert.DeserializeObject<CompletionResult>(responseJson);
+                if (completionResult.choices != null)
+                {
+
+                    // Extract the generated text from the CompletionResult object
+                    Output = completionResult.choices[0].message.content.Trim().ToLower();
+                    Debug.WriteLine(">>>" + queryText);
+                    Debug.WriteLine(Output);
+                    //some sort of error occurred
+                    if (Output.Contains("language model")) return;
+
+                    // Split by comma (,) to get individual values
+                    string[] values = Output.Split(",");
+                    // Get the UKS
+                    GetUKS();
+                    foreach (string s in values)
+                    {
+                        Debug.WriteLine("Individual Itm: " + s);
+                        switch (qType)
+                        {
+                            case QueryType.isa:
+                                UKS.AddStatement(textIn, "is-a", s);
+                                // UKS.AddStatement(parameters[0], "is-a", parameters[2]);
+                                break;
+                            case QueryType.hasa:
+                                UKS.AddStatement(textIn, "have", s);
+                                break;
+                        }
+                    }
+
+
+                }
+                else
+                    if (completionResult.error != null) Output = completionResult.error.message;
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
         public async void GetChatGPTData(string textIn, QueryType qtIn = QueryType.isa, string altLabel = "")
         {
             //Original API Key: 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
@@ -860,7 +956,7 @@ namespace BrainSimulator.Modules
                 QueryType qType = qtIn;
                 if (altLabel == "") altLabel = textIn;
                 string prompt;
-                string apiKey = "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";
+                string apiKey = ConfigurationManager.AppSettings["APIKey"];
                 var client = new HttpClient();
                 var url = "https://api.openai.com/v1/chat/completions";
                 string queryText = textIn;
@@ -903,7 +999,9 @@ namespace BrainSimulator.Modules
                     temperature = 0,
                     max_tokens = 200,
                     model = "gpt-3.5-turbo",
-                    messages = new[] { new { role = "user", content = queryText } },
+                    messages = new[] {
+                        new { role = "user", content = queryText }
+                    },
                 };
 
                 // Serialize the request body to JSON
