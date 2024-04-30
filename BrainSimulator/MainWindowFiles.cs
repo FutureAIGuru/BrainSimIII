@@ -82,12 +82,30 @@ namespace BrainSimulator
                     
                 nameList.Add(BrainSim3Data.modules[i].Label, i);
             }
+            for (int i = 0; i < BrainSim3Data.pythonModules.Count; i++)
+                nameList.Add(BrainSim3Data.pythonModules[i], i);
 
             //add the modules to the stackPanel
             foreach (var x in nameList)
             {
-                ModuleBase mod = BrainSim3Data.modules[x.Value];
-                AddModuleToLoadedModules(x.Value, mod);
+                if (!x.Key.Contains(".py"))
+                {
+                    ModuleBase mod = BrainSim3Data.modules[x.Value];
+                    AddModuleToLoadedModules(x.Value, mod);
+                }
+                else
+                {
+                    TextBlock tb = new TextBlock();
+                    tb.Text = x.Key;
+                    tb.Margin = new Thickness(5, 2, 5, 2);
+                    tb.Padding = new Thickness(10, 3, 10, 3);
+                    tb.ContextMenu = new ContextMenu();
+//                    ModuleView.CreateContextMenu(i, mod, tb, tb.ContextMenu);
+//                    if (mod.isEnabled)
+                    tb.Background = new SolidColorBrush(Colors.LightGreen);
+  //                  else tb.Background = new SolidColorBrush(Colors.Pink);
+                    loadedModulesSP.Children.Add(tb);
+                }
             }
         }
 

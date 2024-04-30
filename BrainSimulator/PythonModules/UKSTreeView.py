@@ -86,12 +86,13 @@ def handleMouseLeave(event):
     updatePaused =False
 
 
+import os
 def main():
     # Create the main window
     global root
     root = tk.Tk()
-    root.title = "View the UKS tree"
-    root.iconbitmap = "iconsmall.ico"    
+    root.title("View the UKS tree")
+    root.iconbitmap(os.getcwd()+"\\iconsmall.ico")    
     root.geometry("400x400+250+250")
 
     global style

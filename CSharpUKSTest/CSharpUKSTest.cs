@@ -5,9 +5,11 @@ using UKS;
 //this is a buffer of python modules so they can be imported once and run many times.
 List<(string, dynamic)> modules = new List<(string, dynamic)>();
 
+//TESTING  REMOVE
 UKS.UKS theUKS = new();
 theUKS.AddStatement("Spot", "is-a", "dog");
 
+//TODO: check to see if files are updated and reload
 var pythonFiles = Directory.EnumerateFiles(".", "*.py").ToList();
 for (int i = 0; i < pythonFiles.Count; i++)
     pythonFiles[i] = Path.GetFileNameWithoutExtension(pythonFiles[i]);
@@ -16,20 +18,6 @@ for (int i = 0; i < pythonFiles.Count; i++)
 while (true)
     foreach (var pythonFile in pythonFiles)
         RunScript(pythonFile, modules);
-
-
-//DEBUG STUFF...REMOVE
-//here is mix/and/match between c# and python using the UKS
-theUKS.AddStatement("Fido", "is-a", "dog");
-theUKS.AddStatement("dog", "has", "leg", "", "4");
-theUKS.AddStatement("dog", "has", "fur");
-Thing fido = theUKS.Labeled("Fido");
-if (fido != null)
-{
-    var results = theUKS.GetAllRelationships(new List<Thing>() { fido }, false);
-    foreach (var result in results)
-        Console.WriteLine(result);
-}
 
 static void RunScript(string scriptName, List<(string, dynamic)> modules)
 {

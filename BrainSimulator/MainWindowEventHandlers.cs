@@ -171,8 +171,16 @@ namespace BrainSimulator
                 {
                     string moduleName = ((Label)cb.SelectedItem).Content.ToString();
                     cb.SelectedIndex = -1;
-                    ModuleBase newModule = CreateNewModule(moduleName);
-                    MainWindow.BrainSim3Data.modules.Add(newModule);
+                    if (!moduleName.Contains(".py"))
+                    {
+                        ModuleBase newModule = CreateNewModule(moduleName);
+                        MainWindow.BrainSim3Data.modules.Add(newModule);
+                    }
+                    else
+                    {
+                        if (!BrainSim3Data.pythonModules.Contains(moduleName))
+                        BrainSim3Data.pythonModules.Add(moduleName);
+                    }
                 }
             }
             loadedModulesSP = LoadedModuleSP;
