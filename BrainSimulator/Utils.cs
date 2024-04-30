@@ -16,8 +16,9 @@ using System.Windows.Input;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media.Media3D;
-using System.Diagnostics;
 using System.IO;
+using System.Windows.Navigation;
+using System.Net.Http.Headers;
 
 namespace BrainSimulator
 {
@@ -83,6 +84,13 @@ namespace BrainSimulator
             }
             catch { }
         }
+        public HSLColor(byte a, byte r, byte g, byte b)
+        {
+            System.Drawing.Color c1 = System.Drawing.Color.FromArgb(255, r, g, b);
+            hue = c1.GetHue();
+            saturation = c1.GetSaturation();
+            luminance = c1.GetBrightness();
+        }
         public HSLColor(Color c)
         {
             System.Drawing.Color c1 = System.Drawing.Color.FromArgb(255, c.R, c.G, c.B);
@@ -107,7 +115,7 @@ namespace BrainSimulator
         public override string ToString()
         { return "H:" + hue.ToString("f2") + " S:" + saturation.ToString("f2") + " L:" + luminance.ToString("f2"); }
 
-        public static float operator -(HSLColor c1,HSLColor c2)
+        public static float operator -(HSLColor c1, HSLColor c2)
         {
             //any lum > .95 is white  \
             //any lum < .15 is black    -set hue to .5
@@ -118,7 +126,7 @@ namespace BrainSimulator
             if (c2.luminance > 0.95) c2.hue = 0.5f;
             else if (c2.luminance < .1) c2.hue = 0.5f;
             else if (c2.saturation < .1) c2.hue = 0.5f;
-            float diff = Abs(c1.hue- c2.hue) * 5 + Abs(c1.saturation - c2.saturation) + Abs(c1.luminance - c2.luminance);
+            float diff = Abs(c1.hue - c2.hue) * 5 + Abs(c1.saturation - c2.saturation) + Abs(c1.luminance - c2.luminance);
             diff /= 7;
             return diff;
         }
@@ -156,12 +164,12 @@ namespace BrainSimulator
 
             Color c;
 
-            if (000 <= hue && hue < 060) c = Color.FromArgb(255, (byte)((C+m)*255), (byte)((X+m)*255), (byte)((0+m)*255));
-            if (060 <= hue && hue < 120) c = Color.FromArgb(255, (byte)((X+m)*255), (byte)((C+m)*255), (byte)((0+m)*255));
-            if (120 <= hue && hue < 180) c = Color.FromArgb(255, (byte)((0+m)*255), (byte)((C+m)*255), (byte)((X+m)*255));
-            if (180 <= hue && hue < 240) c = Color.FromArgb(255, (byte)((0+m)*255), (byte)((X+m)*255), (byte)((C+m)*255));
-            if (240 <= hue && hue < 300) c = Color.FromArgb(255, (byte)((X+m)*255), (byte)((0+m)*255), (byte)((C+m)*255));
-            if (300 <= hue && hue < 345) c = Color.FromArgb(255, (byte)((C+m)*255), (byte)((0+m)*255), (byte)((C+m)*255));
+            if (000 <= hue && hue < 060) c = Color.FromArgb(255, (byte)((C + m) * 255), (byte)((X + m) * 255), (byte)((0 + m) * 255));
+            if (060 <= hue && hue < 120) c = Color.FromArgb(255, (byte)((X + m) * 255), (byte)((C + m) * 255), (byte)((0 + m) * 255));
+            if (120 <= hue && hue < 180) c = Color.FromArgb(255, (byte)((0 + m) * 255), (byte)((C + m) * 255), (byte)((X + m) * 255));
+            if (180 <= hue && hue < 240) c = Color.FromArgb(255, (byte)((0 + m) * 255), (byte)((X + m) * 255), (byte)((C + m) * 255));
+            if (240 <= hue && hue < 300) c = Color.FromArgb(255, (byte)((X + m) * 255), (byte)((0 + m) * 255), (byte)((C + m) * 255));
+            if (300 <= hue && hue < 345) c = Color.FromArgb(255, (byte)((C + m) * 255), (byte)((0 + m) * 255), (byte)((C + m) * 255));
 
             return c;
         }
@@ -189,7 +197,7 @@ namespace BrainSimulator
                 if (c1.luminance > .95) return true;
             }
             float absHueDiff = Abs(hue - c1.hue);
-            if (absHueDiff < 5 || absHueDiff > 355 )
+            if (absHueDiff < 5 || absHueDiff > 355)
                 return true;
             return false;
         }
@@ -344,7 +352,7 @@ namespace BrainSimulator
 
             return Brushes.Gray;
         }
-        
+
         // Hue values for Green, Blue, Cyan, Magenta, Yellow, Orange, Lime and Purple
         // public static List<int> HuesToDetect = new() { 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360, 0 };
 
@@ -353,14 +361,15 @@ namespace BrainSimulator
             if (hsl.luminance < .10) return "Black";
             if (hsl.luminance > .9) return "White";
             if (hsl.saturation < .12) return "Gray";
-            if (hsl.hue <  15 || hsl.hue >= 345) return "Red";
-            if (hsl.hue >=  15 && hsl.hue <  45) return "Orange";
-            if (hsl.hue >=  45 && hsl.hue <  75) return "Yellow";
-            if (hsl.hue >=  75 && hsl.hue < 105) return "Chartreuse";
-            if (hsl.hue >= 105 && hsl.hue < 135) {
+            if (hsl.hue < 15 || hsl.hue >= 345) return "Red";
+            if (hsl.hue >= 15 && hsl.hue < 45) return "Orange";
+            if (hsl.hue >= 45 && hsl.hue < 75) return "Yellow";
+            if (hsl.hue >= 75 && hsl.hue < 105) return "Chartreuse";
+            if (hsl.hue >= 105 && hsl.hue < 135)
+            {
                 if (hsl.luminance < .40) return "Green";
                 else return "Lime";
-            } 
+            }
             if (hsl.hue >= 135 && hsl.hue < 165) return "Spring Green";
             if (hsl.hue >= 165 && hsl.hue < 195) return "Cyan";
             if (hsl.hue >= 195 && hsl.hue < 225) return "Azure";
@@ -371,7 +380,7 @@ namespace BrainSimulator
                 else return "Magenta";
             }
             if (hsl.hue >= 315 && hsl.hue < 345) return "Rose";
-            
+
             return "Gray";
         }
 
@@ -379,9 +388,9 @@ namespace BrainSimulator
         {
             if (HSLColors == null || HSLColors.Count == 0) return null;
             HSLColor ret = HSLColors[0];
-            for ( int i = 1; i < HSLColors.Count; i++ )
+            for (int i = 1; i < HSLColors.Count; i++)
             {
-                if (HSLColors[i] != null &&  Abs( HSLColors[i].luminance - 50 ) < Abs(ret.luminance - 50) )
+                if (HSLColors[i] != null && Abs(HSLColors[i].luminance - 50) < Abs(ret.luminance - 50))
                 {
                     ret = HSLColors[i];
                 }
@@ -394,7 +403,7 @@ namespace BrainSimulator
                 return false;
             List<string> validColors = new List<string>
             {
-                "Red", "Orange", "Yellow", "Chartreuse", "Green", "Spring Green", "Cyan", 
+                "Red", "Orange", "Yellow", "Chartreuse", "Green", "Spring Green", "Cyan",
                 "Azure", "Blue", "Magenta", "Rose", "Black", "White", "Silver", "Gray", "Maroon", "Olive", "Purple"
             };
             if (validColors.Contains(colorName))
@@ -502,27 +511,30 @@ namespace BrainSimulator
             return FindDistanceToSegment(new Point(0, 0), s.P1.P, s.P2.P, out closest);
         }
 
-        public static Vector GetClosestPointOnLine(Vector A, Vector B, Vector P)
+        public static float DistancePointToSegment(Segment s, PointPlus PIn)
         {
+            Point A = s.P1;
+            Point B = s.P2;
+            Point P = PIn;
             Vector AP = P - A;       //Vector from A to P   
-            Vector AB = B - A;       //Vector from A to B  
+            Vector AB = B - A;    //Vector from A to B  
 
             float magnitudeAB = (float)(AB.Length * AB.Length);     //Magnitude of AB vector (it's length squared)     
-            float ABAPproduct = (float)Vector.Multiply(AP, AB);    //The DOT product of a_to_p and a_to_b     
+            float ABAPproduct = (float)Vector.Multiply(AP, AB);    //The DOT product of a_to_p and a_to_b--projection of P onto AB     
             float distance = ABAPproduct / magnitudeAB; //The normalized "distance" from a to your closest point  
 
-            //if (distance < 0)     //Check if P projection is over vectorAB     
-            //{
-            //    return A;
-
-            //}
-            //else if (distance > 1)
-            //{
-            //    return B;
-            //}
-            //else
+            if (distance < 0)     //Check if P projection is over vectorAB     
             {
-                return A + AB * distance;
+                return (float)AP.Length;
+            }
+            else if (distance > 1)
+            {
+                return (float)(P-B).Length;
+            }
+            else
+            {
+                PointPlus closest = A + AB * distance;
+                return (closest-PIn).R;
             }
         }
 
@@ -544,6 +556,10 @@ namespace BrainSimulator
             return retVal;
         }
 
+        public static float FindDistanceToSegment(Point pt, Segment s)
+        {
+            return (float)FindDistanceToSegment(pt, s.P1, s.P2, out Point closest);
+        }
         // Calculate the distance between
         // point pt and the segment p1 --> p2.
         public static double FindDistanceToSegment(
@@ -587,39 +603,44 @@ namespace BrainSimulator
 
             return Math.Sqrt(dx * dx + dy * dy);
         }
-
         public static bool SegmentsIntersect(Point p1, Point p2, Point p3, Point p4)
         {
             FindIntersection(p1, p2, p3, p4,
             out bool lines_intersect, out bool segments_intersect,
             out Point intersection,
             out Point close_p1, out Point close_p2,
-            out double collisionAngle);
+            out Angle collisionAngle);
             return segments_intersect;
         }
 
         // Find the point of intersection between
         // the lines p1 --> p2 and p3 --> p4.
+        public static bool FindIntersection(Segment s1, Segment s2, out PointPlus intersection, out Angle angle)
+        {
+            bool retVal = FindIntersection(s1.P1, s1.P2, s2.P1, s2.P2, out Point intersectionPt, out angle);
+            intersection = intersectionPt;
+            return retVal;
+        }
         public static bool FindIntersection(
             Point p1, Point p2, Point p3, Point p4,
-            out Point intersection
+            out Point intersection, out Angle angle
             )
         {
             FindIntersection(p1, p2, p3, p4,
             out bool lines_intersect, out bool segments_intersect,
             out intersection,
             out Point close_p1, out Point close_p2,
-            out double collisionAngle);
+            out angle);
             return segments_intersect;
         }
-        public static void FindIntersection(Point p1, Point p2, 
+        public static void FindIntersection(Point p1, Point p2,
                                             Point p3, Point p4,
-                                            out bool lines_intersect, 
+                                            out bool lines_intersect,
                                             out bool segments_intersect,
                                             out Point intersection,
-                                            out Point close_p1, 
+                                            out Point close_p1,
                                             out Point close_p2,
-                                            out double collisionAngle)
+                                            out Angle collisionAngle)
         {
             // Get the segments' parameters.
             double dx12 = p2.X - p1.X;
@@ -683,13 +704,20 @@ namespace BrainSimulator
             close_p1 = new Point(p1.X + dx12 * t1, p1.Y + dy12 * t1);
             close_p2 = new Point(p3.X + dx34 * t2, p3.Y + dy34 * t2);
         }
-
         public static float DistancePointToLine(Point P, Point P1, Point P2)
         {
-            double distance = Math.Abs((P2.X - P1.X) * (P1.Y - P.Y) - (P1.X - P.X) * (P2.Y - P1.Y)) /
-                    Math.Sqrt(Math.Pow(P2.X - P1.X, 2) + Math.Pow(P2.Y - P1.Y, 2));
+            double distance = Abs((P2.X - P1.X) * (P1.Y - P.Y) - (P1.X - P.X) * (P2.Y - P1.Y)) /
+                    Sqrt(Pow(P2.X - P1.X, 2) + Math.Pow(P2.Y - P1.Y, 2));
             return (float)distance;
         }
+        public static Segment ExtendSegment(Segment s, float dist)
+        {
+            Segment retVal = new Segment();
+            retVal.P1 = ExtendSegment(s.P1, s.P2, dist, true);
+            retVal.P2 = ExtendSegment(s.P1, s.P2, dist, false);
+            return retVal;
+        }
+
 
         //find a point which is dist off the end of a line segment
         public static PointPlus ExtendSegment(Point P1, Point P2, float dist, bool firstPt)
@@ -724,7 +752,7 @@ namespace BrainSimulator
             if (polygon == null) return false;
             if (polygon.Count() == 2)
             {
-                float dist = Utils.DistancePointToLine(testPoint, polygon[0], polygon[1]);
+                float dist = DistancePointToLine(testPoint, polygon[0], polygon[1]);
                 if (dist < 0.1f) return true;
                 return false;
             }
@@ -1034,7 +1062,7 @@ namespace BrainSimulator
                 fullPath = fullPath.Substring(index);
                 string Path1 = Path.GetFullPath(".");
                 string Path2 = Path1.Replace("\\bin\\Debug\\net6.0-windows", "");
-                fullPath = Path2 + fullPath; 
+                fullPath = Path2 + fullPath;
             }
             return fullPath;
         }
@@ -1081,9 +1109,9 @@ namespace BrainSimulator
             if (cameraPan == null) cameraPan = Angle.FromDegrees(0);
             if (cameraTilt == null) cameraTilt = Angle.FromDegrees(0);
             DateTime now = DateTime.Now;
-            string filename = now.ToString("yyyyMMdd_HHmmss_fff") + "_" + 
-                              (int)deltaTurn.ToDegrees() + "_" + deltaMove.ToString("F1") + "_" +
-                              (int)cameraPan.ToDegrees() + "_" + (int)cameraTilt.ToDegrees() + "_." + extension;
+            string filename = now.ToString("yyyyMMdd_HHmmss_fff") + "_" +
+                              (int)deltaTurn.Degrees + "_" + deltaMove.ToString("F1") + "_" +
+                              (int)cameraPan.Degrees + "_" + (int)cameraTilt.Degrees + "_." + extension;
             return System.IO.Path.Combine(folder, filename);
         }
 
@@ -1140,7 +1168,7 @@ namespace BrainSimulator
             if (!int.TryParse(parts[6], out int a)) return Angle.FromDegrees(0);
             return Angle.FromDegrees(a);
         }
-        
+
         static int trackid = 1000;
 
         public static string NewTrackID()

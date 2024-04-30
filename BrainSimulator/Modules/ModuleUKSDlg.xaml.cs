@@ -13,7 +13,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using System.Diagnostics;
 
 namespace BrainSimulator.Modules;
 
@@ -84,7 +83,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         if (thing is not null)
         {
             totalItemCount = 0;
-            TreeViewItem tvi = new() { Header = thing.Label };
+            TreeViewItem tvi = new() { Header = thing.ToString()};
             tvi.ContextMenu = GetContextMenu(thing);
             tvi.IsExpanded = true; //always expand the top-level item
             theTreeView.Items.Add(tvi);
@@ -112,13 +111,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void AddChildren(Thing t, TreeViewItem tvi, int depth, string parentLabel)
     {
         if (totalItemCount > 3000) return;
-        if (t.Label == "dog")
-        { }
 
         List<Relationship> theChildren = new();
         foreach (Relationship r in t.Relationships)
         {
-            if (Relationship.TrimDigits(r.reltype?.Label) == "has-child" && r.target != null)
+            if (r.relType?.Label.StartsWith("has-child") == true && r.target != null)
             {
                 theChildren.Add(r);
             }
@@ -132,11 +129,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             Thing child = r.target;
             int descCount = child.GetDescendentsCount();
             string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
-            string header = child.Label;
+            string header = child.ToString();
             if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 
-            if (r.weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
-                header = "<" + r.weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.lastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
-            if (r.reltype.HasRelationship(UKS.Labeled("not")) != null) //prepend ! for negative  children
+            if (r.Weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
+                header = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
+            if (r.relType.HasRelationship(UKS.Labeled("not")) != null) //prepend ! for negative  children
                 header = "!" + header;
             if (detailsCB.IsChecked == true)
                 header += ":" + child.Children.Count + "," + descCountStr;
@@ -149,7 +146,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviChild.SetValue(ThingObjectProperty, child);
             if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
                 tviChild.Background = new SolidColorBrush(Colors.LightGreen);
-            if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+            if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                 tviChild.Background = new SolidColorBrush(Colors.LightYellow);
 
             if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
@@ -220,16 +217,14 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             }
             else if (r.relType is not null) //should ALWAYS be true
             {
-                string count = "";
-                if (r.count != 0) count = r.count + ")";
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r), };
 
                 if (r.source != t) tviRef.Header = r.source?.Label + "->" + tviRef.Header;
                 tviRef.ContextMenu = GetRelationshipContextMenu(r);
                 tviRefLabel.Items.Add(tviRef);
-                if (r.lastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
+                if (r.LastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
                     tviRef.Background = new SolidColorBrush(Colors.LightGreen);
-                if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+                if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                     tviRef.Background = new SolidColorBrush(Colors.LightYellow);
                 totalItemCount++;
             }
@@ -251,8 +246,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRefLabel.IsExpanded = true;
         tvi.Items.Add(tviRefLabel);
 
-        IList<Relationship> sortedReferencedBy = t.RelationshipsFrom.OrderBy(x => -x.Value).ToList();
-        foreach (Relationship r in sortedReferencedBy)
+        foreach (Relationship r in t.RelationshipsFrom)
         {
             if (r.relType?.Label == "has-child") continue;
             TreeViewItem tviRef;
@@ -260,9 +254,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRef = new TreeViewItem {Header = headerstring1};
             tviRef.ContextMenu = GetRelationshipContextMenu(r);
             tviRefLabel.Items.Add(tviRef);
-            if (r.lastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
+            if (r.LastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
                 tviRef.Background = new SolidColorBrush(Colors.LightGreen);
-            if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+            if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                 tviRef.Background = new SolidColorBrush(Colors.LightYellow);
             totalItemCount++;
         }
@@ -530,7 +524,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         if (r.relType is null || r.relType.Label != "has-child")
             retVal = r.ToString() + " ";
         if (detailsCB.IsChecked == true)
-            retVal = "<" + r.weight.ToString("f2")+","+(r.TimeToLive==TimeSpan.MaxValue?"∞": (r.lastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
+            retVal = "<" + r.Weight.ToString("f2")+","+(r.TimeToLive==TimeSpan.MaxValue?"∞": (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
         return retVal;
     }
 
@@ -723,7 +717,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 parent.fileName = openFileDialog.FileName;
-                parent.LoadUKSfromXMLFile((btn.Content.ToString()=="Merge"));
+                parent.LoadUKSfromXMLFile(null,btn.Content.ToString()=="Merge");
                 MainWindow.ResumeEngine();
             }
             openFileDialog.Dispose();

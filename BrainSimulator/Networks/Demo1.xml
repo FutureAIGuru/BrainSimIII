@@ -36,8 +36,8 @@
       <isEnabled>true</isEnabled>
       <Label>UKSQuery_1</Label>
       <dlgPos>
-        <X>705</X>
-        <Y>423</Y>
+        <X>704</X>
+        <Y>440</Y>
       </dlgPos>
       <dlgSize>
         <X>530</X>
@@ -50,8 +50,8 @@
       <isEnabled>true</isEnabled>
       <Label>UKSClause_1</Label>
       <dlgPos>
-        <X>187</X>
-        <Y>129</Y>
+        <X>168</X>
+        <Y>213</Y>
       </dlgPos>
       <dlgSize>
         <X>530</X>

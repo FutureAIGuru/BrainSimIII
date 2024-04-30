@@ -11,7 +11,7 @@ namespace BrainSimulator.Modules
         List<Relationship> succeededConditions = new();
 
         //TODO This is hard-codedd to "is" relationships
-        public List<Thing> GetAllAttributes(Thing t) //with inheritance, conflicts, etc
+        private  List<Thing> GetAllAttributes(Thing t) //with inheritance, conflicts, etc
         {
             List<Thing> retVal = new();
 
@@ -22,6 +22,12 @@ namespace BrainSimulator.Modules
                     retVal.Add(r.target);
             return retVal;
         }
+        /// <summary>
+        /// Gets all relationships to a gropu of Things includeing inherited relationships
+        /// </summary>
+        /// <param name="sources"></param>
+        /// <param name="reverse">if true, the first parameter is a list of targets rather than sources</param>
+        /// <returns>List of matching relationships</returns>
         public List<Relationship> GetAllRelationships(List<Thing> sources, bool reverse) //with inheritance, conflicts, etc
         {
             var result1 = BuildSearchList(sources, reverse);
@@ -98,12 +104,12 @@ namespace BrainSimulator.Modules
                             {
                                 thing = r.source,
                                 hopCount = hopCount,
-                                weight = curWeight * r.weight,
+                                weight = curWeight * r.Weight,
                                 reachedWith = r.relType,
                             };
                             thingsToExamine.Add(thingToAdd);
                             //if things have counts, they are multiplied
-                            int val = GetCount(r.reltype);
+                            int val = GetCount(r.relType);
                             thingToAdd.haveCount = curCount * val;
                         }
                     }
@@ -127,12 +133,12 @@ namespace BrainSimulator.Modules
                             {
                                 thing = r.target,
                                 hopCount = hopCount,
-                                weight = curWeight * r.weight,
+                                weight = curWeight * r.Weight,
                                 reachedWith = r.relType,
                             };
                             thingsToExamine.Add(thingToAdd);
                             //if things have counts, they are multiplied
-                            int val = GetCount(r.reltype);
+                            int val = GetCount(r.relType);
                             thingToAdd.haveCount = curCount * val;
                         }
                     }
@@ -161,7 +167,7 @@ namespace BrainSimulator.Modules
                 //relationshipsToAdd.AddRange(t.RelationshipsAsTypeWriteable);
                 foreach (Relationship r in relationshipsToAdd)
                 {
-                    if (r.reltype == Thing.HasChild) continue;
+                    if (r.relType == Thing.HasChild) continue;
 
                     //only add the new relatinoship to the list if it is not already in the list
                     bool ignoreSource = thingsToExamine[i].hopCount > 1;
@@ -173,15 +179,15 @@ namespace BrainSimulator.Modules
                         //this creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                         //this (transient) relationshiop doesn't exist in the UKS
                         Relationship r1 = new Relationship(r);
-                        Thing newCountType = GetOrAddThing((GetCount(r.reltype) * haveCount).ToString(), "number");
+                        Thing newCountType = GetOrAddThing((GetCount(r.relType) * haveCount).ToString(), "number");
 
                         //hack for numeric labels
-                        Thing rootThing = r1.reltype;
+                        Thing rootThing = r1.relType;
                         string[] parts = r.relType.Label.Split('.');
                         if (parts.Length == 2 && int.TryParse(parts[1], out int x))
                             rootThing = GetOrAddThing(parts[0]);
                         Thing newRelType = CreateSubclass(rootThing, new List<Thing> { newCountType });
-                        r1.reltype = newRelType;
+                        r1.relType = newRelType;
                         result.Add(r1);
                     }
                     else
@@ -213,7 +219,7 @@ namespace BrainSimulator.Modules
             for (int i = 0; i < result.Count; i++)
             {
                 Relationship r1 = result[i];
-                if (!ConditionsAreMet(r1.clauses, r1))
+                if (!ConditionsAreMet(r1.Clauses, r1))
                 {
                     failedConditions.Add(r1);
                     result.RemoveAt(i);
@@ -226,6 +232,12 @@ namespace BrainSimulator.Modules
             }
         }
 
+        /// <summary>
+        /// Filters a list of Relationships returning only those with at least one component which  has an ancestor in the list of Ancestors
+        /// </summary>
+        /// <param name="result">List of Relationships from a previous Query</param>
+        /// <param name="ancestors">Filter</param>
+        /// <returns></returns>
         public IList<Relationship> FilterResults(List<Relationship> result, List<Thing> ancestors)
         {
             List<Relationship> retVal = new();
@@ -259,7 +271,7 @@ namespace BrainSimulator.Modules
         }
 
         //determine if a single thing's relationships contain the sequence
-        public bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
+        private bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
         {
             //TODO modify to find closest match, return the matching score instead of bool
             //TODO this requires that all entries in a sequence must be adjascent without any intervening extraneous relationships
@@ -281,6 +293,11 @@ namespace BrainSimulator.Modules
         }
 
         //find all the things containing the sequence of attributes
+        /// <summary>
+        /// Returns a list of Things which have all the target attributes as Relationships
+        /// </summary>
+        /// <param name="targetAttributes">An ordered list of Things which must occur as attributes in the search target</param>
+        /// <returns>All the Things which match the criteria</returns>
         public List<Thing> HasSequence(List<Thing> targetAttributes)
         {
             //get a list of all things with the given attributes
@@ -291,7 +308,7 @@ namespace BrainSimulator.Modules
                         if (!retVal.Contains(r.source))
                             retVal.Add(r.source);
 
-            //remove the onew without the sequence
+            //remove the ones without the sequence
             for (int i = 0; i < retVal.Count; i++)
             {
                 if (!HasSequence(retVal[i].Relationships, targetAttributes))
@@ -305,13 +322,18 @@ namespace BrainSimulator.Modules
         }
 
         //TODO add parameter to allow some number of misses
-        public bool HasAllAttributes(Thing t, List<Thing> targetAttributes)
+        private bool HasAllAttributes(Thing t, List<Thing> targetAttributes)
         {
             List<Thing> thingAttributes = GetAllAttributes(t);
             foreach (Thing t2 in targetAttributes)
                 if (!thingAttributes.Contains(t2) && !t.AncestorList().Contains(t2)) return false;
             return true;
         }
+        /// <summary>
+        /// Returns a list of Things which have ALL the given attributes (IS Relationships)
+        /// </summary>
+        /// <param name="attributes">List of Things</param>
+        /// <returns></returns>
         public List<Thing> FindThingsWithAttributes(List<Thing> attributes)
         {
             List<Thing> retVal = new();
@@ -319,7 +341,7 @@ namespace BrainSimulator.Modules
             foreach (Thing t in attributes)
             {
                 foreach (Relationship r in t.RelationshipsFrom)
-                    if (r.reltype.Label == "is")
+                    if (r.relType.Label == "is")
                     {
                         attribOwners.Add(r.source);
                     }
@@ -354,11 +376,11 @@ namespace BrainSimulator.Modules
             return false;
         }
 
-        bool ConditionsAreMet(List<ClauseType> clauses, Relationship query)
+        bool ConditionsAreMet(List<Clause> clauses, Relationship query)
         {
             if (clauses.Count == 0) return true;
             //if (StackContains("ConditionsAreMet",1)) return true;
-            foreach (ClauseType c in clauses)
+            foreach (Clause c in clauses)
             {
                 if (c.clauseType.Label.ToLower() != "if") continue;
                 Relationship r = c.clause;
@@ -370,7 +392,7 @@ namespace BrainSimulator.Modules
                 if (query.target != null && query.target.AncestorList().Contains(q.source))
                     q.source = query.target;
                 var qResult = Relationship.GetRelationship(q);
-                if (qResult != null && qResult.weight < 0.8)
+                if (qResult != null && qResult.Weight < 0.8)
                     return false;
                 if (qResult == null)
                 {
@@ -382,10 +404,18 @@ namespace BrainSimulator.Modules
             }
             return true;
         }
+        /// <summary>
+        /// Returns a list of Relationships which were false in the previous query
+        /// </summary>
+        /// <returns></returns>
         public List<Relationship> WhyNot()
         {
             return failedConditions;
         }
+        /// <summary>
+        /// Returns a list of Relatioships which were true in the previous query
+        /// </summary>
+        /// <returns></returns>
         public List<Relationship> Why()
         {
             return succeededConditions;

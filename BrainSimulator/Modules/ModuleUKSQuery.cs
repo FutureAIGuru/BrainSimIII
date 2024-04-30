@@ -7,9 +7,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using Pluralize.NET;
-using static BrainSimulator.Modules.ModuleUKS;
 
 namespace BrainSimulator.Modules
 {
@@ -126,7 +123,7 @@ Follow has ONLY if called out in type
                 Relationship r = relationships[i];
                 if (target != "" && !r.target.HasAncestor(targetList[0]))
                 { relationships.RemoveAt(i); i--; continue; }
-                if (relType != "" && !r.reltype.HasAncestorLabeled(relType))
+                if (relType != "" && !r.relType.HasAncestorLabeled(relType))
                 { relationships.RemoveAt(i); i--; continue; }
             }
 

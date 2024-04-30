@@ -1,23 +1,30 @@
-﻿using Emgu.CV.Dnn;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Windows.Documents;
 
 namespace BrainSimulator.Modules
 {
     public partial class ModuleUKS
     {
-        //this overload lets you pass in
-        //a string or a thing for the first three parameters
-        //and a string, Thing, or list of string or Thing for the last 3
-        public Relationship AddStatement(
-            object oSource, object oRelationshipType, object oTarget,
-            object oSourceProperties = null,
-            object oTypeProperties = null,
-            object oTargetProperties = null
-                        )
+
+        /// <summary>
+        /// Creates a Relationship. <br/>
+        /// Parameters may be Things or strings. If strings, they represent Thing labels and if the Things with those lables
+        /// do not exist, they will be created. <br/>
+        /// If the RelationshipType has an inverse, the inverse will be used and the Relationship will be reversed so that 
+        /// Fido IsA Dog become Dog HasChild Fido.<br/>
+        /// If Attributes are given, they apply to the applicable source, type, or target parameter. Example "Fido","IsA","Dog",null,null,"Big" creates or locates 
+        /// an existing Thing which is a child of Dog and has the attribute IS Big (perhaps labeled Dog.Big). Then Fido is made a child of that Thing.
+        /// </summary>
+        /// <param name="oSource">string or Thing</param>
+        /// <param name="oRelationshipType">string or Thing</param>
+        /// <param name="oTarget">string or Thing (or null)</param>
+        /// <param name="oSourceAttributess">String containing one or more Thing labels separated by spaces, list of strings with individusl Thing Labels, Thing, OR List of Things</param>
+        /// <param name="oTypeAttributes">Same</param>
+        /// <param name="oTargetAttributess">Same</param>
+        /// <returns>The primary relationship which was created (others may be created for given attributes</returns>
+
+        public Relationship AddStatement(object oSource, object oRelationshipType, object oTarget,
+            object oSourceAttributess = null,object oTypeAttributes = null,object oTargetAttributess = null)
         {
             try
             {
@@ -25,9 +32,9 @@ namespace BrainSimulator.Modules
                 Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
                 Thing target = ThingFromObject(oTarget);
 
-                List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
-                List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "Action");
-                List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
+                List<Thing> sourceModifiers = ThingListFromObject(oSourceAttributess);
+                List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeAttributes, "Action");
+                List<Thing> targetModifiers = ThingListFromObject(oTargetAttributess);
 
                 Relationship theRelationship = AddStatement(source, relationshipType, target, sourceModifiers, relationshipTypeModifiers, targetModifiers);
                 return theRelationship;
@@ -38,7 +45,7 @@ namespace BrainSimulator.Modules
             }
         }
 
-        public Relationship AddStatement(
+        private Relationship AddStatement(
                         Thing source, Thing relType, Thing target,
                         List<Thing> sourceProperties,
                         List<Thing> typeProperties,
@@ -68,13 +75,13 @@ namespace BrainSimulator.Modules
             {
                 Relationship rReverse = new Relationship(r);
                 (rReverse.source, rReverse.target) = (rReverse.target, rReverse.source);
-                rReverse.clauses.Clear();
+                rReverse.Clauses.Clear();
                 WriteTheRelationship(rReverse);
             }
 
             //if this is adding a child relationship, remove any unknownObject parent
             ClearExtraneousParents(r.source);
-            ClearExtraneousParents(r.T);
+            ClearExtraneousParents(r.target);
             ClearExtraneousParents(r.relType);
             ClearRedundancyInAncestry(r.target);
 
@@ -102,7 +109,7 @@ namespace BrainSimulator.Modules
         private Thing bestMatch = null;
         private List<Thing> missingAttributes;
 
-        public Relationship CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target,
+        private Relationship CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target,
             ref List<Thing> sourceProperties, List<Thing> typeProperties, ref List<Thing> targetProperties)
         {
             Thing inverseType1 = CheckForInverse(relType);
@@ -144,7 +151,7 @@ namespace BrainSimulator.Modules
             relType = relType1;
 
             Relationship r = new Relationship()
-            { source = source, reltype = relType, target = target };
+            { source = source, relType = relType, target = target };
 
             r.source?.SetFired();
             r.target?.SetFired();
@@ -162,29 +169,29 @@ namespace BrainSimulator.Modules
                 if (sourceRel == existingRelationship)
                 {
                     //strengthen this relationship
-                    existingRelationship.weight += (1 - existingRelationship.weight) / 2.0f;
+                    existingRelationship.Weight += (1 - existingRelationship.Weight) / 2.0f;
                     existingRelationship.Fire();
                 }
                 else if (RelationshipsAreExclusive(existingRelationship, sourceRel))
                 {
                     //special cases for "not" so we delete rather than weakening
-                    if (existingRelationship.reltype.Children.Contains(sourceRel.relType) && HasAttribute(sourceRel.relType, "not"))
+                    if (existingRelationship.relType.Children.Contains(sourceRel.relType) && HasAttribute(sourceRel.relType, "not"))
                     {
                         newSource.RemoveRelationship(sourceRel);
                         i--;
                     }
-                    if (sourceRel.reltype.Children.Contains(existingRelationship.relType) && HasAttribute(existingRelationship.relType, "not"))
+                    if (sourceRel.relType.Children.Contains(existingRelationship.relType) && HasAttribute(existingRelationship.relType, "not"))
                     {
                         newSource.RemoveRelationship(sourceRel);
                         i--;
                     }
                     else
                     {
-                        if (existingRelationship.weight == 1 && sourceRel.weight == 1)
-                            sourceRel.weight = .5f;
+                        if (existingRelationship.Weight == 1 && sourceRel.Weight == 1)
+                            sourceRel.Weight = .5f;
                         else
-                            sourceRel.weight = Math.Clamp(sourceRel.weight - .2f, -1, 1);
-                        if (sourceRel.weight <= 0)
+                            sourceRel.Weight = Math.Clamp(sourceRel.Weight - .2f, -1, 1);
+                        if (sourceRel.Weight <= 0)
                         {
                             newSource.RemoveRelationship(sourceRel);
                             i--;
@@ -288,7 +295,7 @@ namespace BrainSimulator.Modules
             foreach (Thing t1 in attributes)
             {
                 Relationship r1 = new Relationship()
-                { source = retVal, reltype = ThingLabels.GetThing("is"), target = t1 };
+                { source = retVal, relType = ThingLabels.GetThing("is"), target = t1 };
                 WriteTheRelationship(r1);
             }
             return retVal;
@@ -297,7 +304,7 @@ namespace BrainSimulator.Modules
         private Thing CheckForInverse(Thing relationshipType)
         {
             if (relationshipType == null) return null;
-            Relationship inverse = relationshipType.Relationships.FindFirst(x => x.reltype.Label == "inverseOf");
+            Relationship inverse = relationshipType.Relationships.FindFirst(x => x.relType.Label == "inverseOf");
             if (inverse != null) return inverse.target;
             //use the bwlow if inverses are 2-way.  Without this, there is a one-way translation
             //inverse = relationshipType.RelationshipsBy.FindFirst(x => x.reltype.Label == "inverseOf");
@@ -315,7 +322,7 @@ namespace BrainSimulator.Modules
         public static void WriteTheRelationship(Relationship r)
         {
             if (r.source == null && r.target == null) return;
-            if (r.reltype == null) return;
+            if (r.relType == null) return;
             if (r.target == null)
             {
                 lock (r.source.RelationshipsWriteable)
@@ -323,8 +330,8 @@ namespace BrainSimulator.Modules
                     {
                         if (!r.source.RelationshipsWriteable.Contains(r))
                             r.source.RelationshipsWriteable.Add(r);
-                        if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
-                            r.reltype.RelationshipsAsTypeWriteable.Add(r);
+                        if (!r.relType.RelationshipsAsTypeWriteable.Contains(r))
+                            r.relType.RelationshipsAsTypeWriteable.Add(r);
                     }
             }
             else if (r.source == null)
@@ -334,8 +341,8 @@ namespace BrainSimulator.Modules
                     {
                         if (!r.target.RelationshipsWriteable.Contains(r))
                             r.target.RelationshipsFromWriteable.Add(r);
-                        if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
-                            r.reltype.RelationshipsAsTypeWriteable.Add(r);
+                        if (!r.relType.RelationshipsAsTypeWriteable.Contains(r))
+                            r.relType.RelationshipsAsTypeWriteable.Add(r);
                     }
             }
             else
@@ -348,8 +355,8 @@ namespace BrainSimulator.Modules
                                 r.source.RelationshipsWriteable.Add(r);
                             if (!r.target.RelationshipsWriteable.Contains(r))
                                 r.target.RelationshipsFromWriteable.Add(r);
-                            if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
-                                r.reltype.RelationshipsAsTypeWriteable.Add(r);
+                            if (!r.relType.RelationshipsAsTypeWriteable.Contains(r))
+                                r.relType.RelationshipsAsTypeWriteable.Add(r);
                         }
             }
         }

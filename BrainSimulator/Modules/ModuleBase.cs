@@ -10,9 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using System.Xml.Serialization;
-using Emgu.CV;
 using System.Windows.Threading;
-using System.Windows.Media;
 
 namespace BrainSimulator.Modules
 {
@@ -47,9 +45,6 @@ namespace BrainSimulator.Modules
         abstract public void Fire();
 
         abstract public void Initialize();
-        public virtual void SetInputImage(Mat inputImage, string inputFilename)
-        {
-        }
         
         public virtual void UKSInitializedNotification()
         {
@@ -204,13 +199,6 @@ namespace BrainSimulator.Modules
                 dlg.Height = dlgSize.Y;
             }
 
-            // if (mainWindow.ActualWidth > 800) //try to keep dialogs on the screen
-            // {
-            //     if (dlg.Width + dlg.Left > mainWindow.ActualWidth)
-            //         dlg.Left = mainWindow.ActualWidth - dlg.Width;
-            //     if (dlg.Height + dlg.Top > mainWindow.ActualHeight)
-            //         dlg.Top = mainWindow.ActualHeight - dlg.Height;
-            //}
 
 
 #if !DEBUG
