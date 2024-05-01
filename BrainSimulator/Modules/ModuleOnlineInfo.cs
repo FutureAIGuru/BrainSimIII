@@ -591,7 +591,7 @@ namespace BrainSimulator.Modules
                             word = word.Replace("’", "");
                             word = word.ToLower();
                             word = RemoveParentheticals(word);
-                            word = Relationship.TrimDigits(word.Trim());
+                            //word = Relationship.TrimDigits(word.Trim());
 
                             if (word == "" && pos.Count > 0)
                                 word = prevWord;
@@ -855,8 +855,6 @@ namespace BrainSimulator.Modules
         public enum QueryType { general, isa, hasa, can, count, list, listCount, types, partsOf };
         public async void GetChatGPTDataFine(string textIn, QueryType qtIn = QueryType.isa, string altLabel = "")
         {
-            //Original API Key: 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
-            //Update 4/5 sk - GAyHuyKv6OzH4L45w6ndT3BlbkFJ1DZfTZFkFwtAQWaZgWWX
             try
             {
                 QueryType qType = qtIn;
@@ -888,7 +886,7 @@ namespace BrainSimulator.Modules
                     max_tokens = 200,
                     // IMPORTANT: Add your model here after fine tuning on OpenAI using word_only_dataset.jsonl.
                     //model = "<YOUR_FINETUNED_MODEL_HERE>",
-                    model = "<YOUR_FINETUNED_MODEL_HERE>",
+                    model = ConfigurationManager.AppSettings["FineTunedModel"],
                     messages = new[] {
                         new { role = "system", content = "Provide answers that are common sense seperated by commas." },
                         new { role = "user", content = queryText }
@@ -933,7 +931,7 @@ namespace BrainSimulator.Modules
                                 // UKS.AddStatement(parameters[0], "is-a", parameters[2]);
                                 break;
                             case QueryType.hasa:
-                                UKS.AddStatement(textIn, "have", s);
+                                UKS.AddStatement(textIn, "has", s);
                                 break;
                         }
                     }
