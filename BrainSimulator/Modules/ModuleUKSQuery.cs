@@ -124,7 +124,7 @@ Follow has ONLY if called out in type
                 Relationship r = relationships[i];
                 if (target != "" && !r.target.HasAncestor(targetList[0]))
                 { relationships.RemoveAt(i); i--; continue; }
-                if (relType != "" && !r.reltype.HasAncestorLabeled(relType))
+                if (relType != "" && !r.relType.HasAncestorLabeled(relType))
                 { relationships.RemoveAt(i); i--; continue; }
             }
 

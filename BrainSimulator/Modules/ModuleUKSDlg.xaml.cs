@@ -112,10 +112,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void AddChildren(Thing t, TreeViewItem tvi, int depth, string parentLabel)
     {
         if (totalItemCount > 3000) return;
+
         List<Relationship> theChildren = new();
         foreach (Relationship r in t.Relationships)
         {
-            if (Relationship.TrimDigits(r.reltype?.Label) == "has-child" && r.target != null)
+            if (r.relType?.Label.StartsWith("has-child") == true && r.target != null)
             {
                 theChildren.Add(r);
             }
@@ -146,7 +147,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviChild.SetValue(ThingObjectProperty, child);
             if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
                 tviChild.Background = new SolidColorBrush(Colors.LightGreen);
-            if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+            if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                 tviChild.Background = new SolidColorBrush(Colors.LightYellow);
 
             if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
@@ -217,16 +218,14 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             }
             else if (r.relType is not null) //should ALWAYS be true
             {
-                string count = "";
-                if (r.count != 0) count = r.count + ")";
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r), };
 
                 if (r.source != t) tviRef.Header = r.source?.Label + "->" + tviRef.Header;
                 tviRef.ContextMenu = GetRelationshipContextMenu(r);
                 tviRefLabel.Items.Add(tviRef);
-                if (r.lastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
+                if (r.LastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
                     tviRef.Background = new SolidColorBrush(Colors.LightGreen);
-                if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+                if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                     tviRef.Background = new SolidColorBrush(Colors.LightYellow);
                 totalItemCount++;
             }
@@ -248,8 +247,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRefLabel.IsExpanded = true;
         tvi.Items.Add(tviRefLabel);
 
-        IList<Relationship> sortedReferencedBy = t.RelationshipsFrom.OrderBy(x => -x.Value).ToList();
-        foreach (Relationship r in sortedReferencedBy)
+        foreach (Relationship r in t.RelationshipsFrom)
         {
             if (r.relType?.Label == "has-child") continue;
             TreeViewItem tviRef;
@@ -257,9 +255,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRef = new TreeViewItem {Header = headerstring1};
             tviRef.ContextMenu = GetRelationshipContextMenu(r);
             tviRefLabel.Items.Add(tviRef);
-            if (r.lastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
+            if (r.LastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
                 tviRef.Background = new SolidColorBrush(Colors.LightGreen);
-            if (r.TimeToLive != TimeSpan.MaxValue && r.lastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+            if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                 tviRef.Background = new SolidColorBrush(Colors.LightYellow);
             totalItemCount++;
         }
@@ -527,7 +525,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         if (r.relType is null || r.relType.Label != "has-child")
             retVal = r.ToString() + " ";
         if (detailsCB.IsChecked == true)
-            retVal = "<" + r.weight.ToString("f2")+","+(r.TimeToLive==TimeSpan.MaxValue?"∞": (r.lastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
+            retVal = "<" + r.Weight.ToString("f2")+","+(r.TimeToLive==TimeSpan.MaxValue?"∞": (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
         return retVal;
     }
 

@@ -6,11 +6,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UKS;
 
 namespace BrainSimulator.Modules;
 
+/// <summary>
+/// Contains a collection of Things linked by Relationships to implement Common Sense and general knowledge.
+/// </summary>
 public partial class ModuleUKS : ModuleBase
 {
     //keeps the file name for xml storage
@@ -18,11 +22,12 @@ public partial class ModuleUKS : ModuleBase
 
     public UKS.UKS theUKS;
 
-    //set size parameters as needed in the constructor
-    //set max to be -1 if unlimited
-    public ModuleUKS()
+    /// <summary>
+    /// Currently not used...for future background processing needs
+    /// </summary>
+    public override void Fire()
     {
-        allowMultipleDialogs = true;
+        Init();  //be sure to leave this here to enable use of the na variable
     }
 
     public override void Fire()

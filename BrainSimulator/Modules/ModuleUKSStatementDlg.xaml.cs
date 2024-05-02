@@ -58,7 +58,7 @@ namespace BrainSimulator.Modules
             Relationship r1 = UKSStatement.AddRelationship(newThing, targetThing, relationType);
             if (r1 != null && setConfCB.IsChecked == true)
             {
-                r1.weight = confidence;
+                r1.Weight = confidence;
                 r1.TimeToLive = duration;
             }
 
