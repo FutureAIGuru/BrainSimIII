@@ -16,8 +16,8 @@ namespace BrainSimulator.Modules
 
     public partial class ModuleOnlineFileDlg : ModuleBaseDlg
     {
-
-        int wordMax = 100;
+        // Word max set to 50 by default, modify at your own risk!
+        int wordMax = 50;
         List<string> words = new List<string>();  // List to hold all words
 
         public ModuleOnlineFileDlg()
@@ -51,8 +51,12 @@ namespace BrainSimulator.Modules
                         using (StreamReader reader = new StreamReader(filePath))
                         {
                             string line;
-                            while ((line = reader.ReadLine()) != null && words.Count < wordMax)
+                            while ((line = reader.ReadLine()) != null)
                             {
+                                if (words.Count >= wordMax)
+                                {
+                                    break;
+                                }
                                 // Split the line into words, removing empty entries
                                 string[] lineWords = line.Split(new char[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
                                 words.AddRange(lineWords);  // Add the words from this line to the list
@@ -108,6 +112,8 @@ namespace BrainSimulator.Modules
                     {
                         mf.GetChatGPTDataFine(word);
                     }
+                    txtOutput.Text = "Done running!";
+                    Debug.WriteLine("Done running!");
                 }
             }
         }
