@@ -112,8 +112,8 @@ namespace BrainSimulator.Modules
                     {
                         mf.GetChatGPTDataFine(word);
                     }
-                    txtOutput.Text = "Done running!";
-                    Debug.WriteLine("Done running!");
+                    txtOutput.Text = $"Done running! Error count out of total words is Not Implemented Yet / {words.Count.ToString()}.";
+                    Debug.WriteLine($"Done running! Error count out of total words is Not Implemented Yet / {words.Count.ToString()}.");
                 }
             }
         }
