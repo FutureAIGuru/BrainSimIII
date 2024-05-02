@@ -13,6 +13,7 @@ public partial class UKS
     private void CreateInitialStructure()
     {
         UKSList.Clear();
+        ThingLabels.ClearLabelList();
         AddThing("Thing", null);
         GetOrAddThing("Object", "Thing");
         GetOrAddThing("Action", "Thing");
@@ -277,11 +278,12 @@ public partial class UKS
     }
 
 
-    public void SaveUKStoXMLFile()
+    public void SaveUKStoXMLFile(string filenameIn = "")
     {
+        if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
         string fullPath = GetFullPathFromKnowledgeFileName(fileName);
 
-        if (CanWriteTo(fileName, out string message))
+        if (!CanWriteTo(fileName, out string message))
         {
             Debug.WriteLine("Could not save file because: " + message);
             return;
@@ -350,9 +352,11 @@ public partial class UKS
         return fileName;
     }
 
-    public void LoadUKSfromXMLFile(bool merge = false)
+    public void LoadUKSfromXMLFile(string filenameIn = "", bool merge = false)
     {
         Stream file;
+        if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
+        
         string fullPath = fileName;
         try
         {

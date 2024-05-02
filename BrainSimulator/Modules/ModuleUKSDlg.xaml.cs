@@ -59,7 +59,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         uks = parent.GetTheUKS();
         try
         {
-            foreach (Thing t1 in uks)
+            foreach (Thing t1 in parent.theUKS.UKSList)
             {
                 t = t1;
                 childCount += t1.Children.Count;
@@ -72,7 +72,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             //you might get this exception if there is a collision
             return;
         }
-        statusLabel.Content = uks.Count + " Things  " + (childCount + refCount) + " Relationships";
+        statusLabel.Content = parent.theUKS.UKSList.Count + " Things  " + (childCount + refCount) + " Relationships";
         Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.fileName);
     }
 
@@ -649,6 +649,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void InitializeButton_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
+        parent.theUKS.UKSList.Clear();
         parent.Initialize();
         CollapseAll();
         textBoxRoot.Text = "Thing";
@@ -692,7 +693,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             MainWindow.SuspendEngine();
             parent.fileName = saveFileDialog.FileName;
-            parent.theUKS.SaveUKStoXMLFile();
+            parent.theUKS.SaveUKStoXMLFile(parent.fileName);
             MainWindow.ResumeEngine();
         }
         saveFileDialog.Dispose();
@@ -718,7 +719,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 parent.fileName = openFileDialog.FileName;
-                parent.theUKS.LoadUKSfromXMLFile((btn.Content.ToString()=="Merge"));
+                parent.theUKS.LoadUKSfromXMLFile(parent.fileName,(btn.Content.ToString()=="Merge"));
                 MainWindow.ResumeEngine();
             }
             openFileDialog.Dispose();
