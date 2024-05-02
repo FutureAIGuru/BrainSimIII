@@ -98,7 +98,7 @@ public partial class UKS
                         {
                             thing = r.source,
                             hopCount = hopCount,
-                            weight = curWeight * r.weight,
+                            weight = curWeight * r.Weight,
                             reachedWith = r.relType,
                         };
                         thingsToExamine.Add(thingToAdd);
@@ -127,7 +127,7 @@ public partial class UKS
                         {
                             thing = r.target,
                             hopCount = hopCount,
-                            weight = curWeight * r.weight,
+                            weight = curWeight * r.Weight,
                             reachedWith = r.relType,
                         };
                         thingsToExamine.Add(thingToAdd);
@@ -213,7 +213,7 @@ public partial class UKS
         for (int i = 0; i < result.Count; i++)
         {
             Relationship r1 = result[i];
-            if (!ConditionsAreMet(r1.clauses, r1))
+            if (!ConditionsAreMet(r1.Clauses, r1))
             {
                 failedConditions.Add(r1);
                 result.RemoveAt(i);
@@ -370,7 +370,7 @@ public partial class UKS
             if (query.target != null && query.target.AncestorList().Contains(q.source))
                 q.source = query.target;
             var qResult = Relationship.GetRelationship(q);
-            if (qResult != null && qResult.weight < 0.8)
+            if (qResult != null && qResult.Weight < 0.8)
                 return false;
             if (qResult == null)
             {

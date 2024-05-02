@@ -319,7 +319,7 @@ public partial class Thing
                 }
             }
         }
-        foreach (ClauseType c in r.clauses)
+        foreach (ClauseType c in r.Clauses)
             RemoveRelationship(c.clause);
     }
 

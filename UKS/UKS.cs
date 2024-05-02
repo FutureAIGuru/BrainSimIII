@@ -1,5 +1,10 @@
-﻿namespace UKS
-    ;
+﻿
+using System;
+using System.Threading;
+
+
+namespace UKS;
+
 public partial class UKS
 {
     //This is the actual Universal Knowledge Store
@@ -11,6 +16,10 @@ public partial class UKS
 
     public List<Thing> UKSList { get => uKSList;}
 
+    //TimeToLive processing for relationships
+    static public  List<Relationship> transientRelationships = new List<Relationship>();
+    static Timer stateTimer;
+
     public UKS()
     {
         //UKSList.Clear();
@@ -21,7 +30,29 @@ public partial class UKS
 
         UKSTemp.Clear();
 
+        var autoEvent = new AutoResetEvent(false);
+        stateTimer = new Timer(RemoveExpiredRelationships,autoEvent,0, 1000);
     }
+
+    private void RemoveExpiredRelationships(Object stateInfo)
+    {
+        for (int i = transientRelationships.Count - 1; i >= 0; i--)
+        {
+            Relationship r = transientRelationships[i];
+            //check to see if the relationship has expired
+            if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now)
+            {
+                r.source.RemoveRelationship(r);
+                //if this leaves an orphan thing, delete the thing
+                if (r.reltype.Label == "has-child" && r.target?.Parents.Count == 0)
+                {
+                    r.target.AddParent(ThingLabels.GetThing("unknownObject"));
+                }
+                transientRelationships.Remove(r);
+            }
+        }
+    }
+
 
     public virtual Thing AddThing(string label, Thing parent)
     {

@@ -21,6 +21,13 @@ public partial class ModuleUKS : ModuleBase
     public string fileName = "";
 
     public UKS.UKS theUKS;
+    //set size parameters as needed in the constructor
+    //set max to be -1 if unlimited
+    public ModuleUKS()
+    {
+        allowMultipleDialogs = true;
+    }
+
 
     /// <summary>
     /// Currently not used...for future background processing needs
@@ -30,11 +37,7 @@ public partial class ModuleUKS : ModuleBase
         Init();  //be sure to leave this here to enable use of the na variable
     }
 
-    public override void Fire()
-    {
-        Init();  //be sure to leave this here to enable use of the na variable
-    }
-
+    
     /// <summary>
     /// /////////////////////////////////////////////////////////// XML File save/load
     /// </summary>

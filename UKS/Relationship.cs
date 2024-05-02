@@ -56,8 +56,8 @@ public class QueryRelationship : Relationship
         source = r.source;
         reltype = r.reltype;
         target = r.target;
-        foreach (ClauseType c in r.clauses)
-            clauses.Add(c);
+        foreach (ClauseType c in r.Clauses)
+            Clauses.Add(c);
     }
 }
 
@@ -90,18 +90,19 @@ public class Relationship
     }
 
     public bool inferred = false;
-    public List<ClauseType> clauses = new();
+    private List<ClauseType> clauses = new();
+    public List<ClauseType> Clauses { get => clauses; set => clauses = value; }
     public List<Relationship> clausesFrom = new();
 
-    public float weight = 1;
+    private float weight = 1;
+    public float Weight { get => weight; set => weight = value; }
+
     public int hits = 0;
     public int misses = 0;
-    public DateTime lastUsed = DateTime.Now;
+    private DateTime lastUsed = DateTime.Now;
+    public DateTime LastUsed { get => lastUsed; set => lastUsed = value; }
     public DateTime created = DateTime.Now;
 
-    //TimeToLive processing for relationships
-    static private List<Relationship> transientRelationships = new List<Relationship>();
-    //static private DispatcherTimer transientTimer;
     private TimeSpan timeToLive = TimeSpan.MaxValue;
     public TimeSpan TimeToLive
     {
@@ -136,12 +137,12 @@ public class Relationship
         misses = r.misses;
         relType = r.relType;
         source = r.source;
-        weight = r.weight;
+        Weight = r.Weight;
         hits = r.hits++;
         target = r.target;
         inferred = r.inferred;
-        if (r.clauses == null) clauses = new();
-        else clauses = new(r.clauses);
+        if (r.Clauses == null) Clauses = new();
+        else Clauses = new(r.Clauses);
         if (r.clausesFrom == null) clausesFrom = new();
         else clausesFrom = new(r.clausesFrom);
     }
@@ -167,9 +168,9 @@ public class Relationship
 
         theClause.clause = r2;
         theClause.clauseType = clauseType;
-        if (clauses.FindFirst(x => x.clauseType == theClause.clauseType && x.clause == r2) == null)
+        if (Clauses.FindFirst(x => x.clauseType == theClause.clauseType && x.clause == r2) == null)
         {
-            clauses.Add(theClause);
+            Clauses.Add(theClause);
             r2.clausesFrom.Add(this);
         }
 
@@ -191,7 +192,7 @@ public class Relationship
 
         //handle Clauses
         //TODO prevent general circular reference stack overflow
-        foreach (ClauseType c in clauses)
+        foreach (ClauseType c in Clauses)
                 allModifierString += c.clauseType.Label + " " + c.clause.ToString(stack)+" ";
 
         if (allModifierString != "")
@@ -277,7 +278,7 @@ public class Relationship
         get
         {
             //need a way to track how confident we should be
-            float retVal = weight;
+            float retVal = Weight;
             if (hits != 0 && misses != 0)
             {
                 //replace with more robust algorithm
@@ -289,41 +290,10 @@ public class Relationship
         }
     }
 
-
     private void AddToTransientList()
     {
-        if (!transientRelationships.Contains(this)) transientRelationships.Add(this);
-        //if (transientTimer == null)
-        {
-            //Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            //{
-            //    transientTimer = new();
-
-            //    transientTimer.Interval = TimeSpan.FromSeconds(1);
-            //    transientTimer.Tick += ForgetTransientRelationships;
-            //    transientTimer.Start();
-            //}));
-        }
-    }
-
-    private void ForgetTransientRelationships(object sender, EventArgs e)
-    {
-
-        for (int i = transientRelationships.Count - 1; i >= 0; i--)
-        {
-            Relationship r = transientRelationships[i];
-            //check to see if the relationship has expired
-            if (r.timeToLive != TimeSpan.MaxValue && r.lastUsed + r.timeToLive < DateTime.Now)
-            {
-                r.source.RemoveRelationship(r);
-                //if this leaves an orphan thing, delete the thing
-                if (r.reltype.Label == "has-child" && r.target?.Parents.Count == 0)
-                {
-                    r.target.AddParent(ThingLabels.GetThing("unknownObject"));
-                }
-                transientRelationships.Remove(r);
-            }
-        }
+        if (!UKS.transientRelationships.Contains(this)) 
+            UKS.transientRelationships.Add(this);
     }
 
 

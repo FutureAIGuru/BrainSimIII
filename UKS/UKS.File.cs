@@ -115,8 +115,8 @@ public partial class UKS
         if (stack.Contains(l))return null;
         stack.Add(l);
         List<SClauseType> clauseList = null;
-        if (l.clauses.Count > 0) clauseList = new();
-        foreach (ClauseType c in l.clauses)
+        if (l.Clauses.Count > 0) clauseList = new();
+        foreach (ClauseType c in l.Clauses)
         {
             int clauseType = UKSList.FindIndex(x => x == c.clauseType);
             SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause,stack) };
@@ -128,7 +128,7 @@ public partial class UKS
             source = UKSList.FindIndex(x => x == l.source),
             target = UKSList.FindIndex(x => x == l.target),
             relationshipType = UKSList.FindIndex(x => x == l.relType),
-            weight = l.weight,
+            weight = l.Weight,
             hits = l.hits,
             misses = l.misses,
             count = l.count,
@@ -206,7 +206,7 @@ public partial class UKS
     {
         if (stack.Contains(r)) return;
         stack.Add(r);
-        foreach (ClauseType c in r.clauses)
+        foreach (ClauseType c in r.Clauses)
         { 
             if (!c.clause.clausesFrom.Contains(r))
                 c.clause.clausesFrom.Add(r);
@@ -237,7 +237,7 @@ public partial class UKS
             relType = relationshipType,
             hits = p.hits,
             misses = p.misses,
-            weight = p.weight,
+            Weight = p.weight,
             count = p.count,
             //sentencetype = p.sentencetype as SentenceType,
         };
@@ -247,7 +247,7 @@ public partial class UKS
             {
                 ClauseType ct = new ClauseType() { clauseType = UKSList[sc.clauseType], clause = UnConvertRelationship(sc.r, stack) };
                 if (ct.clause != null)
-                    r.clauses.Add(ct);
+                    r.Clauses.Add(ct);
             }
         }
         return r;

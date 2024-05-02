@@ -64,7 +64,7 @@ public partial class UKS
         {
             Relationship rReverse = new Relationship(r);
             (rReverse.source, rReverse.target) = (rReverse.target, rReverse.source);
-            rReverse.clauses.Clear();
+            rReverse.Clauses.Clear();
             WriteTheRelationship(rReverse);
         }
 
@@ -158,7 +158,7 @@ public partial class UKS
             if (sourceRel == existingRelationship)
             {
                 //strengthen this relationship
-                existingRelationship.weight += (1 - existingRelationship.weight) / 2.0f;
+                existingRelationship.Weight += (1 - existingRelationship.Weight) / 2.0f;
                 existingRelationship.Fire();
             }
             else if (RelationshipsAreExclusive(existingRelationship, sourceRel))
@@ -176,11 +176,11 @@ public partial class UKS
                 }
                 else
                 {
-                    if (existingRelationship.weight == 1 && sourceRel.weight == 1)
-                        sourceRel.weight = .5f;
+                    if (existingRelationship.Weight == 1 && sourceRel.Weight == 1)
+                        sourceRel.Weight = .5f;
                     else
-                        sourceRel.weight = Math.Clamp(sourceRel.weight - .2f, -1, 1);
-                    if (sourceRel.weight <= 0)
+                        sourceRel.Weight = Math.Clamp(sourceRel.Weight - .2f, -1, 1);
+                    if (sourceRel.Weight <= 0)
                     {
                         newSource.RemoveRelationship(sourceRel);
                         i--;
