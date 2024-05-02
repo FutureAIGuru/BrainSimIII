@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using UKS;
 
 namespace BrainSimulator.Modules;
 
@@ -79,7 +80,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         string root = textBoxRoot.Text;
         ModuleUKS parent = (ModuleUKS)ParentModule;
-        Thing thing = parent.Labeled(root);
+        Thing thing = parent.theUKS.Labeled(root);
         if (thing is not null)
         {
             totalItemCount = 0;
@@ -133,7 +134,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 
             if (r.Weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
                 header = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
-            if (r.relType.HasRelationship(UKS.Labeled("not")) != null) //prepend ! for negative  children
+            if (r.reltype.HasRelationship(UKS.theUKS.Labeled("not")) != null) //prepend ! for negative  children
                 header = "!" + header;
             if (detailsCB.IsChecked == true)
                 header += ":" + child.Children.Count + "," + descCountStr;
@@ -423,7 +424,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         if (sender is MenuItem mi)
         {
-            ModuleUKS uks = (ModuleUKS)ParentModule;
+            UKS.UKS uks = ((ModuleUKS)ParentModule).theUKS;
             ContextMenu m = mi.Parent as ContextMenu;
             Thing tParent = (Thing)mi.GetValue(ThingObjectProperty);
             if (tParent != null)
@@ -691,7 +692,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             MainWindow.SuspendEngine();
             parent.fileName = saveFileDialog.FileName;
-            parent.SaveUKStoXMLFile();
+            parent.theUKS.SaveUKStoXMLFile();
             MainWindow.ResumeEngine();
         }
         saveFileDialog.Dispose();
@@ -717,7 +718,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 parent.fileName = openFileDialog.FileName;
-                parent.LoadUKSfromXMLFile(null,btn.Content.ToString()=="Merge");
+                parent.theUKS.LoadUKSfromXMLFile((btn.Content.ToString()=="Merge"));
                 MainWindow.ResumeEngine();
             }
             openFileDialog.Dispose();

@@ -12,6 +12,7 @@ namespace BrainSimulator
     public class BrainSim3Data
     {
         public List<ModuleBase> modules = new List<ModuleBase>();
+        public List<string> pythonModules = new();
     }
 
     /// <summary>
@@ -243,6 +244,11 @@ namespace BrainSimulator
                     });
                 }
             }
+            foreach(string pythonModule in BrainSim3Data.pythonModules)
+            {
+                string module = pythonModule.Replace(".py", "");
+                RunScript(module);
+            }
         }
 
         private void LoadModuleTypeMenu()
@@ -257,7 +263,12 @@ namespace BrainSimulator
 
                 ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = moduleName, Margin = new Thickness(0), Padding = new Thickness(0) });
             }
-        }
 
+            var pythonModules = GetPythonModules();
+            foreach (var moduleType in pythonModules)
+            {
+                ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = moduleType, Margin = new Thickness(0), Padding = new Thickness(0) });
+            }
+        }
     }
 }

@@ -210,7 +210,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="BrainSim3SplashScreen.jpg" />
-    <Content Include="Iconsmall.ico" />
+    <Content Include="Iconsmall.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Fonts\OpenSans-Bold.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -425,12 +427,19 @@
     <PackageReference Include="NAudio" Version="2.1.0" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
     <PackageReference Include="Python.Included" Version="3.7.3.13" />
+    <PackageReference Include="pythonnet" Version="3.0.3" />
     <PackageReference Include="SharpDX" Version="4.2.0" />
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="System.Speech" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\UKS\UKS.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="MainWindowPythonModules.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
