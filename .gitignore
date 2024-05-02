@@ -283,5 +283,4 @@ AutomatedTests/*.png
 /BrainSimulator/python-3.10.8/Lib/site-packages/functorch
 /BrainSimulator/python-3.10.8/Lib/site-packages
 /BrainSimulator/python-3.10.8/Scripts
-BrainSimulator/app.config
-/html
+/BrainSimulator/App.config

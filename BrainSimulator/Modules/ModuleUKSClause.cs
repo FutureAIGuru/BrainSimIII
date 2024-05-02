@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using Pluralize.NET;
+using UKS;
 
 namespace BrainSimulator.Modules
 {

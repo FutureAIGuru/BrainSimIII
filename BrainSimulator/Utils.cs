@@ -22,6 +22,28 @@ using System.Net.Http.Headers;
 
 namespace BrainSimulator
 {
+
+    public static class IListExtensions
+    {
+        public static T FindFirst<T>(this IList<T> source, Func<T, bool> condition)
+        {
+            foreach (T item in source)
+                if (condition(item))
+                    return item;
+            return default(T);
+        }
+        public static List<T> FindAll<T>(this IList<T> source, Func<T, bool> condition)
+        {
+            List<T> theList = new List<T>();
+            if (source == null) return theList;
+            foreach (T item in source)
+                if (condition(item))
+                    theList.Add(item);
+            return theList;
+        }
+    }
+
+
     //This is not used
     class Range
     {

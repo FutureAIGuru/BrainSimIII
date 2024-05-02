@@ -230,7 +230,8 @@ namespace BrainSimulator
                         theModuleType += "Dlg.xaml";
 
                     string cwd = System.IO.Directory.GetCurrentDirectory();
-                    cwd = cwd.ToLower().Replace("bin\\debug\\net6.0-windows", "");
+                    if (cwd.Contains("bin\\"))
+                        cwd = cwd.ToLower().Substring(0,cwd.IndexOf("bin\\"));
                     string fileName = cwd + @"modules\" + theModuleType + ".cs";
                     if (File.Exists(fileName))
                         OpenSource(fileName);

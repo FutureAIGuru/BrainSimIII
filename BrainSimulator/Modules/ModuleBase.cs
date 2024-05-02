@@ -31,9 +31,10 @@ namespace BrainSimulator.Modules
         private List<ModuleBaseDlg> dlgList = null;
 
         [XmlIgnore]
-        public static ModuleUKS UKS = null;
+        //public static ModuleUKS UKS = null;
+        public static UKS.UKS UKS = null;
 
-        public ModuleBase() 
+        public ModuleBase()
         {
             string moduleName = this.GetType().Name;
             if (moduleName.StartsWith("Module"))
@@ -45,7 +46,7 @@ namespace BrainSimulator.Modules
         abstract public void Fire();
 
         abstract public void Initialize();
-        
+
         public virtual void UKSInitializedNotification()
         {
         }
@@ -76,9 +77,16 @@ namespace BrainSimulator.Modules
         {
             if (UKS is null)
             {
-                UKS = (ModuleUKS)FindModule(typeof(ModuleUKS));
+                ModuleUKS theModule = (ModuleUKS)(FindModule(typeof(ModuleUKS)));
+                if (theModule != null)
+                {
+                    if (theModule.theUKS == null)
+                        theModule.theUKS = new();
+                    UKS = theModule.theUKS;
+                }
             }
         }
+
 
         private List<string> notFoundModules = new();
 
@@ -128,13 +136,13 @@ namespace BrainSimulator.Modules
         public void CloseDlg()
         {
             if (dlgList != null)
-            for (int i = dlgList.Count-1 ; i >= 0; i--)
-            {
-                Application.Current.Dispatcher.Invoke((Action)delegate
+                for (int i = dlgList.Count - 1; i >= 0; i--)
                 {
-                    dlgList[i].Close();
-                });
-            }
+                    Application.Current.Dispatcher.Invoke((Action)delegate
+                    {
+                        dlgList[i].Close();
+                    });
+                }
             if (dlg != null)
             {
                 Application.Current.Dispatcher.Invoke((Action)delegate
@@ -178,7 +186,7 @@ namespace BrainSimulator.Modules
             // so the same functionality is called from within FileLoad
             Window mainWindow = Application.Current.MainWindow;
             if (mainWindow.GetType() == typeof(MainWindow))
-                 dlg.Owner = Application.Current.MainWindow;
+                dlg.Owner = Application.Current.MainWindow;
             // else
             //     Utils.Noop();
 
@@ -205,7 +213,7 @@ namespace BrainSimulator.Modules
             if (GetType().ToString() != "BrainSimulator.Modules.ModuleUserInterface" && !GetType().ToString().StartsWith("BrainSimulator.Modules.ModuleUI_"))
                 dlg.WindowState = WindowState.Minimized;
 #endif
-            
+
             dlg.Show();
             dlgIsOpen = true;
 
@@ -229,7 +237,7 @@ namespace BrainSimulator.Modules
 
         private void Dlg_Closed(object sender, EventArgs e)
         {
-           if (dlg == null) 
+            if (dlg == null)
                 dlgIsOpen = false;
         }
 
