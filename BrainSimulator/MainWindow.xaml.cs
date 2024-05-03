@@ -149,10 +149,22 @@ namespace BrainSimulator
             theUKS.GetOrAddThing("AddStatement", "ActiveModule");
 
             activeModules.Clear();
-            activeModules.Add("UKS");
+            activeModules.Add(CreateNewUniqueModule("UKS"));
             activeModules.Add(CreateNewUniqueModule("UKSStatement"));
         }
 
+        public ModuleBase CreateNewUniqueModule(string ModuleName)
+        {
+            ModuleBase newModule = CreateNewModule(ModuleName);
+            newModule.Label = GetUniqueModuleLabel(ModuleName);
+            return newModule;
+        }
+        internal string GetUniqueModuleLabel(string searchString)
+        {
+            var existing = activeModules.FindAll(module => module.Label.StartsWith(searchString));
+            if (existing == null || existing.Count == 0) return searchString;
+            return searchString + "_" + existing.Count;
+        }
 
         public void CloseAllModuleDialogs()
         {

@@ -257,11 +257,5 @@ namespace BrainSimulator
                 LoadCurrentFile();
             }
         }
-
-
-        internal string GetUniqueModuleLabel(string searchString)
-        {
-            string number = (activeModules.Count(module => module.Label.StartsWith(searchString + "_", StringComparison.OrdinalIgnoreCase)) + 1).ToString();            return searchString + "_" + number;
-        }
     }
 }
