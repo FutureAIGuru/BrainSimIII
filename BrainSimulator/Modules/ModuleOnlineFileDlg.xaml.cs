@@ -7,15 +7,20 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Pluralize.NET;
 
 namespace BrainSimulator.Modules
 {
 
     public partial class ModuleOnlineFileDlg : ModuleBaseDlg
     {
+        // Error count (static for now, working on fix).
+        public static int errorCount;
+
         // Word max set to 50 by default, modify at your own risk!
         int wordMax = 50;
         List<string> words = new List<string>();  // List to hold all words
@@ -36,6 +41,7 @@ namespace BrainSimulator.Modules
         {
             if (sender is Button btn)
             {
+                errorCount = 0;
                 MainWindow.SuspendEngine();
                 words.Clear();
                 System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
@@ -48,29 +54,31 @@ namespace BrainSimulator.Modules
 
                     try
                     {
+                        var pluralizer = new Pluralizer();
+
                         using (StreamReader reader = new StreamReader(filePath))
                         {
                             string line;
                             while ((line = reader.ReadLine()) != null)
                             {
+                                // Break if we are over word max (set to 50 by default) for testing.
                                 if (words.Count >= wordMax)
                                 {
                                     break;
                                 }
                                 // Split the line into words, removing empty entries
                                 string[] lineWords = line.Split(new char[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-                                words.AddRange(lineWords);  // Add the words from this line to the list
+                                // Singularize the words.
+                                for (int i = 0; i < lineWords.Length; i++)
+                                {
+                                    lineWords[i] = pluralizer.Singularize(lineWords[i]);
+                                }
+                                // Add the words to the list from the line
+                                words.AddRange(lineWords);
                             }
                         }
 
                         // Optional: Display the words in the console (commented out by default)
-                        /*
-                        foreach (string word in words)
-                        {
-                            Console.WriteLine(word);
-                        }
-                        */
-
                         /*
                         for (int i = 0; i < 5; i++)
                         {
@@ -95,7 +103,7 @@ namespace BrainSimulator.Modules
             }
         }
 
-        private void RunButton_Click(object sender, RoutedEventArgs e)
+        private async void RunButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn)
             {
@@ -105,18 +113,39 @@ namespace BrainSimulator.Modules
                 }
                 else
                 {
+                    await ProcessWordsAsync(words);
+                    /*
                     ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
                     txtOutput.Text = "Running through words... Word count is: " + words.Count.ToString() + ".";
                     Debug.WriteLine("Running through words... Word count is: " + words.Count.ToString() + ".");
                     foreach (string word in words)
                     {
-                        mf.GetChatGPTDataFine(word);
+                       mf.GetChatGPTDataFine(word);
                     }
-                    txtOutput.Text = $"Done running! Error count out of total words is Not Implemented Yet / {words.Count.ToString()}.";
-                    Debug.WriteLine($"Done running! Error count out of total words is Not Implemented Yet / {words.Count.ToString()}.");
+                    //txtOutput.Text = $"Done running! Error count out of total words is {errorCount} / {words.Count.ToString()}.";
+                    //Debug.WriteLine($"Done running! Error count out of total words is {errorCount} / {words.Count.ToString()}.");
+                    */
                 }
             }
         }
+
+        // Task to process the words.
+        public async Task ProcessWordsAsync(List<string> words)
+        {
+            ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
+
+            txtOutput.Text = "Running through words... Word count is: " + words.Count + ".";
+            Debug.WriteLine("Running through words... Word count is: " + words.Count + ".");
+
+            foreach (string word in words)
+            {
+                await mf.GetChatGPTDataFine(word);
+            }
+
+            txtOutput.Text = $"Done running! Total error count out of all relationships is {errorCount} and words count is {words.Count} words.";
+            Debug.WriteLine($"Done running! Total error count out of all relationships is {errorCount} and words count is {words.Count} words.");
+        }
+
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {

@@ -20,6 +20,7 @@ using static System.Net.Mime.MediaTypeNames;
 using System.ComponentModel;
 using System.Configuration;
 using System.Windows.Documents;
+using System.Threading.Tasks;
 
 namespace BrainSimulator.Modules
 {
@@ -74,10 +75,11 @@ namespace BrainSimulator.Modules
         }
 
         public enum QueryType { general, isa, hasa, can, count, list, listCount, types, partsOf };
-        public async void GetChatGPTDataFine(string textIn, QueryType qtIn = QueryType.isa, string altLabel = "")
+        public async Task GetChatGPTDataFine(string textIn, QueryType qtIn = QueryType.isa, string altLabel = "")
         {
             try
             {
+                bool isError = true;
                 QueryType qType = qtIn;
                 if (altLabel == "") altLabel = textIn;
                 string prompt;
@@ -133,6 +135,7 @@ namespace BrainSimulator.Modules
                     if (values.Length == 0)
                     {
                         Debug.WriteLine($"Error, length of value '{Output}' is 0.");
+                        ModuleOnlineFileDlg.errorCount += 1;
                     }
                     string[] relationships = new string[Output.Length];
                     string[] targets = new string[Output.Length];
@@ -148,13 +151,15 @@ namespace BrainSimulator.Modules
                         }
                         else
                         {
-                            Debug.WriteLine($"Unexpected format in values[i]: {values[i]}");
+                            Debug.WriteLine($"Error, unexpected format in values[i]: {values[i]}");
+                            ModuleOnlineFileDlg.errorCount += 1;
                         }
                         
                     }
                     // Get the UKS
                     GetUKS();
-
+                    
+                    // Add the statements to the UKS
                     for (int i = 0; i < relationships.Length; i++)
                     {
                         UKS.AddStatement(textIn, relationships[i], targets[i]);
@@ -165,7 +170,7 @@ namespace BrainSimulator.Modules
             }
             catch (Exception ex)
             {
-
+                Debug.WriteLine($"Error with getting Chat GPT Fine tuning. Error is {ex}.");
             }
         }
     }
