@@ -1,4 +1,5 @@
 ﻿using BrainSimulator.Modules;
+using Emgu.CV;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -48,12 +49,9 @@ namespace BrainSimulator
 
 
                 string fileName = ""; //if the load is successful, currentfile will be set by the load process
-                //if (App.StartupString != "")
-                //    fileName = App.StartupString;
+
                 if (fileName == "")
                     fileName = (string)Properties.Settings.Default["CurrentFile"];
-                if (fileName == "")  //hack to make first-time operation smoother
-                    fileName = Path.GetFullPath(@"..\..\..\networks\demo1.xml");
                 if (fileName != "")
                 {
                     LoadFile(fileName);
@@ -65,9 +63,35 @@ namespace BrainSimulator
             }
             catch (Exception ex) { }
 
+            //setup the python path
+            string pythonPath = (string)Properties.Settings.Default["PythonPath"];
+            if (string.IsNullOrEmpty(pythonPath))
+            {
+                string likeliPath = (string)Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData);
+                likeliPath += @"\Programs\Python";
+                System.Windows.Forms.OpenFileDialog openFileDialog = new()
+                {
+                    Filter = Utils.FilterXMLs,
+                    Title = "SELECT path to Python .dll (or cancel for no Python support)",
+                    InitialDirectory = likeliPath,
+                    
+                };
+                // Show the file Dialog.  
+                System.Windows.Forms.DialogResult result = openFileDialog.ShowDialog();
+                // If the user clicked OK in the dialog and  
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    pythonPath = openFileDialog.FileName;
+                    Properties.Settings.Default["PythonPath"] = pythonPath;
+                    Properties.Settings.Default.Save();
+                }
+                openFileDialog.Dispose();
+            }
+
             LoadModuleTypeMenu();
             InitializeModulePane();
             ShowAllModuleDialogs();
+
         }
 
         public void InitializeModulePane()
