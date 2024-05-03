@@ -71,7 +71,7 @@ namespace BrainSimulator
             ShowAllModuleDialogs();
         }
 
-        public static void ReloadLoadedModules()
+        public void ReloadLoadedModules()
         {
             if (loadedModulesSP == null) return;
             loadedModulesSP.Children.Clear();
@@ -85,7 +85,9 @@ namespace BrainSimulator
                 tb.Margin = new Thickness(5, 2, 5, 2);
                 tb.Padding = new Thickness(10, 3, 10, 3);
                 tb.ContextMenu = new ContextMenu();
-                                    ModuleView.CreateContextMenu(i, mod, tb, tb.ContextMenu);
+                ModuleBase mod = activeModules.FindFirst(x => x.Label == t.Label);
+                activeModules.Add(mod);
+                CreateContextMenu(mod, tb, tb.ContextMenu);
                 //                    if (mod.isEnabled)
                 tb.Background = new SolidColorBrush(Colors.LightGreen);
                 //                  else tb.Background = new SolidColorBrush(Colors.Pink);
@@ -118,14 +120,14 @@ namespace BrainSimulator
             //}
         }
 
-        private static void AddModuleToLoadedModules(int i, ModuleBase mod)
+        private void AddModuleToLoadedModules(int i, ModuleBase mod)
         {
             TextBlock tb = new TextBlock();
             tb.Text = mod.Label;
             tb.Margin = new Thickness(5, 2, 5, 2);
             tb.Padding = new Thickness(10, 3, 10, 3);
             tb.ContextMenu = new ContextMenu();
-            ModuleView.CreateContextMenu(i, mod, tb, tb.ContextMenu);
+            CreateContextMenu(mod, tb, tb.ContextMenu);
             if (mod.isEnabled) tb.Background = new SolidColorBrush(Colors.LightGreen);
             else tb.Background = new SolidColorBrush(Colors.Pink);
             loadedModulesSP.Children.Add(tb);

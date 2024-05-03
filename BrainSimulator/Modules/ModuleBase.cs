@@ -53,7 +53,7 @@ namespace BrainSimulator.Modules
 
         public void UKSInitialized()
         {
-            foreach (ModuleBase module in MainWindow.BrainSim3Data.modules)
+            foreach (ModuleBase module in MainWindow.theWindow.activeModules)
             {
                 if (module.isEnabled)
                     module.UKSInitializedNotification();
@@ -66,7 +66,7 @@ namespace BrainSimulator.Modules
 
         public void UKSReloaded()
         {
-            foreach (ModuleBase module in MainWindow.BrainSim3Data.modules)
+            foreach (ModuleBase module in MainWindow.theWindow.activeModules)
             {
                 if (module.isEnabled)
                     module.UKSReloadedNotification();
@@ -315,7 +315,7 @@ namespace BrainSimulator.Modules
 
         public ModuleBase FindModule(Type t, bool suppressWarning = true)
         {
-            foreach (ModuleBase na1 in MainWindow.BrainSim3Data.modules)
+            foreach (ModuleBase na1 in MainWindow.theWindow.activeModules)
             {
                 if (na1 != null && na1.GetType() == t)
                 {

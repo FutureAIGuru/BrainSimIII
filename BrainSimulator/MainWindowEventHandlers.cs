@@ -160,7 +160,8 @@ namespace BrainSimulator
             ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(t);
 
             //ensure no name collistions
-            theModule.Label = MainWindow.GetUniqueModuleLabel(moduleLabel);
+            //theModule.Label = GetUniqueModuleLabel(moduleLabel);
+            theModule.Label = moduleLabel;
             return theModule;
         }
         private void ModuleList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -175,7 +176,7 @@ namespace BrainSimulator
                     {
                         ModuleBase newModule = CreateNewModule(moduleName);
                         theUKS.AddStatement(moduleName, "is-a", "ActiveModule");
-                        //MainWindow.BrainSim3Data.modules.Add(newModule);
+                        activeModules.Add(newModule);
                     }
                     else
                     {
@@ -258,9 +259,9 @@ namespace BrainSimulator
         }
 
 
-        internal static string GetUniqueModuleLabel(string searchString)
+        internal string GetUniqueModuleLabel(string searchString)
         {
-            string number = (BrainSim3Data.modules.Count(module => module.Label.StartsWith(searchString + "_", StringComparison.OrdinalIgnoreCase)) + 1).ToString();            return searchString + "_" + number;
+            string number = (activeModules.Count(module => module.Label.StartsWith(searchString + "_", StringComparison.OrdinalIgnoreCase)) + 1).ToString();            return searchString + "_" + number;
         }
     }
 }

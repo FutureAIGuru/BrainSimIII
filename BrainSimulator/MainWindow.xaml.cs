@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using UKS;
@@ -13,21 +14,24 @@ namespace BrainSimulator
 {
     public class BrainSim3Data
     {
-        public List<ModuleBase> modules = new List<ModuleBase>();
         public List<string> pythonModules = new();
     }
+
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : System.Windows.Window
+    public partial class MainWindow : Window
     {
         public static BrainSim3Data BrainSim3Data = new BrainSim3Data();
+
+        public List<ModuleBase> activeModules = new List<ModuleBase>();
 
         //the name of the currently-loaded network file
         public static string currentFileName = "";
         public static string pythonPath = "";
         public static UKS.UKS theUKS = new UKS.UKS();
+        public static MainWindow theWindow = null;
 
         public MainWindow()
         {
@@ -39,7 +43,7 @@ namespace BrainSimulator
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-
+            theWindow = this;
             string fileName = Directory.GetCurrentDirectory() + @"\networks\UKS\demo.xml";  
             string savedFile = (string)Properties.Settings.Default["CurrentFile"];
             if (savedFile != "")
@@ -105,9 +109,9 @@ namespace BrainSimulator
             loadedModulesSP = LoadedModuleSP;
             LoadedModuleSP.Children.Clear();
 
-            for (int i = 0; i < MainWindow.BrainSim3Data.modules.Count; i++)
+            for (int i = 0; i < activeModules.Count; i++)
             {
-                ModuleBase mod = MainWindow.BrainSim3Data.modules[i];
+                ModuleBase mod = activeModules[i];
                 if (mod != null)
                 {
                     mod.SetUpAfterLoad();
@@ -119,7 +123,7 @@ namespace BrainSimulator
 
         public void ShowAllModuleDialogs()
         {
-            foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
+            foreach (ModuleBase mb in activeModules)
             {
                 if (mb != null && mb.dlgIsOpen)
                 {
@@ -144,17 +148,17 @@ namespace BrainSimulator
             theUKS.GetOrAddThing("UKS", "ActiveModule");
             theUKS.GetOrAddThing("AddStatement", "ActiveModule");
 
-            //            BrainSim3Data.modules.Clear();
-            //            BrainSim3Data.modules.Add(CreateNewUniqueModule("UKS"));
-            //            BrainSim3Data.modules.Add(CreateNewUniqueModule("UKSStatement"));
+            activeModules.Clear();
+            activeModules.Add("UKS");
+            activeModules.Add(CreateNewUniqueModule("UKSStatement"));
         }
 
 
-        public static void CloseAllModuleDialogs()
+        public void CloseAllModuleDialogs()
         {
-            lock (BrainSim3Data.modules)
+            lock (activeModules)
             {
-                foreach (ModuleBase md in MainWindow.BrainSim3Data.modules)
+                foreach (ModuleBase md in activeModules)
                 {
                     if (md != null)
                     {
@@ -164,11 +168,11 @@ namespace BrainSimulator
             }
         }
 
-        public static void CloseAllModules()
+        public void CloseAllModules()
         {
-            lock (MainWindow.BrainSim3Data.modules)
+            lock (activeModules)
             {
-                foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
+                foreach (ModuleBase mb in activeModules)
                 {
                     if (mb != null)
                     {
@@ -200,7 +204,7 @@ namespace BrainSimulator
 
         public ModuleBase FindModule(Type t, bool suppressWarning = true)
         {
-            foreach (ModuleBase mb1 in BrainSim3Data.modules)
+            foreach (ModuleBase mb1 in activeModules)
             {
                 if (mb1 != null && mb1.GetType() == t)
                 {
@@ -231,7 +235,7 @@ namespace BrainSimulator
             foreach (Thing module in theUKS.Labeled("ActiveModule").Children)
 //            foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
             {
-                ModuleBase mb = BrainSim3Data.modules.FindFirst(x => x.Label == module.Label); 
+                ModuleBase mb = activeModules.FindFirst(x => x.Label == module.Label); 
                 if (mb != null && mb.dlgIsOpen)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
