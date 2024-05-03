@@ -174,28 +174,33 @@ namespace BrainSimulator
                     if (!moduleName.Contains(".py"))
                     {
                         ModuleBase newModule = CreateNewModule(moduleName);
-                        MainWindow.BrainSim3Data.modules.Add(newModule);
+                        theUKS.AddStatement(moduleName, "is-a", "ActiveModule");
+                        //MainWindow.BrainSim3Data.modules.Add(newModule);
                     }
                     else
                     {
-                        if (!BrainSim3Data.pythonModules.Contains(moduleName))
-                        BrainSim3Data.pythonModules.Add(moduleName);
+                        theUKS.AddStatement(moduleName, "is-a", "ActiveModule");
+                        //                        if (!BrainSim3Data.pythonModules.Contains(moduleName))
+                        //BrainSim3Data.pythonModules.Add(moduleName);
                     }
                 }
             }
             loadedModulesSP = LoadedModuleSP;
             LoadedModuleSP.Children.Clear();
 
-            for (int i = 0; i < MainWindow.BrainSim3Data.modules.Count; i++)
-            {
-                ModuleBase mod = MainWindow.BrainSim3Data.modules[i];
-                if (mod != null)
-                {
-                    mod.SetUpAfterLoad();
-                }
-            }
+            //for (int i = 0; i < MainWindow.BrainSim3Data.modules.Count; i++)
+            //{
+            //    ModuleBase mod = MainWindow.BrainSim3Data.modules[i];
+            //    if (mod != null)
+            //    {
+            //        mod.SetUpAfterLoad();
+            //    }
+            //}
 
             ReloadLoadedModules();
+        }
+        private void MakeModuleActive(string moduleName)
+        {
         }
         private void button_FileNew_Click(object sender, RoutedEventArgs e)
         {

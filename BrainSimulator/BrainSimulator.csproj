@@ -48,6 +48,7 @@
     <Compile Remove="Modules\WaveMemoryStream.cs" />
     <Compile Remove="Network.cs" />
     <Compile Remove="Sallie.cs" />
+    <Compile Remove="XmlFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="BrainSim3SplashScreen.jpg" />

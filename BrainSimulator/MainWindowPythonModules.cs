@@ -16,15 +16,20 @@ public partial class MainWindow : Window
     {
         //this is a buffer of python modules so they can be imported once and run many times.
         List<(string, dynamic)> modules = new List<(string, dynamic)>();
-
-        //TODO: check to see if files are updated and reload
-        var pythonFiles = Directory.GetFiles(@".\pythonModules", "*.py").ToList();
-        string destDir = Directory.GetCurrentDirectory();
-        string sourceDir = destDir + "\\PythonModules";
-        for (int i = 0; i < pythonFiles.Count; i++)
+        List<String> pythonFiles = new();
+        try
         {
-            pythonFiles[i] = Path.GetFileName(pythonFiles[i]);
-            File.Copy(Path.Combine(sourceDir,pythonFiles[i]), Path.Combine(destDir,pythonFiles[i]), true);
+            pythonFiles = Directory.GetFiles(@".\pythonModules", "*.py").ToList();
+            string destDir = Directory.GetCurrentDirectory();
+            string sourceDir = destDir + "\\PythonModules";
+            for (int i = 0; i < pythonFiles.Count; i++)
+            {
+                pythonFiles[i] = Path.GetFileName(pythonFiles[i]);
+                File.Copy(Path.Combine(sourceDir, pythonFiles[i]), Path.Combine(destDir, pythonFiles[i]), true);
+            }
+        } catch
+        {
+
         }
         return pythonFiles;
     }

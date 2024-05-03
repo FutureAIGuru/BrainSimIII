@@ -59,7 +59,7 @@ public partial class ModuleUKS : ModuleBase
         base.SetUpBeforeSave();
         if (fileName != null && fileName.Length > 0)
         {
-            //theUKS.SaveUKStoXMLFile();
+            theUKS.SaveUKStoXMLFile();
         }
     }
 

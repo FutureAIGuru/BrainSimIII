@@ -1,12 +1,13 @@
 ﻿using BrainSimulator.Modules;
-using Emgu.CV;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Threading;
 using System.Xml.Serialization;
+using UKS;
 
 namespace BrainSimulator
 {
@@ -19,12 +20,14 @@ namespace BrainSimulator
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
         public static BrainSim3Data BrainSim3Data = new BrainSim3Data();
 
         //the name of the currently-loaded network file
         public static string currentFileName = "";
+        public static string pythonPath = "";
+        public static UKS.UKS theUKS = new UKS.UKS();
 
         public MainWindow()
         {
@@ -32,26 +35,50 @@ namespace BrainSimulator
 
             SetTitleBar();
             Loaded += MainWindow_Loaded;
-
-            DispatcherTimer dt = new();
-            dt.Interval = TimeSpan.FromSeconds(0.1);
-            dt.Tick += Dt_Tick;
-            dt.Start();
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
 
+            string fileName = Directory.GetCurrentDirectory() + @"\networks\UKS\demo.xml";  
+            string savedFile = (string)Properties.Settings.Default["CurrentFile"];
+            if (savedFile != "")
+                fileName = savedFile;
+
+            //setup the python path
+            pythonPath = (string)Properties.Settings.Default["PythonPath"];
+            if (string.IsNullOrEmpty(pythonPath) && pythonPath != "No Python")
+            {
+                string likeliPath = (string)Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                likeliPath += @"\Programs\Python";
+                System.Windows.Forms.OpenFileDialog openFileDialog = new()
+                {
+                    Filter = Utils.FilterXMLs,
+                    Title = "SELECT path to Python .dll (or cancel for no Python support)",
+                    InitialDirectory = likeliPath,
+                };
+
+                // Show the file Dialog.  
+                DialogResult result = openFileDialog.ShowDialog();
+                // If the user clicked OK in the dialog and  
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    pythonPath = openFileDialog.FileName;
+                    Properties.Settings.Default["PythonPath"] = pythonPath;
+                    Properties.Settings.Default.Save();
+                }
+                else
+                {
+                    Properties.Settings.Default["PythonPath"] = "No Python";
+                    Properties.Settings.Default.Save();
+                }
+                openFileDialog.Dispose();
+            }
+
+            LoadModuleTypeMenu();
+
             try
             {
-                SplashScreeen sp = new SplashScreeen();
-                sp.Show();
-
-
-                string fileName = ""; //if the load is successful, currentfile will be set by the load process
-
-                if (fileName == "")
-                    fileName = (string)Properties.Settings.Default["CurrentFile"];
                 if (fileName != "")
                 {
                     LoadFile(fileName);
@@ -63,35 +90,14 @@ namespace BrainSimulator
             }
             catch (Exception ex) { }
 
-            //setup the python path
-            string pythonPath = (string)Properties.Settings.Default["PythonPath"];
-            if (string.IsNullOrEmpty(pythonPath))
-            {
-                string likeliPath = (string)Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData);
-                likeliPath += @"\Programs\Python";
-                System.Windows.Forms.OpenFileDialog openFileDialog = new()
-                {
-                    Filter = Utils.FilterXMLs,
-                    Title = "SELECT path to Python .dll (or cancel for no Python support)",
-                    InitialDirectory = likeliPath,
-                    
-                };
-                // Show the file Dialog.  
-                System.Windows.Forms.DialogResult result = openFileDialog.ShowDialog();
-                // If the user clicked OK in the dialog and  
-                if (result == System.Windows.Forms.DialogResult.OK)
-                {
-                    pythonPath = openFileDialog.FileName;
-                    Properties.Settings.Default["PythonPath"] = pythonPath;
-                    Properties.Settings.Default.Save();
-                }
-                openFileDialog.Dispose();
-            }
-
-            LoadModuleTypeMenu();
             InitializeModulePane();
+
             ShowAllModuleDialogs();
 
+            DispatcherTimer dt = new();
+            dt.Interval = TimeSpan.FromSeconds(0.1);
+            dt.Tick += Dt_Tick;
+            dt.Start();
         }
 
         public void InitializeModulePane()
@@ -135,17 +141,14 @@ namespace BrainSimulator
         public void InsertMandatoryModules()
         {
             Debug.WriteLine("InsertMandatoryModules entered");
-            BrainSim3Data.modules.Clear();
-            BrainSim3Data.modules.Add(CreateNewUniqueModule("UKS"));
-            BrainSim3Data.modules.Add(CreateNewUniqueModule("UKSStatement"));
+            theUKS.GetOrAddThing("UKS", "ActiveModule");
+            theUKS.GetOrAddThing("AddStatement", "ActiveModule");
+
+            //            BrainSim3Data.modules.Clear();
+            //            BrainSim3Data.modules.Add(CreateNewUniqueModule("UKS"));
+            //            BrainSim3Data.modules.Add(CreateNewUniqueModule("UKSStatement"));
         }
 
-        public ModuleBase CreateNewUniqueModule(string ModuleName)
-        {
-            ModuleBase newModule = CreateNewModule(ModuleName);
-            newModule.Label = MainWindow.GetUniqueModuleLabel(ModuleName);
-            return newModule;
-        }
 
         public static void CloseAllModuleDialogs()
         {
@@ -179,7 +182,7 @@ namespace BrainSimulator
         {
             Title = "Brain Simulator III " + System.IO.Path.GetFileNameWithoutExtension(currentFileName);
         }
-        
+
         public static void Update()
         {
             Debug.WriteLine("Update entered");
@@ -217,49 +220,18 @@ namespace BrainSimulator
 
         public static void SuspendEngine()
         {
-            /*
-            // just pushing an int here, we won't restore it later
-            engineSpeedStack.Push(engineDelay);
-            if (theNeuronArray == null)
-                return;
-
-            string currentThreadName = Thread.CurrentThread.Name;
-            // wait for the engine to actually stop before returning
-            while (theNeuronArray != null && !engineIsPaused && currentThreadName != "EngineThread")
-            {
-                Thread.Sleep(100);
-                System.Windows.Forms.Application.DoEvents();
-            }
-            */
         }
 
         public static void ResumeEngine()
         {
-            /*
-            // first pop the top to make sure we balance the suspends and resumes
-            if (engineSpeedStack.Count > 0)
-                engineDelay = engineSpeedStack.Pop();
-            if (theNeuronArray == null)
-                return;
-
-            // resume the engine
-            // on shutdown, the current application may be gone when this is requested
-            if (theNeuronArray != null && Application.Current != null)
-            {
-                Application.Current.Dispatcher.Invoke((Action)delegate
-                {
-                    MainWindow.thisWindow.SetSliderPosition(engineDelay);
-                });
-            }
-            */
         }
 
         private void Dt_Tick(object? sender, EventArgs e)
         {
-            // Debug.WriteLine("Dt_tick entered");
-
-            foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
+            foreach (Thing module in theUKS.Labeled("ActiveModule").Children)
+//            foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
             {
+                ModuleBase mb = BrainSim3Data.modules.FindFirst(x => x.Label == module.Label); 
                 if (mb != null && mb.dlgIsOpen)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
@@ -268,7 +240,7 @@ namespace BrainSimulator
                     });
                 }
             }
-            foreach(string pythonModule in BrainSim3Data.pythonModules)
+            foreach (string pythonModule in BrainSim3Data.pythonModules)
             {
                 string module = pythonModule.Replace(".py", "");
                 RunScript(module);
@@ -279,19 +251,26 @@ namespace BrainSimulator
         {
             var moduleTypes = Utils.GetArrayOfModuleTypes();
 
+            theUKS.GetOrAddThing("BrainSim", null);
+            theUKS.GetOrAddThing("AvailableModule", "BrainSim");
+            theUKS.GetOrAddThing("ActiveModule", "BrainSim");
+
             foreach (var moduleType in moduleTypes)
             {
                 string moduleName = moduleType.Name;
                 moduleName = moduleName.Replace("Module", "");
-                Modules.ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(moduleType);
-
-                ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = moduleName, Margin = new Thickness(0), Padding = new Thickness(0) });
+                theUKS.GetOrAddThing(moduleName, "AvailableModule");
             }
 
             var pythonModules = GetPythonModules();
             foreach (var moduleType in pythonModules)
             {
-                ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = moduleType, Margin = new Thickness(0), Padding = new Thickness(0) });
+                theUKS.GetOrAddThing(moduleType, "AvailableModule");
+            }
+
+            foreach (Thing t in theUKS.Labeled("AvailableModule").Children)
+            {
+                ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = t.Label, Margin = new Thickness(0), Padding = new Thickness(0) });
             }
         }
     }

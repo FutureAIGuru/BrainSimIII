@@ -351,7 +351,7 @@ public partial class UKS
         return fileName;
     }
 
-    public void LoadUKSfromXMLFile(string filenameIn = "", bool merge = false)
+    public bool LoadUKSfromXMLFile(string filenameIn = "", bool merge = false)
     {
         Stream file;
         if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
@@ -363,7 +363,7 @@ public partial class UKS
         catch (Exception e)
         {
             Debug.WriteLine("Could not open file because: " + e.Message);
-            return;
+            return false;
         }
 
         List<Type> extraTypes = GetTypesInUKS();
@@ -376,14 +376,13 @@ public partial class UKS
         {
             file.Close();
             Debug.WriteLine("Network file load failed, a blank network will be opened. \r\n\r\n" + e.InnerException);//, "File Load Error",
-                                                                                                                     //                MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-            return;
+            return false;
         }
         file.Close();
         if (merge)
             DeFormatAndMergeContentAfterLoading();
         else
             DeFormatContentAfterLoading();
-        //base.UKSReloaded();
+        return true;
     }
 }
