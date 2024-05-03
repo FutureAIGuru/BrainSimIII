@@ -20,6 +20,7 @@ using static System.Net.Mime.MediaTypeNames;
 using System.ComponentModel;
 using System.Configuration;
 using System.Windows.Documents;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
@@ -216,25 +217,25 @@ namespace BrainSimulator.Modules
                 }
             }
             //check UKS for circular references
-            foreach (Thing t1 in UKS.GetTheUKS())
-            {
-                if (t1.HasAncestor(t1))
-                {
-                    //find a direct path which is the circle
-                    Thing t2 = t1;
-                    List<Thing> x;
-                    while ((x = t2.Parents.FindAll(x => x.HasAncestor(t1))).Count > 0)
-                    {
-                        if (x.Count == 1)
-                        {
-                            Debug.Write($"{x[0].Label} -> ");
-                            t2 = x[0];
-                        }
-                        else { }
-                        if (t2 == t1) break;
-                    }
-                }
-            }
+            //foreach (Thing t1 in UKS.GetTheUKS())
+            //{
+            //    if (t1.HasAncestor(t1))
+            //    {
+            //        //find a direct path which is the circle
+            //        Thing t2 = t1;
+            //        List<Thing> x;
+            //        while ((x = t2.Parents.FindAll(x => x.HasAncestor(t1))).Count > 0)
+            //        {
+            //            if (x.Count == 1)
+            //            {
+            //                Debug.Write($"{x[0].Label} -> ");
+            //                t2 = x[0];
+            //            }
+            //            else { }
+            //            if (t2 == t1) break;
+            //        }
+            //    }
+            //}
 
 
             List<Result> resultListHash = new();
