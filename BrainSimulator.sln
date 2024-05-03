@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{1C458A63
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKS", "UKS\UKS.csproj", "{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PythonProj", "PythonProj\PythonProj.pyproj", "{CA6D501B-6295-42CF-A444-AAFE9525A0EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,12 @@ Global
 		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Release|x64.Build.0 = Release|Any CPU
 		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Release|x86.ActiveCfg = Release|Any CPU
 		{7C22FBB6-FE12-43D3-9F6F-479E830C94F6}.Release|x86.Build.0 = Release|Any CPU
+		{CA6D501B-6295-42CF-A444-AAFE9525A0EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA6D501B-6295-42CF-A444-AAFE9525A0EC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CA6D501B-6295-42CF-A444-AAFE9525A0EC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CA6D501B-6295-42CF-A444-AAFE9525A0EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA6D501B-6295-42CF-A444-AAFE9525A0EC}.Release|x64.ActiveCfg = Release|Any CPU
+		{CA6D501B-6295-42CF-A444-AAFE9525A0EC}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

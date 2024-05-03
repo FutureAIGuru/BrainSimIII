@@ -13,6 +13,7 @@ public partial class UKS
     private void CreateInitialStructure()
     {
         UKSList.Clear();
+        ThingLabels.ClearLabelList();
         AddThing("Thing", null);
         GetOrAddThing("Object", "Thing");
         GetOrAddThing("Action", "Thing");
@@ -103,23 +104,23 @@ public partial class UKS
             };
             foreach (Relationship l in t.Relationships)
             {
-                SRelationship sR = ConvertRelationship(l,new List<Relationship>());
+                SRelationship sR = ConvertRelationship(l, new List<Relationship>());
                 st.relationships.Add(sR);
             }
             UKSTemp.Add(st);
         }
     }
 
-    private SRelationship ConvertRelationship(Relationship l,List<Relationship> stack)
+    private SRelationship ConvertRelationship(Relationship l, List<Relationship> stack)
     {
-        if (stack.Contains(l))return null;
+        if (stack.Contains(l)) return null;
         stack.Add(l);
         List<SClauseType> clauseList = null;
         if (l.Clauses.Count > 0) clauseList = new();
         foreach (ClauseType c in l.Clauses)
         {
             int clauseType = UKSList.FindIndex(x => x == c.clauseType);
-            SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause,stack) };
+            SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause, stack) };
             clauseList.Add(ct);
         }
 
@@ -180,7 +181,7 @@ public partial class UKS
         {
             foreach (SRelationship p in UKSTemp[i].relationships)
             {
-                Relationship r = UnConvertRelationship(p,new List<SRelationship>());
+                Relationship r = UnConvertRelationship(p, new List<SRelationship>());
                 if (r != null)
                     UKSList[i].RelationshipsWriteable.Add(r);
             }
@@ -197,28 +198,28 @@ public partial class UKS
                 if (r.relType != null)
                     if (!r.relType.RelationshipsAsTypeWriteable.Contains(r))
                         r.relType.RelationshipsAsTypeWriteable.Add(r);
-                AddClauses(r,new List<Relationship>());
+                AddClauses(r, new List<Relationship>());
             }
         }
     }
 
-    private void AddClauses(Relationship r,List<Relationship>stack)
+    private void AddClauses(Relationship r, List<Relationship> stack)
     {
         if (stack.Contains(r)) return;
         stack.Add(r);
         foreach (ClauseType c in r.Clauses)
-        { 
+        {
             if (!c.clause.clausesFrom.Contains(r))
                 c.clause.clausesFrom.Add(r);
-            AddClauses(c.clause,stack);
+            AddClauses(c.clause, stack);
         }
     }
 
-    private Relationship UnConvertRelationship(SRelationship p,List<SRelationship>stack)
+    private Relationship UnConvertRelationship(SRelationship p, List<SRelationship> stack)
     {
-        if (p == null) 
+        if (p == null)
             return null;
-        if (stack.Contains(p)) 
+        if (stack.Contains(p))
             return null;
         stack.Add(p);
         Thing source = null;
@@ -276,12 +277,12 @@ public partial class UKS
 
     }
 
-
-    public void SaveUKStoXMLFile()
+    public void SaveUKStoXMLFile(string filenameIn = "")
     {
+        if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
         string fullPath = GetFullPathFromKnowledgeFileName(fileName);
 
-        if (CanWriteTo(fileName, out string message))
+        if (!CanWriteTo(fileName, out string message))
         {
             Debug.WriteLine("Could not save file because: " + message);
             return;
@@ -310,7 +311,7 @@ public partial class UKS
 
     private static List<Type> GetTypesInUKS()
     {
-        List < Type > extraTypes = new List<Type>();
+        List<Type> extraTypes = new List<Type>();
         /*
                 // Add classes so XML saving works
                 extraTypes.Add(typeof(Angle));
@@ -350,9 +351,10 @@ public partial class UKS
         return fileName;
     }
 
-    public void LoadUKSfromXMLFile(bool merge = false)
+    public void LoadUKSfromXMLFile(string filenameIn = "", bool merge = false)
     {
         Stream file;
+        if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
         string fullPath = fileName;
         try
         {
@@ -374,7 +376,7 @@ public partial class UKS
         {
             file.Close();
             Debug.WriteLine("Network file load failed, a blank network will be opened. \r\n\r\n" + e.InnerException);//, "File Load Error",
-//                MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                                                                                                                     //                MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
             return;
         }
         file.Close();
