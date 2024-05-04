@@ -137,12 +137,15 @@ namespace BrainSimulator.Modules
                         Debug.WriteLine($"Error, length of value '{Output}' is 0.");
                         ModuleOnlineFileDlg.errorCount += 1;
                     }
-                    string[] relationships = new string[Output.Length];
-                    string[] targets = new string[Output.Length];
+
+                    string[] relationships = new string[values.Length];
+                    string[] targets = new string[values.Length];
+
                     // Split by pipe (|) to get relationships and targets
                     for (int i = 0; i < values.Length; i++)
                     {
                         string[] parts = values[i].Split("|");
+                        ModuleOnlineFileDlg.relationshipCount += 1;
                         // Make sure the length of each pair is 2.
                         if (parts.Length == 2)
                         {

@@ -18,11 +18,12 @@ namespace BrainSimulator.Modules
 
     public partial class ModuleOnlineFileDlg : ModuleBaseDlg
     {
-        // Error count (static for now, working on fix).
+        // Error count and relationship count, used for debugging (static for now, working on fix).
         public static int errorCount;
+        public static int relationshipCount;
 
-        // Word max set to 50 by default, modify at your own risk!
-        int wordMax = 50;
+        // Word max set to 10 by default. *Modify/Increase Value at your own risk!*
+        int wordMax = 10;
         List<string> words = new List<string>();  // List to hold all words
 
         public ModuleOnlineFileDlg()
@@ -41,7 +42,9 @@ namespace BrainSimulator.Modules
         {
             if (sender is Button btn)
             {
+                // Reset to 0 each time for error and relationship count
                 errorCount = 0;
+                relationshipCount = 0;
                 MainWindow.SuspendEngine();
                 words.Clear();
                 System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
@@ -142,8 +145,8 @@ namespace BrainSimulator.Modules
                 await mf.GetChatGPTDataFine(word);
             }
 
-            txtOutput.Text = $"Done running! Total error count out of all relationships is {errorCount} and words count is {words.Count} words.";
-            Debug.WriteLine($"Done running! Total error count out of all relationships is {errorCount} and words count is {words.Count} words.");
+            txtOutput.Text = $"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.";
+            Debug.WriteLine($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
         }
 
 
