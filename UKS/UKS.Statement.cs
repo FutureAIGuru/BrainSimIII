@@ -267,6 +267,10 @@ public partial class UKS
         return null;
     }
 
+    public Thing CreateInstanceOf(Thing t)
+    {
+        return CreateSubclass(t, new List<Thing>());
+    }
     Thing CreateSubclass(Thing t, List<Thing> attributes)
     {
         if (t == null) return null;

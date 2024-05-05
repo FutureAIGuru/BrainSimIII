@@ -239,7 +239,7 @@ namespace BrainSimulator
                 OpenFileDialog openFileDialog1 = new OpenFileDialog
                 {
                     Filter = Utils.FilterXMLs,
-                    Title = Utils.TitleBrainSimLoad,
+                    Title = Utils.TitleUKSFileLoad,
                 };
                 // Show the Dialog.  
                 // If the user clicked OK in the dialog and  

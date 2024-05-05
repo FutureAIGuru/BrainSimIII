@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
 using System.Windows.Threading;
 using System.Xml.Serialization;
 using UKS;
@@ -79,7 +78,6 @@ namespace BrainSimulator
                 openFileDialog.Dispose();
             }
 
-            LoadModuleTypeMenu();
 
             try
             {
@@ -94,14 +92,18 @@ namespace BrainSimulator
             }
             catch (Exception ex) { }
 
+            if (theUKS.Labeled("BrainSim") == null)
+                CreateEmptyNetwork();
+
+            LoadModuleTypeMenu();
             InitializeModulePane();
 
             ShowAllModuleDialogs();
 
-            DispatcherTimer dt = new();
-            dt.Interval = TimeSpan.FromSeconds(0.1);
-            dt.Tick += Dt_Tick;
-            dt.Start();
+            //DispatcherTimer dt = new();
+            //dt.Interval = TimeSpan.FromSeconds(0.1);
+            //dt.Tick += Dt_Tick;
+            //dt.Start();
         }
 
         public void InitializeModulePane()
@@ -145,7 +147,10 @@ namespace BrainSimulator
         public void InsertMandatoryModules()
         {
             Debug.WriteLine("InsertMandatoryModules entered");
-            theUKS.GetOrAddThing("UKS", "ActiveModule");
+            Thing t = theUKS.CreateInstanceOf(theUKS.Labeled("UKS"));
+            if (t == null)
+                t = theUKS.AddThing("UKS", theUKS.Labeled("AvailableModules"));
+            t.AddParent(theUKS.Labeled("ActiveModule"));
             theUKS.GetOrAddThing("AddStatement", "ActiveModule");
 
             activeModules.Clear();
@@ -267,7 +272,8 @@ namespace BrainSimulator
         {
             var moduleTypes = Utils.GetArrayOfModuleTypes();
 
-            theUKS.GetOrAddThing("BrainSim", null);
+            if (theUKS.Labeled("BrainSim") == null)
+                theUKS.AddThing("BrainSim", null);
             theUKS.GetOrAddThing("AvailableModule", "BrainSim");
             theUKS.GetOrAddThing("ActiveModule", "BrainSim");
 

@@ -416,23 +416,8 @@
     <Resource Include="Resources\UserInterface\MainWindow\WINDOWS-ICON-Move.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Betalgo.OpenAI.GPT3" Version="6.7.2" />
-    <PackageReference Include="Catalyst" Version="1.0.33442" />
-    <PackageReference Include="Catalyst.Models.English" Version="1.0.30952" />
-    <PackageReference Include="Catalyst.Spacy" Version="1.0.33442" />
-    <PackageReference Include="Emgu.CV" Version="4.5.5.4823" />
-    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.5.5.4823" />
-    <PackageReference Include="Emgu.CV.UI" Version="4.5.5.4823" />
-    <PackageReference Include="HelixToolkit.Wpf" Version="2.24.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.23.0" />
-    <PackageReference Include="NAudio" Version="2.1.0" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
-    <PackageReference Include="Python.Included" Version="3.7.3.13" />
     <PackageReference Include="pythonnet" Version="3.0.3" />
-    <PackageReference Include="SharpDX" Version="4.2.0" />
-    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
-    <PackageReference Include="System.Management" Version="8.0.0" />
-    <PackageReference Include="System.Speech" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UKS\UKS.csproj" />

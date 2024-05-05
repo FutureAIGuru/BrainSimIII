@@ -32,7 +32,7 @@ namespace BrainSimulator.Modules
 
         [XmlIgnore]
         //public static ModuleUKS UKS = null;
-        public static UKS.UKS UKS = null;
+        public UKS.UKS UKS = null;
 
         public ModuleBase()
         {
@@ -75,16 +75,7 @@ namespace BrainSimulator.Modules
 
         public void GetUKS()
         {
-            if (UKS is null)
-            {
-                ModuleUKS theModule = (ModuleUKS)(FindModule(typeof(ModuleUKS)));
-                if (theModule != null)
-                {
-                    if (theModule.theUKS == null)
-                        theModule.theUKS = new();
-                    UKS = theModule.theUKS;
-                }
-            }
+            UKS = MainWindow.theUKS;
         }
 
 
@@ -310,20 +301,6 @@ namespace BrainSimulator.Modules
 
         public virtual MenuItem CustomContextMenuItems()
         {
-            return null;
-        }
-
-        public ModuleBase FindModule(Type t, bool suppressWarning = true)
-        {
-            foreach (ModuleBase na1 in MainWindow.theWindow.activeModules)
-            {
-                if (na1 != null && na1.GetType() == t)
-                {
-                    return na1;
-                }
-            }
-            if (!suppressWarning)
-                MarkModuleTypeAsNotLoaded(t.ToString());
             return null;
         }
     }

@@ -119,14 +119,14 @@ namespace BrainSimulator.Modules
                 retVal.Add(t);
             }
             //is this a sequence?
-            List<Thing> tSequence = UKS.HasSequence(retVal);
+            List<Thing> tSequence = MainWindow.theUKS.HasSequence(retVal);
             if (tSequence != null && tSequence.Count > 0)
             {
                 retVal = tSequence;
             }
             else if (retVal.Count > 1) //do things represent a list of attributes
             {
-                retVal = UKS.FindThingsWithAttributes(retVal);
+                retVal = MainWindow.theUKS.FindThingsWithAttributes(retVal);
             }
 
             return retVal;

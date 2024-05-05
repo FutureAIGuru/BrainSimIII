@@ -247,7 +247,7 @@ namespace BrainSimulator
             SaveFileDialog saveFileDialog1 = new SaveFileDialog
             {
                 Filter = Utils.FilterXMLs,
-                Title = Utils.TitleBrainSimSave,
+                Title = Utils.TitleUKSFileSave,
                 InitialDirectory = defaultPath
             };
 

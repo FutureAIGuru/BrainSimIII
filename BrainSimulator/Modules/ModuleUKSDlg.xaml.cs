@@ -59,7 +59,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         uks = parent.GetTheUKS();
         try
         {
-            foreach (Thing t1 in parent.theUKS.UKSList)
+            foreach (Thing t1 in parent.UKS.UKSList)
             {
                 t = t1;
                 childCount += t1.Children.Count;
@@ -72,7 +72,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             //you might get this exception if there is a collision
             return;
         }
-        statusLabel.Content = parent.theUKS.UKSList.Count + " Things  " + (childCount + refCount) + " Relationships";
+        statusLabel.Content = parent.UKS.UKSList.Count + " Things  " + (childCount + refCount) + " Relationships";
         Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.fileName);
     }
 
@@ -80,7 +80,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         string root = textBoxRoot.Text;
         ModuleUKS parent = (ModuleUKS)ParentModule;
-        Thing thing = parent.theUKS.Labeled(root);
+        Thing thing = parent.UKS.Labeled(root);
         if (thing is not null)
         {
             totalItemCount = 0;
@@ -134,7 +134,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 
             if (r.Weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
                 header = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
-            if (r.reltype.HasRelationship(UKS.theUKS.Labeled("not")) != null) //prepend ! for negative  children
+            if (r.reltype.HasRelationship(UKS.UKS.Labeled("not")) != null) //prepend ! for negative  children
                 header = "!" + header;
             if (detailsCB.IsChecked == true)
                 header += ":" + child.Children.Count + "," + descCountStr;
@@ -425,7 +425,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         if (sender is MenuItem mi)
         {
-            UKS.UKS uks = ((ModuleUKS)ParentModule).theUKS;
+            UKS.UKS uks = ((ModuleUKS)ParentModule).UKS;
             ContextMenu m = mi.Parent as ContextMenu;
             Thing tParent = (Thing)mi.GetValue(ThingObjectProperty);
             if (tParent != null)
@@ -650,7 +650,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void InitializeButton_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
-        parent.theUKS.UKSList.Clear();
+        parent.UKS.UKSList.Clear();
         parent.Initialize();
 
         CollapseAll();
@@ -685,7 +685,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             Filter = Utils.FilterXMLs,
             Title = Utils.TitleUKSFileSave,
-            InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.FolderKnowledgeFiles),
+            InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.UKSContentFolder),
         };
 
         // Show the file Dialog.  
@@ -695,7 +695,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             MainWindow.SuspendEngine();
             parent.fileName = saveFileDialog.FileName;
-            parent.theUKS.SaveUKStoXMLFile(parent.fileName);
+            parent.UKS.SaveUKStoXMLFile(parent.fileName);
             MainWindow.ResumeEngine();
         }
         saveFileDialog.Dispose();
@@ -712,7 +712,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             {
                 Filter = Utils.FilterXMLs,
                 Title = Utils.TitleUKSFileLoad,
-                InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.FolderKnowledgeFiles),
+                InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.UKSContentFolder),
             };
 
             // Show the file Dialog.  
@@ -721,7 +721,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 parent.fileName = openFileDialog.FileName;
-                parent.theUKS.LoadUKSfromXMLFile(parent.fileName, (btn.Content.ToString() == "Merge"));
+                parent.UKS.LoadUKSfromXMLFile(parent.fileName, (btn.Content.ToString() == "Merge"));
                 MainWindow.ResumeEngine();
             }
             openFileDialog.Dispose();
