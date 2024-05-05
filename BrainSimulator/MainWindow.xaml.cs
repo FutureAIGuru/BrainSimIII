@@ -35,7 +35,7 @@ namespace BrainSimulator
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             theWindow = this;
-            string fileName = Directory.GetCurrentDirectory() + @"\networks\UKS\demo.xml";  
+            string fileName = "";  
             string savedFile = (string)Properties.Settings.Default["CurrentFile"];
             if (savedFile != "")
                 fileName = savedFile;
@@ -44,6 +44,7 @@ namespace BrainSimulator
             pythonPath = (string)Properties.Settings.Default["PythonPath"];
             if (string.IsNullOrEmpty(pythonPath) && pythonPath != "No Python")
             {
+                MessageBox.Show("Do you want Python Modules?");
                 string likeliPath = (string)Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 likeliPath += @"\Programs\Python";
                 System.Windows.Forms.OpenFileDialog openFileDialog = new()
@@ -97,6 +98,7 @@ namespace BrainSimulator
 
             ShowAllModuleDialogs();
 
+            LoadMRUMenu();
             //start the module engine
             //DispatcherTimer dt = new();
             //dt.Interval = TimeSpan.FromSeconds(0.1);
@@ -123,8 +125,6 @@ namespace BrainSimulator
                     mod.SetUpAfterLoad();
                 }
             }
-
-            ReloadActiveModulesSP();
         }
 
         public void ShowAllModuleDialogs()

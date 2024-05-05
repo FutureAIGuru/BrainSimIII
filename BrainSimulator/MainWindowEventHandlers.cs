@@ -68,22 +68,14 @@ namespace BrainSimulator
         }
 
 
-        //This opens an app depending on the assignments of the file extensions in Windows
-        public static Process OpenApp(string fileName)
+        private ModuleBase CreateNewModule(string moduleTypeLabel,string moduleLabel="")
         {
-            Process p = new Process();
-            p.StartInfo.FileName = fileName;
-            p.StartInfo.UseShellExecute = true;
-            p.Start();
-            return p;
-        }
-
-        private ModuleBase CreateNewModule(string moduleLabel)
-        {
-            Type t = Type.GetType("BrainSimulator.Modules.Module" + moduleLabel);
+            Type t = Type.GetType("BrainSimulator.Modules.Module" + moduleTypeLabel);
             ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(t);
 
             theModule.Label = moduleLabel;
+            if (moduleLabel == "")
+                theModule.Label = moduleTypeLabel;
             return theModule;
         }
         private void ModuleList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -157,7 +149,7 @@ namespace BrainSimulator
             else
             {
                 //this is a file name from the File menu
-                currentFileName = Path.GetFullPath("./Networks/" + fileName + ".xml");
+                currentFileName = Path.GetFullPath("./UKSContent/" + fileName + ".xml");
                 LoadCurrentFile();
             }
         }
