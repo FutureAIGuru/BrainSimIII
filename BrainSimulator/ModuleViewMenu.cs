@@ -125,7 +125,6 @@ namespace BrainSimulator
                     int i = activeModules.IndexOf(m);
 
                     DeleteModule(i);
-                    MainWindow.Update();
                     deleted = true;
                     cm.IsOpen = false;
                 }
@@ -157,11 +156,6 @@ namespace BrainSimulator
         static bool deleted = false;
         private void Cm_Closed(object sender, RoutedEventArgs e)
         {
-            if ((Keyboard.GetKeyStates(Key.Escape) & KeyStates.Down) > 0)
-            {
-                MainWindow.Update();
-                return;
-            }
             if (deleted)
             {
                 deleted = false;
@@ -220,8 +214,7 @@ namespace BrainSimulator
                     activeModules[i].Label = theModuleTypeStr;
                 }
             }
-            Update();
-            ReloadLoadedModules();
+            ReloadActiveModulesSP();
         }
 
         private void Mi_Click(object sender, RoutedEventArgs e)
@@ -330,7 +323,7 @@ namespace BrainSimulator
             mb.Closing();
             activeModules.RemoveAt(i);
 
-            ReloadLoadedModules();
+            ReloadActiveModulesSP();
         }
     }
 }

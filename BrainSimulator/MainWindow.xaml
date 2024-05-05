@@ -152,7 +152,7 @@
                 </StackPanel>
             </DockPanel>
             <Border BorderThickness="4" Width="180" Grid.Column="0" Grid.Row="1" BorderBrush="Gray" HorizontalAlignment="Left">
-                <StackPanel x:Name="LoadedModuleSP">
+                <StackPanel x:Name="ActiveModuleSP">
                 </StackPanel>
             </Border>
         </Grid>

@@ -275,7 +275,7 @@ public partial class UKS
     {
         if (t == null) return null;
         Thing t2 = SubclassExists(t, attributes);
-        if (t2 != null) return t2;
+        if (t2 != null && attributes.Count != 0) return t2;
 
         string newLabel = t.Label;
         foreach (Thing t1 in attributes)
@@ -283,7 +283,7 @@ public partial class UKS
             newLabel += "." + t1.Label;
         }
         //create the new thing which is child of the original
-        Thing retVal = GetOrAddThing(newLabel, t);
+        Thing retVal = AddThing(newLabel, t);
         //add the attributes
         foreach (Thing t1 in attributes)
         {

@@ -9,6 +9,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,7 +24,7 @@ namespace BrainSimulator
     public partial class MainWindow : Window
     {
         private static StackPanel loadedModulesSP;
-        private async void LoadFile(string fileName)
+        private bool LoadFile(string fileName)
         {
             //CloseAllModuleDialogs();
             //CloseAllModules();
@@ -66,20 +67,29 @@ namespace BrainSimulator
             if (!theUKS.LoadUKSfromXMLFile(fileName))
             {
                 theUKS = new UKS.UKS();
+                return false;
             }
-            ReloadLoadedModules();
+            Properties.Settings.Default["CurrentFile"] = currentFileName;
+            Properties.Settings.Default.Save();
+            ReloadActiveModulesSP();
             ShowAllModuleDialogs();
+            return true;
         }
 
-        public void ReloadLoadedModules()
+        public void ReloadActiveModulesSP()
         {
-            if (loadedModulesSP == null) return;
-            loadedModulesSP.Children.Clear();
+            ActiveModuleSP.Children.Clear();
 
-//            System.Collections.Generic.SortedDictionary<string, int> nameList = new();
-            foreach (Thing t in theUKS.Labeled("ActiveModule").Children)
-//            for (int i = 0; i < BrainSim3Data.modules.Count; i++)
+            var activeModules1 = theUKS.Labeled("ActiveModule").Children;
+            activeModules1 = activeModules1.OrderBy(x => x.Label).ToList();
+
+            foreach (Thing t in activeModules1)
             {
+                //what kind of module is this?
+                Thing t1 = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+                if (t1 == null) continue;
+                string moduleType = t1.Label;
+
                 TextBlock tb = new TextBlock();
                 tb.Text = t.Label;
                 tb.Margin = new Thickness(5, 2, 5, 2);
@@ -91,33 +101,8 @@ namespace BrainSimulator
                 //                    if (mod.isEnabled)
                 tb.Background = new SolidColorBrush(Colors.LightGreen);
                 //                  else tb.Background = new SolidColorBrush(Colors.Pink);
-                loadedModulesSP.Children.Add(tb);
+                ActiveModuleSP.Children.Add(tb);
             }
-            //for (int i = 0; i < BrainSim3Data.pythonModules.Count; i++)
-            //    nameList.Add(BrainSim3Data.pythonModules[i], i);
-
-            //add the modules to the stackPanel
-            //foreach (var x in nameList)
-            //{
-            //    if (!x.Key.Contains(".py"))
-            //    {
-            //        ModuleBase mod = BrainSim3Data.modules[x.Value];
-            //        AddModuleToLoadedModules(x.Value, mod);
-            //    }
-            //    else
-            //    {
-            //        TextBlock tb = new TextBlock();
-            //        tb.Text = x.Key;
-            //        tb.Margin = new Thickness(5, 2, 5, 2);
-            //        tb.Padding = new Thickness(10, 3, 10, 3);
-            //        tb.ContextMenu = new ContextMenu();
-            //        //                    ModuleView.CreateContextMenu(i, mod, tb, tb.ContextMenu);
-            //        //                    if (mod.isEnabled)
-            //        tb.Background = new SolidColorBrush(Colors.LightGreen);
-            //        //                  else tb.Background = new SolidColorBrush(Colors.Pink);
-            //        loadedModulesSP.Children.Add(tb);
-            //    }
-            //}
         }
 
         private void AddModuleToLoadedModules(int i, ModuleBase mod)

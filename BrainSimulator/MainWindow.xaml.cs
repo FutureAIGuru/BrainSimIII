@@ -4,27 +4,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Forms;
-using System.Windows.Threading;
-using System.Xml.Serialization;
 using UKS;
 
 namespace BrainSimulator
 {
-    public class BrainSim3Data
-    {
-        public List<string> pythonModules = new();
-    }
-
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static BrainSim3Data BrainSim3Data = new BrainSim3Data();
 
         public List<ModuleBase> activeModules = new List<ModuleBase>();
+        public List<string> pythonModules = new();
 
         //the name of the currently-loaded network file
         public static string currentFileName = "";
@@ -62,7 +54,7 @@ namespace BrainSimulator
                 };
 
                 // Show the file Dialog.  
-                DialogResult result = openFileDialog.ShowDialog();
+                System.Windows.Forms.DialogResult result = openFileDialog.ShowDialog();
                 // If the user clicked OK in the dialog and  
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
@@ -83,34 +75,46 @@ namespace BrainSimulator
             {
                 if (fileName != "")
                 {
-                    LoadFile(fileName);
+                    if (!LoadFile(fileName))
+                        CreateEmptyUKS();
                 }
                 else //force a new file creation on startup if no file name set
                 {
-                    CreateEmptyNetwork();
+                    CreateEmptyUKS();
                 }
             }
-            catch (Exception ex) { }
+            catch (Exception ex) { 
+                System.Windows.MessageBox.Show("UKS Content not loaded"); }
 
+            //safety check
             if (theUKS.Labeled("BrainSim") == null)
-                CreateEmptyNetwork();
+                CreateEmptyUKS();
 
             LoadModuleTypeMenu();
-            InitializeModulePane();
+            ReloadActiveModulesSP();
+
+            InitializeActiveModules();
 
             ShowAllModuleDialogs();
 
+            //start the module engine
             //DispatcherTimer dt = new();
             //dt.Interval = TimeSpan.FromSeconds(0.1);
             //dt.Tick += Dt_Tick;
             //dt.Start();
         }
 
-        public void InitializeModulePane()
+        void LoadActiveModuleSP()
         {
-            loadedModulesSP = LoadedModuleSP;
-            LoadedModuleSP.Children.Clear();
+            ActiveModuleSP.Children.Clear();
+            var activeModules = theUKS.GetOrAddThing("ActiveModule").Children;
+            foreach (Thing t in activeModules)
+                ActiveModuleSP.Children.Add(new System.Windows.Controls.Label { Content = t.Label});
+        }
 
+
+        public void InitializeActiveModules()
+        {
             for (int i = 0; i < activeModules.Count; i++)
             {
                 ModuleBase mod = activeModules[i];
@@ -120,7 +124,7 @@ namespace BrainSimulator
                 }
             }
 
-            ReloadLoadedModules();
+            ReloadActiveModulesSP();
         }
 
         public void ShowAllModuleDialogs()
@@ -137,25 +141,45 @@ namespace BrainSimulator
             }
         }
 
-        public void CreateEmptyNetwork()
+        public void CreateEmptyUKS()
         {
+            theUKS = new UKS.UKS();
+            theUKS.AddThing("BrainSim", null);
+            theUKS.GetOrAddThing("AvailableModule", "BrainSim");
+            theUKS.GetOrAddThing("ActiveModule", "BrainSim");
+
             InsertMandatoryModules();
-            InitializeModulePane();
-            Update();
+            InitializeActiveModules();
         }
 
         public void InsertMandatoryModules()
         {
-            Debug.WriteLine("InsertMandatoryModules entered");
-            Thing t = theUKS.CreateInstanceOf(theUKS.Labeled("UKS"));
-            if (t == null)
-                t = theUKS.AddThing("UKS", theUKS.Labeled("AvailableModules"));
-            t.AddParent(theUKS.Labeled("ActiveModule"));
-            theUKS.GetOrAddThing("AddStatement", "ActiveModule");
 
-            activeModules.Clear();
-            activeModules.Add(CreateNewUniqueModule("UKS"));
-            activeModules.Add(CreateNewUniqueModule("UKSStatement"));
+            Debug.WriteLine("InsertMandatoryModules entered");
+            ActivateModule("UKS");
+            ActivateModule("UKSStatement");
+        }
+
+        public string ActivateModule(string moduleName)
+        {
+            Thing t = theUKS.GetOrAddThing(moduleName, "AvailableModule");
+            t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleName));
+            t.AddParent(theUKS.Labeled("ActiveModule"));
+
+            if (!moduleName.Contains(".py"))
+            {
+                ModuleBase newModule = CreateNewModule(moduleName);
+                newModule.Label = t.Label;
+                activeModules.Add(newModule);
+            }
+            else
+            {
+                theUKS.AddStatement(t.Label, "is-a", "ActiveModule");
+                pythonModules.Add(t.Label);
+            }
+
+            LoadActiveModuleSP();
+            return t.Label;
         }
 
         public ModuleBase CreateNewUniqueModule(string ModuleName)
@@ -204,41 +228,6 @@ namespace BrainSimulator
             Title = "Brain Simulator III " + System.IO.Path.GetFileNameWithoutExtension(currentFileName);
         }
 
-        public static void Update()
-        {
-            Debug.WriteLine("Update entered");
-        }
-
-        [XmlIgnore]
-        public ModuleUKS UKS = null;
-        public void GetUKS()
-        {
-            if (UKS is null)
-            {
-                UKS = (ModuleUKS)FindModule(typeof(ModuleUKS));
-            }
-        }
-
-        public ModuleBase FindModule(Type t, bool suppressWarning = true)
-        {
-            foreach (ModuleBase mb1 in activeModules)
-            {
-                if (mb1 != null && mb1.GetType() == t)
-                {
-                    return mb1;
-                }
-            }
-            return null;
-        }
-
-        // stack to make sure we supend and resume the engine properly
-        static Stack<int> engineSpeedStack = new Stack<int>();
-
-        public bool IsEngineSuspended()
-        {
-            return engineSpeedStack.Count > 0;
-        }
-
         public static void SuspendEngine()
         {
         }
@@ -261,7 +250,7 @@ namespace BrainSimulator
                     });
                 }
             }
-            foreach (string pythonModule in BrainSim3Data.pythonModules)
+            foreach (string pythonModule in pythonModules)
             {
                 string module = pythonModule.Replace(".py", "");
                 RunScript(module);
@@ -271,11 +260,6 @@ namespace BrainSimulator
         private void LoadModuleTypeMenu()
         {
             var moduleTypes = Utils.GetArrayOfModuleTypes();
-
-            if (theUKS.Labeled("BrainSim") == null)
-                theUKS.AddThing("BrainSim", null);
-            theUKS.GetOrAddThing("AvailableModule", "BrainSim");
-            theUKS.GetOrAddThing("ActiveModule", "BrainSim");
 
             foreach (var moduleType in moduleTypes)
             {
