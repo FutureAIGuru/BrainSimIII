@@ -32,7 +32,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private bool busy;
     private List<string> expandedItems = new();
     private bool updateFailed;
-    private List<Thing> uks;
+    //private List<Thing> uks;
     private DispatcherTimer dt;
     private string expandAll = "";  //all the children below this named node will be expanded
 
@@ -56,7 +56,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         int refCount = 0;
         ModuleUKS parent = (ModuleUKS)ParentModule;
         Thing t = null;
-        uks = parent.GetTheUKS();
         try
         {
             foreach (Thing t1 in parent.UKS.UKSList)
@@ -78,8 +77,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private void LoadContentToTreeView()
     {
-        string root = textBoxRoot.Text;
         ModuleUKS parent = (ModuleUKS)ParentModule;
+        string root = parent.GetAttribute("Root");
+        if (root == null)
+        {
+            root = "Thing";
+            parent.SetAttribute("Root", root);
+        }
         Thing thing = parent.UKS.Labeled(root);
         if (thing is not null)
         {
@@ -96,7 +100,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             try //ignore problems of collection modified
             {
-                foreach (Thing t1 in uks)
+                foreach (Thing t1 in parent.UKS.UKSList)
                 {
                     if (t1.Parents.Count == 0)
                     {
@@ -309,7 +313,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         ContextMenu menu = new ContextMenu();
         menu.SetValue(ThingObjectProperty, t);
-        int ID = uks.IndexOf(t);
+        ModuleUKS parent = (ModuleUKS)ParentModule;
+        int ID = parent.UKS.UKSList.IndexOf(t);
         MenuItem mi = new();
         string thingLabel = "___";
         if (t != null)
@@ -556,10 +561,17 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private void TextBoxRoot_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Return)
-        {
-            RefreshButton_Click(null, null);
-        }
+        //ModuleUKS parent = (ModuleUKS)ParentModule;
+        //parent.SetAttribute("Root", textBoxRoot.Text);
+        //RefreshButton_Click(null, null);
+    }
+    private void textBoxRoot_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        ModuleUKS parent = (ModuleUKS)ParentModule;
+        if (parent == null) return; 
+        parent.SetAttribute("Root", textBoxRoot.Text);
+        RefreshButton_Click(null, null);
+
     }
 
     //using the mouse-wheel while pressing ctrl key changes the font size
@@ -654,7 +666,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         parent.Initialize();
 
         CollapseAll();
-        textBoxRoot.Text = "Thing";
+        string root= parent.GetAttribute("root"); ;
+        if (root == "") root = "Thing";
+        textBoxRoot.Text = root;
         //expandAll = "";
         RefreshButton_Click(null, null);
     }

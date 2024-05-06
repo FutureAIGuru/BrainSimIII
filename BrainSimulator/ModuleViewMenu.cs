@@ -11,7 +11,7 @@ namespace BrainSimulator
 {
     public partial class MainWindow : Window
     {
-        public static readonly DependencyProperty moduleNameProperty  =
+        public static readonly DependencyProperty moduleNameProperty =
             DependencyProperty.Register("moduleName", typeof(string), typeof(MenuItem));
 
         public void CreateContextMenu(ModuleBase nr, FrameworkElement r, ContextMenu cm = null) //for a selection
@@ -20,7 +20,6 @@ namespace BrainSimulator
             if (cm == null)
                 cm = new ContextMenu();
             cm.SetValue(moduleNameProperty, nr.Label);
-            cm.PreviewKeyDown += Cm_PreviewKeyDown;
 
             StackPanel sp;
             MenuItem mi = new MenuItem();
@@ -105,30 +104,6 @@ namespace BrainSimulator
                     {
                         Cm_Closed(cm, null);
                     }
-            }
-        }
-
-        private void Cm_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            ContextMenu cm = sender as ContextMenu;
-            if (e.Key == Key.Enter)
-            {
-                Cm_Closed(sender, e);
-            }
-            if (e.Key == Key.Delete)
-            {
-                IInputElement focusedControl = Keyboard.FocusedElement;
-                if (focusedControl.GetType() != typeof(TextBox))
-                {
-                    string moduleName = (string)cm.GetValue(moduleNameProperty);
-                    ModuleBase m = activeModules.FindFirst(x => x.Label == moduleName);
-                    int i = activeModules.IndexOf(m);
-
-                    DeleteModule(i);
-                    deleted = true;
-                    cm.IsOpen = false;
-                }
-
             }
         }
 
@@ -234,7 +209,7 @@ namespace BrainSimulator
 
                     string cwd = System.IO.Directory.GetCurrentDirectory();
                     if (cwd.Contains("bin\\"))
-                        cwd = cwd.ToLower().Substring(0,cwd.IndexOf("bin\\"));
+                        cwd = cwd.ToLower().Substring(0, cwd.IndexOf("bin\\"));
                     string fileName = cwd + @"modules\" + theModuleType + ".cs";
                     if (File.Exists(fileName))
                         OpenSource(fileName);
@@ -248,7 +223,7 @@ namespace BrainSimulator
                 {
                     if (i >= 0)
                     {
-                        DeleteModule(i);
+                        DeleteModule(moduleName);
                         deleted = true;
                     }
                 }
@@ -274,35 +249,17 @@ namespace BrainSimulator
                 }
                 if ((string)mi.Header == "Show Dialog")
                 {
-                    if (i < 0)
-                    {
-                    }
-                    else
-                    {
-                        activeModules[i].ShowDialog();
-                    }
+                    activeModules[i].OpenDlg();
                 }
                 if ((string)mi.Header == "Hide Dialog")
                 {
-                    if (i < 0)
-                    {
-                    }
-                    else
-                    {
-                        activeModules[i].CloseDlg();
-                    }
+                    activeModules[i].CloseDlg();
                 }
                 if ((string)mi.Header == "Info...")
                 {
-                    if (i < 0)
-                    {
-                    }
-                    else
-                    {
-                        string theModuleType = m.GetType().Name.ToString();
-                        ModuleDescriptionDlg md = new ModuleDescriptionDlg(theModuleType);
-                        md.ShowDialog();
-                    }
+                    string theModuleType = m.GetType().Name.ToString();
+                    ModuleDescriptionDlg md = new ModuleDescriptionDlg(theModuleType);
+                    md.ShowDialog();
                 }
             }
         }
@@ -316,12 +273,13 @@ namespace BrainSimulator
             process.Start();
         }
 
-        public void DeleteModule(int i)
+        public void DeleteModule(string moduleName)
         {
-            ModuleBase mb = activeModules[i];
+            ModuleBase mb = activeModules.FindFirst(x => x.Label == moduleName);
             mb.CloseDlg();
             mb.Closing();
-            activeModules.RemoveAt(i);
+            activeModules.Remove(mb);
+            theUKS.DeleteThing(theUKS.Labeled(mb.Label));
 
             ReloadActiveModulesSP();
         }

@@ -76,6 +76,7 @@ namespace BrainSimulator
             theModule.Label = moduleLabel;
             if (moduleLabel == "")
                 theModule.Label = moduleTypeLabel;
+            theModule.GetUKS();
             return theModule;
         }
         private void ModuleList_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -277,7 +277,7 @@ public partial class UKS
 
     }
 
-    public void SaveUKStoXMLFile(string filenameIn = "")
+    public bool SaveUKStoXMLFile(string filenameIn = "")
     {
         if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
         string fullPath = GetFullPathFromKnowledgeFileName(fileName);
@@ -285,7 +285,7 @@ public partial class UKS
         if (!CanWriteTo(fileName, out string message))
         {
             Debug.WriteLine("Could not save file because: " + message);
-            return;
+            return false;
         }
         FormatContentForSaving();
         List<Type> extraTypes = GetTypesInUKS();
@@ -303,10 +303,11 @@ public partial class UKS
             else
                 Debug.WriteLine("Xml file write failed because: " + e.Message);
             file.Close();
-            return;
+            return false;
         }
         file.Close();
         UKSTemp = new();
+        return true;
     }
 
     private static List<Type> GetTypesInUKS()

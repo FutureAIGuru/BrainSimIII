@@ -9,15 +9,13 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 using System.Windows.Threading;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
     abstract public class ModuleBase
     {
-        //this is public so it will be included in the saved xml file.  That way
-        //initialized data content can be preserved from run to run and only reinitialized when requested.
         public bool initialized = false;
 
         public bool isEnabled = true;
@@ -28,9 +26,7 @@ namespace BrainSimulator.Modules
         public Point dlgSize;
         public bool dlgIsOpen = false;
         protected bool allowMultipleDialogs = false;
-        private List<ModuleBaseDlg> dlgList = null;
 
-        [XmlIgnore]
         //public static ModuleUKS UKS = null;
         public UKS.UKS UKS = null;
 
@@ -123,17 +119,13 @@ namespace BrainSimulator.Modules
                 dlgIsOpen = true;
             }
         }
-
+        public void OpenDlg()
+        {
+            SetAttribute("Open", "True");
+            ShowDialog();
+        }
         public void CloseDlg()
         {
-            if (dlgList != null)
-                for (int i = dlgList.Count - 1; i >= 0; i--)
-                {
-                    Application.Current.Dispatcher.Invoke((Action)delegate
-                    {
-                        dlgList[i].Close();
-                    });
-                }
             if (dlg != null)
             {
                 Application.Current.Dispatcher.Invoke((Action)delegate
@@ -141,10 +133,26 @@ namespace BrainSimulator.Modules
                     dlg.Close();
                 });
             }
+            SetAttribute("Open", "");
         }
 
         public virtual void ShowDialog()
         {
+            if (GetAttribute("Open") != "True") return;
+            string infoString = GetDlgWindow();
+            if ( infoString != null)
+            {
+                if (string.IsNullOrEmpty(infoString)) return;
+                string[] info = infoString.Split('+', 'x');
+                if (info.Length == 4)
+                {
+                    dlgSize.X = int.Parse(info[0]);
+                    dlgSize.Y = int.Parse(info[1]);
+                    dlgPos.X = int.Parse(info[2]);
+                    dlgPos.Y = int.Parse(info[3]);
+                }
+            }
+
             ApartmentState aps = Thread.CurrentThread.GetApartmentState();
             if (aps != ApartmentState.STA) return;
             Type t = this.GetType();
@@ -159,8 +167,6 @@ namespace BrainSimulator.Modules
             if (!allowMultipleDialogs && dlg != null) dlg.Close();
             if (allowMultipleDialogs && dlg != null)
             {
-                if (dlgList == null) dlgList = new List<ModuleBaseDlg>();
-                dlgList.Add(dlg);
                 dlgPos.X += 10;
                 dlgPos.Y += 10;
             }
@@ -178,8 +184,6 @@ namespace BrainSimulator.Modules
             Window mainWindow = Application.Current.MainWindow;
             if (mainWindow.GetType() == typeof(MainWindow))
                 dlg.Owner = Application.Current.MainWindow;
-            // else
-            //     Utils.Noop();
 
             //restore the size and position
             if (dlgPos != new Point(0, 0))
@@ -214,45 +218,86 @@ namespace BrainSimulator.Modules
 #endif
         }
 
+        public  string GetAttribute(string attribName)
+        {
+            Thing thisDlg = UKS.Labeled(Label);
+            if (thisDlg == null) return null;   
+            foreach (var r in thisDlg.Relationships)
+            {
+                if (r.reltype.Label == "hasAttribute" && r.target.Label.StartsWith(attribName))
+                {
+                    string retVal = (string)r.target.V;
+                    return retVal;
+                }
+            }
+            return null;
+        }
+        public void SetAttribute(string attribName, string attribValue)
+        {
+            if (string.IsNullOrEmpty(attribName)) { return; }
+            Thing thisDlg = UKS.Labeled(Label);
+            if (thisDlg == null) { return; }
+            foreach (var r in thisDlg.Relationships)
+            {
+                if (r.reltype.Label == "hasAttribute" && r.target.Label.StartsWith(attribName))
+                {
+                    if (attribValue == null)
+                    {
+                        UKS.DeleteThing(r.target);
+                        return;
+                    }
+                    r.target.V = attribValue;
+                    return;
+                }
+            }
+            if (attribName == null) return;
+            Thing dlgAttribParent = UKS.GetOrAddThing("DlgAttrib", "BrainSim");
+            Thing dlgInfo = UKS.AddThing(attribName, dlgAttribParent);
+            Thing hasAttribute = UKS.GetOrAddThing("hasAttribute", "RelationshipType");
+            thisDlg.AddRelationship(dlgInfo,hasAttribute);
+            dlgInfo.V = attribValue;
+            dlgInfo.SetFired();
+        }
+        string GetDlgWindow()
+        {
+            return GetAttribute("DlgWindow");
+        }
+        void SetDlgWindow()
+        {
+            string infoString = "";
+            if (dlg != null)
+                infoString = dlg.Width + "x" + dlg.Height + "+" + dlg.Left + "+" + dlg.Top;
+            SetAttribute("DlgWindow", infoString);
+
+        }
         private void Dlg_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             dlgSize = new Point()
             { Y = dlg.Height, X = dlg.Width };
+            SetDlgWindow();
         }
 
         private void Dlg_LocationChanged(object sender, EventArgs e)
         {
             dlgPos = new Point()
             { Y = dlg.Top, X = dlg.Left };
+            SetDlgWindow();
         }
 
         private void Dlg_Closed(object sender, EventArgs e)
         {
             if (dlg == null)
                 dlgIsOpen = false;
+            SetAttribute("Open", "True");
         }
 
         private void Dlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (dlgList != null && dlgList.Count > 0)
-            {
-                if (dlgList.Contains((ModuleBaseDlg)sender))
-                {
-                    dlgList.Remove((ModuleBaseDlg)sender);
-                }
-                else
-                {
-                    dlg = dlgList[0];
-                    dlgList.RemoveAt(0);
-                }
-            }
-            else
-                dlg = null;
+            dlg = null;
         }
 
         private DispatcherTimer timer;
         private DateTime dt;
-        [XmlIgnore]
         public TimeSpan DialogLockSpan = new TimeSpan(0, 0, 0, 0, 500);
         public void UpdateDialog()
         {

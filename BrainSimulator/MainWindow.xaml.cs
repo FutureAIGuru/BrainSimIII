@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 using UKS;
 
 namespace BrainSimulator
@@ -15,8 +16,8 @@ namespace BrainSimulator
     public partial class MainWindow : Window
     {
 
-        public List<ModuleBase> activeModules = new List<ModuleBase>();
-        public List<string> pythonModules = new();
+        public List<ModuleBase> activeModules = new();
+        //public List<string> pythonModules = new();
 
         //the name of the currently-loaded network file
         public static string currentFileName = "";
@@ -92,18 +93,16 @@ namespace BrainSimulator
                 CreateEmptyUKS();
 
             LoadModuleTypeMenu();
-            ReloadActiveModulesSP();
 
             InitializeActiveModules();
 
-            ShowAllModuleDialogs();
-
             LoadMRUMenu();
+
             //start the module engine
-            //DispatcherTimer dt = new();
-            //dt.Interval = TimeSpan.FromSeconds(0.1);
-            //dt.Tick += Dt_Tick;
-            //dt.Start();
+            DispatcherTimer dt = new();
+            dt.Interval = TimeSpan.FromSeconds(0.1);
+            dt.Tick += Dt_Tick;
+            dt.Start();
         }
 
         void LoadActiveModuleSP()
@@ -131,7 +130,7 @@ namespace BrainSimulator
         {
             foreach (ModuleBase mb in activeModules)
             {
-                if (mb != null && mb.dlgIsOpen)
+                if (mb != null)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
                     {

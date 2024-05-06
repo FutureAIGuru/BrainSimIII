@@ -25,6 +25,10 @@ namespace BrainSimulator
         private static StackPanel loadedModulesSP;
         private bool LoadFile(string fileName)
         {
+            SuspendEngine();
+            CloseAllModuleDialogs();
+            UnloadActiveModules();
+
             if (!theUKS.LoadUKSfromXMLFile(fileName))
             {
                 theUKS = new UKS.UKS();
@@ -32,13 +36,15 @@ namespace BrainSimulator
             }
             currentFileName = fileName;
             SetCurrentFileNameToProperties();
+            LoadActiveModules();
             ReloadActiveModulesSP();
             ShowAllModuleDialogs();
             SetTitleBar();
+            ResumeEngine();
             return true;
         }
 
-        public void ReloadActiveModulesSP()
+        void ReloadActiveModulesSP()
         {
             ActiveModuleSP.Children.Clear();
 
@@ -58,19 +64,52 @@ namespace BrainSimulator
                 tb.Padding = new Thickness(10, 3, 10, 3);
                 tb.ContextMenu = new ContextMenu();
                 ModuleBase mod = activeModules.FindFirst(x => x.Label == t.Label);
-                if ( mod == null)
-                    mod = CreateNewModule(moduleType);
-                activeModules.Add(mod);
                 CreateContextMenu(mod, tb, tb.ContextMenu);
-                //                    if (mod.isEnabled)
                 tb.Background = new SolidColorBrush(Colors.LightGreen);
-                //                  else tb.Background = new SolidColorBrush(Colors.Pink);
                 ActiveModuleSP.Children.Add(tb);
             }
         }
+        void UnloadActiveModules()
+        {
+            Thing activeModulesParent = theUKS.Labeled("ActiveModule");
+            if (activeModulesParent == null) return;
+            var activeModules1 = activeModulesParent.Children;
 
+            foreach (Thing t in activeModules1)
+            {
+                for (int i = 0; i < t.Relationships.Count; i++)
+                {
+                    Relationship r = t.Relationships[i];
+                    theUKS.DeleteThing(r.target);
+                    t.RemoveRelationship(r);
+                }
+                theUKS.DeleteThing(t);
+            }
+        }
+
+        void LoadActiveModules()
+        {
+            activeModules.Clear();
+
+            var activeModules1 = theUKS.Labeled("ActiveModule").Children;
+            activeModules1 = activeModules1.OrderBy(x => x.Label).ToList();
+
+            foreach (Thing t in activeModules1)
+            {
+                //what kind of module is this?
+                Thing tModuleType = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+                if (tModuleType == null) continue;
+                string moduleType = tModuleType.Label;
+
+                //TODO handle python modules
+                ModuleBase mod = CreateNewModule(moduleType,t.Label);
+                activeModules.Add(mod);
+            }
+
+        }
         private bool SaveFile(string fileName)
         {
+            Save();
             AddFileToMRUList(fileName);
             return true;
         }
@@ -123,12 +162,20 @@ namespace BrainSimulator
             Properties.Settings.Default.Save();
         }
 
-        public int undoCountAtLastSave = 0;
         private bool PromptToSaveChanges()
         {
+            var result = MessageBox.Show("Save before loading?", "Save", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                Save();
+            }
             return false;
         }
 
+        private bool Save()
+        {
+            return theUKS.SaveUKStoXMLFile(currentFileName);
+        }
         private bool SaveAs()
         {
             System.Windows.Forms.SaveFileDialog saveFileDialog = new()
@@ -150,11 +197,11 @@ namespace BrainSimulator
                 SetCurrentFileNameToProperties();
 
                 SetTitleBar();
+                ResumeEngine();
             }
             else
             {
                 saveFileDialog.Dispose();
-                ResumeEngine();
                 return false;
             }
             saveFileDialog.Dispose();
