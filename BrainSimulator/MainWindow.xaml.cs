@@ -237,8 +237,10 @@ namespace BrainSimulator
 
         private void Dt_Tick(object? sender, EventArgs e)
         {
-            foreach (Thing module in theUKS.Labeled("ActiveModule").Children)
-//            foreach (ModuleBase mb in MainWindow.BrainSim3Data.modules)
+
+            Thing activeModuleParent = theUKS.Labeled("ActiveModule");
+            if (activeModuleParent == null) return;
+            foreach (Thing module in activeModuleParent.Children)
             {
                 ModuleBase mb = activeModules.FindFirst(x => x.Label == module.Label); 
                 if (mb != null && mb.dlgIsOpen)
