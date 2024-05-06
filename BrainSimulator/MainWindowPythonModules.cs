@@ -45,6 +45,10 @@ public partial class MainWindow : Window
                 Runtime.PythonDLL = @"Python310.dll";
 
                 PythonEngine.Initialize();
+                dynamic sys = Py.Import("sys");
+                dynamic os = Py.Import("os");
+                sys.path.append(os.getcwd());  // enables finding scriptName module
+                sys.path.append(os.getcwd() + "\\pythonModules");
             }
             catch
             {
