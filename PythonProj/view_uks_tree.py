@@ -109,7 +109,7 @@ class ViewUKSTree(ViewBase):
         self.tree_view.bind("<Enter>", self.handle_mouse_enter)
         self.tree_view.bind("<Leave>", self.handle_mouse_leave)
         
-        self.level.mainloop()
+        #self.level.mainloop()
     
     ############
     ##  Fire  ##
@@ -136,3 +136,7 @@ view = ViewUKSTree()
 
 def Fire():
     view.fire()
+    
+def GetHWND() -> int:
+    hwnd = view.level.frame()
+    return hwnd

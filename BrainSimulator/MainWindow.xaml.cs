@@ -173,7 +173,6 @@ namespace BrainSimulator
             }
             else
             {
-                theUKS.AddStatement(t.Label, "is-a", "ActiveModule");
                 pythonModules.Add(t.Label);
             }
 
@@ -181,18 +180,6 @@ namespace BrainSimulator
             return t.Label;
         }
 
-        public ModuleBase CreateNewUniqueModule(string ModuleName)
-        {
-            ModuleBase newModule = CreateNewModule(ModuleName);
-            newModule.Label = GetUniqueModuleLabel(ModuleName);
-            return newModule;
-        }
-        internal string GetUniqueModuleLabel(string searchString)
-        {
-            var existing = activeModules.FindAll(module => module.Label.StartsWith(searchString));
-            if (existing == null || existing.Count == 0) return searchString;
-            return searchString + "_" + existing.Count;
-        }
 
         public void CloseAllModuleDialogs()
         {
@@ -253,8 +240,7 @@ namespace BrainSimulator
             }
             foreach (string pythonModule in pythonModules)
             {
-                string module = pythonModule.Replace(".py", "");
-                RunScript(module);
+                RunScript(pythonModule);
             }
         }
 

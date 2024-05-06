@@ -35,6 +35,10 @@ namespace BrainSimulator
                 return false;
             }
             currentFileName = fileName;
+
+            if (theUKS.Labeled("BrainSim") == null)
+                CreateEmptyUKS();
+
             SetCurrentFileNameToProperties();
             LoadActiveModules();
             ReloadActiveModulesSP();

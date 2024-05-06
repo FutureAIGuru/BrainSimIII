@@ -6,7 +6,7 @@ from utils import ViewBase
 
 class ViewDialogAddStatement(ViewBase):
     def __init__(self, title: str = "UKS Add Statement") -> None:
-        super(ViewDialogAddStatement, self).__init__(title=title, level=tk.Toplevel())
+        super(ViewDialogAddStatement, self).__init__(title=title, level=tk.Tk())
         ## Set up a callback
         sv0, sv1, sv2 = tk.StringVar(), tk.StringVar(), tk.StringVar()
         self.input_src = tk.Entry(master=self.level, width=40, textvariable=sv0)
@@ -66,7 +66,7 @@ class ViewDialogAddStatement(ViewBase):
                                   command=lambda:self.submit_input())
         submit_button.grid(row=3, column=1, pady=20, sticky="W")  # W = west
         self.level.bind("<Return>", self.handle_return)
-        self.level.mainloop()
+        #self.level.mainloop()
     
     ############
     ##  Fire  ##
@@ -84,3 +84,8 @@ view = ViewDialogAddStatement()
 
 def Fire():
     view.fire()
+    
+def GetHWND() -> int:
+    hwnd = view.level.frame()
+    return hwnd
+
