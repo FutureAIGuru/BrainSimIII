@@ -6,13 +6,10 @@
 
 using Microsoft.Win32;
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using BrainSimulator.Modules;
-using System.Linq;
 
 namespace BrainSimulator
 {
@@ -21,7 +18,6 @@ namespace BrainSimulator
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static bool WasClosed = false;
 
         private void buttonSave_Click(object sender, RoutedEventArgs e)
         {
@@ -49,7 +45,7 @@ namespace BrainSimulator
         {
             if (PromptToSaveChanges())
                 return;
-            
+
             if (currentFileName != "")
             {
                 LoadCurrentFile();
@@ -61,14 +57,13 @@ namespace BrainSimulator
         private void button_Exit_Click(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.Save();
-            MainWindow.WasClosed = true;
             CloseAllModuleDialogs();
             CloseAllModules();
             this.Close();
         }
 
 
-        private ModuleBase CreateNewModule(string moduleTypeLabel,string moduleLabel="")
+        private ModuleBase CreateNewModule(string moduleTypeLabel, string moduleLabel = "")
         {
             Type t = Type.GetType("BrainSimulator.Modules.Module" + moduleTypeLabel);
             ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(t);
@@ -103,14 +98,14 @@ namespace BrainSimulator
 
             ReloadNetwork.IsEnabled = false;
             Reload_network.IsEnabled = false;
-            
+
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
             currentFileName = "";
             SetCurrentFileNameToProperties();
             SetTitleBar();
-                
+
             ResumeEngine();
         }
 
@@ -145,5 +140,13 @@ namespace BrainSimulator
                 LoadCurrentFile();
             }
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            PromptToSaveChanges();
+            CloseAllModuleDialogs();
+            CloseAllModules();
+        }
     }
+
 }

@@ -159,15 +159,15 @@ namespace BrainSimulator
             ActivateModule("UKSStatement");
         }
 
-        public string ActivateModule(string moduleName)
+        public string ActivateModule(string moduleType)
         {
-            Thing t = theUKS.GetOrAddThing(moduleName, "AvailableModule");
-            t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleName));
+            Thing t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
+            t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleType));
             t.AddParent(theUKS.Labeled("ActiveModule"));
 
-            if (!moduleName.Contains(".py"))
+            if (!moduleType.Contains(".py"))
             {
-                ModuleBase newModule = CreateNewModule(moduleName);
+                ModuleBase newModule = CreateNewModule(moduleType);
                 newModule.Label = t.Label;
                 activeModules.Add(newModule);
             }

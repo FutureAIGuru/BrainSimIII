@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800" WindowState="Maximized">
+        Title="MainWindow" Height="600" Width="800" WindowState="Maximized" Closing="Window_Closing">
     <Window.Background>
         <ImageBrush ImageSource="/brainsim3splashscreen.jpg" Opacity="0.5" />
     </Window.Background>
