@@ -91,15 +91,6 @@ namespace BrainSimulator
                 }
             }
 
-            //for (int i = 0; i < MainWindow.BrainSim3Data.modules.Count; i++)
-            //{
-            //    ModuleBase mod = MainWindow.BrainSim3Data.modules[i];
-            //    if (mod != null)
-            //    {
-            //        mod.SetUpAfterLoad();
-            //    }
-            //}
-
             ReloadActiveModulesSP();
         }
         private void button_FileNew_Click(object sender, RoutedEventArgs e)

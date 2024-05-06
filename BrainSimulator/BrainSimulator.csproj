@@ -485,4 +485,18 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="PythonModules\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\PythonProj\utils.py" Link="PythonModules\utils.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\PythonProj\view_dialog_add_statement.py" Link="PythonModules\view_dialog_add_statement.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\PythonProj\view_uks_tree.py" Link="PythonModules\view_uks_tree.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

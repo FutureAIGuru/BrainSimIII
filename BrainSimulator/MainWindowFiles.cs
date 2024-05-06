@@ -65,8 +65,13 @@ namespace BrainSimulator
                 tb.Margin = new Thickness(5, 2, 5, 2);
                 tb.Padding = new Thickness(10, 3, 10, 3);
                 tb.ContextMenu = new ContextMenu();
-                ModuleBase mod = activeModules.FindFirst(x => x.Label == t.Label);
-                CreateContextMenu(mod, tb, tb.ContextMenu);
+                if (moduleType.Contains(".py"))
+                { }
+                else
+                {
+                    ModuleBase mod = activeModules.FindFirst(x => x.Label == t.Label);
+                    CreateContextMenu(mod, tb, tb.ContextMenu);
+                }
                 tb.Background = new SolidColorBrush(Colors.LightGreen);
                 ActiveModuleSP.Children.Add(tb);
             }

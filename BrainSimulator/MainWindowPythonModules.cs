@@ -24,8 +24,8 @@ public partial class MainWindow : Window
             string sourceDir = destDir + "\\PythonModules";
             for (int i = 0; i < pythonFiles.Count; i++)
             {
+                if (pythonFiles[i].StartsWith("utils")) continue;
                 pythonFiles[i] = Path.GetFileName(pythonFiles[i]);
-                File.Copy(Path.Combine(sourceDir, pythonFiles[i]), Path.Combine(destDir, pythonFiles[i]), true);
             }
         } catch
         {
@@ -41,7 +41,9 @@ public partial class MainWindow : Window
         {
             try
             {
+                //TODO use variable
                 Runtime.PythonDLL = @"Python310.dll";
+
                 PythonEngine.Initialize();
             }
             catch

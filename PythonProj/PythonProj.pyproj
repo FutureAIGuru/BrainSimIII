@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ca6d501b-6295-42cf-a444-aafe9525a0ec</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>MainWindow.py</StartupFile>
+    <StartupFile>view_uks_tree.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,6 +22,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="MainWindow.py" />
+    <Compile Include="utils.py" />
+    <Compile Include="view_dialog_add_statement.py" />
+    <Compile Include="view_uks_tree.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Iconsmall.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
