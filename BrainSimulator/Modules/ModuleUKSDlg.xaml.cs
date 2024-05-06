@@ -58,7 +58,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         Thing t = null;
         try
         {
-            foreach (Thing t1 in parent.UKS.UKSList)
+            foreach (Thing t1 in parent.theUKS.UKSList)
             {
                 t = t1;
                 childCount += t1.Children.Count;
@@ -71,20 +71,21 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             //you might get this exception if there is a collision
             return;
         }
-        statusLabel.Content = parent.UKS.UKSList.Count + " Things  " + (childCount + refCount) + " Relationships";
+        statusLabel.Content = parent.theUKS.UKSList.Count + " Things  " + (childCount + refCount) + " Relationships";
         Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.fileName);
     }
 
     private void LoadContentToTreeView()
     {
         ModuleUKS parent = (ModuleUKS)ParentModule;
+        expandAll = parent.GetAttribute("ExpandAll");
         string root = parent.GetAttribute("Root");
         if (root == null)
         {
             root = "Thing";
             parent.SetAttribute("Root", root);
         }
-        Thing thing = parent.UKS.Labeled(root);
+        Thing thing = parent.theUKS.Labeled(root);
         if (thing is not null)
         {
             totalItemCount = 0;
@@ -100,7 +101,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             try //ignore problems of collection modified
             {
-                foreach (Thing t1 in parent.UKS.UKSList)
+                foreach (Thing t1 in parent.theUKS.UKSList)
                 {
                     if (t1.Parents.Count == 0)
                     {
@@ -138,7 +139,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 
             if (r.Weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
                 header = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
-            if (r.reltype.HasRelationship(UKS.UKS.Labeled("not")) != null) //prepend ! for negative  children
+            if (r.reltype.HasRelationship(UKS.theUKS.Labeled("not")) != null) //prepend ! for negative  children
                 header = "!" + header;
             if (detailsCB.IsChecked == true)
                 header += ":" + child.Children.Count + "," + descCountStr;
@@ -314,7 +315,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         ContextMenu menu = new ContextMenu();
         menu.SetValue(ThingObjectProperty, t);
         ModuleUKS parent = (ModuleUKS)ParentModule;
-        int ID = parent.UKS.UKSList.IndexOf(t);
+        int ID = parent.theUKS.UKSList.IndexOf(t);
         MenuItem mi = new();
         string thingLabel = "___";
         if (t != null)
@@ -430,7 +431,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         if (sender is MenuItem mi)
         {
-            UKS.UKS uks = ((ModuleUKS)ParentModule).UKS;
+            UKS.UKS theUKS = ((ModuleUKS)ParentModule).theUKS;
             ContextMenu m = mi.Parent as ContextMenu;
             Thing tParent = (Thing)mi.GetValue(ThingObjectProperty);
             if (tParent != null)
@@ -453,6 +454,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     expandAll = t.Label;
                     expandedItems.Clear();
                     expandedItems.Add("|Thing|Object");
+                    ModuleUKS parent = (ModuleUKS)ParentModule;
+                    parent.SetAttribute("ExpandAll", expandAll);
                     updateFailed = true; //this forces the expanded items list not to rebuild
                     break;
                 case "Collapse All":
@@ -466,8 +469,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     RefreshButton_Click(null, null);
                     break;
                 case "Delete":
-                    uks.DeleteAllChildren(t);
-                    uks.DeleteThing(t);
+                    theUKS.DeleteAllChildren(t);
+                    theUKS.DeleteThing(t);
                     break;
                 case "Make Root":
                     textBoxRoot.Text = t.Label;
@@ -662,10 +665,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void InitializeButton_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
-        parent.UKS.UKSList.Clear();
+        parent.theUKS.UKSList.Clear();
         parent.Initialize();
 
         CollapseAll();
+        expandAll = parent.GetAttribute("ExpandAll");
+        if (expandAll == null) expandAll = "";
         string root= parent.GetAttribute("root"); ;
         if (root == "") root = "Thing";
         textBoxRoot.Text = root;
@@ -709,7 +714,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             MainWindow.SuspendEngine();
             parent.fileName = saveFileDialog.FileName;
-            parent.UKS.SaveUKStoXMLFile(parent.fileName);
+            parent.theUKS.SaveUKStoXMLFile(parent.fileName);
             MainWindow.ResumeEngine();
         }
         saveFileDialog.Dispose();
@@ -735,7 +740,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 parent.fileName = openFileDialog.FileName;
-                parent.UKS.LoadUKSfromXMLFile(parent.fileName, (btn.Content.ToString() == "Merge"));
+                parent.theUKS.LoadUKSfromXMLFile(parent.fileName, (btn.Content.ToString() == "Merge"));
                 MainWindow.ResumeEngine();
             }
             openFileDialog.Dispose();

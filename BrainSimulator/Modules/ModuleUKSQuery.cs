@@ -68,7 +68,7 @@ Follow has ONLY if called out in type
             thingResult = new();
             relationships = new();
             GetUKS();
-            if (UKS == null) return;
+            if (theUKS == null) return;
             string source = sourceIn.Trim();
             string relType = relTypeIn.Trim();
             string target = targetIn.Trim();
@@ -104,7 +104,7 @@ Follow has ONLY if called out in type
                 return;
             }
 
-            relationships = UKS.GetAllRelationships(sourceList, reverse);
+            relationships = theUKS.GetAllRelationships(sourceList, reverse);
 
             //unreverse the source and target
             if (reverse)
@@ -131,7 +131,7 @@ Follow has ONLY if called out in type
             if (filter != "")
             {
                 List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
-                relationships = UKS.FilterResults(relationships, filterThings).ToList();
+                relationships = theUKS.FilterResults(relationships, filterThings).ToList();
             }
 
             if (paramCount == 2)

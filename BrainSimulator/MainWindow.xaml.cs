@@ -17,7 +17,7 @@ namespace BrainSimulator
     {
 
         public List<ModuleBase> activeModules = new();
-        //public List<string> pythonModules = new();
+        public List<string> pythonModules = new();
 
         //the name of the currently-loaded network file
         public static string currentFileName = "";

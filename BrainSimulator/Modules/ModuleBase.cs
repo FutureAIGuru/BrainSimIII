@@ -28,7 +28,7 @@ namespace BrainSimulator.Modules
         protected bool allowMultipleDialogs = false;
 
         //public static ModuleUKS UKS = null;
-        public UKS.UKS UKS = null;
+        public UKS.UKS theUKS = null;
 
         public ModuleBase()
         {
@@ -71,7 +71,7 @@ namespace BrainSimulator.Modules
 
         public void GetUKS()
         {
-            UKS = MainWindow.theUKS;
+            theUKS = MainWindow.theUKS;
         }
 
 
@@ -220,7 +220,7 @@ namespace BrainSimulator.Modules
 
         public  string GetAttribute(string attribName)
         {
-            Thing thisDlg = UKS.Labeled(Label);
+            Thing thisDlg = theUKS.Labeled(Label);
             if (thisDlg == null) return null;   
             foreach (var r in thisDlg.Relationships)
             {
@@ -235,7 +235,7 @@ namespace BrainSimulator.Modules
         public void SetAttribute(string attribName, string attribValue)
         {
             if (string.IsNullOrEmpty(attribName)) { return; }
-            Thing thisDlg = UKS.Labeled(Label);
+            Thing thisDlg = theUKS.Labeled(Label);
             if (thisDlg == null) { return; }
             foreach (var r in thisDlg.Relationships)
             {
@@ -243,7 +243,7 @@ namespace BrainSimulator.Modules
                 {
                     if (attribValue == null)
                     {
-                        UKS.DeleteThing(r.target);
+                        theUKS.DeleteThing(r.target);
                         return;
                     }
                     r.target.V = attribValue;
@@ -251,9 +251,9 @@ namespace BrainSimulator.Modules
                 }
             }
             if (attribName == null) return;
-            Thing dlgAttribParent = UKS.GetOrAddThing("DlgAttrib", "BrainSim");
-            Thing dlgInfo = UKS.AddThing(attribName, dlgAttribParent);
-            Thing hasAttribute = UKS.GetOrAddThing("hasAttribute", "RelationshipType");
+            Thing dlgAttribParent = theUKS.GetOrAddThing("DlgAttrib", "BrainSim");
+            Thing dlgInfo = theUKS.AddThing(attribName, dlgAttribParent);
+            Thing hasAttribute = theUKS.GetOrAddThing("hasAttribute", "RelationshipType");
             thisDlg.AddRelationship(dlgInfo,hasAttribute);
             dlgInfo.V = attribValue;
             dlgInfo.SetFired();
