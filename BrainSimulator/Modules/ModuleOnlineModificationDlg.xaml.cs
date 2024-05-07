@@ -37,11 +37,8 @@ namespace BrainSimulator.Modules
         {
             if (sender is Button btn)
             {
-                txtOutput.Text = "Bugged, go to this code to uncomment and run.";
-                Debug.WriteLine("Bugged, go to this code to uncomment and run.");
                 // Uncomment below if you want to run it.
-
-                // await ProcessChildrenAsync();
+                await ProcessChildrenAsync();
             }
         }
 
@@ -76,7 +73,7 @@ namespace BrainSimulator.Modules
 
                 foreach (Thing child in children)
                 {
-                    Debug.WriteLine(childId.ToString() + ": " + child.ToString());
+                    Debug.WriteLine(childId.ToString() + "/" + children.Count + ": " + child.ToString());
                     await mf.GetChatGPTDataParents(child.Label);
                     childId++;
                 }
