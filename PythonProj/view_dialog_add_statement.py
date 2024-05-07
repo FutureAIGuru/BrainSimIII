@@ -1,5 +1,6 @@
 ﻿## Global imports
 import tkinter as tk
+import sys
 ## Local imports
 from utils import ViewBase
 
@@ -66,7 +67,9 @@ class ViewDialogAddStatement(ViewBase):
                                   command=lambda:self.submit_input())
         submit_button.grid(row=3, column=1, pady=20, sticky="W")  # W = west
         self.level.bind("<Return>", self.handle_return)
-        #self.level.mainloop()
+        
+        # if sys.argv[1] == "StandAlone":
+        self.level.mainloop()
     
     ############
     ##  Fire  ##

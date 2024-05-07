@@ -4,13 +4,16 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ca6d501b-6295-42cf-a444-aafe9525a0ec</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>view_uks_tree.py</StartupFile>
+    <StartupFile>view_dialog_add_statement.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>PythonProj</Name>
     <RootNamespace>PythonProj</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments>StandAlone</CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -28,6 +31,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Iconsmall.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UKS\UKS.csproj">
+      <Name>UKS</Name>
+      <Project>{7c22fbb6-fe12-43d3-9f6f-479e830c94f6}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

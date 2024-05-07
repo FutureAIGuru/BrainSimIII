@@ -105,8 +105,12 @@ class MainWindow(Frame):
 e = MainWindow(root)
 e.pack(fill=BOTH, expand=YES)
 
+import sys
+print(sys.argv[1:])
+print ("hello:",sys.argv[1])
 
-root.mainloop()
+if sys.argv[1] == "StandAlone":
+    root.mainloop()
 
 
 """
