@@ -39,6 +39,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     public ModuleUKSDlg()
     {
         InitializeComponent();
+
     }
     public override bool Draw(bool checkDrawTimer)
     {

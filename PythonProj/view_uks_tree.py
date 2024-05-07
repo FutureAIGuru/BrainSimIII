@@ -5,11 +5,13 @@ import tkinter as tk
 import tkinter.ttk as ttk
 ## Local imports
 from utils import ViewBase
+import os
+import sys
 
 
 class ViewUKSTree(ViewBase):
     def __init__(self, title: str = "The Universal Knowledge Store (UKS)") -> None:
-        super(ViewUKSTree, self).__init__(title=title, level=tk.Tk())
+        super(ViewUKSTree, self).__init__(title=title, level=tk.Tk(),module_type=os.path.basename(__file__))
         ## Keep track of expanded items so refresh can preserve them
         self.open_items: List[str] = []
         ## Pause the refresh if the mouse is inside the control
@@ -109,7 +111,9 @@ class ViewUKSTree(ViewBase):
         self.tree_view.bind("<Enter>", self.handle_mouse_enter)
         self.tree_view.bind("<Leave>", self.handle_mouse_leave)
         
-        self.level.mainloop()
+        print (sys.argv[0])
+        if sys.argv[0] != "":
+            self.level.mainloop()
     
     ############
     ##  Fire  ##
@@ -140,3 +144,5 @@ def Fire():
 def GetHWND() -> int:
     hwnd = view.level.frame()
     return hwnd
+def SetLabel(label):
+    view.setLabel(label)

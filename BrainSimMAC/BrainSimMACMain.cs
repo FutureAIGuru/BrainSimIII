@@ -26,7 +26,8 @@ static void RunScript(string scriptName, List<(string, dynamic)> modules)
         try
         {
             Console.WriteLine("\nLoading Python DLL...");
-            Runtime.PythonDLL = @"/opt/anaconda3/envs/brainsim/bin/python";
+            //Runtime.PythonDLL = @"/opt/anaconda3/envs/brainsim/bin/python";
+            Runtime.PythonDLL = @"python310";
             PythonEngine.Initialize();
             dynamic sys = Py.Import("sys");
             dynamic os = Py.Import("os");
@@ -50,6 +51,7 @@ static void RunScript(string scriptName, List<(string, dynamic)> modules)
             {
                 Console.WriteLine("Loading " + scriptName);
                 dynamic theModule = Py.Import(scriptName);
+                theModule.SetLabel(scriptName + "0");
                 theModuleEntry = (scriptName, theModule);
                 modules.Add(theModuleEntry);
             }

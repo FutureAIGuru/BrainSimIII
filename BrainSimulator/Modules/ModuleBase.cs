@@ -74,38 +74,8 @@ namespace BrainSimulator.Modules
             theUKS = MainWindow.theUKS;
         }
 
-
-        private List<string> notFoundModules = new();
-
-        public void MarkModuleTypeAsNotLoaded(string typeName)
-        {
-            string moduleName = typeName;
-            if (typeName.StartsWith("BrainSimulator.Modules."))
-            {
-                moduleName = moduleName[23..];
-            }
-            if (!notFoundModules.Contains(moduleName))
-            {
-                notFoundModules.Add(moduleName);
-                MessageBox.Show(" Module of type " + moduleName + " does not exist in this network.", "Module Not Found", MessageBoxButton.OK,
-                    MessageBoxImage.None, MessageBoxResult.None, MessageBoxOptions.DefaultDesktopOnly);
-            }
-        }
-
-        public void MarkModuleNameAsNotLoaded(string moduleName)
-        {
-            if (!notFoundModules.Contains(moduleName))
-            {
-                notFoundModules.Add(moduleName);
-                MessageBox.Show("Module named " + moduleName + " does not exist in this network.", "Module Not Found", MessageBoxButton.OK,
-                    MessageBoxImage.None, MessageBoxResult.None, MessageBoxOptions.DefaultDesktopOnly);
-            }
-        }
-
         protected void Init(bool forceInit = false)
         {
-            // SetModuleView();
-
             if (initialized && !forceInit) return;
             initialized = true;
 
