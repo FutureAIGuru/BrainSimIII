@@ -1,14 +1,16 @@
-﻿## Global imports
+﻿import sys, os
+## Global imports
+from typing import Union
 import tkinter as tk
-import sys
-import os
 ## Local imports
 from utils import ViewBase
 
 
 class ViewDialogAddStatement(ViewBase):
-    def __init__(self, title: str = "UKS Add Statement") -> None:
-        super(ViewDialogAddStatement, self).__init__(title=title, level=tk.Tk(),module_type=os.path.basename(__file__))
+    def __init__(self, level: Union[tk.Tk, tk.Toplevel]) -> None:
+        title: str = "UKS Add Statement"
+        super(ViewDialogAddStatement, self).__init__(
+            title=title, level=level, module_type=os.path.basename(__file__))
         ## Set up a callback
         sv0, sv1, sv2 = tk.StringVar(), tk.StringVar(), tk.StringVar()
         self.input_src = tk.Entry(master=self.level, width=40, textvariable=sv0)
@@ -81,9 +83,9 @@ class ViewDialogAddStatement(ViewBase):
         return self.level.winfo_exists()
 
 
-#####################
-##  Expose Method  ##
-#####################
+######################
+##  Expose Methods  ##
+######################
 
 def Init():
     global view
@@ -95,6 +97,6 @@ def Fire() -> bool:
 def GetHWND() -> int:
     hwnd = view.level.frame()
     return hwnd
-def SetLabel(label):
-    view.setLabel(label)
 
+def SetLabel(label: str):
+    view.setLabel(label)

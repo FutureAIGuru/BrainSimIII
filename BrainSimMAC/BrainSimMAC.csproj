@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\PythonProj\__init__.py" Link="__init__.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\PythonProj\utils.py" Link="utils.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

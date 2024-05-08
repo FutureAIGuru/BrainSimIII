@@ -1,6 +1,5 @@
 ## Global imports
 import os
-import sys
 from typing import Union
 from abc import abstractmethod
 import tkinter as tk
@@ -18,7 +17,6 @@ except Exception as e:
 
 
 class ViewBase(object):
-
     def __init__(self, 
                  title: str, 
                  level: Union[tk.Tk, tk.Toplevel],
@@ -28,7 +26,7 @@ class ViewBase(object):
         self.level = level
         self.level.title(title)
         self.level.iconbitmap(os.path.join(os.getcwd(), "iconsmall.ico"))
-        
+        ## Set UI params
         self.window_width = None
         self.window_height = None
         self.window_x = None
@@ -38,12 +36,12 @@ class ViewBase(object):
         #BUG...if you enable the following line, the WINDOWS program will crash if you move/resize a window
         #self.level.bind("<Configure>",self.resize)
         
-    def setLabel(self,newlabel):
-        self.label=newlabel
+    def setLabel(self, new_label: str):
+        self.label = new_label
 
     def resize(self,event):
         #this actually receives ALL the configuration events...so we have to sort out resize/move and the event source
-        if hasattr(event.widget, 'widgetName'):
+        if hasattr(event.widget, "widgetName"):
             pass
         else: #if it doesn't have a name, it must be top level
             if (self.window_width != event.width) or (self.window_height != event.height):
@@ -56,9 +54,7 @@ class ViewBase(object):
             #TODO Add code to update values in UKS
 
     def setGeometryString():
-        pass    
-    
-
+        pass
 
     @abstractmethod
     def build(self):
