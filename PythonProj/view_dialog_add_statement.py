@@ -1,14 +1,16 @@
-﻿## Global imports
+﻿import sys, os
+## Global imports
+from typing import Union
 import tkinter as tk
-import sys
-import os
 ## Local imports
 from utils import ViewBase
 
 
 class ViewDialogAddStatement(ViewBase):
-    def __init__(self, title: str = "UKS Add Statement") -> None:
-        super(ViewDialogAddStatement, self).__init__(title=title, level=tk.Tk(),module_type=os.path.basename(__file__))
+    def __init__(self, level: Union[tk.Tk, tk.Toplevel]) -> None:
+        title: str = "UKS Add Statement"
+        super(ViewDialogAddStatement, self).__init__(
+            title=title, level=level, module_type=os.path.basename(__file__))
         ## Set up a callback
         sv0, sv1, sv2 = tk.StringVar(), tk.StringVar(), tk.StringVar()
         self.input_src = tk.Entry(master=self.level, width=40, textvariable=sv0)
@@ -68,7 +70,7 @@ class ViewDialogAddStatement(ViewBase):
                                   command=lambda:self.submit_input())
         submit_button.grid(row=3, column=1, pady=20, sticky="W")  # W = west
         self.level.bind("<Return>", self.handle_return)
-       
+        ## Do mainloop (??? for Windows ???)
         print (sys.argv[0])
         if sys.argv[0] != "":
             self.level.mainloop()
@@ -81,11 +83,11 @@ class ViewDialogAddStatement(ViewBase):
         self.level.update()
 
 
-#####################
-##  Expose Method  ##
-#####################
+######################
+##  Expose Methods  ##
+######################
 
-view = ViewDialogAddStatement()
+view = ViewDialogAddStatement(level=tk.Toplevel())
 
 def Fire():
     view.fire()
@@ -93,6 +95,6 @@ def Fire():
 def GetHWND() -> int:
     hwnd = view.level.frame()
     return hwnd
-def SetLabel(label):
-    view.setLabel(label)
 
+def SetLabel(label: str):
+    view.setLabel(label)

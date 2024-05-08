@@ -1,17 +1,18 @@
 ﻿## Global imports
-from typing import List
+import sys, os
+from typing import List, Union
 import time  # time needed for refresh()
 import tkinter as tk
 import tkinter.ttk as ttk
 ## Local imports
 from utils import ViewBase
-import os
-import sys
 
 
 class ViewUKSTree(ViewBase):
-    def __init__(self, title: str = "The Universal Knowledge Store (UKS)") -> None:
-        super(ViewUKSTree, self).__init__(title=title, level=tk.Tk(),module_type=os.path.basename(__file__))
+    def __init__(self, level: Union[tk.Tk, tk.Toplevel]) -> None:
+        title: str = "The Universal Knowledge Store (UKS)"
+        super(ViewUKSTree, self).__init__(
+            title=title, level=level, module_type=os.path.basename(__file__))
         ## Keep track of expanded items so refresh can preserve them
         self.open_items: List[str] = []
         ## Pause the refresh if the mouse is inside the control
@@ -110,8 +111,8 @@ class ViewUKSTree(ViewBase):
         self.tree_view.bind("<<TreeviewClose>>", self.handle_close_event)
         self.tree_view.bind("<Enter>", self.handle_mouse_enter)
         self.tree_view.bind("<Leave>", self.handle_mouse_leave)
-        
-        print (sys.argv[0])
+        ## ??? Is this mandatory for Windows ???
+        print(sys.argv[0])
         if sys.argv[0] != "":
             self.level.mainloop()
     
@@ -132,11 +133,11 @@ class ViewUKSTree(ViewBase):
         self.level.update()
 
 
-#####################
-##  Expose Method  ##
-#####################
+######################
+##  Expose Methods  ##
+######################
 
-view = ViewUKSTree()
+view = ViewUKSTree(level=tk.Tk())
 
 def Fire():
     view.fire()
@@ -144,5 +145,6 @@ def Fire():
 def GetHWND() -> int:
     hwnd = view.level.frame()
     return hwnd
-def SetLabel(label):
+
+def SetLabel(label: str):
     view.setLabel(label)

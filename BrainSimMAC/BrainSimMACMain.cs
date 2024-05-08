@@ -26,12 +26,14 @@ static void RunScript(string scriptName, List<(string, dynamic)> modules)
         try
         {
             Console.WriteLine("\nLoading Python DLL...");
-            //Runtime.PythonDLL = @"/opt/anaconda3/envs/brainsim/bin/python";
-            Runtime.PythonDLL = @"python310";
+            // Runtime.PythonDLL = @"/opt/anaconda3/envs/brainsim/bin/python";  // Yida's MAC
+            Runtime.PythonDLL = @"python310";  // Charles's Windows
             PythonEngine.Initialize();
             dynamic sys = Py.Import("sys");
             dynamic os = Py.Import("os");
-            sys.path.append(os.getcwd());  // enables finding scriptName module
+            string desiredPath = os.path.join(os.getcwd(), "./bin/Debug/net8.0/");
+            Console.WriteLine("desired path: " + desiredPath);
+            sys.path.append(desiredPath);  // enables finding scriptName module
             Console.WriteLine("PythonEngine init succeeded\n");
         }
         catch (Exception ex)
