@@ -69,26 +69,28 @@ class ViewDialogAddStatement(ViewBase):
         submit_button.grid(row=3, column=1, pady=20, sticky="W")  # W = west
         self.level.bind("<Return>", self.handle_return)
        
-        print (sys.argv[0])
-        if sys.argv[0] != "":
+        if sys.argv[0]  != "":
             self.level.mainloop()
     
     ############
     ##  Fire  ##
     ############
 
-    def fire(self):
+    def fire(self) ->bool:
         self.level.update()
+        return self.level.winfo_exists()
 
 
 #####################
 ##  Expose Method  ##
 #####################
 
-view = ViewDialogAddStatement()
+def Init():
+    global view
+    view = ViewDialogAddStatement()
 
-def Fire():
-    view.fire()
+def Fire() -> bool:
+    return view.fire()
     
 def GetHWND() -> int:
     hwnd = view.level.frame()

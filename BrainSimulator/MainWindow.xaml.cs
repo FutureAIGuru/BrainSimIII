@@ -22,7 +22,7 @@ namespace BrainSimulator
         //the name of the currently-loaded network file
         public static string currentFileName = "";
         public static string pythonPath = "";
-        public static UKS.UKS theUKS = new UKS.UKS();
+        public static UKS.UKS theUKS = ModuleHandler.theUKS ;
         public static MainWindow theWindow = null;
 
         public MainWindow()
@@ -105,14 +105,6 @@ namespace BrainSimulator
             dt.Start();
         }
 
-        void LoadActiveModuleSP()
-        {
-            ActiveModuleSP.Children.Clear();
-            var activeModules = theUKS.GetOrAddThing("ActiveModule").Children;
-            foreach (Thing t in activeModules)
-                ActiveModuleSP.Children.Add(new System.Windows.Controls.Label { Content = t.Label});
-        }
-
 
         public void InitializeActiveModules()
         {
@@ -176,7 +168,7 @@ namespace BrainSimulator
                 pythonModules.Add(t.Label);
             }
 
-            LoadActiveModuleSP();
+            ReloadActiveModulesSP();
             return t.Label;
         }
 
@@ -240,7 +232,7 @@ namespace BrainSimulator
             }
             foreach (string pythonModule in pythonModules)
             {
-                RunScript(pythonModule);
+                ModuleHandler.RunScript(pythonModule);
             }
         }
 
@@ -255,7 +247,7 @@ namespace BrainSimulator
                 theUKS.GetOrAddThing(moduleName, "AvailableModule");
             }
 
-            var pythonModules = GetPythonModules();
+            var pythonModules = ModuleHandler.GetPythonModules();
             foreach (var moduleType in pythonModules)
             {
                 theUKS.GetOrAddThing(moduleType, "AvailableModule");

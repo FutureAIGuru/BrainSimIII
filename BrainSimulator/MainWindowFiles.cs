@@ -48,7 +48,7 @@ namespace BrainSimulator
             return true;
         }
 
-        void ReloadActiveModulesSP()
+        public void ReloadActiveModulesSP()
         {
             ActiveModuleSP.Children.Clear();
 

@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Remove="GlobalSuppressions.cs" />
     <Compile Remove="ImgUtils.cs" />
+    <Compile Remove="MainWindowPythonModules.cs" />
     <Compile Remove="Modules\Module2DSim.cs" />
     <Compile Remove="Modules\Module2DSimDlg.xaml.cs" />
     <Compile Remove="Modules\Module2DVision.cs" />
@@ -423,9 +424,6 @@
     <ProjectReference Include="..\UKS\UKS.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="MainWindowPythonModules.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

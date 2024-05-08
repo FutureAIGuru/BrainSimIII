@@ -7,6 +7,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);CONSOLE_APP</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\BrainSimulator\ModuleHandler.cs" Link="ModuleHandler.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="..\PythonProj\utils.py" Link="utils.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

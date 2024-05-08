@@ -111,17 +111,16 @@ class ViewUKSTree(ViewBase):
         self.tree_view.bind("<Enter>", self.handle_mouse_enter)
         self.tree_view.bind("<Leave>", self.handle_mouse_leave)
         
-        print (sys.argv[0])
-        if sys.argv[0] != "":
+        if sys.argv[0]  != "":
             self.level.mainloop()
     
     ############
     ##  Fire  ##
     ############
 
-    def fire(self) -> None:
+    def fire(self) -> bool:
         if self.update_paused:
-            return
+            return True
         curr_time: float = time.time()
         try:
             if curr_time > (self.prev_time + 1.0):
@@ -130,19 +129,24 @@ class ViewUKSTree(ViewBase):
         except Exception:
             self.prev_time = curr_time
         self.level.update()
+        return self.level.winfo_exists()
+
 
 
 #####################
 ##  Expose Method  ##
 #####################
 
-view = ViewUKSTree()
+def Init():
+    global view
+    view = ViewUKSTree()
 
-def Fire():
-    view.fire()
+def Fire() -> bool:    
+    return view.fire()
     
 def GetHWND() -> int:
     hwnd = view.level.frame()
     return hwnd
+
 def SetLabel(label):
     view.setLabel(label)

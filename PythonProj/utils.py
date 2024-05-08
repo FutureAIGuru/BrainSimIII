@@ -35,6 +35,7 @@ class ViewBase(object):
         self.window_y = None
         self.module_type = module_type
         self.label = ""
+        #BUG...if you enable the following line, the WINDOWS program will crash if you move/resize a window
         #self.level.bind("<Configure>",self.resize)
         
     def setLabel(self,newlabel):
@@ -52,6 +53,7 @@ class ViewBase(object):
                 self.window_x, self.window_y = event.x,event.y
             print(self.module_type, self.label)
             print(self.level.winfo_geometry())
+            #TODO Add code to update values in UKS
 
     def setGeometryString():
         pass    

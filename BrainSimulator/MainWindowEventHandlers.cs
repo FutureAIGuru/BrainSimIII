@@ -63,7 +63,7 @@ namespace BrainSimulator
         }
 
 
-        private ModuleBase CreateNewModule(string moduleTypeLabel, string moduleLabel = "")
+        public ModuleBase CreateNewModule(string moduleTypeLabel, string moduleLabel = "")
         {
             Type t = Type.GetType("BrainSimulator.Modules.Module" + moduleTypeLabel);
             ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(t);

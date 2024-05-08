@@ -1,20 +1,65 @@
-﻿
-using Python.Runtime;
+﻿using Python.Runtime;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using UKS;
+#if !CONSOLE_APP
 using System.Windows.Interop;
-
+#endif
 
 namespace BrainSimulator;
 
-public partial class MainWindow : Window
+public static class ModuleHandler
 {
+    public static List<string> pythonModules = new();
+
+
     public static List<(string, dynamic)> activePythonModules = new();
+    public static UKS.UKS theUKS = new();
+
+
+    public static string ActivateModule(string moduleType)
+    {
+        Thing t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
+        t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleType));
+        t.AddParent(theUKS.Labeled("ActiveModule"));
+
+#if !CONSOLE_APP
+        if (!moduleType.Contains(".py"))
+        {
+            BrainSimulator.Modules.ModuleBase newModule = MainWindow.theWindow.CreateNewModule(moduleType);
+            newModule.Label = t.Label;
+            MainWindow.theWindow.activeModules.Add(newModule);
+        }
+        else
+#endif
+        {
+            pythonModules.Add(t.Label);
+        }
+
+        return t.Label;
+    }
+    public static void DeactivateModule(string moduleLabel)
+    {
+        Thing t = theUKS.Labeled(moduleLabel);
+        if (t == null) return;
+        for (int i = 0; i < t.Relationships.Count; i++)
+        {
+            Relationship r = t.Relationships[i];
+            theUKS.DeleteThing(r.target);
+        }
+        theUKS.DeleteThing(t);
+
+        return;
+    }
+
+
     public static List<string> GetPythonModules()
     {
         //this is a buffer of python modules so they can be imported once and run many times.
@@ -37,7 +82,7 @@ public partial class MainWindow : Window
         }
         return pythonFiles;
     }
-    static void RunScript(string moduleLabel)
+    public static void RunScript(string moduleLabel)
     {
         bool firstTime = false;
         //get the ModuleType
@@ -78,9 +123,9 @@ public partial class MainWindow : Window
                 {
                     Console.WriteLine("Loading " + moduleLabel);
                     dynamic theModule = Py.Import(moduleType);
+                    theModule.Init();
                     theModuleEntry = (moduleLabel, theModule);
                     activePythonModules.Add(theModuleEntry);
-                    theModule.Init();
                     firstTime = true;
                 }
                 catch (Exception ex)
@@ -94,8 +139,9 @@ public partial class MainWindow : Window
             {
                 try
                 {
-                    if (!theModuleEntry.Item2.Fire())
-                    { } //this doesn't seem to work because it thows an exception instead
+                    theModuleEntry.Item2.Fire();
+#if !CONSOLE_APP
+//This sets the owner of any target window so that the system will work propertly
                     if (firstTime)
                     {
                         var HWND = theModuleEntry.Item2.GetHWND();
@@ -105,18 +151,44 @@ public partial class MainWindow : Window
                         firstTime = false;
                         SetOwner(intValue);
                     }
+#endif
                 }
                 catch (Exception ex)
                 {
                     activePythonModules.Remove(theModuleEntry);
-                    MainWindow.theWindow.DeactivateModule(moduleLabel);
+                    DeactivateModule(moduleLabel);
+#if !CONSOLE_APP
+                    MainWindow.theWindow.ReloadActiveModulesSP();
+#endif
                     Console.WriteLine("Fire method call failed for module: " + moduleLabel + "   Reason: " + ex.Message);
                 }
             }
         }
     }
 
+    public static void CreateEmptyUKS()
+    {
+        theUKS = new UKS.UKS();
+        theUKS.AddThing("BrainSim", null);
+        theUKS.GetOrAddThing("AvailableModule", "BrainSim");
+        theUKS.GetOrAddThing("ActiveModule", "BrainSim");
 
+        InsertMandatoryModules();
+    }
+
+    public static void InsertMandatoryModules()
+    {
+
+        Debug.WriteLine("InsertMandatoryModules entered");
+#if !CONSOLE_APP
+        ActivateModule("UKS");
+        ActivateModule("UKSStatement");
+#endif
+    }
+
+
+
+#if !CONSOLE_APP
     private const int GWL_HWNDPARENT = -8;
 
     [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
@@ -129,7 +201,7 @@ public partial class MainWindow : Window
     {
         // Example usage
         IntPtr childHwnd = new IntPtr(HWND); // Child window handle
-        //IntPtr ownerHwnd = new IntPtr(654321); // New owner window handle
+                                             //IntPtr ownerHwnd = new IntPtr(654321); // New owner window handle
         Window window = Window.GetWindow(MainWindow.theWindow);
         var wih = new WindowInteropHelper(window);
         IntPtr ownerHwnd = wih.Handle;
@@ -143,7 +215,7 @@ public partial class MainWindow : Window
         if (IntPtr.Size == 8)
             SetWindowLongPtr(childHwnd, GWL_HWNDPARENT, ownerHwnd);
         else
-    SetWindowLong(childHwnd, GWL_HWNDPARENT, ownerHwnd);
+            SetWindowLong(childHwnd, GWL_HWNDPARENT, ownerHwnd);
 
         if (result == IntPtr.Zero)
         {
@@ -155,7 +227,5 @@ public partial class MainWindow : Window
             Console.WriteLine("Window owner changed successfully.");
         }
     }
+#endif
 }
-
-
-
