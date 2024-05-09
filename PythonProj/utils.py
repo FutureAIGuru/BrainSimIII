@@ -53,8 +53,10 @@ class ViewBase(object):
             print(self.level.winfo_geometry())
             #TODO Add code to update values in UKS
 
-    def setGeometryString():
-        pass
+    def close(self):
+        self.level.destroy()
+    
+
 
     @abstractmethod
     def build(self):

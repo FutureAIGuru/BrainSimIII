@@ -89,7 +89,7 @@ class ViewDialogAddStatement(ViewBase):
 
 def Init():
     global view
-    view = ViewDialogAddStatement()
+    view = ViewDialogAddStatement(level=tk.Tk())
 
 def Fire() -> bool:
     return view.fire()
@@ -100,3 +100,9 @@ def GetHWND() -> int:
 
 def SetLabel(label: str):
     view.setLabel(label)
+    
+def Close():
+    view.close()
+
+if sys.argv[0]  != "":
+    Init()

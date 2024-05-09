@@ -98,23 +98,16 @@ public static class ModuleHandler
         {
             try
             {
+                //TODO use environment variable for python path
                 //Runtime.PythonDLL = @"/opt/anaconda3/envs/brainsim/bin/python";  // Yida's MAC
                 Runtime.PythonDLL = @"python310";  // Charles's Windows
                 PythonEngine.Initialize();
                 dynamic sys = Py.Import("sys");
                 dynamic os = Py.Import("os");
                 string desiredPath = os.path.join(os.getcwd(), "./bin/Debug/net8.0/");
-                Console.WriteLine("desired path: " + desiredPath);
                 sys.path.append(desiredPath);  // enables finding scriptName module
-                Console.WriteLine("PythonEngine init succeeded\n");
-                //TODO use variable
-                Runtime.PythonDLL = @"Python310";
-
-                PythonEngine.Initialize();
-                dynamic sys = Py.Import("sys");
-                dynamic os = Py.Import("os");
-                sys.path.append(os.getcwd());  // enables finding scriptName module
                 sys.path.append(os.getcwd() + "\\pythonModules");
+                Console.WriteLine("PythonEngine init succeeded\n");
             }
             catch
             {

@@ -94,6 +94,7 @@ class ViewUKSTree(ViewBase):
 
     def build(self) -> None:
         ## Create the window
+        self.level.transient()
         self.level.geometry("400x400+250+250")
         self.style.theme_use("clam")
         self.tree_view.pack(expand=True, fill=tk.BOTH, padx=10, pady=10)
@@ -114,6 +115,8 @@ class ViewUKSTree(ViewBase):
         
         if sys.argv[0]  != "":
             self.level.mainloop()
+            
+        
     
     ############
     ##  Fire  ##
@@ -139,7 +142,7 @@ class ViewUKSTree(ViewBase):
 
 def Init():
     global view
-    view = ViewUKSTree()
+    view = ViewUKSTree(level=tk.Tk())
 
 def Fire() -> bool:    
     return view.fire()
@@ -150,3 +153,9 @@ def GetHWND() -> int:
 
 def SetLabel(label):
     view.setLabel(label)
+    
+def Close():
+    view.close()
+
+if sys.argv[0]  != "":
+    Init()

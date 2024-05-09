@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ca6d501b-6295-42cf-a444-aafe9525a0ec</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>view_dialog_add_statement.py</StartupFile>
+    <StartupFile>MainWindow.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
