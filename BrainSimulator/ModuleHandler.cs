@@ -63,17 +63,20 @@ public static class ModuleHandler
     public static List<string> GetPythonModules()
     {
         //this is a buffer of python modules so they can be imported once and run many times.
-        List<(string, dynamic)> modules = new List<(string, dynamic)>();
         List<String> pythonFiles = new();
         try
         {
-            pythonFiles = Directory.GetFiles(@".\pythonModules", "*.py").ToList();
-            string destDir = Directory.GetCurrentDirectory();
-            string sourceDir = destDir + "\\PythonModules";
-            for (int i = 0; i < pythonFiles.Count; i++)
+            var filesInDir = Directory.GetFiles(@".", "*.py").ToList();
+            foreach (var file in filesInDir)
             {
-                if (pythonFiles[i].StartsWith("utils")) continue;
-                pythonFiles[i] = Path.GetFileName(pythonFiles[i]);
+                if (file.StartsWith("utils")) continue;
+                pythonFiles.Add(Path.GetFileName(file));
+            }
+            filesInDir = Directory.GetFiles(@".\pythonModules", "*.py").ToList();
+            foreach (var file in filesInDir)
+            {
+                if (file.StartsWith("utils")) continue;
+                pythonFiles.Add(Path.GetFileName(file));
             }
         }
         catch

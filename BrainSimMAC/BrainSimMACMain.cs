@@ -7,6 +7,14 @@ if (args.Length > 0)
     string fileName = args[0];
     BrainSimulator.ModuleHandler.theUKS.LoadUKSfromXMLFile(fileName);
 }
+else 
+{
+    var pythonFiles = BrainSimulator.ModuleHandler.GetPythonModules();
+    Thing availableModuleRoot = BrainSimulator.ModuleHandler.theUKS.Labeled("AvailableModule");
+    foreach (var moduleName in pythonFiles)
+        BrainSimulator.ModuleHandler.theUKS.AddThing(moduleName,availableModuleRoot);
+}
+
 //initialize active module list
 Thing activeModulesRoot = BrainSimulator.ModuleHandler.theUKS.Labeled("ActiveModule");
 if (activeModulesRoot != null)

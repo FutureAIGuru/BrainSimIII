@@ -1,12 +1,10 @@
 {
   "profiles": {
     "BrainSimMAC": {
-      "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\c_sim\\source\\repos\\WORKING\\MyTest2.xml"
+      "commandName": "Project"
     },
     "Startup": {
-      "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\c_sim\\source\\repos\\WORKING\\MyTest2.xml"
+      "commandName": "Project"
     }
   }
 }
