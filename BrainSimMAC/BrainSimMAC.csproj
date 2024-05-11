@@ -1,22 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);CONSOLE_APP</DefineConstants>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DefineConstants>$(DefineConstants);CONSOLE_APP</DefineConstants>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="..\BrainSimulator\ModuleHandler.cs" Link="ModuleHandler.cs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\BrainSimulator\ModuleHandler.cs" Link="ModuleHandler.cs" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\PythonProj\MainWindow.py" Link="MainWindow.py">
+    <ItemGroup>
+        <None Include="..\PythonProj\*.py" >
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <!--<None Include="..\PythonProj\MainWindow.py" Link="MainWindow.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\PythonProj\open_file.py" Link="open_file.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\PythonProj\__init__.py" Link="__init__.py">
@@ -30,21 +36,21 @@
     </None>
     <None Include="..\PythonProj\view_uks_tree.py" Link="view_uks_tree.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+    </None>-->
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="pythonnet" Version="3.0.3" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="pythonnet" Version="3.0.3" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\UKS\UKS.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\UKS\UKS.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Iconsmall.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="Iconsmall.ico">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
 </Project>

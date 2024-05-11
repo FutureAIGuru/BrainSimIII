@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml.Serialization;
-using System.IO;
-using System.Windows;
+﻿using System.Xml.Serialization;
 using System.Diagnostics;
 
 namespace UKS;
 
 public partial class UKS
 {
+    string fileName = "";
 
     private void CreateInitialStructure()
     {
@@ -73,6 +70,7 @@ public partial class UKS
         GetOrAddThing("none", "number");
 
 
+        //demo to add PI to the structure
         //AddStatement("pi", "is-a", "number");
         //AddStatement("pi", "hasDigit*", "3");
         //AddStatement("pi", "hasDigit*", ".");
@@ -83,6 +81,13 @@ public partial class UKS
         //AddStatement("pi", "hasDigit*", "9");
     }
 
+    void AddBrainSimConfigSectionIfNeeded()
+    {
+        if (Labeled("BrainSim") != null) return;
+        AddThing("BrainSim", null);
+        GetOrAddThing("AvailableModule", "BrainSim");
+        GetOrAddThing("ActiveModule", "BrainSim");
+    }
 
 
     /// <summary>
@@ -117,7 +122,7 @@ public partial class UKS
         stack.Add(l);
         List<SClauseType> clauseList = null;
         if (l.Clauses.Count > 0) clauseList = new();
-        foreach (ClauseType c in l.Clauses)
+        foreach (Clause c in l.Clauses)
         {
             int clauseType = UKSList.FindIndex(x => x == c.clauseType);
             SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause, stack) };
@@ -130,8 +135,8 @@ public partial class UKS
             target = UKSList.FindIndex(x => x == l.target),
             relationshipType = UKSList.FindIndex(x => x == l.relType),
             weight = l.Weight,
-            hits = l.hits,
-            misses = l.misses,
+            hits = l.Hits,
+            misses = l.Misses,
             count = l.count,
             clauses = clauseList,
         };
@@ -191,7 +196,7 @@ public partial class UKS
         {
             foreach (Relationship r in t.Relationships)
             {
-                Thing t1 = r.T;
+                Thing t1 = r.target;
                 if (t1 != null)
                     if (!t1.RelationshipsFromWriteable.Contains(r))
                         t1.RelationshipsFromWriteable.Add(r);
@@ -207,7 +212,7 @@ public partial class UKS
     {
         if (stack.Contains(r)) return;
         stack.Add(r);
-        foreach (ClauseType c in r.Clauses)
+        foreach (Clause c in r.Clauses)
         {
             if (!c.clause.clausesFrom.Contains(r))
                 c.clause.clausesFrom.Add(r);
@@ -236,8 +241,8 @@ public partial class UKS
             source = source,
             target = target,
             relType = relationshipType,
-            hits = p.hits,
-            misses = p.misses,
+            Hits = p.hits,
+            Misses = p.misses,
             Weight = p.weight,
             count = p.count,
             //sentencetype = p.sentencetype as SentenceType,
@@ -246,7 +251,7 @@ public partial class UKS
         {
             foreach (SClauseType sc in p.clauses)
             {
-                ClauseType ct = new ClauseType() { clauseType = UKSList[sc.clauseType], clause = UnConvertRelationship(sc.r, stack) };
+                Clause ct = new Clause() { clauseType = UKSList[sc.clauseType], clause = UnConvertRelationship(sc.r, stack) };
                 if (ct.clause != null)
                     r.Clauses.Add(ct);
             }
@@ -254,7 +259,6 @@ public partial class UKS
         return r;
     }
 
-    string fileName = "";
     public static bool CanWriteTo(string fileName, out string message)
     {
         FileStream file1;
@@ -274,8 +278,18 @@ public partial class UKS
             }
         }
         return true;
-
     }
+
+    List<string> ExtractPortionOfUKS(Thing root)
+    {
+        List<string> uksContent = new List<string>();
+        return uksContent;
+    }
+
+    /// <summary>
+    /// Saves the UKS content to an XML file
+    /// </summary>
+    /// <param name="fileNameIn">Leave null or empty to use file name from previous operation  </param>
 
     public bool SaveUKStoXMLFile(string filenameIn = "")
     {
@@ -312,7 +326,24 @@ public partial class UKS
 
     private static List<Type> GetTypesInUKS()
     {
+        //TODO, This works for writing but not for reading
         List<Type> extraTypes = new List<Type>();
+        foreach (Thing t in uKSList)
+        {
+            if (t.V != null)
+            {
+                var theType = t.V.GetType();
+                if (theType.IsSerializable)
+                {
+                    if (!extraTypes.Contains(theType))
+                        extraTypes.Add(theType);
+                }
+                else
+                {
+                    Debug.Write("Type " + theType.FullName + " is not serializable");
+                }
+            }
+        }
         /*
                 // Add classes so XML saving works
                 extraTypes.Add(typeof(Angle));
@@ -352,8 +383,16 @@ public partial class UKS
         return fileName;
     }
 
+    /// <summary>
+    /// Loads UKS content from a prvsiously-saved XML file
+    /// </summary>
+    /// <param name="fileNameIn">Leave null or empty to use file name from previous operation  </param>
+    /// <param name="merge">If true, existing UKS content is not deleted and new content is merged by Thing label</param>
     public bool LoadUKSfromXMLFile(string filenameIn = "", bool merge = false)
     {
+        //stash the current BrainSim configuration
+        ExtractPortionOfUKS(Labeled("BrainSim"));
+
         Stream file;
         if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
         string fullPath = fileName;
@@ -366,6 +405,7 @@ public partial class UKS
             Debug.WriteLine("Could not open file because: " + e.Message);
             return false;
         }
+
 
         List<Type> extraTypes = GetTypesInUKS();
         XmlSerializer reader1 = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());
@@ -384,6 +424,8 @@ public partial class UKS
             DeFormatAndMergeContentAfterLoading();
         else
             DeFormatContentAfterLoading();
+
+        AddBrainSimConfigSectionIfNeeded();
         return true;
     }
 }
