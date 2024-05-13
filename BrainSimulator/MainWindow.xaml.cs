@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using UKS;
@@ -22,7 +21,8 @@ namespace BrainSimulator
         //the name of the currently-loaded network file
         public static string currentFileName = "";
         public static string pythonPath = "";
-        public static UKS.UKS theUKS = ModuleHandler.theUKS ;
+        public static ModuleHandler moduleHandler = new();
+        public static UKS.UKS theUKS = moduleHandler.theUKS;
         public static MainWindow theWindow = null;
 
         public MainWindow()
@@ -36,42 +36,54 @@ namespace BrainSimulator
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             theWindow = this;
-            string fileName = "";  
-            string savedFile = (string)Properties.Settings.Default["CurrentFile"];
-            if (savedFile != "")
-                fileName = savedFile;
 
-            //setup the python path
-            pythonPath = (string)Properties.Settings.Default["PythonPath"];
-            if (string.IsNullOrEmpty(pythonPath) && pythonPath != "No Python")
+            //setup the python support
+            pythonPath = (string)Environment.GetEnvironmentVariable("PythonPath", EnvironmentVariableTarget.User);
+            if (string.IsNullOrEmpty(pythonPath))
             {
-                MessageBox.Show("Do you want Python Modules?");
-                string likeliPath = (string)Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                likeliPath += @"\Programs\Python";
-                System.Windows.Forms.OpenFileDialog openFileDialog = new()
+                var result1 = MessageBox.Show("Do you want to use Python Modules?", "Python?", MessageBoxButton.YesNo);
+                if (result1 == MessageBoxResult.Yes)
                 {
-                    Filter = Utils.FilterXMLs,
-                    Title = "SELECT path to Python .dll (or cancel for no Python support)",
-                    InitialDirectory = likeliPath,
-                };
+                    string likeliPath = (string)Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    likeliPath += @"\Programs\Python";
+                    System.Windows.Forms.OpenFileDialog openFileDialog = new()
+                    {
+                        Filter = Utils.FilterXMLs,
+                        Title = "SELECT path to Python .dll (or cancel for no Python support)",
+                        InitialDirectory = likeliPath,
+                    };
 
-                // Show the file Dialog.  
-                System.Windows.Forms.DialogResult result = openFileDialog.ShowDialog();
-                // If the user clicked OK in the dialog and  
-                if (result == System.Windows.Forms.DialogResult.OK)
-                {
-                    pythonPath = openFileDialog.FileName;
-                    Properties.Settings.Default["PythonPath"] = pythonPath;
-                    Properties.Settings.Default.Save();
+                    // Show the file Dialog.  
+                    System.Windows.Forms.DialogResult result = openFileDialog.ShowDialog();
+                    // If the user clicked OK in the dialog and  
+                    if (result == System.Windows.Forms.DialogResult.OK)
+                    {
+                        pythonPath = openFileDialog.FileName;
+                        Environment.SetEnvironmentVariable("PythonPath", pythonPath, EnvironmentVariableTarget.User);
+                    }
+                    else
+                    {
+                        Environment.SetEnvironmentVariable("PythonPath", "", EnvironmentVariableTarget.User);
+                    }
+                    openFileDialog.Dispose();
                 }
                 else
                 {
-                    Properties.Settings.Default["PythonPath"] = "No Python";
-                    Properties.Settings.Default.Save();
+                    pythonPath = "no";
+                    Environment.SetEnvironmentVariable("PythonPath", pythonPath, EnvironmentVariableTarget.User);
                 }
-                openFileDialog.Dispose();
+            }
+            moduleHandler.PythonPath = pythonPath;
+            if (pythonPath != "no")
+            {
+                moduleHandler.InitPythonEngine();
             }
 
+            //setup the input file
+            string fileName = "";
+            string savedFile = (string)Properties.Settings.Default["CurrentFile"];
+            if (savedFile != "")
+                fileName = savedFile;
 
             try
             {
@@ -85,8 +97,10 @@ namespace BrainSimulator
                     CreateEmptyUKS();
                 }
             }
-            catch (Exception ex) { 
-                System.Windows.MessageBox.Show("UKS Content not loaded"); }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("UKS Content not loaded");
+            }
 
             //safety check
             if (theUKS.Labeled("BrainSim") == null)
@@ -221,7 +235,7 @@ namespace BrainSimulator
             if (activeModuleParent == null) return;
             foreach (Thing module in activeModuleParent.Children)
             {
-                ModuleBase mb = activeModules.FindFirst(x => x.Label == module.Label); 
+                ModuleBase mb = activeModules.FindFirst(x => x.Label == module.Label);
                 if (mb != null && mb.dlgIsOpen)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
@@ -232,7 +246,7 @@ namespace BrainSimulator
             }
             foreach (string pythonModule in pythonModules)
             {
-                ModuleHandler.RunScript(pythonModule);
+                moduleHandler.RunScript(pythonModule);
             }
         }
 
@@ -247,7 +261,7 @@ namespace BrainSimulator
                 theUKS.GetOrAddThing(moduleName, "AvailableModule");
             }
 
-            var pythonModules = ModuleHandler.GetPythonModules();
+            var pythonModules = moduleHandler.GetPythonModules();
             foreach (var moduleType in pythonModules)
             {
                 theUKS.GetOrAddThing(moduleType, "AvailableModule");

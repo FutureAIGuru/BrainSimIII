@@ -1,30 +1,57 @@
-﻿using UKS;
+﻿using BrainSimulator;
+using UKS;
 
-BrainSimulator.ModuleHandler.CreateEmptyUKS();
+
+ModuleHandler moduleHandler = new ModuleHandler();
+moduleHandler.CreateEmptyUKS();
+
+//setup the python path
+string? pythonPath = (string?)Environment.GetEnvironmentVariable("PythonPath", EnvironmentVariableTarget.User);
+if (string.IsNullOrEmpty(pythonPath))
+{
+    Console.Write("Path to Python .dll must be set: ");
+    pythonPath = Console.ReadLine();
+    moduleHandler.PythonPath = pythonPath;
+    if (moduleHandler.InitPythonEngine())
+    {
+        Environment.SetEnvironmentVariable("PythonPath", pythonPath, EnvironmentVariableTarget.User);
+    }
+    else
+    {
+        Console.Write("Path not set, program must restart.  Press any key... ");
+        Console.ReadKey();
+        Environment.Exit(1);
+    }
+}
+else
+{
+    moduleHandler.PythonPath = pythonPath;
+}
+
 
 if (args.Length > 0)
 {
     string fileName = args[0];
-    BrainSimulator.ModuleHandler.theUKS.LoadUKSfromXMLFile(fileName);
+    moduleHandler.theUKS.LoadUKSfromXMLFile(fileName);
 }
-else 
+else
 {
-    var pythonFiles = BrainSimulator.ModuleHandler.GetPythonModules();
-    Thing availableModuleRoot = BrainSimulator.ModuleHandler.theUKS.Labeled("AvailableModule");
+    var pythonFiles = moduleHandler.GetPythonModules();
+    Thing availableModuleRoot = moduleHandler.theUKS.Labeled("AvailableModule");
     foreach (var moduleName in pythonFiles)
-        BrainSimulator.ModuleHandler.theUKS.AddThing(moduleName,availableModuleRoot);
+        moduleHandler.theUKS.AddThing(moduleName, availableModuleRoot);
 }
 
 //initialize active module list
-Thing activeModulesRoot = BrainSimulator.ModuleHandler.theUKS.Labeled("ActiveModule");
+Thing activeModulesRoot = moduleHandler.theUKS.Labeled("ActiveModule");
 if (activeModulesRoot != null)
 {
     foreach (Thing module in activeModulesRoot.Children)
         if (module.Label.Contains(".py"))
-            BrainSimulator.ModuleHandler.pythonModules.Add(module.Label);
+            moduleHandler.pythonModules.Add(module.Label);
 }
 //force the MainWindow to always be activated
-BrainSimulator.ModuleHandler.ActivateModule("MainWindow.py");
+moduleHandler.ActivateModule("MainWindow.py");
 
 
 while (true)
@@ -32,18 +59,19 @@ while (true)
     foreach (var module in activeModulesRoot.Children)
     {
         if (module.Label.Contains(".py"))
-            BrainSimulator.ModuleHandler.RunScript(module.Label);
+            moduleHandler.RunScript(module.Label);
     }
+    activeModulesRoot = moduleHandler.theUKS.Labeled("ActiveModule");
 
-    for (int i = 0; i < BrainSimulator.ModuleHandler.activePythonModules.Count; i++)
+    for (int i = 0; i < moduleHandler.activePythonModules.Count; i++)
     {
-        (string, dynamic) module = BrainSimulator.ModuleHandler.activePythonModules[i];
+        (string, dynamic) module = moduleHandler.activePythonModules[i];
         if (activeModulesRoot.Children.FindFirst(x => x.Label == module.Item1) == null)
         {
             try
             {
                 module.Item2.Close();
-                BrainSimulator.ModuleHandler.activePythonModules.RemoveAt(i);
+                moduleHandler.activePythonModules.RemoveAt(i);
                 i--;
             }
             catch { }

@@ -14,16 +14,22 @@ using System.Windows.Interop;
 
 namespace BrainSimulator;
 
-public static class ModuleHandler
+public class ModuleHandler
 {
-    public static List<string> pythonModules = new();
+    public List<string> pythonModules = new();
 
 
-    public static List<(string, dynamic)> activePythonModules = new();
-    public static UKS.UKS theUKS = new();
+    public List<(string, dynamic)> activePythonModules = new();
+    public UKS.UKS theUKS = new();
+
+    string pythonPath = "";
+    public string PythonPath { get => pythonPath; set => pythonPath = value; }
+
+    //Runtime.PythonDLL = @"/opt/anaconda3/envs/brainsim/bin/python";  // Yida's MAC
+    // Runtime.PythonDLL = PythonDll;//  @"python310";  // Charles's Windows
 
 
-    public static string ActivateModule(string moduleType)
+    public string ActivateModule(string moduleType)
     {
         Thing t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
         t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleType));
@@ -44,7 +50,7 @@ public static class ModuleHandler
 
         return t.Label;
     }
-    public static void DeactivateModule(string moduleLabel)
+    public void DeactivateModule(string moduleLabel)
     {
         Thing t = theUKS.Labeled(moduleLabel);
         if (t == null) return;
@@ -59,19 +65,20 @@ public static class ModuleHandler
     }
 
 
-    public static List<string> GetPythonModules()
+    public List<string> GetPythonModules()
     {
         //this is a buffer of python modules so they can be imported once and run many times.
         List<String> pythonFiles = new();
+        if (pythonPath == "no") return pythonFiles;
         try
         {
-            var filesInDir = Directory.GetFiles(@".", "*.py").ToList();
+            var filesInDir = Directory.GetFiles(@".", "m*.py").ToList();
             foreach (var file in filesInDir)
             {
                 if (file.StartsWith("utils")) continue;
                 pythonFiles.Add(Path.GetFileName(file));
             }
-            filesInDir = Directory.GetFiles(@".\pythonModules", "*.py").ToList();
+            filesInDir = Directory.GetFiles(@".\pythonModules", "m*.py").ToList();
             foreach (var file in filesInDir)
             {
                 if (file.StartsWith("utils")) continue;
@@ -84,8 +91,32 @@ public static class ModuleHandler
         }
         return pythonFiles;
     }
-    public static void RunScript(string moduleLabel)
+
+    public bool InitPythonEngine()
     {
+        try
+        {
+            //Runtime.PythonDLL = @"/opt/anaconda3/envs/brainsim/bin/python";  // Yida's MAC
+            Runtime.PythonDLL = PythonPath;//  @"python310";  // Charles's Windows
+            if (!PythonEngine.IsInitialized)
+                PythonEngine.Initialize();
+            dynamic sys = Py.Import("sys");
+            dynamic os = Py.Import("os");
+            string desiredPath = os.path.join(os.getcwd(), "./bin/Debug/net8.0/");
+            sys.path.append(desiredPath);  // enables finding scriptName module
+            sys.path.append(os.getcwd() + "\\pythonModules");
+            Console.WriteLine("PythonEngine init succeeded\n");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Python engine initialization failed because: "+ex.Message);
+            return false;
+        }
+        return true;
+    }
+    public void RunScript(string moduleLabel)
+    {
+        if (PythonPath == "no") return;
         bool firstTime = false;
         //get the ModuleType
         Thing tModule = theUKS.Labeled(moduleLabel);
@@ -100,9 +131,7 @@ public static class ModuleHandler
         {
             try
             {
-                //TODO use environment variable for python path
-                //Runtime.PythonDLL = @"/opt/anaconda3/envs/brainsim/bin/python";  // Yida's MAC
-                Runtime.PythonDLL = @"python310";  // Charles's Windows
+                Runtime.PythonDLL = PythonPath;//  @"python310";  // Charles's Windows
                 PythonEngine.Initialize();
                 dynamic sys = Py.Import("sys");
                 dynamic os = Py.Import("os");
@@ -170,7 +199,7 @@ public static class ModuleHandler
         }
     }
 
-    public static void CreateEmptyUKS()
+    public void CreateEmptyUKS()
     {
         theUKS = new UKS.UKS();
         theUKS.AddThing("BrainSim", null);
@@ -180,7 +209,7 @@ public static class ModuleHandler
         InsertMandatoryModules();
     }
 
-    public static void InsertMandatoryModules()
+    public void InsertMandatoryModules()
     {
 
         Debug.WriteLine("InsertMandatoryModules entered");

@@ -4,7 +4,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ca6d501b-6295-42cf-a444-aafe9525a0ec</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>open_file.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -26,20 +27,11 @@
   <ItemGroup>
     <Compile Include="MainWindow.py" />
     <Compile Include="module_template.py" />
-    <Compile Include="open_file.py" />
     <Compile Include="utils.py" />
-    <Compile Include="view_dialog_add_statement.py" />
-    <Compile Include="view_uks_tree.py" />
+    <Compile Include="module_add_statement.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Iconsmall.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\UKS\UKS.csproj">
-      <Name>UKS</Name>
-      <Project>{7c22fbb6-fe12-43d3-9f6f-479e830c94f6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

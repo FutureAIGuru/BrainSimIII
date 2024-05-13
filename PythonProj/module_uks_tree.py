@@ -1,11 +1,14 @@
 ﻿## Global imports
 import sys, os
+from tkinter.tix import MAX
 from typing import List, Union
 import time  # time needed for refresh()
 import tkinter as tk
 import tkinter.ttk as ttk
 ## Local imports
 from utils import ViewBase
+
+MAX_DEPTH = 4
 
 
 class ViewUKSTree(ViewBase):
@@ -31,9 +34,12 @@ class ViewUKSTree(ViewBase):
                                          iid="Things", 
                                          text="Thing")
         ## Build the new tree content
+        self.curr_depth = 1
         self.add_children(iid, "Thing")
         
     def add_children(self, parent_id: str, item_label: str) -> None:
+        if self.curr_depth >= MAX_DEPTH:
+            return
         ## Recursively add children to the treeview
         parent_thing = self.uks.Labeled(item_label)
         if parent_thing is None:  # safety
@@ -46,7 +52,12 @@ class ViewUKSTree(ViewBase):
                                              text=child.ToString())
             if parent_id in self.open_items:
                 self.tree_view.item(parent_id, open=True)
+
+            if self.curr_depth >= MAX_DEPTH:
+                return
+            self.curr_depth += 1
             self.add_children(iid, child.Label)
+            self.curr_depth -= 1
     
     ################
     ##  Handlers  ##
@@ -100,6 +111,7 @@ class ViewUKSTree(ViewBase):
         self.tree_view.pack(expand=True, fill=tk.BOTH, padx=10, pady=10)
         ## Inserted at the root:
         iid: str = self.tree_view.insert("", "end", "Thing", text="Thing")
+        self.curr_depth = 1
         self.add_children(iid, "Thing")
         # TODO: Add load and save command buttons here
         ## Add REFRESH button

@@ -25,6 +25,7 @@ class ViewBase(object):
         self.uks = uks
         self.level = level
         self.level.title(title)
+        #self.level.transient()
         self.level.iconbitmap(os.path.join(os.getcwd(), "iconsmall.ico"))
         ## Set UI params
         self.window_width = None
@@ -40,6 +41,7 @@ class ViewBase(object):
         self.label = new_label
 
     def resize(self,event):
+        breakpoint()
         #this actually receives ALL the configuration events...so we have to sort out resize/move and the event source
         if hasattr(event.widget, "widgetName"):
             pass
@@ -55,6 +57,8 @@ class ViewBase(object):
 
     def close(self):
         self.level.destroy()
+        
+
     
 
 

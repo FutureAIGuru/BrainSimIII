@@ -7,6 +7,8 @@ public partial class UKS
 {
     string fileName = "";
 
+    public string FileName { get => fileName;}
+
     private void CreateInitialStructure()
     {
         UKSList.Clear();
@@ -283,8 +285,26 @@ public partial class UKS
     List<string> ExtractPortionOfUKS(Thing root)
     {
         List<string> uksContent = new List<string>();
+        if (root == null) return uksContent;
+        var descendants = root.DescendentsList;
+        foreach (var descendant in root.DescendentsList())
+        {
+            foreach (var r in descendant.Relationships)
+            {
+                uksContent.Add(r.ToString());
+            }
+        }
         return uksContent;
     }
+    void MergeStringListIntoUKS(List<String> contentToRestore)
+    {
+        AddThing("BrainSim", null);
+        foreach (string s in contentToRestore)
+        {
+            string[] strings = s.Split("->");
+        }
+    }
+
 
     /// <summary>
     /// Saves the UKS content to an XML file
@@ -391,7 +411,7 @@ public partial class UKS
     public bool LoadUKSfromXMLFile(string filenameIn = "", bool merge = false)
     {
         //stash the current BrainSim configuration
-        ExtractPortionOfUKS(Labeled("BrainSim"));
+        var contentToRestore = ExtractPortionOfUKS(Labeled("BrainSim"));
 
         Stream file;
         if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
@@ -426,6 +446,12 @@ public partial class UKS
             DeFormatContentAfterLoading();
 
         AddBrainSimConfigSectionIfNeeded();
+
+        if (Labeled("BrainSim") == null)
+        {
+            MergeStringListIntoUKS(contentToRestore);
+        }
+
         return true;
     }
 }

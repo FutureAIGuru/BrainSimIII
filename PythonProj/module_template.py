@@ -1,4 +1,5 @@
 import sys, os
+from time import time_ns
 ## Global imports
 from typing import Union
 import tkinter as tk
@@ -9,9 +10,14 @@ from utils import ViewBase
 #Do a global search/replace for "ViewTemplate" with your class name
 #Fill in the areas where functional code is needed
 
+#the title which shows in the dialog titlebar
+TITLE = "Your Window TitleBar Entry HERE"
+#the minimum delay (in seconds) between successive calls to the self.fire method
+TIME_DELAY = 0
+
 class ViewTemplate(ViewBase):
     def __init__(self, level: Union[tk.Tk, tk.Toplevel]) -> None:
-        title: str = "Your Window TitleBar Entry HERE"
+        title: str = TITLE
         super(ViewTemplate, self).__init__(
             title=title, level=level, module_type=os.path.basename(__file__))
         ## Set up any callbacks
@@ -21,7 +27,7 @@ class ViewTemplate(ViewBase):
         ## Create the window
         self.level.geometry("300x250+100+100")
         
-        #Put the widget-creation for the dialog box HERE
+        #Put the widget-creation for the dialog HERE
 
         #needed for stand-alone debugging
         if sys.argv[0]  != "":
@@ -38,7 +44,7 @@ class ViewTemplate(ViewBase):
             return True
         curr_time: float = time.time()
         try:
-            if curr_time > (self.prev_time + 1.0): #Only do stuff onece a second
+            if curr_time > (self.prev_time + TIMEDELAY): 
                 #do your stuff HERE
                 self.prev_time = curr_time
         except Exception:
