@@ -28,12 +28,13 @@ class ViewBase(object):
         #self.level.transient()
         self.level.iconbitmap(os.path.join(os.getcwd(), "iconsmall.ico"))
         ## Set UI params
+        self.module_type = module_type
+        self.label = ""
+        #for future resize event capture
         self.window_width = None
         self.window_height = None
         self.window_x = None
         self.window_y = None
-        self.module_type = module_type
-        self.label = ""
         #BUG...if you enable the following line, the WINDOWS program will crash if you move/resize a window
         #self.level.bind("<Configure>",self.resize)
         
@@ -41,7 +42,7 @@ class ViewBase(object):
         self.label = new_label
 
     def resize(self,event):
-        breakpoint()
+        #breakpoint()
         #this actually receives ALL the configuration events...so we have to sort out resize/move and the event source
         if hasattr(event.widget, "widgetName"):
             pass

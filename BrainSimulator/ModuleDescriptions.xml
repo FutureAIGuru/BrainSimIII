@@ -13,9 +13,6 @@ Thing/Relationship Display:
 
 Buttons:
           Initialize: Creates a UKS with just a few basic elements.
-          Load: Loads UKS content from an XML file.
-          Save: Saves UKS content to an XML file.
-          Merge: Loads UKS content from an XML file and merges it with existing UKS content based on Thing labels.
 
 Context Menu:
 For a Relationship, the only option is to delete the relationship.

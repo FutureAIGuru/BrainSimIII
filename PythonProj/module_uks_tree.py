@@ -114,7 +114,7 @@ class ViewUKSTree(ViewBase):
         iid: str = self.tree_view.insert("", "end", "Thing", text="Thing")
         self.curr_depth = 1
         self.add_children(iid, "Thing")
-        # TODO: Add load and save command buttons here
+
         ## Add REFRESH button
         self.refresh_button = tk.Button(master=self.level, 
                                    text="Refresh", 

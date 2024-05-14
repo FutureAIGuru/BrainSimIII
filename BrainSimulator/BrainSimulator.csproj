@@ -53,17 +53,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="BrainSim3SplashScreen.jpg" />
-    <None Remove="Networks\3DSim.xml" />
-    <None Remove="Networks\BabyTalk.xml" />
-    <None Remove="Networks\BasicNeurons.xml" />
-    <None Remove="Networks\GameOfLife.xml" />
-    <None Remove="Networks\Imagination.xml" />
-    <None Remove="Networks\Maze.xml" />
-    <None Remove="Networks\NeuralGraph.xml" />
-    <None Remove="Networks\ObjectMotion.xml" />
-    <None Remove="Networks\Perception.xml" />
-    <None Remove="Networks\SallieKeyword.table" />
-    <None Remove="Networks\SalliePod.xml" />
     <None Remove="Resources\charactergrowfont.png" />
     <None Remove="Resources\charactershrinkfont.png" />
     <None Remove="Resources\ClearHistory.png" />
@@ -442,46 +431,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Update="Networks\ModuleDescriptions.xml">
+    <None Update="ModuleDescriptions.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Networks\SallieShapes.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Networks\SallieSpeech.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <None Update="Resources\KeywordTables\MagentaKeyword.table">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\KeywordTables\SusieKeyword.table">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ryanHexOutput">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ryanHexOutput %281%29">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ryanHexOutput - Copy">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ryanHexOutput_2">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ryanHexOutput_3.bin">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Modules\ModuleUI_MotionDlg - Copy.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\PythonProj\utils.py">

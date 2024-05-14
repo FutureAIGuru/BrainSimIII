@@ -82,7 +82,7 @@ namespace BrainSimulator
         {
             Stream file;
             string location = AppDomain.CurrentDomain.BaseDirectory;
-            location += "\\Networks\\ModuleDescriptions.xml";
+            location += "ModuleDescriptions.xml";
             file = File.Open(location, FileMode.Open, FileAccess.Read);
             try
             {
@@ -103,15 +103,12 @@ namespace BrainSimulator
             Stream file;
             string fileName = Path.GetFullPath(".").ToLower();
             //we're running with source...save to the source version
-            if (fileName.Contains("\\bin"))
+            int index = fileName.IndexOf("bin\\");
+            if (index != -1)
             {
-                fileName = fileName.Replace("\\bin", "");
-                fileName = fileName.Replace("\\release", "");
-                fileName = fileName.Replace("\\x64", "");
-                fileName = fileName.Replace("\\debug", "");
-                fileName = fileName.Replace("\\net6.0-windows", "");
+                fileName = fileName.Substring(0, index);
             }
-            fileName += "\\Networks\\ModuleDescriptions.xml";
+            fileName += "ModuleDescriptions.xml";
             try
             {
                 file = File.Create(fileName);
