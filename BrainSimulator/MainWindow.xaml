@@ -32,14 +32,14 @@
                         <Image Source="resources/icons/saveAs_16x.png"></Image>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem x:Name="Reload_network" Header="Reload _Network" Click="buttonReloadNetwork_click" IsEnabled="False">
-                </MenuItem>
+                <!--<MenuItem x:Name="Reload_network" Header="Reload _Network" Click="buttonReloadNetwork_click" IsEnabled="False">
+                </MenuItem>-->
                 <Separator />
-                <MenuItem Header="_Properties">
+                <!--<MenuItem Header="_Properties">
                     <MenuItem.Icon>
                         <TextBlock FontSize="16" FontFamily="Segoe MDL2 Assets" Foreground="#FF00539C"  >&#xE71D;</TextBlock>
                     </MenuItem.Icon>
-                </MenuItem>
+                </MenuItem>-->
                 <Separator />
                 <MenuItem Header="Recent" x:Name="MRUListMenu">
                 </MenuItem>
@@ -50,7 +50,7 @@
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="Edit">
+            <!--<MenuItem Header="Edit">
                 <MenuItem Header="Insert Module" x:Name="InsertModuleMenu"></MenuItem>
             </MenuItem>
             <MenuItem Header="View">
@@ -113,7 +113,7 @@
                 </MenuItem>
                 <MenuItem Header="Check for available updates"></MenuItem>
                 <MenuItem Header="About"/>
-            </MenuItem>
+            </MenuItem>-->
         </Menu>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -139,9 +139,9 @@
                 <Button x:Name="SaveAsButton" Click="buttonSaveAs_Click" VerticalAlignment="Top" ToolTip="Save File As"  >
                     <Image Source="/resources/icons/SaveAs_16x.png" Height="20"></Image>
                 </Button>
-                <Button x:Name="ReloadNetwork" Click="buttonReloadNetwork_click" VerticalAlignment="Top" ToolTip="Reload Current Network" IsEnabled="False" >
+                <!--<Button x:Name="ReloadNetwork" Click="buttonReloadNetwork_click" VerticalAlignment="Top" ToolTip="Reload Current Network" IsEnabled="False" >
                     <Image Source="/resources/icons/Refresh_16x.png" Height="20" ></Image>
-                </Button>
+                </Button>-->
                 <Label Visibility="Hidden" Width="30"></Label>
                 <Label Visibility="Hidden" Width="5"></Label>
                 <Label Visibility="Hidden" Width="30"></Label>

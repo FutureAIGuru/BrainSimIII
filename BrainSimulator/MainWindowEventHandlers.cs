@@ -36,8 +36,8 @@ namespace BrainSimulator
             if (SaveAs())
             {
                 SaveButton.IsEnabled = true;
-                Reload_network.IsEnabled = true;
-                ReloadNetwork.IsEnabled = true;
+                //Reload_network.IsEnabled = true;
+                //ReloadNetwork.IsEnabled = true;
             }
         }
 
@@ -94,16 +94,22 @@ namespace BrainSimulator
                 return;
 
             SuspendEngine();
+            CloseAllModuleDialogs();
+            CloseAllModules();
+            UnloadActiveModules();
+
             CreateEmptyUKS(); // to avoid keeping too many bytes occupied...
-
-            ReloadNetwork.IsEnabled = false;
-            Reload_network.IsEnabled = false;
-
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
 
             currentFileName = "";
             SetCurrentFileNameToProperties();
+
+            LoadModuleTypeMenu();
+
+            InitializeActiveModules();
+
+            LoadMRUMenu();
+
+
             SetTitleBar();
 
             ResumeEngine();

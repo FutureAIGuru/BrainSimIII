@@ -1,6 +1,7 @@
 ﻿## Global imports
+from cgitb import text
 import sys, os
-from tkinter.tix import MAX
+#from tkinter.tix import MAX
 from typing import List, Union
 import time  # time needed for refresh()
 import tkinter as tk
@@ -31,11 +32,11 @@ class ViewUKSTree(ViewBase):
             self.tree_view.delete(item)    
         iid: str = self.tree_view.insert(parent="", 
                                          index="end", 
-                                         iid="Things", 
-                                         text="Thing")
+                                         iid=self.rootBox.get(), 
+                                         text=self.rootBox.get())
         ## Build the new tree content
         self.curr_depth = 1
-        self.add_children(iid, "Thing")
+        self.add_children(iid, self.rootBox.get())
         
     def add_children(self, parent_id: str, item_label: str) -> None:
         if self.curr_depth >= MAX_DEPTH:
@@ -115,10 +116,17 @@ class ViewUKSTree(ViewBase):
         self.add_children(iid, "Thing")
         # TODO: Add load and save command buttons here
         ## Add REFRESH button
-        refresh_button = tk.Button(master=self.level, 
+        self.refresh_button = tk.Button(master=self.level, 
                                    text="Refresh", 
                                    command=lambda:self.refresh())
-        refresh_button.pack()
+        self.refresh_button.pack(side='right',pady=15,padx=10)
+        root_label = tk.Label(master=self.level, text="Root:")
+        root_label.pack(side='left',padx=10)
+        self.rootBox = tk.Entry(master=self.level,width=20)
+        self.rootBox.insert(tk.END,"Thing")
+        self.rootBox.pack(side='left')
+        
+
         ## Set up the Treeview events to handle
         self.tree_view.bind("<<TreeviewOpen>>", self.handle_open_event)
         self.tree_view.bind("<<TreeviewClose>>", self.handle_close_event)

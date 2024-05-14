@@ -484,13 +484,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="PythonModules\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\PythonProj\utils.py" Link="PythonModules\utils.py">
+    <None Include="..\PythonProj\utils.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\PythonProj\module*.py" >
+    <None Include="..\PythonProj\module*.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,15 +1,15 @@
 ﻿using Python.Runtime;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using UKS;
+using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Windows;
-using UKS;
+using System.Collections.Generic;
 
 #if !CONSOLE_APP
 using System.Windows.Interop;
+using System.Windows;
+using System.Runtime.InteropServices;
 #endif
 
 namespace BrainSimulator;
@@ -76,12 +76,7 @@ public class ModuleHandler
             foreach (var file in filesInDir)
             {
                 if (file.StartsWith("utils")) continue;
-                pythonFiles.Add(Path.GetFileName(file));
-            }
-            filesInDir = Directory.GetFiles(@".\pythonModules", "m*.py").ToList();
-            foreach (var file in filesInDir)
-            {
-                if (file.StartsWith("utils")) continue;
+                if (file.Contains("template")) continue;
                 pythonFiles.Add(Path.GetFileName(file));
             }
         }
@@ -109,11 +104,28 @@ public class ModuleHandler
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Python engine initialization failed because: "+ex.Message);
+            Console.WriteLine("Python engine initialization failed because: " + ex.Message);
             return false;
         }
         return true;
     }
+
+    public void Close(string moduleLabel)
+    {
+        var theModuleEntry = activePythonModules.FirstOrDefault(x => x.Item1.ToLower() == moduleLabel.ToLower());
+        if (theModuleEntry.Item2 != null)
+        {
+            if (theModuleEntry.Item2 != null)
+            {
+                try
+                {
+                    theModuleEntry.Item2.Close();
+                }
+                catch { }
+            }
+        }
+    }
+
     public void RunScript(string moduleLabel)
     {
         if (PythonPath == "no") return;
@@ -202,7 +214,8 @@ public class ModuleHandler
     public void CreateEmptyUKS()
     {
         theUKS = new UKS.UKS();
-        theUKS.AddThing("BrainSim", null);
+        if (theUKS.Labeled("BrainSim") == null)
+            theUKS.AddThing("BrainSim", null);
         theUKS.GetOrAddThing("AvailableModule", "BrainSim");
         theUKS.GetOrAddThing("ActiveModule", "BrainSim");
 

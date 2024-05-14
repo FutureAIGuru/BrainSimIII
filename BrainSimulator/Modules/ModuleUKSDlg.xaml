@@ -24,8 +24,8 @@
         <Label Content="Root:" HorizontalAlignment="Left" Margin="415,0,0,27" Width="90" Height="35" VerticalAlignment="Bottom" FontSize="16"/>
         <Label Content="" x:Name="statusLabel"  HorizontalAlignment="Left" Margin="415,0,0,-2" Width="200" Height="35" VerticalAlignment="Bottom" FontSize="16"/>
         <Button x:Name="InitializeButton" Content="Initialize" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="InitializeButton_Click" Margin="0,20,22,0" FontSize="16"   />
-        <Button x:Name="LoadButton" Content="Load" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="LoadButton_Click" Margin="0,50,22,0" FontSize="16" />
+        <!--<Button x:Name="LoadButton" Content="Load" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="LoadButton_Click" Margin="0,50,22,0" FontSize="16" />
         <Button x:Name="SaveButton" Content="Save" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="SaveButton_Click" Margin="0,80,22,0" FontSize="16" />
-        <Button x:Name="MergeButton" Content="Merge" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="LoadButton_Click" Margin="0,110,22,0" FontSize="16"/>
+        <Button x:Name="MergeButton" Content="Merge" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="LoadButton_Click" Margin="0,110,22,0" FontSize="16"/>-->
     </Grid>
 </local:ModuleBaseDlg>

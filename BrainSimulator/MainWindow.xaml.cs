@@ -48,7 +48,6 @@ namespace BrainSimulator
                     likeliPath += @"\Programs\Python";
                     System.Windows.Forms.OpenFileDialog openFileDialog = new()
                     {
-                        Filter = Utils.FilterXMLs,
                         Title = "SELECT path to Python .dll (or cancel for no Python support)",
                         InitialDirectory = likeliPath,
                     };
@@ -148,6 +147,7 @@ namespace BrainSimulator
 
         public void CreateEmptyUKS()
         {
+            theUKS.UKSList.Clear();
             theUKS = new UKS.UKS();
             theUKS.AddThing("BrainSim", null);
             theUKS.GetOrAddThing("AvailableModule", "BrainSim");
@@ -213,6 +213,11 @@ namespace BrainSimulator
                     }
                 }
             }
+            foreach (string pythonModule in pythonModules)
+            {
+                moduleHandler.Close(pythonModule);
+            }
+            pythonModules.Clear();
         }
 
         private void SetTitleBar()
@@ -267,6 +272,7 @@ namespace BrainSimulator
                 theUKS.GetOrAddThing(moduleType, "AvailableModule");
             }
 
+            ModuleListComboBox.Items.Clear();
             foreach (Thing t in theUKS.Labeled("AvailableModule").Children)
             {
                 ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = t.Label, Margin = new Thickness(0), Padding = new Thickness(0) });

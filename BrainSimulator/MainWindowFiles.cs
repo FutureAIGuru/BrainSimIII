@@ -102,6 +102,9 @@ namespace BrainSimulator
         {
             activeModules.Clear();
             pythonModules.Clear();
+            moduleHandler.pythonModules.Clear();
+            moduleHandler.activePythonModules.Clear();
+
 
             var activeModules1 = theUKS.Labeled("ActiveModule").Children;
             activeModules1 = activeModules1.OrderBy(x => x.Label).ToList();
@@ -182,11 +185,11 @@ namespace BrainSimulator
 
         private bool PromptToSaveChanges()
         {
-            var result = MessageBox.Show("Save before loading?", "Save", MessageBoxButton.YesNo);
+            var result = MessageBox.Show("Save current UKS content first?", "Save?", MessageBoxButton.YesNoCancel);
+            if (result == MessageBoxResult.Cancel)
+                return true;
             if (result == MessageBoxResult.Yes)
-            {
                 Save();
-            }
             return false;
         }
 
@@ -200,7 +203,7 @@ namespace BrainSimulator
             {
                 Filter = Utils.FilterXMLs,
                 Title = Utils.TitleUKSFileSave,
-                InitialDirectory = Utils.GetOrAddLocalSubFolder(Directory.GetCurrentDirectory()+"\\"+Utils.UKSContentFolder),
+                InitialDirectory = Utils.GetOrAddLocalSubFolder(Directory.GetCurrentDirectory() + "\\" + Utils.UKSContentFolder),
             };
 
             // Show the file Dialog.  

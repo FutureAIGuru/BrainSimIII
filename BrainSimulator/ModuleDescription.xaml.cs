@@ -18,10 +18,6 @@ namespace BrainSimulator
             InitializeComponent();
             moduleType = theModuleType;
             string fileName = Path.GetFullPath(".").ToLower();
-            if (fileName.Contains("program"))
-            {
-                buttonSave.IsEnabled = false;
-            }
             var modules = Utils.GetArrayOfModuleTypes();
 
             foreach (var v in modules)
