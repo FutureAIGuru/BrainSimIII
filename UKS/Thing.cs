@@ -11,23 +11,44 @@ using System.Linq;
 
 namespace UKS;
 
-//a thing is anything, physical object, attribute, word, action, etc.
+/// <summary>
+/// In the lexicon of graphs, a Thing is a "node".  A Thing can represent anything, physical object, attribute, word, action, etc.
+/// </summary>
 public partial class Thing
 {
     private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
     private List<Relationship> relationshipsFrom = new List<Relationship>(); //synapses from
     private List<Relationship> relationshipsAsType = new List<Relationship>(); //nodes which use this as a relationshipType
+    /// <summary>
+    /// Only used by the tree control
+    /// </summary>
     public IList<Relationship> RelationshipsNoCount { get { lock (relationships) { return new List<Relationship>(relationships.AsReadOnly()); } } }
+    /// <summary>
+    /// Get an "unsafe" writeable list of a Thing's Relationships.
+    /// This list may change while it is in use and so should not be used as a foreach iterator
+    /// </summary>
     public List<Relationship> RelationshipsWriteable { get => relationships; }
+    /// <summary>
+    /// Get a "safe" list of relationships which target this Thing
+    /// </summary>
     public IList<Relationship> RelationshipsFrom { get { lock (relationshipsFrom) { return new List<Relationship>(relationshipsFrom.AsReadOnly()); } } }
+    /// <summary>
+    /// Get an "unsafe" writeable list of Relationships which target this Thing
+    /// </summary>
     public List<Relationship> RelationshipsFromWriteable { get => relationshipsFrom; }
+    /// <summary>
+    /// Get an "unsafe" writeable list of Relationships for which this Thing is the relationship type
+    /// </summary>
     public List<Relationship> RelationshipsAsTypeWriteable { get => relationshipsAsType; }
 
     private string label = "";
     object value;
     public int useCount = 0;
     public DateTime lastFiredTime = new();
-    
+
+    /// <summary>
+    /// Any serializable object can be attached to a Thing
+    /// </summary>
     public object V
     {
         get => value;
@@ -42,7 +63,11 @@ public partial class Thing
     }
 
 
-    //even with no references, don't delete ToString  because the debugger uses it
+    /// <summary>
+    /// Returns a Thing's label
+    /// don't delete this ToString because the debugger uses it when mousing over a Thing
+    /// </summary>
+    /// <returns>the Thing's label</returns>
     public override string ToString()
     {
         string retVal = label;
@@ -50,6 +75,11 @@ public partial class Thing
             retVal += " V: " + V.ToString();
         return retVal;
     }
+    /// <summary>
+    /// Formats a displayable Thing as a string
+    /// </summary>
+    /// <param name="showProperties">Appends a parenthetical list of relationships to the label</param>
+    /// <returns>The string to display</returns>
     public string ToString(bool showProperties = false)
     {
         string retVal = label;// + ": " + useCount;
@@ -59,12 +89,15 @@ public partial class Thing
         {
             retVal += " {";
             foreach (Relationship l in Relationships)
-                retVal += l.T?.label + ",";
+                retVal += l.target?.label + ",";
             retVal += "}";
         }
         return retVal;
     }
 
+    /// <summary>
+    /// Manages a Thing's label and maintais a hash table
+    /// </summary>
     public string Label
     {
         get => label;
@@ -107,10 +140,19 @@ public partial class Thing
     }
 
 
+    /// <summary>
+    /// "Safe" list of direct ancestors
+    /// </summary>
     public IList<Thing> Parents { get => RelationshipsOfType(HasChild, true); }
 
+    /// <summary>
+    /// "Safe" list of direct descendants
+    /// </summary>
     public IList<Thing> Children { get => RelationshipsOfType(HasChild, false); }
 
+    /// <summary>
+    /// Full "Safe" list or relationships
+    /// </summary>
     public IList<Relationship> Relationships
     {
         get
@@ -118,7 +160,7 @@ public partial class Thing
             lock (relationships)
             {
                 foreach (Relationship r in relationships)
-                    r.misses++;
+                    r.Misses++;
                 return new List<Relationship>(relationships.AsReadOnly());
             }
         }
@@ -132,6 +174,9 @@ public partial class Thing
         return FollowTransitiveRelationships(hasChildType, true);
     }
 
+    /// <summary>
+    /// Recursively gets all the ancestors of a Thing
+    /// </summary>
     public IEnumerable<Thing> Ancestors
     {
         get
@@ -144,29 +189,49 @@ public partial class Thing
             }
         }
     }
-
+    /// <summary>
+    /// Determines whether a Thing has a specific ancestor
+    /// </summary>
+    /// <param name="label"></param>
+    /// <returns></returns>
     public bool HasAncestorLabeled(string label)
     {
         Thing t = ThingLabels.GetThing(label);
         if (t == null) return false;
         return HasAncestor(t);
     }
+    /// <summary>
+    /// Determines whether a Thing has a specific ancestor
+    /// </summary>
+    /// <param name="label"></param>
+    /// <returns></returns>
     public bool HasAncestor(Thing t)
     {
         var x = FollowTransitiveRelationships(hasChildType, true, t);
         return x.Count != 0;
     }
 
+    /// <summary>
+    /// Determines how many descendants a Thing has
+    /// </summary>
+    /// <returns>the count</returns>
     public int GetDescendentsCount()
     {
         return DescendentsList().Count;
     }
+    /// <summary>
+    /// Returns a list of all of a thing's descendandants.
+    /// CAUTION: this may be large and time-consuming
+    /// </summary>
+    /// <returns></returns>
     public IList<Thing> DescendentsList()
     {
         return FollowTransitiveRelationships(hasChildType, false);
     }
 
-    //recursively gets all descendents
+    /// <summary>
+    /// Rrecursively gets all descendents of a Thing. Use with caution as this might be a large list
+    /// </summary>
     public IEnumerable<Thing> Descendents
     {
         get
@@ -207,7 +272,10 @@ public partial class Thing
         return retVal;
     }
 
-
+    /// <summary>
+    /// Updates the last-fired time on a Thing
+    /// </summary>
+    /// <param name="t">optional: may select a different Thing</param>
     public void SetFired(Thing t = null)
     {
         if (t != null)
@@ -224,8 +292,12 @@ public partial class Thing
 
 
     //RELATIONSHIPS
-
-    //add a relationship from this thing to the specified thing
+    /// <summary>
+    /// Adds a relationship to a Thing if it does not already exist.  The Thing is the source of the relationship.
+    /// </summary>
+    /// <param name="target">Target Thing</param>
+    /// <param name="relationshipType">RelatinoshipType Thing</param>
+    /// <returns>the new or existing Relationship</returns>
     public Relationship AddRelationship(Thing target, Thing relationshipType)
     {
         if (relationshipType == null)
@@ -242,7 +314,7 @@ public partial class Thing
         {
             relType = relationshipType,
             source = this,
-            T = target,
+            target = target,
         };
         if (target != null)
         {
@@ -277,7 +349,10 @@ public partial class Thing
         }
         return null;
     }
-
+    /// <summary>
+    /// Removes a relationship. 
+    /// </summary>
+    /// <param name="r">The Relationship's source neede not be this Thing</param>
     public void RemoveRelationship(Relationship r)
     {
         if (r == null) return;
@@ -319,7 +394,7 @@ public partial class Thing
                 }
             }
         }
-        foreach (ClauseType c in r.Clauses)
+        foreach (Clause c in r.Clauses)
             RemoveRelationship(c.clause);
     }
 
@@ -333,7 +408,7 @@ public partial class Thing
     public Thing HasRelationshipWithParent(Thing t)
     {
         foreach (Relationship L in Relationships)
-            if (L.T.Parents.Contains(t)) return L.T;
+            if (L.target.Parents.Contains(t)) return L.target;
         return null;
     }
 
@@ -341,10 +416,10 @@ public partial class Thing
     {
         foreach (Relationship L in Relationships)
         {
-            if (L.T != null)
+            if (L.target != null)
             {
-                Thing t = L.T.AncestorList().FindFirst(x => x.Label == s);
-                if (t != null) return L.T;
+                Thing t = L.target.AncestorList().FindFirst(x => x.Label == s);
+                if (t != null) return L.target;
             }
         }
         return null;
@@ -366,7 +441,7 @@ public partial class Thing
         {
             for (int i = 0; i < Relationships.Count; i++)
             {
-                if (Relationships[i].T.HasAncestor(t))
+                if (Relationships[i].target.HasAncestor(t))
                 {
                     retVal.Add(Relationships[i]);
                 }
@@ -387,7 +462,10 @@ public partial class Thing
         }
         return retVal.OrderBy(x => -x.Value).ToList();
     }
-
+    /// <summary>
+    /// Addsa a parent to a Thing
+    /// </summary>
+    /// <param name="newParent"></param>
     public void AddParent(Thing newParent)
     {
         if (newParent == null) return;
@@ -396,7 +474,10 @@ public partial class Thing
             newParent.AddRelationship(this, HasChild);
         }
     }
-
+    /// <summary>
+    /// Remove a parent from a Thing
+    /// </summary>
+    /// <param name="t">If the Thing is not a parent, the function does nothing</param>
     public void RemoveParent(Thing t)
     {
         Relationship r = new() { source = t, reltype = hasChildType, target = this };

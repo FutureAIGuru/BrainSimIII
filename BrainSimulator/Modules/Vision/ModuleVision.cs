@@ -345,13 +345,13 @@ namespace BrainSimulator.Modules
 
             //set up the UKS structure for outlines
             GetUKS();
-            if (UKS == null) return;
-            UKS.GetOrAddThing("Sense", "Thing");
-            UKS.GetOrAddThing("Visual", "Sense");
-            Thing outlines = UKS.GetOrAddThing("Outline", "Visual");
-            Thing tCorners = UKS.GetOrAddThing("Corners", "Visual");
-            UKS.DeleteAllChildren(outlines);
-            UKS.DeleteAllChildren(tCorners);
+            if (theUKS == null) return;
+            theUKS.GetOrAddThing("Sense", "Thing");
+            theUKS.GetOrAddThing("Visual", "Sense");
+            Thing outlines = theUKS.GetOrAddThing("Outline", "Visual");
+            Thing tCorners = theUKS.GetOrAddThing("Corners", "Visual");
+            theUKS.DeleteAllChildren(outlines);
+            theUKS.DeleteAllChildren(tCorners);
 
             if (corners.Count == 0) return;
 
@@ -401,12 +401,12 @@ namespace BrainSimulator.Modules
             //let's add it to the UKS
 
             //TODO: here's where we'll have a loop for multiple outlines
-            Thing currOutline = UKS.GetOrAddThing("Outline*", "Outlines");
+            Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
             foreach (Corner c in outline)
             {
-                Thing corner = UKS.GetOrAddThing("corner*", tCorners);
+                Thing corner = theUKS.GetOrAddThing("corner*", tCorners);
                 corner.V = c;
-                UKS.AddStatement(currOutline, "has*", corner);
+                theUKS.AddStatement(currOutline, "has*", corner);
             }
         }
 

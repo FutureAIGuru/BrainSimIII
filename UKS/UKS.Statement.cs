@@ -5,9 +5,22 @@ namespace UKS;
 
 public partial class UKS
 {
-    //this overload lets you pass in
-    //a string or a thing for the first three parameters
-    //and a string, Thing, or list of string or Thing for the last 3
+    /// <summary>
+    /// Creates a Relationship. <br/>
+    /// Parameters may be Things or strings. If strings, they represent Thing labels and if the Things with those lables
+    /// do not exist, they will be created. <br/>
+    /// If the RelationshipType has an inverse, the inverse will be used and the Relationship will be reversed so that 
+    /// Fido IsA Dog become Dog HasChild Fido.<br/>
+    /// If Attributes are given, they apply to the applicable source, type, or target parameter. Example "Fido","IsA","Dog",null,null,"Big" creates or locates 
+    /// an existing Thing which is a child of Dog and has the attribute IS Big (perhaps labeled Dog.Big). Then Fido is made a child of that Thing.
+    /// </summary>
+    /// <param name="oSource">string or Thing</param>
+    /// <param name="oRelationshipType">string or Thing</param>
+    /// <param name="oTarget">string or Thing (or null)</param>
+    /// <param name="oSourceAttributess">String containing one or more Thing labels separated by spaces, list of strings with individusl Thing Labels, Thing, OR List of Things</param>
+    /// <param name="oTypeAttributes">Same</param>
+    /// <param name="oTargetAttributess">Same</param>
+    /// <returns>The primary relationship which was created (others may be created for given attributes</returns>
     public Relationship AddStatement(
         object oSource, object oRelationshipType, object oTarget,
         object oSourceProperties = null,
@@ -34,7 +47,7 @@ public partial class UKS
 //        }
     }
 
-    public Relationship AddStatement(
+    private Relationship AddStatement(
                     Thing source, Thing relType, Thing target,
                     List<Thing> sourceProperties,
                     List<Thing> typeProperties,
@@ -70,7 +83,7 @@ public partial class UKS
 
         //if this is adding a child relationship, remove any unknownObject parent
         ClearExtraneousParents(r.source);
-        ClearExtraneousParents(r.T);
+        ClearExtraneousParents(r.target);
         ClearExtraneousParents(r.relType);
         ClearRedundancyInAncestry(r.target);
 
@@ -267,11 +280,15 @@ public partial class UKS
         return null;
     }
 
+    public Thing CreateInstanceOf(Thing t)
+    {
+        return CreateSubclass(t, new List<Thing>());
+    }
     Thing CreateSubclass(Thing t, List<Thing> attributes)
     {
         if (t == null) return null;
         Thing t2 = SubclassExists(t, attributes);
-        if (t2 != null) return t2;
+        if (t2 != null && attributes.Count != 0) return t2;
 
         string newLabel = t.Label;
         foreach (Thing t1 in attributes)
@@ -279,7 +296,7 @@ public partial class UKS
             newLabel += "." + t1.Label;
         }
         //create the new thing which is child of the original
-        Thing retVal = GetOrAddThing(newLabel, t);
+        Thing retVal = AddThing(newLabel, t);
         //add the attributes
         foreach (Thing t1 in attributes)
         {

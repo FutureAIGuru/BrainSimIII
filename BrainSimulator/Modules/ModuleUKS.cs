@@ -20,12 +20,13 @@ public partial class ModuleUKS : ModuleBase
     //keeps the file name for xml storage
     public string fileName = "";
 
-    public UKS.UKS theUKS;
+//    public UKS.UKS theUKS = null;
     //set size parameters as needed in the constructor
     //set max to be -1 if unlimited
     public ModuleUKS()
     {
         allowMultipleDialogs = true;
+//        theUKS = MainWindow.theUKS;
     }
 
 
@@ -45,7 +46,7 @@ public partial class ModuleUKS : ModuleBase
     public override void Initialize()
     {
         MainWindow.SuspendEngine();
-        theUKS = new UKS.UKS();
+//        theUKS = new UKS.UKS();
 
         // Make sure all other loaded modules get notified of UKS Initialization
         UKSInitialized();
@@ -59,7 +60,7 @@ public partial class ModuleUKS : ModuleBase
         base.SetUpBeforeSave();
         if (fileName != null && fileName.Length > 0)
         {
-            //theUKS.SaveUKStoXMLFile();
+            theUKS.SaveUKStoXMLFile();
         }
     }
 

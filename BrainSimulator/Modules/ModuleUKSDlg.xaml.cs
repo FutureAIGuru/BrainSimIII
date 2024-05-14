@@ -32,7 +32,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private bool busy;
     private List<string> expandedItems = new();
     private bool updateFailed;
-    private List<Thing> uks;
+    //private List<Thing> uks;
     private DispatcherTimer dt;
     private string expandAll = "";  //all the children below this named node will be expanded
 
@@ -56,7 +56,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         int refCount = 0;
         ModuleUKS parent = (ModuleUKS)ParentModule;
         Thing t = null;
-        uks = parent.GetTheUKS();
         try
         {
             foreach (Thing t1 in parent.theUKS.UKSList)
@@ -78,13 +77,19 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private void LoadContentToTreeView()
     {
-        string root = textBoxRoot.Text;
         ModuleUKS parent = (ModuleUKS)ParentModule;
+        expandAll = parent.GetAttribute("ExpandAll");
+        string root = parent.GetAttribute("Root");
+        if (root == null)
+        {
+            root = "Thing";
+            parent.SetAttribute("Root", root);
+        }
         Thing thing = parent.theUKS.Labeled(root);
         if (thing is not null)
         {
             totalItemCount = 0;
-            TreeViewItem tvi = new() { Header = thing.ToString()};
+            TreeViewItem tvi = new() { Header = thing.ToString() };
             tvi.ContextMenu = GetContextMenu(thing);
             tvi.IsExpanded = true; //always expand the top-level item
             theTreeView.Items.Add(tvi);
@@ -96,7 +101,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             try //ignore problems of collection modified
             {
-                foreach (Thing t1 in uks)
+                foreach (Thing t1 in parent.theUKS.UKSList)
                 {
                     if (t1.Parents.Count == 0)
                     {
@@ -152,8 +157,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
             if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
                 tviChild.IsExpanded = true;
-            if (r.target.AncestorList().Contains(ThingLabels.GetThing(expandAll)) && 
-                (child.Label == "" ||!parentLabel.Contains("|"+child.Label)))
+            if (r.target.AncestorList().Contains(ThingLabels.GetThing(expandAll)) &&
+                (child.Label == "" || !parentLabel.Contains("|" + child.Label)))
                 tviChild.IsExpanded = true;
 
             tvi.Items.Add(tviChild);
@@ -182,7 +187,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     tviChild.Items.Add(emptyChild);
                     tviChild.Expanded += EmptyChild_Expanded;
                 }
-                else {
+                else
+                {
                     //not expandable
                     //Debug.Write("x");
                 }
@@ -252,7 +258,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (r.relType?.Label == "has-child") continue;
             TreeViewItem tviRef;
             string headerstring1 = GetRelationshipString(r);
-            tviRef = new TreeViewItem {Header = headerstring1};
+            tviRef = new TreeViewItem { Header = headerstring1 };
             tviRef.ContextMenu = GetRelationshipContextMenu(r);
             tviRefLabel.Items.Add(tviRef);
             if (r.LastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
@@ -308,7 +314,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         ContextMenu menu = new ContextMenu();
         menu.SetValue(ThingObjectProperty, t);
-        int ID = uks.IndexOf(t);
+        ModuleUKS parent = (ModuleUKS)ParentModule;
+        int ID = parent.theUKS.UKSList.IndexOf(t);
         MenuItem mi = new();
         string thingLabel = "___";
         if (t != null)
@@ -317,7 +324,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         mi.IsEnabled = false;
         menu.Items.Add(mi);
 
-        TextBox renameBox = new() { Text = thingLabel, Width = 200,Name="RenameBox" };
+        TextBox renameBox = new() { Text = thingLabel, Width = 200, Name = "RenameBox" };
         renameBox.PreviewKeyDown += RenameBox_PreviewKeyDown;
         mi = new();
         mi.Header = renameBox;
@@ -404,7 +411,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             }
             if (e.Key == Key.Escape)
             {
-                cm.IsOpen= false;
+                cm.IsOpen = false;
             }
         }
     }
@@ -424,7 +431,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         if (sender is MenuItem mi)
         {
-            UKS.UKS uks = ((ModuleUKS)ParentModule).theUKS;
+            UKS.UKS theUKS = ((ModuleUKS)ParentModule).theUKS;
             ContextMenu m = mi.Parent as ContextMenu;
             Thing tParent = (Thing)mi.GetValue(ThingObjectProperty);
             if (tParent != null)
@@ -447,6 +454,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     expandAll = t.Label;
                     expandedItems.Clear();
                     expandedItems.Add("|Thing|Object");
+                    ModuleUKS parent = (ModuleUKS)ParentModule;
+                    parent.SetAttribute("ExpandAll", expandAll);
                     updateFailed = true; //this forces the expanded items list not to rebuild
                     break;
                 case "Collapse All":
@@ -460,8 +469,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     RefreshButton_Click(null, null);
                     break;
                 case "Delete":
-                    uks.DeleteAllChildren(t);
-                    uks.DeleteThing(t);
+                    theUKS.DeleteAllChildren(t);
+                    theUKS.DeleteThing(t);
                     break;
                 case "Make Root":
                     textBoxRoot.Text = t.Label;
@@ -525,7 +534,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         if (r.relType is null || r.relType.Label != "has-child")
             retVal = r.ToString() + " ";
         if (detailsCB.IsChecked == true)
-            retVal = "<" + r.Weight.ToString("f2")+","+(r.TimeToLive==TimeSpan.MaxValue?"∞": (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
+            retVal = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
         return retVal;
     }
 
@@ -555,10 +564,17 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private void TextBoxRoot_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Return)
-        {
-            RefreshButton_Click(null, null);
-        }
+        //ModuleUKS parent = (ModuleUKS)ParentModule;
+        //parent.SetAttribute("Root", textBoxRoot.Text);
+        //RefreshButton_Click(null, null);
+    }
+    private void textBoxRoot_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        ModuleUKS parent = (ModuleUKS)ParentModule;
+        if (parent == null) return; 
+        parent.SetAttribute("Root", textBoxRoot.Text);
+        RefreshButton_Click(null, null);
+
     }
 
     //using the mouse-wheel while pressing ctrl key changes the font size
@@ -651,8 +667,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
         parent.theUKS.UKSList.Clear();
         parent.Initialize();
+
         CollapseAll();
-        textBoxRoot.Text = "Thing";
+        expandAll = parent.GetAttribute("ExpandAll");
+        if (expandAll == null) expandAll = "";
+        string root= parent.GetAttribute("root"); ;
+        if (root == "") root = "Thing";
+        textBoxRoot.Text = root;
         //expandAll = "";
         RefreshButton_Click(null, null);
     }
@@ -683,7 +704,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             Filter = Utils.FilterXMLs,
             Title = Utils.TitleUKSFileSave,
-            InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.FolderKnowledgeFiles),
+            InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.UKSContentFolder),
         };
 
         // Show the file Dialog.  
@@ -710,7 +731,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             {
                 Filter = Utils.FilterXMLs,
                 Title = Utils.TitleUKSFileLoad,
-                InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.FolderKnowledgeFiles),
+                InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.UKSContentFolder),
             };
 
             // Show the file Dialog.  
@@ -719,7 +740,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 parent.fileName = openFileDialog.FileName;
-                parent.theUKS.LoadUKSfromXMLFile(parent.fileName,(btn.Content.ToString()=="Merge"));
+                parent.theUKS.LoadUKSfromXMLFile(parent.fileName, (btn.Content.ToString() == "Merge"));
                 MainWindow.ResumeEngine();
             }
             openFileDialog.Dispose();

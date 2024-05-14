@@ -9,9 +9,15 @@ public partial class UKS
     List<Relationship> failedConditions = new();
     List<Relationship> succeededConditions = new();
 
-    //TODO This is hard-codedd to "is" relationships
+    /// <summary>
+    /// Gets all relationships to a gropu of Things includeing inherited relationships
+    /// </summary>
+    /// <param name="sources"></param>
+    /// <param name="reverse">if true, the first parameter is a list of targets rather than sources</param>
+    /// <returns>List of matching relationships</returns>
     public List<Thing> GetAllAttributes(Thing t) //with inheritance, conflicts, etc
     {
+        //TODO This is hard-codedd to "is" relationships
         List<Thing> retVal = new();
 
         var temp1 = BuildSearchList(new List<Thing>() { t });
@@ -226,6 +232,12 @@ public partial class UKS
         }
     }
 
+    /// <summary>
+    /// Filters a list of Relationships returning only those with at least one component which  has an ancestor in the list of Ancestors
+    /// </summary>
+    /// <param name="result">List of Relationships from a previous Query</param>
+    /// <param name="ancestors">Filter</param>
+    /// <returns></returns>
     public IList<Relationship> FilterResults(List<Relationship> result, List<Thing> ancestors)
     {
         List<Relationship> retVal = new();
@@ -258,8 +270,8 @@ public partial class UKS
         return retVal;
     }
 
-    //determine if a single thing's relationships contain the sequence
-    public bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
+           //find all the things containing the sequence of attributes
+ private bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
     {
         //TODO modify to find closest match, return the matching score instead of bool
         //TODO this requires that all entries in a sequence must be adjascent without any intervening extraneous relationships
@@ -280,7 +292,11 @@ public partial class UKS
         return false;
     }
 
-    //find all the things containing the sequence of attributes
+    /// <summary>
+    /// Returns a list of Things which have all the target attributes as Relationships
+    /// </summary>
+    /// <param name="targetAttributes">An ordered list of Things which must occur as attributes in the search target</param>
+    /// <returns>All the Things which match the criteria</returns>
     public List<Thing> HasSequence(List<Thing> targetAttributes)
     {
         //get a list of all things with the given attributes
@@ -305,13 +321,18 @@ public partial class UKS
     }
 
     //TODO add parameter to allow some number of misses
-    public bool HasAllAttributes(Thing t, List<Thing> targetAttributes)
+    private  bool HasAllAttributes(Thing t, List<Thing> targetAttributes)
     {
         List<Thing> thingAttributes = GetAllAttributes(t);
         foreach (Thing t2 in targetAttributes)
             if (!thingAttributes.Contains(t2) && !t.AncestorList().Contains(t2)) return false;
         return true;
     }
+    /// <summary>
+    /// Returns a list of Things which have ALL the given attributes (IS Relationships)
+    /// </summary>
+    /// <param name="attributes">List of Things</param>
+    /// <returns></returns>
     public List<Thing> FindThingsWithAttributes(List<Thing> attributes)
     {
         List<Thing> retVal = new();
@@ -334,31 +355,11 @@ public partial class UKS
     }
 
 
-
-    public static bool StackContains(string target, int count = 0)
-    {
-        StackTrace stackTrace = new StackTrace();           // get call stack
-        StackFrame[] stackFrames = stackTrace.GetFrames();  // get method calls (frames)
-
-        // do not bubble if called from Initialization
-        foreach (StackFrame stackFrame in stackFrames)
-        {
-            string name = stackFrame.GetMethod().Name;
-            if (name.Contains(target))
-            {
-                if (count == 0)
-                    return true;
-                count--;
-            }
-        }
-        return false;
-    }
-
-    bool ConditionsAreMet(List<ClauseType> clauses, Relationship query)
+    bool ConditionsAreMet(List<Clause> clauses, Relationship query)
     {
         if (clauses.Count == 0) return true;
         //if (StackContains("ConditionsAreMet",1)) return true;
-        foreach (ClauseType c in clauses)
+        foreach (Clause c in clauses)
         {
             if (c.clauseType.Label.ToLower() != "if") continue;
             Relationship r = c.clause;
@@ -382,10 +383,19 @@ public partial class UKS
         }
         return true;
     }
+    /// <summary>
+    /// Returns a list of Relationships which were false in the previous query
+    /// </summary>
+    /// <returns></returns>
+
     public List<Relationship> WhyNot()
     {
         return failedConditions;
     }
+    /// <summary>
+    /// Returns a list of Relatioships which were true in the previous query
+    /// </summary>
+    /// <returns></returns>
     public List<Relationship> Why()
     {
         return succeededConditions;
