@@ -91,6 +91,7 @@ Follow has ONLY if called out in type
             List<Thing> targetList = ModuleUKSStatement.ThingListFromString(target);
 
             //Handle is-a queries as a special case
+            if (sourceList.Count == 0) return;
             if (relType.Contains("is-a") && reverse ||
                 relType.Contains("has-child") && !reverse)
             {
