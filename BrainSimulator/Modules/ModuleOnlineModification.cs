@@ -21,14 +21,15 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Windows.Documents;
 using System.Threading.Tasks;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
-    public class ModuleOnlineFile : ModuleBase
+    public class ModuleOnlineModification : ModuleBase
     {
         public string Output = "";
 
-        public ModuleOnlineFile()
+        public ModuleOnlineModification()
         {
 
         }
@@ -75,13 +76,13 @@ namespace BrainSimulator.Modules
         }
 
         public enum QueryType { general, isa, hasa, can, count, list, listCount, types, partsOf };
-        public async Task GetChatGPTDataFine(string textIn, QueryType qtIn = QueryType.isa, string altLabel = "")
+        public async Task GetChatGPTDataParents(string textIn)
         {
+            QueryType qtIn = QueryType.isa;
             try
             {
                 bool isError = true;
                 QueryType qType = qtIn;
-                if (altLabel == "") altLabel = textIn;
                 string prompt;
                 string apiKey = ConfigurationManager.AppSettings["APIKey"];
                 var client = new HttpClient();
@@ -89,8 +90,7 @@ namespace BrainSimulator.Modules
                 string queryText = textIn;
                 textIn = textIn.ToLower();
 
-
-                queryText = $"Provide commonsense facts about the following: {textIn}";
+                queryText = $"Provide is-a answers about the following: {textIn}";
 
                 // Define the request body
                 var requestBody = new
@@ -98,9 +98,9 @@ namespace BrainSimulator.Modules
                     temperature = 0,
                     max_tokens = 200,
                     // IMPORTANT: Add your model here after fine tuning on OpenAI using word_only_dataset.jsonl.
-                    model = ConfigurationManager.AppSettings["FineTunedModel_File"],
+                    model = ConfigurationManager.AppSettings["FineTunedModel"],
                     messages = new[] {
-                        new { role = "system", content = "Provide answers that are common sense to a 10 year old." },
+                        new { role = "system", content = "Provide answers that are common sense seperated by commas." },
                         new { role = "user", content = queryText}
                     },
                 };
@@ -129,52 +129,33 @@ namespace BrainSimulator.Modules
                     //some sort of error occurred
                     if (Output.Contains("language model")) return;
 
-                    // Split by comma (,) to get individual pairs
+                    // Split by comma (,) to get individual values
                     string[] values = Output.Split(",");
-                    // Error check
-                    if (values.Length == 0)
-                    {
-                        Debug.WriteLine($"Error, length of value '{Output}' is 0.");
-                        ModuleOnlineFileDlg.errorCount += 1;
-                    }
-
-                    string[] relationships = new string[values.Length];
-                    string[] targets = new string[values.Length];
-
-                    // Split by pipe (|) to get relationships and targets
-                    for (int i = 0; i < values.Length; i++)
-                    {
-                        string[] parts = values[i].Split("|");
-                        ModuleOnlineFileDlg.relationshipCount += 1;
-                        // Make sure the length of each pair is 2.
-                        if (parts.Length == 2)
-                        {
-                            relationships[i] = parts[0];
-                            targets[i] = parts[1];
-                        }
-                        else
-                        {
-                            Debug.WriteLine($"Error, unexpected format in values[i]: {values[i]}");
-                            ModuleOnlineFileDlg.errorCount += 1;
-                        }
-                        
-                    }
                     // Get the UKS
                     GetUKS();
-                    
-                    // Add the statements to the UKS
-                    for (int i = 0; i < relationships.Length; i++)
+                    foreach (string s in values)
                     {
-                        UKS.AddStatement(textIn, relationships[i], targets[i]);
+                        ModuleOnlineModificationDlg.relationshipCount += 1;
+                        Debug.WriteLine("Individual Item: " + s);
+                        UKS.AddStatement(textIn, "is-a", s);
                     }
                 }
-                else
-                    if (completionResult.error != null) Output = completionResult.error.message;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error with getting Chat GPT Fine tuning. Error is {ex}.");
             }
         }
+
+        public IList<Thing> GetUnknownChildren()
+        {
+            GetUKS();
+
+            Thing unknown = UKS.GetOrAddThing("unknownObject");
+
+            return unknown.Children;
+        }
+
     }
+
 }
