@@ -36,7 +36,7 @@ public partial class UKS
         AddStatement("has", "hasProperty", "isTransitive");
         AddStatement("has-child", "hasProperty", "isTransitive");
 
-
+        AddBrainSimConfigSectionIfNeeded();
         SetupNumbers();
     }
 

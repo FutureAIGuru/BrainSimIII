@@ -34,6 +34,7 @@ class ViewUKSTree(ViewBase):
                                          index="end", 
                                          iid=self.rootBox.get(), 
                                          text=self.rootBox.get())
+        self.tree_view.item(iid, open=True)
         ## Build the new tree content
         self.curr_depth = 1
         self.add_children(iid, self.rootBox.get())
@@ -47,18 +48,23 @@ class ViewUKSTree(ViewBase):
             return
         children = parent_thing.Children
         for child in children:
-            iid: str = self.tree_view.insert(parent=parent_id, 
+            try:
+                #todo, randomize the iid in order to allow duplicates
+                iid: str = self.tree_view.insert(parent=parent_id, 
                                              index="end", 
-                                             iid=child.Label, 
+                                             iid=child.ToString(),
                                              text=child.ToString())
-            if parent_id in self.open_items:
-                self.tree_view.item(parent_id, open=True)
+                if parent_id in self.open_items:
+                    self.tree_view.item(parent_id, open=True)
 
-            if self.curr_depth >= MAX_DEPTH:
-                return
-            self.curr_depth += 1
-            self.add_children(iid, child.Label)
-            self.curr_depth -= 1
+                if self.curr_depth >= MAX_DEPTH:
+                    return
+                self.curr_depth += 1
+                self.add_children(iid, child.Label)
+                self.curr_depth -= 1
+            except Exception as e:
+                print(e)
+            
     
     ################
     ##  Handlers  ##

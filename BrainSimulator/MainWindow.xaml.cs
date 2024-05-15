@@ -14,7 +14,7 @@ namespace BrainSimulator
     /// </summary>
     public partial class MainWindow : Window
     {
-
+        //TODO move these to ModuleHandler
         public List<ModuleBase> activeModules = new();
         public List<string> pythonModules = new();
 
