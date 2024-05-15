@@ -165,7 +165,7 @@ namespace BrainSimulator.Modules
                     // Add the statements to the UKS
                     for (int i = 0; i < relationships.Length; i++)
                     {
-                        UKS.AddStatement(textIn, relationships[i], targets[i]);
+                        theUKS.AddStatement(textIn, relationships[i], targets[i]);
                     }
                 }
                 else

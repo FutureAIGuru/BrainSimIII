@@ -96,7 +96,7 @@ namespace BrainSimulator.Modules
                     {
                         // Process the line
                         Debug.WriteLine($"{source} -> {rel} -> {target}");
-                        //UKS.AddStatement(source, "is-a", target);
+                        //theUKS.AddStatement(source, "is-a", target);
                     }
                 }
             }
@@ -187,7 +187,7 @@ namespace BrainSimulator.Modules
                 if (sourceHash != null)
                 {
                     //delete orphas
-                    Thing objectRoot = UKS.GetOrAddThing("Object", "Thing");
+                    Thing objectRoot = theUKS.GetOrAddThing("Object", "Thing");
                     if (objectRoot == null) return;
                     for (int i = 0; i < objectRoot.Children.Count; i++)
                     {
@@ -196,8 +196,8 @@ namespace BrainSimulator.Modules
                         if (descendentCount == 1)
                         {
                             i--;
-                            UKS.DeleteAllChildren(child);
-                            UKS.DeleteThing(child);
+                            theUKS.DeleteAllChildren(child);
+                            theUKS.DeleteThing(child);
                         }
                     }
                     int counter = 0;
@@ -210,14 +210,14 @@ namespace BrainSimulator.Modules
                         foreach (Result r in l)
                         {
                             if (wordList2.Any(x => x.Item1 == r.sourceText) && wordList2.Any(x => x.Item1 == r.targetText) && r.rel == "IsA")
-                                UKS.AddStatement(r.sourceText, "is-a", r.targetText);
+                                theUKS.AddStatement(r.sourceText, "is-a", r.targetText);
                         }
                     }
                     return;
                 }
             }
             //check UKS for circular references
-            //foreach (Thing t1 in UKS.GetTheUKS())
+            //foreach (Thing t1 in theUKS.GetTheUKS())
             //{
             //    if (t1.HasAncestor(t1))
             //    {
@@ -281,7 +281,7 @@ namespace BrainSimulator.Modules
                             //Debug.WriteLine($"{source} -> {rel} -> {target} :  {fWeight.ToString("F2")}");
                             //Debug.Write(".");
                             if (wordsToLookUp == null) wordsToLookUp = new();
-                            Thing t = UKS.Labeled(target);
+                            Thing t = theUKS.Labeled(target);
                             if (t == null)
                             {
                                 //    int index1 = wordsToLookUp.FindIndex(x => x.Item1 == target);
@@ -293,7 +293,7 @@ namespace BrainSimulator.Modules
                             }
                             //if (sourceHash[source].Count > 5 && targetHash[target].Count > 5)
                             {
-                                Relationship r1 = UKS.AddStatement(source, "is-a", target);
+                                Relationship r1 = theUKS.AddStatement(source, "is-a", target);
                                 if (r1 != null)
                                 {
                                     if (r1.TimeToLive == TimeSpan.MaxValue)
@@ -617,7 +617,7 @@ namespace BrainSimulator.Modules
                 { continue; }
                 Thing existingThing = null;
                 /* rewrite for new single-label concept
-                 * var existingThings = UKS.Labeled(word.Item1);
+                 * var existingThings = theUKS.Labeled(word.Item1);
                                 foreach (var t in existingThings)
                                     if (t.HasAncestorLabeled("Words"))
                                     {
@@ -626,12 +626,12 @@ namespace BrainSimulator.Modules
                                     }
                    */
                 string firstLetter = word.Item1.Substring(0, 1).ToUpper();
-                UKS.GetOrAddThing("Words", "Object");
-                UKS.GetOrAddThing(word.Item2, "Words");
-                Thing letterParent = UKS.GetOrAddThing(firstLetter, word.Item2);
+                theUKS.GetOrAddThing("Words", "Object");
+                theUKS.GetOrAddThing(word.Item2, "Words");
+                Thing letterParent = theUKS.GetOrAddThing(firstLetter, word.Item2);
 
                 if (existingThing == null)
-                    existingThing = UKS.GetOrAddThing(word.Item1, letterParent);
+                    existingThing = theUKS.GetOrAddThing(word.Item1, letterParent);
                 else
                     existingThing.AddParent(letterParent);
             }
@@ -674,7 +674,7 @@ namespace BrainSimulator.Modules
                 {
                     Output = kid.ToString();
                     GetUKS();
-                    Thing incomingInfo = UKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
+                    Thing incomingInfo = theUKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
                     incomingInfo.V = kid;
                     return;
                 }
@@ -741,7 +741,7 @@ namespace BrainSimulator.Modules
             }
             Output = kidsdef.ToString();
             GetUKS();
-            Thing incomingInfo = UKS.GetOrAddThing("CurrentIncomingInfo", "Attention");
+            Thing incomingInfo = theUKS.GetOrAddThing("CurrentIncomingInfo", "Attention");
             incomingInfo.V = kidsdef;
 
             int index = 0;
@@ -928,11 +928,11 @@ namespace BrainSimulator.Modules
                         switch (qType)
                         {
                             case QueryType.isa:
-                                UKS.AddStatement(textIn, "is-a", s);
-                                // UKS.AddStatement(parameters[0], "is-a", parameters[2]);
+                                theUKS.AddStatement(textIn, "is-a", s);
+                                // theUKS.AddStatement(parameters[0], "is-a", parameters[2]);
                                 break;
                             case QueryType.hasa:
-                                UKS.AddStatement(textIn, "has", s);
+                                theUKS.AddStatement(textIn, "has", s);
                                 break;
                         }
                     }
@@ -1045,24 +1045,24 @@ namespace BrainSimulator.Modules
                         switch (qType)
                         {
                             case QueryType.general:
-                                Thing incomingInfo = UKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
+                                Thing incomingInfo = theUKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
                                 incomingInfo.V = Output;
                                 break;
                             case QueryType.isa:
                                 string content = GetParenthetical(Output);
                                 string[] parameters = content.Split(",");
                                 if (parameters.Length == 3)
-                                    UKS.AddStatement(parameters[0], "is-a", parameters[2]);
+                                    theUKS.AddStatement(parameters[0], "is-a", parameters[2]);
                                 break;
                             case QueryType.hasa:
                                 if (listItem.Contains("."))
                                     listItem = listItem.Substring(3);
-                                UKS.AddStatement(textIn, "have", (object)listItem);
+                                theUKS.AddStatement(textIn, "have", (object)listItem);
                                 break;
                             case QueryType.can:
                                 if (listItem.Contains("."))
                                     listItem = listItem.Substring(3);
-                                UKS.AddStatement(textIn, (object)listItem, null, null, "can");
+                                theUKS.AddStatement(textIn, (object)listItem, null, null, "can");
                                 break;
                             case QueryType.count:
                                 if (listItem.Contains("."))
@@ -1078,7 +1078,7 @@ namespace BrainSimulator.Modules
 
                                         listItem = SingularizePhrase((string)listItem.Trim());
                                         textIn = SingularizePhrase(textIn.Trim());
-                                        UKS.AddStatement(textIn, "have", (object)listItem, null, countString);
+                                        theUKS.AddStatement(textIn, "have", (object)listItem, null, countString);
                                     }
                                 }
                                 break;
@@ -1088,7 +1088,7 @@ namespace BrainSimulator.Modules
                                     listItem = listItem.Substring(3);
                                 listItem = SingularizePhrase(listItem.Trim());
                                 textIn = SingularizePhrase(textIn);
-                                UKS.AddStatement(textIn, "has-child", listItem);
+                                theUKS.AddStatement(textIn, "has-child", listItem);
                                 break;
                             case QueryType.partsOf:
                             case QueryType.listCount:
@@ -1110,22 +1110,22 @@ namespace BrainSimulator.Modules
 
                                     listItem = SingularizePhrase(listItem.Trim());
                                     //if (wordList2.FindIndex(x => x.Item1 == singularized) != -1)
-                                    UKS.AddStatement(textIn, "has", textIn + " part");
+                                    theUKS.AddStatement(textIn, "has", textIn + " part");
                                     string rootPart = textIn + " part";
-                                    UKS.AddStatement(rootPart, "has-child", listItem);
-                                    UKS.AddStatement(textIn, "have", listItem, null, countString);
+                                    theUKS.AddStatement(rootPart, "has-child", listItem);
+                                    theUKS.AddStatement(textIn, "have", listItem, null, countString);
                                 }
                                 else
                                 {
-                                    UKS.AddStatement(textIn, "has-child", textIn + " parts");
+                                    theUKS.AddStatement(textIn, "has-child", textIn + " parts");
                                     string rootPart = textIn + " parts";
-                                    UKS.AddStatement(rootPart, "has-child", listItem);
-                                    UKS.AddStatement(textIn, "have", listItem);
+                                    theUKS.AddStatement(rootPart, "has-child", listItem);
+                                    theUKS.AddStatement(textIn, "have", listItem);
                                 }
                                 break;
                         }
                     }
-                    //Thing incomingInfo = UKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
+                    //Thing incomingInfo = theUKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
                     //incomingInfo.V = Output;
                 }
                 else
@@ -1215,10 +1215,10 @@ namespace BrainSimulator.Modules
             string propertyURLResult = propertyURL.ToString();
             propertyDoc.LoadXml(propertyURLResult);
 
-            //Thing props = UKS.GetOrAddThing("Properties", item);
+            //Thing props = theUKS.GetOrAddThing("Properties", item);
             if (propName != "")
             {
-                //Thing prop = UKS.GetOrAddThing(propName, props);
+                //Thing prop = theUKS.GetOrAddThing(propName, props);
                 var propertyToCheck = propName;
 
                 var docPropertyValues = propertyDoc.GetElementsByTagName("result");
@@ -1270,7 +1270,7 @@ namespace BrainSimulator.Modules
                         {
                             Debug.WriteLine(text);
 
-                            //UKS.GetOrAddThing(text, prop);
+                            //theUKS.GetOrAddThing(text, prop);
                             //AddObjectPropertyToMentalModel(name, text, prop.Label);
                             //TextBoxWiki.Text += text + '\n';
                         }
@@ -1292,12 +1292,12 @@ namespace BrainSimulator.Modules
                         Debug.WriteLine(xn.ChildNodes[i].InnerText + " :: ");
                         //if (i == 0)
                         //{
-                        //    prop = UKS.GetOrAddThing(xn.ChildNodes[i].InnerText, props);
+                        //    prop = theUKS.GetOrAddThing(xn.ChildNodes[i].InnerText, props);
                         //}
                         //else
                         //{
                         //    fn[i] = (xn.ChildNodes[i].InnerText.ToString());
-                        //    UKS.GetOrAddThing(xn.ChildNodes[i].InnerText, prop);
+                        //    theUKS.GetOrAddThing(xn.ChildNodes[i].InnerText, prop);
                         //}
                     }
 
@@ -1318,7 +1318,7 @@ namespace BrainSimulator.Modules
                         if (text != null)
                         {
                             Debug.Print(text);
-                            //UKS.GetOrAddThing(text, props);
+                            //theUKS.GetOrAddThing(text, props);
                             //AddObjectPropertyToMentalModel(name, text, props.Label);
                             //TextBoxWiki.Text += text + '\n';
                         }

@@ -137,7 +137,7 @@ namespace BrainSimulator.Modules
                     {
                         ModuleOnlineModificationDlg.relationshipCount += 1;
                         Debug.WriteLine("Individual Item: " + s);
-                        UKS.AddStatement(textIn, "is-a", s);
+                        theUKS.AddStatement(textIn, "is-a", s);
                     }
                 }
             }
@@ -151,7 +151,7 @@ namespace BrainSimulator.Modules
         {
             GetUKS();
 
-            Thing unknown = UKS.GetOrAddThing("unknownObject");
+            Thing unknown = theUKS.GetOrAddThing("unknownObject");
 
             return unknown.Children;
         }
