@@ -17,8 +17,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media.Media3D;
 using System.IO;
-using System.Windows.Navigation;
-using System.Net.Http.Headers;
 
 namespace BrainSimulator
 {
@@ -1038,31 +1036,31 @@ namespace BrainSimulator
         }
 
         // Constant strings related to file dialogs. 
-        public const string FolderModelObjects = "Networks\\3DSimModelObjects";
-        public const string FolderAudioFiles = "Networks\\AudioFiles";
-        public const string FolderUIAudioFiles = "Resources\\UserInterface\\AudioClips";
-        public const string FolderCommandFiles = "Networks\\CommandFiles";
-        public const string FolderPodBin = "Resources\\Pod_Bin";
-        public const string FolderCameraBin = "Resources\\Camera_Bin";
-        public const string FolderImageRecognitionParameters = "Networks\\ImageRecognitionParameters";
-        public const string FolderKnowledgeFiles = "Networks\\KnowledgeFiles";
-        public const string FolderUISavedImages = "SavedPictures";
+        //public const string FolderModelObjects = "Networks\\3DSimModelObjects";
+        //public const string FolderAudioFiles = "Networks\\AudioFiles";
+        //public const string FolderUIAudioFiles = "Resources\\UserInterface\\AudioClips";
+        //public const string FolderCommandFiles = "Networks\\CommandFiles";
+        //public const string FolderPodBin = "Resources\\Pod_Bin";
+        //public const string FolderCameraBin = "Resources\\Camera_Bin";
+        //public const string FolderImageRecognitionParameters = "Networks\\ImageRecognitionParameters";
+        public const string UKSContentFolder = "UKSContent";
+        //public const string FolderUISavedImages = "SavedPictures";
 
         public const string FilterXMLs = "XML Files|*.xml";
-        public const string FilterImages = "Image Files|*.png;*.jpg;*.bmp";
-        public const string FilterWavs = "wav Files|*.wav";
+        //public const string FilterImages = "Image Files|*.png;*.jpg;*.bmp";
+        //public const string FilterWavs = "wav Files|*.wav";
 
-        public const string TitleBrainSimLoad = "Select a Brain Simulator file to load";
-        public const string TitleBrainSimSave = "Select a Brain Simulator file to save";
-        public const string TitleUKSFileLoad = "Select a Brain Simulator Knowledge Content File to load";
-        public const string TitleUKSFileSave = "Select a Brain Simulator Knowledge Content File to save";
-        public const string TitleImagesLoad = "Select an image file for input";
-        public const string TitleImagesSave = "Select a name to save the image";
-        public const string TitleModelLoad = "Select an XML file to load a model";
-        public const string TitleModelSave = "Select an XML file to save a model";
-        public const string TitleParamLoad = "Select an XML file to load parameters";
-        public const string TitleParamSave = "Select an XML file to save parameters";
-        public const string TitleSoundLoad = "Select a wav file to load";
+        //public const string TitleBrainSimLoad = "Select a Brain Simulator file to load";
+        //public const string TitleBrainSimSave = "Select a Brain Simulator file to save";
+        public const string TitleUKSFileLoad = "Select a Brain UKS Content File to load";
+        public const string TitleUKSFileSave = "Select a Brain UKS Content File to save";
+        //public const string TitleImagesLoad = "Select an image file for input";
+        //public const string TitleImagesSave = "Select a name to save the image";
+        //public const string TitleModelLoad = "Select an XML file to load a model";
+        //public const string TitleModelSave = "Select an XML file to save a model";
+        //public const string TitleParamLoad = "Select an XML file to load parameters";
+        //public const string TitleParamSave = "Select an XML file to save parameters";
+        //public const string TitleSoundLoad = "Select a wav file to load";
 
         public static string GetOrAddDocumentsSubFolder(string subfolder)
         {

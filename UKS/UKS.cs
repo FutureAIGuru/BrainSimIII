@@ -1,25 +1,31 @@
 ﻿
-using System;
-using System.Threading;
-
-
 namespace UKS;
 
+/// <summary>
+/// Contains a collection of Things linked by Relationships to implement Common Sense and general knowledge.
+/// </summary>
 public partial class UKS
 {
-    //This is the actual Universal Knowledge Store
+    //This is the actual internal Universal Knowledge Store
     static private List<Thing> uKSList = new() { Capacity = 1000000, };
 
-    //This is a temporary copy of the UKS which used during the save and restore process to 
+
+    //This is a temporary copy of the UKS which used internally during the save and restore process to 
     //break circular links by storing index values instead of actual links Note the use of SThing instead of Thing
     private  List<SThing> UKSTemp = new();
 
-    public List<Thing> UKSList { get => uKSList;}
+    /// <summary>
+    /// Occasionally a list of all the Things in the UKS is needed. This is READ ONLY.
+    /// There is only one (shared) list for the App.
+    /// </summary>
+    public IList<Thing> UKSList { get => uKSList;}
 
     //TimeToLive processing for relationships
     static public  List<Relationship> transientRelationships = new List<Relationship>();
     static Timer stateTimer;
-
+    /// <summary>
+    /// Creates a new reference to the UKS and initializes it if it is the first reference. 
+    /// </summary>
     public UKS()
     {
         //UKSList.Clear();
@@ -53,7 +59,12 @@ public partial class UKS
         }
     }
 
-
+    /// <summary>
+    /// This is a primitive method needed only to create ROOT Things which have no parents
+    /// </summary>
+    /// <param name="label"></param>
+    /// <param name="parent">May be null</param>
+    /// <returns></returns>
     public virtual Thing AddThing(string label, Thing parent)
     {
         Thing newThing = new();
@@ -69,6 +80,10 @@ public partial class UKS
         return newThing;
     }
 
+    /// <summary>
+    /// This is a primitive method to Delete a Thing...the Thing must not have any children
+    /// </summary>
+    /// <param name="t">The Thing to delete</param>
     public virtual void DeleteThing(Thing t)
     {
         if (t == null) return;
@@ -83,7 +98,11 @@ public partial class UKS
             UKSList.Remove(t);
     }
 
-    //returns the thing with the given label
+    /// <summary>
+    /// Uses a hash table to return the Thing with the given label or null if it does not exist
+    /// </summary>
+    /// <param name="label"></param>
+    /// <returns>The Thing or null</returns>
     public Thing Labeled(string label)
     {
         Thing retVal = ThingLabels.GetThing(label);
@@ -166,7 +185,7 @@ public partial class UKS
 
 
 
-    public bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
+    private  bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
     {
         //are two relationships mutually exclusive?
         //yes if they differ by a single component property
@@ -263,7 +282,7 @@ public partial class UKS
         return false;
     }
 
-    public IList<Thing> GetAttributes(Thing t)
+    private IList<Thing> GetAttributes(Thing t)
     {
         List<Thing> retVal = new();
         if (t == null) return retVal;
@@ -275,7 +294,7 @@ public partial class UKS
         return retVal;
     }
 
-    public bool HasAttribute(Thing t, string name)
+    private bool HasAttribute(Thing t, string name)
     {
         if (t == null) return false;
         foreach (Relationship r in t.Relationships)
@@ -298,7 +317,7 @@ public partial class UKS
     {
         if (t == null) return false;
         var v = t.Relationships;
-        if (v.FindFirst(x => x.T?.Label.ToLower() == propertyName.ToLower() && x.reltype.Label == "hasProperty") != null) return true;
+        if (v.FindFirst(x => x.target?.Label.ToLower() == propertyName.ToLower() && x.reltype.Label == "hasProperty") != null) return true;
         return false;
     }
 
@@ -389,7 +408,10 @@ public partial class UKS
 
 
 
-    //TODO ?move to Thing  t.DeleteAllChildren()
+    /// <summary>
+    /// Recursively removes all the descendants of a Thing. If these descendants have no other parents, they will be deleted as well
+    /// </summary>
+    /// <param name="t">The Thing to remove the children from</param>
     public void DeleteAllChildren(Thing t)
     {
         if (t is not null)
@@ -413,6 +435,14 @@ public partial class UKS
 
     // If a thing exists, return it.  If not, create it.
     // If it is currently an unknown, defining the parent can make it known
+    /// <summary>
+    /// Creates a new Thing in the UKS OR returns an existing Thing, based on the label
+    /// </summary>
+    /// <param name="label">The new label OR if it ends in an asterisk, the astrisk will be replaced by digits to create a new Thing with a unique label.</param>
+    /// <param name="parent"></param>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     public Thing GetOrAddThing(string label, object parent = null, Thing source = null)
     {
         Thing thingToReturn = null;

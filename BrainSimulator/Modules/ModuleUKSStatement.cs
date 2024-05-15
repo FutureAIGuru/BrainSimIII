@@ -58,16 +58,16 @@ namespace BrainSimulator.Modules
         public bool AddChildButton(string newThing, string parent)
         {
             GetUKS();
-            if (UKS == null) return true;
+            if (theUKS == null) return true;
 
-            UKS.GetOrAddThing(newThing, parent);
+            theUKS.GetOrAddThing(newThing, parent);
             return true;
         }
 
         public Relationship AddRelationship(string source, string target, string relationshipType)
         {
             GetUKS();
-            if (UKS == null) return null;
+            if (theUKS == null) return null;
             IPluralize pluralizer = new Pluralizer();
 
 
@@ -93,12 +93,12 @@ namespace BrainSimulator.Modules
             if (target == "" && relationshipType == "is-a")
             {
                 if (target == "" && source != "")
-                    UKS.AddThing(source, null);
+                    theUKS.AddThing(source, null);
                 return null;
             }
 
 
-            Relationship r = UKS.AddStatement(source, relationshipType, target,sourceModifiers, typeModifiers, targetModifiers);
+            Relationship r = theUKS.AddStatement(source, relationshipType, target,sourceModifiers, typeModifiers, targetModifiers);
             
             return r;
         }
@@ -119,14 +119,14 @@ namespace BrainSimulator.Modules
                 retVal.Add(t);
             }
             //is this a sequence?
-            List<Thing> tSequence = UKS.HasSequence(retVal);
+            List<Thing> tSequence = MainWindow.theUKS.HasSequence(retVal);
             if (tSequence != null && tSequence.Count > 0)
             {
                 retVal = tSequence;
             }
             else if (retVal.Count > 1) //do things represent a list of attributes
             {
-                retVal = UKS.FindThingsWithAttributes(retVal);
+                retVal = MainWindow.theUKS.FindThingsWithAttributes(retVal);
             }
 
             return retVal;

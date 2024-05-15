@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml.Serialization;
-using System.IO;
-using System.Windows;
+﻿using System.Xml.Serialization;
 using System.Diagnostics;
 
 namespace UKS;
 
 public partial class UKS
 {
+    string fileName = "";
+
+    public string FileName { get => fileName;}
 
     private void CreateInitialStructure()
     {
@@ -37,7 +36,7 @@ public partial class UKS
         AddStatement("has", "hasProperty", "isTransitive");
         AddStatement("has-child", "hasProperty", "isTransitive");
 
-
+        AddBrainSimConfigSectionIfNeeded();
         SetupNumbers();
     }
 
@@ -73,6 +72,7 @@ public partial class UKS
         GetOrAddThing("none", "number");
 
 
+        //demo to add PI to the structure
         //AddStatement("pi", "is-a", "number");
         //AddStatement("pi", "hasDigit*", "3");
         //AddStatement("pi", "hasDigit*", ".");
@@ -83,6 +83,13 @@ public partial class UKS
         //AddStatement("pi", "hasDigit*", "9");
     }
 
+    void AddBrainSimConfigSectionIfNeeded()
+    {
+        if (Labeled("BrainSim") != null) return;
+        AddThing("BrainSim", null);
+        GetOrAddThing("AvailableModule", "BrainSim");
+        GetOrAddThing("ActiveModule", "BrainSim");
+    }
 
 
     /// <summary>
@@ -104,23 +111,23 @@ public partial class UKS
             };
             foreach (Relationship l in t.Relationships)
             {
-                SRelationship sR = ConvertRelationship(l,new List<Relationship>());
+                SRelationship sR = ConvertRelationship(l, new List<Relationship>());
                 st.relationships.Add(sR);
             }
             UKSTemp.Add(st);
         }
     }
 
-    private SRelationship ConvertRelationship(Relationship l,List<Relationship> stack)
+    private SRelationship ConvertRelationship(Relationship l, List<Relationship> stack)
     {
-        if (stack.Contains(l))return null;
+        if (stack.Contains(l)) return null;
         stack.Add(l);
         List<SClauseType> clauseList = null;
         if (l.Clauses.Count > 0) clauseList = new();
-        foreach (ClauseType c in l.Clauses)
+        foreach (Clause c in l.Clauses)
         {
             int clauseType = UKSList.FindIndex(x => x == c.clauseType);
-            SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause,stack) };
+            SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause, stack) };
             clauseList.Add(ct);
         }
 
@@ -130,8 +137,8 @@ public partial class UKS
             target = UKSList.FindIndex(x => x == l.target),
             relationshipType = UKSList.FindIndex(x => x == l.relType),
             weight = l.Weight,
-            hits = l.hits,
-            misses = l.misses,
+            hits = l.Hits,
+            misses = l.Misses,
             count = l.count,
             clauses = clauseList,
         };
@@ -181,7 +188,7 @@ public partial class UKS
         {
             foreach (SRelationship p in UKSTemp[i].relationships)
             {
-                Relationship r = UnConvertRelationship(p,new List<SRelationship>());
+                Relationship r = UnConvertRelationship(p, new List<SRelationship>());
                 if (r != null)
                     UKSList[i].RelationshipsWriteable.Add(r);
             }
@@ -191,35 +198,35 @@ public partial class UKS
         {
             foreach (Relationship r in t.Relationships)
             {
-                Thing t1 = r.T;
+                Thing t1 = r.target;
                 if (t1 != null)
                     if (!t1.RelationshipsFromWriteable.Contains(r))
                         t1.RelationshipsFromWriteable.Add(r);
                 if (r.relType != null)
                     if (!r.relType.RelationshipsAsTypeWriteable.Contains(r))
                         r.relType.RelationshipsAsTypeWriteable.Add(r);
-                AddClauses(r,new List<Relationship>());
+                AddClauses(r, new List<Relationship>());
             }
         }
     }
 
-    private void AddClauses(Relationship r,List<Relationship>stack)
+    private void AddClauses(Relationship r, List<Relationship> stack)
     {
         if (stack.Contains(r)) return;
         stack.Add(r);
-        foreach (ClauseType c in r.Clauses)
-        { 
+        foreach (Clause c in r.Clauses)
+        {
             if (!c.clause.clausesFrom.Contains(r))
                 c.clause.clausesFrom.Add(r);
-            AddClauses(c.clause,stack);
+            AddClauses(c.clause, stack);
         }
     }
 
-    private Relationship UnConvertRelationship(SRelationship p,List<SRelationship>stack)
+    private Relationship UnConvertRelationship(SRelationship p, List<SRelationship> stack)
     {
-        if (p == null) 
+        if (p == null)
             return null;
-        if (stack.Contains(p)) 
+        if (stack.Contains(p))
             return null;
         stack.Add(p);
         Thing source = null;
@@ -236,8 +243,8 @@ public partial class UKS
             source = source,
             target = target,
             relType = relationshipType,
-            hits = p.hits,
-            misses = p.misses,
+            Hits = p.hits,
+            Misses = p.misses,
             Weight = p.weight,
             count = p.count,
             //sentencetype = p.sentencetype as SentenceType,
@@ -246,7 +253,7 @@ public partial class UKS
         {
             foreach (SClauseType sc in p.clauses)
             {
-                ClauseType ct = new ClauseType() { clauseType = UKSList[sc.clauseType], clause = UnConvertRelationship(sc.r, stack) };
+                Clause ct = new Clause() { clauseType = UKSList[sc.clauseType], clause = UnConvertRelationship(sc.r, stack) };
                 if (ct.clause != null)
                     r.Clauses.Add(ct);
             }
@@ -254,7 +261,6 @@ public partial class UKS
         return r;
     }
 
-    string fileName = "";
     public static bool CanWriteTo(string fileName, out string message)
     {
         FileStream file1;
@@ -274,11 +280,38 @@ public partial class UKS
             }
         }
         return true;
+    }
 
+    List<string> ExtractPortionOfUKS(Thing root)
+    {
+        List<string> uksContent = new List<string>();
+        if (root == null) return uksContent;
+        var descendants = root.DescendentsList;
+        foreach (var descendant in root.DescendentsList())
+        {
+            foreach (var r in descendant.Relationships)
+            {
+                uksContent.Add(r.ToString());
+            }
+        }
+        return uksContent;
+    }
+    void MergeStringListIntoUKS(List<String> contentToRestore)
+    {
+        AddThing("BrainSim", null);
+        foreach (string s in contentToRestore)
+        {
+            string[] strings = s.Split("->");
+        }
     }
 
 
-    public void SaveUKStoXMLFile(string filenameIn = "")
+    /// <summary>
+    /// Saves the UKS content to an XML file
+    /// </summary>
+    /// <param name="fileNameIn">Leave null or empty to use file name from previous operation  </param>
+
+    public bool SaveUKStoXMLFile(string filenameIn = "")
     {
         if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
         string fullPath = GetFullPathFromKnowledgeFileName(fileName);
@@ -286,7 +319,7 @@ public partial class UKS
         if (!CanWriteTo(fileName, out string message))
         {
             Debug.WriteLine("Could not save file because: " + message);
-            return;
+            return false;
         }
         FormatContentForSaving();
         List<Type> extraTypes = GetTypesInUKS();
@@ -304,15 +337,33 @@ public partial class UKS
             else
                 Debug.WriteLine("Xml file write failed because: " + e.Message);
             file.Close();
-            return;
+            return false;
         }
         file.Close();
         UKSTemp = new();
+        return true;
     }
 
     private static List<Type> GetTypesInUKS()
     {
-        List < Type > extraTypes = new List<Type>();
+        //TODO, This works for writing but not for reading
+        List<Type> extraTypes = new List<Type>();
+        foreach (Thing t in uKSList)
+        {
+            if (t.V != null)
+            {
+                var theType = t.V.GetType();
+                if (theType.IsSerializable)
+                {
+                    if (!extraTypes.Contains(theType))
+                        extraTypes.Add(theType);
+                }
+                else
+                {
+                    Debug.Write("Type " + theType.FullName + " is not serializable");
+                }
+            }
+        }
         /*
                 // Add classes so XML saving works
                 extraTypes.Add(typeof(Angle));
@@ -352,11 +403,18 @@ public partial class UKS
         return fileName;
     }
 
-    public void LoadUKSfromXMLFile(string filenameIn = "", bool merge = false)
+    /// <summary>
+    /// Loads UKS content from a prvsiously-saved XML file
+    /// </summary>
+    /// <param name="fileNameIn">Leave null or empty to use file name from previous operation  </param>
+    /// <param name="merge">If true, existing UKS content is not deleted and new content is merged by Thing label</param>
+    public bool LoadUKSfromXMLFile(string filenameIn = "", bool merge = false)
     {
+        //stash the current BrainSim configuration
+        var contentToRestore = ExtractPortionOfUKS(Labeled("BrainSim"));
+
         Stream file;
         if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
-        
         string fullPath = fileName;
         try
         {
@@ -365,8 +423,9 @@ public partial class UKS
         catch (Exception e)
         {
             Debug.WriteLine("Could not open file because: " + e.Message);
-            return;
+            return false;
         }
+
 
         List<Type> extraTypes = GetTypesInUKS();
         XmlSerializer reader1 = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());
@@ -378,14 +437,21 @@ public partial class UKS
         {
             file.Close();
             Debug.WriteLine("Network file load failed, a blank network will be opened. \r\n\r\n" + e.InnerException);//, "File Load Error",
-//                MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-            return;
+            return false;
         }
         file.Close();
         if (merge)
             DeFormatAndMergeContentAfterLoading();
         else
             DeFormatContentAfterLoading();
-        //base.UKSReloaded();
+
+        AddBrainSimConfigSectionIfNeeded();
+
+        if (Labeled("BrainSim") == null)
+        {
+            MergeStringListIntoUKS(contentToRestore);
+        }
+
+        return true;
     }
 }
