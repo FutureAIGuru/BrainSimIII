@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ca6d501b-6295-42cf-a444-aafe9525a0ec</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>module_uks_tree.py</StartupFile>
+    <StartupFile>MainWindow.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

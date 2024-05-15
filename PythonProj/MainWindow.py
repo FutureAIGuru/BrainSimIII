@@ -8,7 +8,7 @@ import tkinter.ttk as ttk
 from utils import ViewBase
 from tkinter.filedialog import askopenfile,asksaveasfile
 
-titleBase = "The Brain Simulator IIIX"
+titleBase = "The Brain Simulator III"
 TIMEDELAY = 1
 
 class MainWindow(ViewBase):
@@ -16,6 +16,7 @@ class MainWindow(ViewBase):
         title: str = titleBase
         super(MainWindow, self).__init__(
             title=title, level=level, module_type=os.path.basename(__file__))
+        self.setupUKS()
         self.build()
 
    
@@ -70,12 +71,28 @@ class MainWindow(ViewBase):
             fileName = file.name        
             file.close()
             self.uks.LoadUKSfromXMLFile(fileName)
+            self.setupUKS()
             if self.uks.Labeled("MainWindow.py") == None:
                 self.uks.AddThing("MainWindow.py", self.uks.Labeled("AvailableModule"));
             self.activateModule("MainWindow.py")
             self.level.title(titleBase +'  --  ' +os.path.basename(fileName))
             self.setupcontent()
             print ("File Loaded: ",fileName)
+
+    #Add necessary status info to older UKS if needed
+    def setupUKS(self):
+        if self.uks.Labeled("BrainSim") == None:
+            self.uks.AddThing("BrainSim",None)
+        self.uks.GetOrAddThing("AvailableModule","BrainSim")
+        self.uks.GetOrAddThing("ActiveeModule","BrainSim")
+        if self.uks.Labeled("AvailableModule").Children.Count == 0:
+            python_modules = os.listdir(".")
+            for module in python_modules:
+                if module.startswith("m") and module.endswith(".py"):
+                    self.uks.GetOrAddThing(module,"AvailableModule")
+
+        
+        
             
     def saveFile(self):
         if self.uks.FileName == "":
