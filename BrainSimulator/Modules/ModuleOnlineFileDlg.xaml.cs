@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,7 +24,7 @@ namespace BrainSimulator.Modules
         public static int relationshipCount;
 
         // Word max set to 10 by default. *Modify/Increase Value at your own risk!*
-        int wordMax = 1000;
+        int wordMax = 100;
         List<string> words = new List<string>();  // List to hold all words
 
         public ModuleOnlineFileDlg()
@@ -70,10 +71,15 @@ namespace BrainSimulator.Modules
                                     break;
                                 }
                                 // Split the line into words, removing empty entries
-                                string[] lineWords = line.Split(new char[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                                List<string> lineWords = line.Split(new char[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
                                 // Singularize the words.
-                                for (int i = 0; i < lineWords.Length; i++)
+                                for (int i = 0; i < lineWords.Count; i++)
                                 {
+                                    if (lineWords[i].Trim() == "")
+                                    {
+                                        lineWords.RemoveAt(i);
+                                        i--;
+                                    }
                                     lineWords[i] = pluralizer.Singularize(lineWords[i]);
                                 }
                                 // Add the words to the list from the line
@@ -131,6 +137,8 @@ namespace BrainSimulator.Modules
 
             foreach (string word in words)
             {
+                if (word == words.Last())
+                    await mf.GetChatGPTDataFine(word.Trim());
                 if (word.Trim() != "")
                     mf.GetChatGPTDataFine(word.Trim());
             }
@@ -172,7 +180,7 @@ namespace BrainSimulator.Modules
                     var thingList = mf.theUKS.Labeled("unknownObject").Children;
                     foreach (var thing in thingList)
                     {
-                        if (words.Count >= 10) break;
+                        if (words.Count >= wordMax) break;
                         words.Add(thing.Label);
                     }
 

@@ -105,6 +105,7 @@ namespace BrainSimulator.Modules
                     // IMPORTANT: Add your model here after fine tuning on OpenAI using word_only_dataset.jsonl.
                     //model = "<YOUR_FINETUNED_MODEL_HERE>",
                     model = "gpt-4o",// ConfigurationManager.AppSettings["FineTunedModel"],
+                    //model = "gpt-3.5-turbo-0125",// ConfigurationManager.AppSettings["FineTunedModel"],
                     messages = new[] {
                         new { role = "system", content = "Provide answers that are common sense to a 5 year old. \n\r" +
                         "Answer in ordered pairs of the form value-name | value separated by line-breaks. \n\r" +
@@ -112,18 +113,20 @@ namespace BrainSimulator.Modules
                         "Example of answer with numerical value: contains (with counts) | 2 eyes, 4 legs, 1 tail \n\r"+
                         "If there is more than one value for a given value-name, these should be saparated by commas. \n\r"+
                         "Individual values should not be more than two words. \n\r"+
-                        "use the following value-name: " +
+                        "If an item contains a compound verb such as 'can move', the complete verb should be be included in the value-name. For example: can make | coffee  or can be| happy. \n\r"+
+                        "Use the following value-name: " +
                         "is-a, " +
                         "can, " +
-                        "needs, " +
+                        "usually possesses "+
+                        //"needs, " +
                         "has-properties), " +
                         "contains (with counts), " +
-                        "is-part-of, " +
-                        "is-bigger-than, " +
-                        "is-smaller-than, " +
-                        "is-similar-to, " +
+                        //"is-part-of, " +
+                        //"is-bigger-than, " +
+                        //"is-smaller-than, " +
+                        //"is-similar-to, " +
                         "is-part-of-speech, " +
-                        "is-a-group-containing (up to 10)" },
+                        "represents-a-group-containing (up to 10)" },
                         new { role = "user", content = queryText}
                     },
                 };
@@ -163,6 +166,14 @@ namespace BrainSimulator.Modules
             }
         }
 
+        string Singularize(string text)
+        {
+            List<string> ignoreWords = new() { "clothes","wales", };
+            string retVal = text.ToLower().Trim();
+            if (ignoreWords.Contains(text)) return retVal;
+            retVal = pluralizer.Singularize(text);
+            return retVal;
+        }
         public string ParseGPTOutput(string textIn,string GPTOutput)
         {
             // Get the UKS
@@ -176,7 +187,7 @@ namespace BrainSimulator.Modules
                 ModuleOnlineFileDlg.errorCount += 1;
             }
 
-            textIn = pluralizer.Singularize(textIn.Trim());
+            textIn = Singularize(textIn);
 
             foreach (string s in valuePairs)
             {
@@ -186,26 +197,28 @@ namespace BrainSimulator.Modules
                     string valueType = nameValuePair[0].Trim();
                     string valueString = nameValuePair[1].Trim();
                     List<string> values = valueString.Split(',').ToList();
-                    for (int i = 0; i < values.Count; i++) values[i] = pluralizer.Singularize(values[i].Trim());
+                    for (int i = 0; i < values.Count; i++) values[i] = Singularize(values[i]);
 
                     for (int j = 0; j < values.Count; j++)
                     {
-                        string value = values[j];
+                        valueType = nameValuePair[0].Trim();
+                        List<string> valueTypeProperties = new();
+                        string value = values[j].Trim();
                         if (value.Contains("-")) continue; //gets rid of hyphenated numbers
                         string count = "";
+
+                        //capture compound verbs based on "can"
                         List<string> subValues = value.Split(" ").ToList();
+                        if (valueType == "can" && subValues.Count > 1)
+                        {
+                            valueTypeProperties.Add(subValues[0]);
+                            subValues.RemoveAt(0);
+                        }
 
                         //parse out multi-word values
                         for (int i = 0; i < subValues.Count; i++)
                         {
                             string subValue = subValues[i].Trim();
-                            if (subValue == "be")
-                            {
-                                subValues.RemoveAt(i);
-                                i--;
-                                if (!valueType.EndsWith("-be"))
-                                    valueType += "-be";
-                            }
                             if (subValue == "a" || subValue == "an")
                             {
                                 subValues.RemoveAt(i);
@@ -239,17 +252,17 @@ namespace BrainSimulator.Modules
                         else
                             continue;
                         if (value == textIn) continue;
-                        if (valueType.StartsWith("is-") && valueType != "is-a")
-                            valueType = valueType[3..];
-                        if (valueType.StartsWith("a-group-containing"))
+                        if (valueType.StartsWith("represents-a-group-containing"))
                         {
-                            theUKS.AddStatement(value, "is-a", textIn);
+                            theUKS.AddStatement(value, "is-a", textIn); //note reversal
                         }
-                        else if (valueType.StartsWith("part-of-speech"))
+                        else if (valueType.StartsWith("usually possesses"))
+                        {
+                            theUKS.AddStatement(textIn, "has", value,null,"often");
+                        }
+                        else if (valueType.StartsWith("is-a-part-of-speech"))
                         {
                             theUKS.AddStatement(textIn, "is-a", value);
-                            if (value.StartsWith("verb"))
-                                theUKS.AddStatement(textIn, "is-a", "Action");
                         }
                         else if (valueType.StartsWith("has-properties"))
                         {
@@ -262,13 +275,9 @@ namespace BrainSimulator.Modules
                             else
                                 theUKS.AddStatement(textIn, "has", value, null, count);
                         }
-                        else if (valueType.StartsWith("is-a-group"))
-                        {
-                            theUKS.AddStatement(value, "is-a", textIn);
-                        }
                         else
                         {
-                            theUKS.AddStatement(textIn, valueType, value);
+                            theUKS.AddStatement(textIn, valueType, value, null, valueTypeProperties);
                         }
                     }
                 }

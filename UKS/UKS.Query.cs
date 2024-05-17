@@ -85,7 +85,8 @@ public partial class UKS
             Thing reachedWith = thingsToExamine[i].reachedWith;
 
             foreach (Relationship r in t.RelationshipsFrom)  //has-child et al
-                if ((r.relType.HasAncestorLabeled("has-child") && !reverse) ||
+                if (r.relType == null) continue;
+                else if ((r.relType.HasAncestorLabeled("has-child") && !reverse) ||
                     (r.relType.HasAncestorLabeled("has") && reverse))// ||
 //                   (r.relType.HasAncestorLabeled("is") && reverse))
                 {
@@ -116,7 +117,8 @@ public partial class UKS
                 }
 
             foreach (Relationship r in t.Relationships) //has-a et al
-                if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
+                if (r.relType == null) continue;
+                else if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
                     (r.relType.HasAncestorLabeled("has") && !reverse))
                 {
                     if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twqp)
@@ -175,7 +177,7 @@ public partial class UKS
                 Relationship existing = result.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));
                 if (existing != null) continue;
 
-                if (haveCount > 1 && r.relType.Label == "has")
+                if (haveCount > 1 && r.relType?.Label == "has")
                 {
                     //this creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
@@ -309,7 +311,8 @@ public partial class UKS
         List<Thing> retVal = new();
         foreach (Thing t in targetAttributes)
             foreach (Relationship r in t.RelationshipsFrom)
-                if (r.relType.HasAncestorLabeled("has"))
+                if (r.reltype == null) continue;
+                else if (r.relType.HasAncestorLabeled("has"))
                     if (!retVal.Contains(r.source))
                         retVal.Add(r.source);
 
