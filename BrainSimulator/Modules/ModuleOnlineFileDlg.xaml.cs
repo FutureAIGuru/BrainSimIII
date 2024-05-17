@@ -23,7 +23,7 @@ namespace BrainSimulator.Modules
         public static int relationshipCount;
 
         // Word max set to 10 by default. *Modify/Increase Value at your own risk!*
-        int wordMax = 10;
+        int wordMax = 1000;
         List<string> words = new List<string>();  // List to hold all words
 
         public ModuleOnlineFileDlg()
@@ -117,17 +117,6 @@ namespace BrainSimulator.Modules
                 else
                 {
                     await ProcessWordsAsync(words);
-                    /*
-                    ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
-                    txtOutput.Text = "Running through words... Word count is: " + words.Count.ToString() + ".";
-                    Debug.WriteLine("Running through words... Word count is: " + words.Count.ToString() + ".");
-                    foreach (string word in words)
-                    {
-                       mf.GetChatGPTDataFine(word);
-                    }
-                    //txtOutput.Text = $"Done running! Error count out of total words is {errorCount} / {words.Count.ToString()}.";
-                    //Debug.WriteLine($"Done running! Error count out of total words is {errorCount} / {words.Count.ToString()}.");
-                    */
                 }
             }
         }
@@ -142,7 +131,8 @@ namespace BrainSimulator.Modules
 
             foreach (string word in words)
             {
-                await mf.GetChatGPTDataFine(word);
+                if (word.Trim() != "")
+                    mf.GetChatGPTDataFine(word.Trim());
             }
 
             txtOutput.Text = $"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.";
@@ -153,6 +143,42 @@ namespace BrainSimulator.Modules
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
             txtOutput.Text = "";
+        }
+
+        private async void textInput_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                txtOutput.Text = "Working...";
+                string txt = textInput.Text;
+                ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
+                await mf.GetChatGPTDataFine(txt);
+                txtOutput.Text = mf.Output;
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button b)
+            {
+                ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
+                if (b.Content.ToString() == "Re-Parse")
+                { 
+                    mf.ParseGPTOutput(textInput.Text, txtOutput.Text);
+                }
+                else
+                {
+                    List<string> words = new List<string>();
+                    var thingList = mf.theUKS.Labeled("unknownObject").Children;
+                    foreach (var thing in thingList)
+                    {
+                        if (words.Count >= 10) break;
+                        words.Add(thing.Label);
+                    }
+
+                    ProcessWordsAsync(words);
+                }
+            }
         }
     }
 }

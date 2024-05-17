@@ -9,13 +9,12 @@ public partial class UKS
 
     public string FileName { get => fileName;}
 
-    private void CreateInitialStructure()
+    public void CreateInitialStructure()
     {
-        UKSList.Clear();
-        ThingLabels.ClearLabelList();
         AddThing("Thing", null);
         GetOrAddThing("Object", "Thing");
         GetOrAddThing("Action", "Thing");
+        GetOrAddThing("RelationshipType", "Thing");
         GetOrAddThing("unknownObject", "Object");
         GetOrAddThing("is-a", "RelationshipType");
         GetOrAddThing("inverseOf", "RelationshipType");

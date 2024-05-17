@@ -8,8 +8,11 @@
         Title="ModuleOnlineFileDlg" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
     <Grid Name="theGrid" SizeChanged="TheCanvas_SizeChanged" >
         <TextBox x:Name="txtOutput" FontSize="14" TextWrapping="Wrap" Text="TextBox" Margin="58,133,79,54" />
-        <Button Content="Clear" Height="29" Margin="0,0,152,10" VerticalAlignment="Bottom" Click="ClearButton_Click" HorizontalAlignment="Right" Width="102"/>
-        <Button x:Name="LoadButton" Content="Load" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="LoadButton_Click" Margin="0,50,79,0" FontSize="16" />
-        <Button x:Name="RunButton" Content="Run" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="RunButton_Click" Margin="0,101,79,0" FontSize="16" />
+        <Button Content="Clear Output" Height="29" Margin="0,0,152,10" VerticalAlignment="Bottom" Click="ClearButton_Click" HorizontalAlignment="Right" Width="102"/>
+        <Button x:Name="LoadButton" Content="Load File" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="LoadButton_Click" Margin="0,50,79,0" FontSize="16" />
+        <Button x:Name="RunButton" Content="Run File" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="RunButton_Click" Margin="0,87,79,0" FontSize="16" />
+        <TextBox x:Name="textInput" HorizontalAlignment="Left" Height="37" Margin="58,77,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="284" PreviewKeyDown="textInput_PreviewKeyDown"/>
+        <Button Content="Re-Parse" HorizontalAlignment="Left" Margin="413,50,0,0" Height="27" Width="148" Click="Button_Click" FontSize="16" VerticalAlignment="Top"/>
+        <Button Content="Handle Unknowns" HorizontalAlignment="Left" Margin="413,87,0,0" Height="27" Width="148" Click="Button_Click" FontSize="16" VerticalAlignment="Top"/>
     </Grid>
 </local:ModuleBaseDlg>

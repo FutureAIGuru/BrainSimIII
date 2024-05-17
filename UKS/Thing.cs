@@ -171,7 +171,7 @@ public partial class Thing
     //////////////////////////////////////////////////////////////
     public IList<Thing> AncestorList()
     {
-        return FollowTransitiveRelationships(hasChildType, true);
+        return FollowTransitiveRelationships(HasChild, true);
     }
 
     /// <summary>
@@ -207,7 +207,7 @@ public partial class Thing
     /// <returns></returns>
     public bool HasAncestor(Thing t)
     {
-        var x = FollowTransitiveRelationships(hasChildType, true, t);
+        var x = FollowTransitiveRelationships(HasChild, true, t);
         return x.Count != 0;
     }
 
@@ -226,7 +226,7 @@ public partial class Thing
     /// <returns></returns>
     public IList<Thing> DescendentsList()
     {
-        return FollowTransitiveRelationships(hasChildType, false);
+        return FollowTransitiveRelationships(HasChild, false);
     }
 
     /// <summary>
@@ -480,7 +480,7 @@ public partial class Thing
     /// <param name="t">If the Thing is not a parent, the function does nothing</param>
     public void RemoveParent(Thing t)
     {
-        Relationship r = new() { source = t, reltype = hasChildType, target = this };
+        Relationship r = new() { source = t, reltype = HasChild, target = this };
         t.RemoveRelationship(r);
     }
 
@@ -491,7 +491,7 @@ public partial class Thing
 
     public void RemoveChild(Thing t)
     {
-        Relationship r = new() { source = this, reltype = hasChildType, target = t };
+        Relationship r = new() { source = this, reltype = HasChild, target = t };
         RemoveRelationship(r);
     }
 

@@ -116,7 +116,7 @@ public class Relationship
     private Thing targ = null;
     public Thing target
     {
-        get { Hits++; lastUsed = DateTime.Now; return targ; }
+        get { /*Hits++; lastUsed = DateTime.Now;*/ return targ; }
         set
         {
             targ = value;

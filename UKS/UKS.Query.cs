@@ -31,7 +31,8 @@ public partial class UKS
     {
         var result1 = BuildSearchList(sources, reverse);
         List<Relationship> result2 = GetAllRelationshipsInt(result1);
-        RemoveConflictingResults(result2);
+        if (result2.Count < 200)
+            RemoveConflictingResults(result2);
         RemoveFalseConditionals(result2);
         AlphabetizeRelationships(ref result2);
         return result2;
@@ -63,7 +64,6 @@ public partial class UKS
     //TODO This is hardcoded to only follow "has" and "has-child" transitive relationships
     private  List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
     {
-
         List<ThingWithQueryParams> thingsToExamine = new();
         int maxHops = 20;
         int hopCount = 0;
@@ -86,9 +86,10 @@ public partial class UKS
 
             foreach (Relationship r in t.RelationshipsFrom)  //has-child et al
                 if ((r.relType.HasAncestorLabeled("has-child") && !reverse) ||
-                    (r.relType.HasAncestorLabeled("has") && reverse) ||
-                   (r.relType.HasAncestorLabeled("is") && reverse))
+                    (r.relType.HasAncestorLabeled("has") && reverse))// ||
+//                   (r.relType.HasAncestorLabeled("is") && reverse))
                 {
+                    if (r.target.Label == "has") continue;
                     if (thingsToExamine.FindFirst(x => x.thing == r.source) is ThingWithQueryParams twgp)
                     {
                         twgp.hitCount++;
@@ -174,7 +175,7 @@ public partial class UKS
                 Relationship existing = result.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));
                 if (existing != null) continue;
 
-                if (haveCount > 1)
+                if (haveCount > 1 && r.relType.Label == "has")
                 {
                     //this creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
@@ -186,7 +187,11 @@ public partial class UKS
                     //TODO  reenable
                     if (r.relType.Label.Contains("."))
                         rootThing = GetOrAddThing(r.relType.Label.Substring(0, r.relType.Label.IndexOf(".")));
-                    Thing newRelType = CreateSubclass(rootThing, new List<Thing> { newCountType });
+                    Thing bestMatch = r.relType;
+                    List<Thing> missingAttributes = new();
+                    Thing newRelType = SubclassExists(r.relType, new List<Thing> { newCountType },ref bestMatch,ref missingAttributes);
+                    if (newRelType == null)
+                        newRelType = CreateSubclass(rootThing, new List<Thing> { newCountType });
                     r1.reltype = newRelType;
                     result.Add(r1);
                 }
@@ -213,6 +218,7 @@ public partial class UKS
 
             }
         }
+    
     }
     private void RemoveFalseConditionals(List<Relationship> result)
     {

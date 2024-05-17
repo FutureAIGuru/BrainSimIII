@@ -46,6 +46,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         //only updates 10x per second
         if (!base.Draw(checkDrawTimer)) return false;
         if (busy) return false;
+        if (!checkBoxAuto.IsChecked == true) { return false; }
         RefreshButton_Click(null, null);
         return true;
     }
@@ -96,6 +97,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tvi.SetValue(ThingObjectProperty, thing);
             totalItemCount++;
             AddChildren(thing, tvi, 0, thing.Label);
+            AddRelationships(thing,tvi,"");
+            if (reverseCB.IsChecked == true)
+                AddRelationshipsFrom(thing, tvi, "");
         }
         else if (string.IsNullOrEmpty(root)) //search for unattached Things
         {
@@ -204,6 +208,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRefLabel.Header += CountNonChildRelationships(t.RelationshipsNoCount).ToString();
 
         string fullString = "|" + parentLabel + "|" + t.Label + "|:Relationships";
+        fullString = fullString.Replace("||", "|"); //needed to make top level work
         if (expandedItems.Contains(fullString))
             tviRefLabel.IsExpanded = true;
         if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
@@ -247,6 +252,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRefLabel.Header += CountNonChildRelationships(t.RelationshipsFrom).ToString();
 
         string fullString = "|" + parentLabel + "|" + t.Label + "|:RelationshipsFrom";
+        fullString = fullString.Replace("||", "|"); //needed to make top level work
         if (expandedItems.Contains(fullString))
             tviRefLabel.IsExpanded = true;
         if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
@@ -448,13 +454,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 RefreshButton_Click(null, null);
                 return;
             }
+            ModuleUKS parent = (ModuleUKS)ParentModule;
             switch (mi.Header)
             {
                 case "Expand All":
                     expandAll = t.Label;
                     expandedItems.Clear();
                     expandedItems.Add("|Thing|Object");
-                    ModuleUKS parent = (ModuleUKS)ParentModule;
                     parent.SetAttribute("ExpandAll", expandAll);
                     updateFailed = true; //this forces the expanded items list not to rebuild
                     break;
@@ -463,6 +469,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     expandedItems.Clear();
                     expandedItems.Add("|Thing|Object");
                     updateFailed = true;
+                    parent.SetAttribute("ExpandAll", expandAll);
                     break;
                 case "Show All (make \"Thing\" root)": //make "Thing" the root
                     textBoxRoot.Text = "Thing";
@@ -571,7 +578,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void textBoxRoot_TextChanged(object sender, TextChangedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)ParentModule;
-        if (parent == null) return; 
+        if (parent == null) return;
         parent.SetAttribute("Root", textBoxRoot.Text);
         RefreshButton_Click(null, null);
 
@@ -665,16 +672,33 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void InitializeButton_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
-        parent.theUKS.UKSList.Clear();
-        parent.Initialize();
+
+        //parent.theUKS.UKSList.Clear();
+        for (int i = 0; i < parent.theUKS.UKSList.Count; i++)
+        {
+            Thing t = parent.theUKS.UKSList[i];
+            if (t.HasAncestorLabeled("BrainSim")) continue;
+            if (t.Label == "has-child") continue;
+            if (t.Label == "Thing") continue;
+            if (t.Label == "RelationshipType") continue;
+            if (t.Label == "hasAttribute") continue;
+            if (t != null)
+            {
+                //                    parent.theUKS.DeleteAllChildren(t);
+                parent.theUKS.DeleteThing(t);
+                i--;
+            }
+        }
+
+        parent.theUKS.CreateInitialStructure();
+        //parent.Initialize();
 
         CollapseAll();
         expandAll = parent.GetAttribute("ExpandAll");
         if (expandAll == null) expandAll = "";
-        string root= parent.GetAttribute("root"); ;
-        if (root == "") root = "Thing";
+        string root = parent.GetAttribute("root");
+        if (string.IsNullOrEmpty(root)) root = "Thing";
         textBoxRoot.Text = root;
-        //expandAll = "";
         RefreshButton_Click(null, null);
     }
 

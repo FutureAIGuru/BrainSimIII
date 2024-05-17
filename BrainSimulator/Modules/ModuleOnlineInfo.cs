@@ -873,10 +873,10 @@ namespace BrainSimulator.Modules
                         queryText = textIn;
                         break;
                     case QueryType.isa:
-                        queryText = $"Provide is-a answers about the following: {textIn}";
+                        queryText = $"Provide common-sense facts about the following: {textIn}";
                         break;
                     case QueryType.hasa:
-                        queryText = $"Provide has answers about the following: {textIn}";
+                        queryText = $"Provide common-sense facts about the following: {textIn}";
                         break;
                 }
 
@@ -887,10 +887,25 @@ namespace BrainSimulator.Modules
                     max_tokens = 200,
                     // IMPORTANT: Add your model here after fine tuning on OpenAI using word_only_dataset.jsonl.
                     //model = "<YOUR_FINETUNED_MODEL_HERE>",
-                    model = ConfigurationManager.AppSettings["FineTunedModel"],
+                    model = "gpt-4o",// ConfigurationManager.AppSettings["FineTunedModel"],
                     messages = new[] {
-                        new { role = "system", content = "Provide answers that are common sense seperated by commas." },
-                        new { role = "user", content = queryText }
+                        new { role = "system", content = "Provide answers that are common sense to a 5 year old. \n\r" +
+                        "Answer in ordered pairs of the form value-name | value separated by line-breaks. \n\r" +
+                        "If there is more than one value for a given value-name, these should be saparated by commas. \n\r"+
+                        "Individual values should not be more than two words. \n\r"+
+                        "use the following value-name: " +
+                        "is-a, " +
+                        "can, " +
+                        "has-properties, " +
+                        "contains (with counts), " +
+                        "is-part-of, " +
+                        "is-bigger-than, " +
+                        "is-smaller-than, " +
+                        "is-similar-to, " +
+                        "is-part-of-speech, " +
+                        "unique-characteristics, " +
+                        "is-a-group-containing (up to 10)" },
+                        new { role = "user", content = queryText}
                     },
                 };
 
@@ -918,24 +933,24 @@ namespace BrainSimulator.Modules
                     //some sort of error occurred
                     if (Output.Contains("language model")) return;
 
-                    // Split by comma (,) to get individual values
-                    string[] values = Output.Split(",");
-                    // Get the UKS
-                    GetUKS();
-                    foreach (string s in values)
-                    {
-                        Debug.WriteLine("Individual Itm: " + s);
-                        switch (qType)
-                        {
-                            case QueryType.isa:
-                                theUKS.AddStatement(textIn, "is-a", s);
-                                // theUKS.AddStatement(parameters[0], "is-a", parameters[2]);
-                                break;
-                            case QueryType.hasa:
-                                theUKS.AddStatement(textIn, "has", s);
-                                break;
-                        }
-                    }
+                    //// Split by comma (,) to get individual values
+                    //string[] values = Output.Split(",");
+                    //// Get the UKS
+                    //GetUKS();
+                    //foreach (string s in values)
+                    //{
+                    //    Debug.WriteLine("Individual Itm: " + s);
+                    //    switch (qType)
+                    //    {
+                    //        case QueryType.isa:
+                    //            theUKS.AddStatement(textIn, "is-a", s);
+                    //            // theUKS.AddStatement(parameters[0], "is-a", parameters[2]);
+                    //            break;
+                    //        case QueryType.hasa:
+                    //            theUKS.AddStatement(textIn, "has", s);
+                    //            break;
+                    //    }
+                    //}
 
 
                 }

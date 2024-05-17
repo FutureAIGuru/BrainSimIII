@@ -13,6 +13,7 @@ namespace BrainSimulator.Modules
     public partial class ModuleUKSQueryDlg : ModuleBaseDlg
     {
         // Constructor of the ModuleUKSStatement dialog
+        //lists of nouns from https://www.momswhothink.com/list-of-nouns/
         public ModuleUKSQueryDlg()
         {
             InitializeComponent();

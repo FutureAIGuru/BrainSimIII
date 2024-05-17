@@ -21,12 +21,17 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Windows.Documents;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using System.Drawing;
 
 namespace BrainSimulator.Modules
 {
     public class ModuleOnlineFile : ModuleBase
     {
         public string Output = "";
+
+        Pluralizer pluralizer = new Pluralizer();
+
 
         public ModuleOnlineFile()
         {
@@ -98,9 +103,27 @@ namespace BrainSimulator.Modules
                     temperature = 0,
                     max_tokens = 200,
                     // IMPORTANT: Add your model here after fine tuning on OpenAI using word_only_dataset.jsonl.
-                    model = ConfigurationManager.AppSettings["FineTunedModel_File"],
+                    //model = "<YOUR_FINETUNED_MODEL_HERE>",
+                    model = "gpt-4o",// ConfigurationManager.AppSettings["FineTunedModel"],
                     messages = new[] {
-                        new { role = "system", content = "Provide answers that are common sense to a 10 year old." },
+                        new { role = "system", content = "Provide answers that are common sense to a 5 year old. \n\r" +
+                        "Answer in ordered pairs of the form value-name | value separated by line-breaks. \n\r" +
+                        "Each Answer is formatted: value-name | value, value, value ... \n\r" +
+                        "Example of answer with numerical value: contains (with counts) | 2 eyes, 4 legs, 1 tail \n\r"+
+                        "If there is more than one value for a given value-name, these should be saparated by commas. \n\r"+
+                        "Individual values should not be more than two words. \n\r"+
+                        "use the following value-name: " +
+                        "is-a, " +
+                        "can, " +
+                        "needs, " +
+                        "has-properties), " +
+                        "contains (with counts), " +
+                        "is-part-of, " +
+                        "is-bigger-than, " +
+                        "is-smaller-than, " +
+                        "is-similar-to, " +
+                        "is-part-of-speech, " +
+                        "is-a-group-containing (up to 10)" },
                         new { role = "user", content = queryText}
                     },
                 };
@@ -129,44 +152,7 @@ namespace BrainSimulator.Modules
                     //some sort of error occurred
                     if (Output.Contains("language model")) return;
 
-                    // Split by comma (,) to get individual pairs
-                    string[] values = Output.Split(",");
-                    // Error check
-                    if (values.Length == 0)
-                    {
-                        Debug.WriteLine($"Error, length of value '{Output}' is 0.");
-                        ModuleOnlineFileDlg.errorCount += 1;
-                    }
-
-                    string[] relationships = new string[values.Length];
-                    string[] targets = new string[values.Length];
-
-                    // Split by pipe (|) to get relationships and targets
-                    for (int i = 0; i < values.Length; i++)
-                    {
-                        string[] parts = values[i].Split("|");
-                        ModuleOnlineFileDlg.relationshipCount += 1;
-                        // Make sure the length of each pair is 2.
-                        if (parts.Length == 2)
-                        {
-                            relationships[i] = parts[0];
-                            targets[i] = parts[1];
-                        }
-                        else
-                        {
-                            Debug.WriteLine($"Error, unexpected format in values[i]: {values[i]}");
-                            ModuleOnlineFileDlg.errorCount += 1;
-                        }
-                        
-                    }
-                    // Get the UKS
-                    GetUKS();
-                    
-                    // Add the statements to the UKS
-                    for (int i = 0; i < relationships.Length; i++)
-                    {
-                        theUKS.AddStatement(textIn, relationships[i], targets[i]);
-                    }
+                    textIn = ParseGPTOutput(textIn, Output);
                 }
                 else
                     if (completionResult.error != null) Output = completionResult.error.message;
@@ -175,6 +161,120 @@ namespace BrainSimulator.Modules
             {
                 Debug.WriteLine($"Error with getting Chat GPT Fine tuning. Error is {ex}.");
             }
+        }
+
+        public string ParseGPTOutput(string textIn,string GPTOutput)
+        {
+            // Get the UKS
+            GetUKS();
+            // Split by comma (,) to get individual pairs
+            string[] valuePairs = GPTOutput.Split(';', '\n');
+            // Error check
+            if (valuePairs.Length == 0)
+            {
+                Debug.WriteLine($"Error, length of value '{Output}' is 0.");
+                ModuleOnlineFileDlg.errorCount += 1;
+            }
+
+            textIn = pluralizer.Singularize(textIn.Trim());
+
+            foreach (string s in valuePairs)
+            {
+                string[] nameValuePair = s.Split("|");
+                if (nameValuePair.Length == 2)
+                {
+                    string valueType = nameValuePair[0].Trim();
+                    string valueString = nameValuePair[1].Trim();
+                    List<string> values = valueString.Split(',').ToList();
+                    for (int i = 0; i < values.Count; i++) values[i] = pluralizer.Singularize(values[i].Trim());
+
+                    for (int j = 0; j < values.Count; j++)
+                    {
+                        string value = values[j];
+                        if (value.Contains("-")) continue; //gets rid of hyphenated numbers
+                        string count = "";
+                        List<string> subValues = value.Split(" ").ToList();
+
+                        //parse out multi-word values
+                        for (int i = 0; i < subValues.Count; i++)
+                        {
+                            string subValue = subValues[i].Trim();
+                            if (subValue == "be")
+                            {
+                                subValues.RemoveAt(i);
+                                i--;
+                                if (!valueType.EndsWith("-be"))
+                                    valueType += "-be";
+                            }
+                            if (subValue == "a" || subValue == "an")
+                            {
+                                subValues.RemoveAt(i);
+                                i--;
+                            }
+                            List<string> digitWords = new() { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten" };
+                            int index = digitWords.IndexOf(subValue);
+                            if (index != -1)
+                            {
+                                count = index.ToString();
+                                subValues.RemoveAt(i);
+                                i--;
+                            }
+                            else if (int.TryParse(subValues[0], out int iCount))
+                            {
+                                count = iCount.ToString();
+                                subValues.RemoveAt(i);
+                                i--;
+                            }
+                            if (new List<string> { "some", "many", "lots", "few" }.Contains(subValue))
+                            {
+                                count = subValue;
+                                subValues.RemoveAt(i);
+                                i--;
+                            }
+                        }
+
+                        //write the valueType|value  to the UKS
+                        if (subValues.Count > 0)
+                            value = string.Join(" ",subValues);
+                        else
+                            continue;
+                        if (value == textIn) continue;
+                        if (valueType.StartsWith("is-") && valueType != "is-a")
+                            valueType = valueType[3..];
+                        if (valueType.StartsWith("a-group-containing"))
+                        {
+                            theUKS.AddStatement(value, "is-a", textIn);
+                        }
+                        else if (valueType.StartsWith("part-of-speech"))
+                        {
+                            theUKS.AddStatement(textIn, "is-a", value);
+                            if (value.StartsWith("verb"))
+                                theUKS.AddStatement(textIn, "is-a", "Action");
+                        }
+                        else if (valueType.StartsWith("has-properties"))
+                        {
+                            theUKS.AddStatement(textIn, "is", value);
+                        }
+                        else if (valueType.StartsWith("contains"))
+                        {
+                            if (count == "" || count == "1")
+                                theUKS.AddStatement(textIn, "has", value);
+                            else
+                                theUKS.AddStatement(textIn, "has", value, null, count);
+                        }
+                        else if (valueType.StartsWith("is-a-group"))
+                        {
+                            theUKS.AddStatement(value, "is-a", textIn);
+                        }
+                        else
+                        {
+                            theUKS.AddStatement(textIn, valueType, value);
+                        }
+                    }
+                }
+            }
+
+            return textIn;
         }
     }
 }
