@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -73,9 +74,14 @@ namespace BrainSimulator.Modules
 
                 foreach (Thing child in children)
                 {
-                    Debug.WriteLine(childId.ToString() + "/" + children.Count + ": " + child.ToString());
-                    await mf.GetChatGPTDataParents(child.Label);
-                    childId++;
+                    if (child == children.Last())
+                        await mf.GetChatGPTDataParents(child.Label);
+                    else
+                    {
+                        Debug.WriteLine(childId.ToString() + "/" + children.Count + ": " + child.ToString());
+                        mf.GetChatGPTDataParents(child.Label);
+                        childId++;
+                    }
                 }
 
                 int newChildCount = mf.GetUnknownChildren().Count;

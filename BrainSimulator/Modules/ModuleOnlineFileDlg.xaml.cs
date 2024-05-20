@@ -24,7 +24,7 @@ namespace BrainSimulator.Modules
         public static int relationshipCount;
 
         // Word max set to 10 by default. *Modify/Increase Value at your own risk!*
-        int wordMax = 100;
+        int wordMax = 1000;
         List<string> words = new List<string>();  // List to hold all words
 
         public ModuleOnlineFileDlg()

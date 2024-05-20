@@ -72,16 +72,16 @@ namespace BrainSimulator.Modules
                 {
                     case "ChatGPT":
                         if (txt.EndsWith("?"))
-                            mcn.GetChatGPTDataFine(txt, ModuleOnlineInfo.QueryType.general);
+                            mcn.GetChatGPTResult(txt, ModuleOnlineInfo.QueryType.general);
                         else if (txt.StartsWith("list some"))
-                            mcn.GetChatGPTDataFine(txt.Substring(10), ModuleOnlineInfo.QueryType.list);
+                            mcn.GetChatGPTResult(txt.Substring(10), ModuleOnlineInfo.QueryType.list);
                         else if (txt.StartsWith("count some"))
-                            mcn.GetChatGPTDataFine(txt.Substring(11), ModuleOnlineInfo.QueryType.listCount);
+                            mcn.GetChatGPTResult(txt.Substring(11), ModuleOnlineInfo.QueryType.listCount);
                         else if (txt.EndsWith("can"))
-                            mcn.GetChatGPTDataFine(txt.Substring(0,txt.Length-3), ModuleOnlineInfo.QueryType.can);
+                            mcn.GetChatGPTResult(txt.Substring(0,txt.Length-3), ModuleOnlineInfo.QueryType.can);
                         else
                         {
-                            mcn.GetChatGPTDataFine(txt, qType);
+                            mcn.GetChatGPTResult(txt, qType);
                             //Thread.Sleep(1000);
                             //mcn.GetChatGPTData(txt, ModuleOnlineInfo.QueryType.hasa);
                             //Thread.Sleep(1000);

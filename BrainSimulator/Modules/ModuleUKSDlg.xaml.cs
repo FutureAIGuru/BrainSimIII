@@ -216,7 +216,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         tvi.Items.Add(tviRefLabel);
 
         totalItemCount++;
-        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => x.relType.Label).ToList();
+        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => x.relType?.Label).ToList();
         foreach (Relationship r in sortedReferences)
         {
             if (r.relType?.Label == "has-child") continue;
@@ -677,7 +677,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         for (int i = 0; i < parent.theUKS.UKSList.Count; i++)
         {
             Thing t = parent.theUKS.UKSList[i];
-            if (t.HasAncestorLabeled("BrainSim")) continue;
+            if (t.HasAncestorLabeled("BrainSim")) 
+                continue;
             if (t.Label == "has-child") continue;
             if (t.Label == "Thing") continue;
             if (t.Label == "RelationshipType") continue;

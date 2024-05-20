@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http.Headers;
 
 namespace UKS;
@@ -29,7 +30,8 @@ public partial class UKS
         object oTargetProperties = null
                     )
     {
-//        try
+        Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
+//        try  //let any exceptions be trapped above
         {
             Thing source = ThingFromObject(oSource);
             Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);

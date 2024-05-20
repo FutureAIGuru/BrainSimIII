@@ -11,7 +11,8 @@ public partial class UKS
 
     public void CreateInitialStructure()
     {
-        AddThing("Thing", null);
+        if (Labeled("Thing") == null)
+            AddThing("Thing", null);
         GetOrAddThing("Object", "Thing");
         GetOrAddThing("Action", "Thing");
         GetOrAddThing("RelationshipType", "Thing");

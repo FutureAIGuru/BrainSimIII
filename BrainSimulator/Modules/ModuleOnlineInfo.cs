@@ -825,36 +825,8 @@ namespace BrainSimulator.Modules
             }
         }
 
-        class CompletionResult
-        {
-            public string text { get; set; }
-            public string finish_reason { get; set; }
-            public string model { get; set; }
-            public string prompt { get; set; }
-            public string created { get; set; }
-            public string id { get; set; }
-            public Choice[] choices { get; set; }
-            public Error error { get; set; }
-
-            public class Choice
-            {
-                public string text { get; set; }
-                public float? score { get; set; }
-                public Message message { get; set; }
-            }
-            public class Message
-            {
-                public string role { get; set; }
-                public string content { get; set; }
-            }
-            public class Error
-            {
-                public string message { get; set; }
-            }
-        }
-
         public enum QueryType { general, isa, hasa, can, count, list, listCount, types, partsOf };
-        public async void GetChatGPTDataFine(string textIn, QueryType qtIn = QueryType.isa, string altLabel = "")
+        public async void GetChatGPTResult(string textIn, QueryType qtIn = QueryType.isa, string altLabel = "")
         {
             try
             {
@@ -880,54 +852,13 @@ namespace BrainSimulator.Modules
                         break;
                 }
 
-                // Define the request body
-                var requestBody = new
-                {
-                    temperature = 0,
-                    max_tokens = 200,
-                    // IMPORTANT: Add your model here after fine tuning on OpenAI using word_only_dataset.jsonl.
-                    //model = "<YOUR_FINETUNED_MODEL_HERE>",
-                    model = "gpt-4o",// ConfigurationManager.AppSettings["FineTunedModel"],
-                    messages = new[] {
-                        new { role = "system", content = "Provide answers that are common sense to a 5 year old. \n\r" +
-                        "Answer in ordered pairs of the form value-name | value separated by line-breaks. \n\r" +
-                        "If there is more than one value for a given value-name, these should be saparated by commas. \n\r"+
-                        "Individual values should not be more than two words. \n\r"+
-                        "use the following value-name: " +
-                        "is-a, " +
-                        "can, " +
-                        "has-properties, " +
-                        "contains (with counts), " +
-                        "is-part-of, " +
-                        "is-bigger-than, " +
-                        "is-smaller-than, " +
-                        "is-similar-to, " +
-                        "is-part-of-speech, " +
-                        "unique-characteristics, " +
-                        "is-a-group-containing (up to 10)" },
-                        new { role = "user", content = queryText}
-                    },
-                };
 
-                // Serialize the request body to JSON
-                var requestBodyJson = JsonConvert.SerializeObject(requestBody);
-
-                // Create the request message
-                var request = new HttpRequestMessage(HttpMethod.Post, url);
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-                request.Content = new StringContent(requestBodyJson, Encoding.UTF8, "application/json");
-
-                // Send the request and get the response
-                var response = await client.SendAsync(request);
-
-                // Deserialize the response body to a CompletionResult object
-                var responseJson = await response.Content.ReadAsStringAsync();
-                CompletionResult completionResult = JsonConvert.DeserializeObject<CompletionResult>(responseJson);
-                if (completionResult.choices != null)
+                string answerString = await GPT.GetGPTResult("Answer appropriate for a 10 year old.",queryText);
+                if (!answerString.StartsWith("ERROR"))
                 {
 
                     // Extract the generated text from the CompletionResult object
-                    Output = completionResult.choices[0].message.content.Trim().ToLower();
+                    Output = answerString.Trim().ToLower();
                     Debug.WriteLine(">>>" + queryText);
                     Debug.WriteLine(Output);
                     //some sort of error occurred
@@ -955,196 +886,7 @@ namespace BrainSimulator.Modules
 
                 }
                 else
-                    if (completionResult.error != null) Output = completionResult.error.message;
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
-        public async void GetChatGPTData(string textIn, QueryType qtIn = QueryType.isa, string altLabel = "")
-        {
-            //Original API Key: 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
-            //Update 4/5 sk - GAyHuyKv6OzH4L45w6ndT3BlbkFJ1DZfTZFkFwtAQWaZgWWX
-            try
-            {
-                QueryType qType = qtIn;
-                if (altLabel == "") altLabel = textIn;
-                string prompt;
-                string apiKey = ConfigurationManager.AppSettings["APIKey"];
-                var client = new HttpClient();
-                var url = "https://api.openai.com/v1/chat/completions";
-                string queryText = textIn;
-
-                switch (qType)
-                {
-                    case QueryType.general:
-                        queryText = textIn;
-                        break;
-                    case QueryType.isa:
-                        queryText = "input: dog,is-a\noutput: (dog,is-a,canine)\ninput: cat,is-a\noutput: (cat,is-a,feline)\ninput: shirt\noutput:upper-body-clothing\n";
-                        queryText += "input: " + textIn + " is-a";
-                        break;
-                    case QueryType.hasa:
-                        queryText = $"List one-word things a {textIn} has only one of";
-                        break;
-                    case QueryType.can:
-                        queryText = $"List several one-word things most {PluralizePhrase(textIn)} can do";
-                        break;
-                    case QueryType.count:
-                        queryText = $"List one-word things most {PluralizePhrase(textIn)} has more than one of and how many of each";
-                        break;
-                    case QueryType.list:
-                        queryText = $"List some common {PluralizePhrase(textIn)}";
-                        break;
-                    case QueryType.listCount:
-                        queryText = $"List some common things that are {PluralizePhrase(textIn)} with counts";
-                        break;
-                    case QueryType.types:
-                        queryText = $"List some common types of {PluralizePhrase(textIn)}";
-                        break;
-                    case QueryType.partsOf:
-                        queryText += $"List common parts of a {textIn} with how many of each";
-                        break;
-                }
-
-                // Define the request body
-                var requestBody = new
-                {
-                    temperature = 0,
-                    max_tokens = 200,
-                    model = "gpt-3.5-turbo",
-                    messages = new[] {
-                        new { role = "user", content = queryText }
-                    },
-                };
-
-                // Serialize the request body to JSON
-                var requestBodyJson = JsonConvert.SerializeObject(requestBody);
-
-                // Create the request message
-                var request = new HttpRequestMessage(HttpMethod.Post, url);
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-                request.Content = new StringContent(requestBodyJson, Encoding.UTF8, "application/json");
-
-                // Send the request and get the response
-                var response = await client.SendAsync(request);
-
-                // Deserialize the response body to a CompletionResult object
-                var responseJson = await response.Content.ReadAsStringAsync();
-                CompletionResult completionResult = JsonConvert.DeserializeObject<CompletionResult>(responseJson);
-                if (completionResult.choices != null)
-                {
-
-                    // Extract the generated text from the CompletionResult object
-                    Output = completionResult.choices[0].message.content.Trim().ToLower();
-                    Debug.WriteLine(">>>" + queryText);
-                    Debug.WriteLine(Output);
-                    //some sort of error occurred
-                    if (Output.Contains("language model")) return;
-
-                    string[] lines = Output.Split("\n");
-                    if (lines.Length == 1)
-                        lines = Output.Split(",");
-                    GetUKS();
-                    foreach (string s in lines)
-                    {
-                        if (s == "") continue;
-                        if (s.Contains("well,")) continue;
-                        if (s.Contains("sure,")) continue;
-                        if (s.Contains("remember,")) continue;
-                        string listItem = s.Trim();
-                        listItem = RemoveParentheticals(listItem);
-                        if (listItem.EndsWith("."))
-                            listItem = listItem.Substring(0, listItem.Length - 1);
-                        switch (qType)
-                        {
-                            case QueryType.general:
-                                Thing incomingInfo = theUKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
-                                incomingInfo.V = Output;
-                                break;
-                            case QueryType.isa:
-                                string content = GetParenthetical(Output);
-                                string[] parameters = content.Split(",");
-                                if (parameters.Length == 3)
-                                    theUKS.AddStatement(parameters[0], "is-a", parameters[2]);
-                                break;
-                            case QueryType.hasa:
-                                if (listItem.Contains("."))
-                                    listItem = listItem.Substring(3);
-                                theUKS.AddStatement(textIn, "have", (object)listItem);
-                                break;
-                            case QueryType.can:
-                                if (listItem.Contains("."))
-                                    listItem = listItem.Substring(3);
-                                theUKS.AddStatement(textIn, (object)listItem, null, null, "can");
-                                break;
-                            case QueryType.count:
-                                if (listItem.Contains("."))
-                                    listItem = listItem.Substring(3);
-                                string[] splitCount = listItem.Split("-");
-                                if (splitCount.Length >= 2)
-                                {
-                                    listItem = splitCount[0];
-                                    if (int.TryParse(splitCount[1].Trim(), out int result))
-                                    {
-                                        string countString = "many";
-                                        if (result > 0 && result < 11) countString = result.ToString();
-
-                                        listItem = SingularizePhrase((string)listItem.Trim());
-                                        textIn = SingularizePhrase(textIn.Trim());
-                                        theUKS.AddStatement(textIn, "have", (object)listItem, null, countString);
-                                    }
-                                }
-                                break;
-                            case QueryType.types:
-                            case QueryType.list:
-                                if (listItem.Contains("."))
-                                    listItem = listItem.Substring(3);
-                                listItem = SingularizePhrase(listItem.Trim());
-                                textIn = SingularizePhrase(textIn);
-                                theUKS.AddStatement(textIn, "has-child", listItem);
-                                break;
-                            case QueryType.partsOf:
-                            case QueryType.listCount:
-                                if (listItem.Contains("."))
-                                    listItem = listItem.Substring(3);
-                                string[] splitCount1 = listItem.Split("-");
-                                if (splitCount1.Length >= 2)
-                                {
-                                    listItem = splitCount1[0];
-                                    string countString1 = splitCount1[1].Trim();
-                                    int index;
-                                    if ((index = countString1.IndexOf(" ")) != -1)
-                                        countString1 = countString1.Substring(0, index);
-                                    if ((index = countString1.IndexOf("-")) != -1)
-                                        countString1 = countString1.Substring(0, index);
-                                    string countString = "many";
-                                    if (int.TryParse(countString1, out int result))
-                                        if (result > 0 && result < 11) countString = result.ToString();
-
-                                    listItem = SingularizePhrase(listItem.Trim());
-                                    //if (wordList2.FindIndex(x => x.Item1 == singularized) != -1)
-                                    theUKS.AddStatement(textIn, "has", textIn + " part");
-                                    string rootPart = textIn + " part";
-                                    theUKS.AddStatement(rootPart, "has-child", listItem);
-                                    theUKS.AddStatement(textIn, "have", listItem, null, countString);
-                                }
-                                else
-                                {
-                                    theUKS.AddStatement(textIn, "has-child", textIn + " parts");
-                                    string rootPart = textIn + " parts";
-                                    theUKS.AddStatement(rootPart, "has-child", listItem);
-                                    theUKS.AddStatement(textIn, "have", listItem);
-                                }
-                                break;
-                        }
-                    }
-                    //Thing incomingInfo = theUKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
-                    //incomingInfo.V = Output;
-                }
-                else
-                    if (completionResult.error != null) Output = completionResult.error.message;
+                    Output = answerString;
             }
             catch (Exception ex)
             {

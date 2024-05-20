@@ -129,21 +129,21 @@ Follow has ONLY if called out in type
                 { relationships.RemoveAt(i); i--; continue; }
             }
 
-            if (filter != "")
-            {
-                List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
-                relationships = theUKS.FilterResults(relationships, filterThings).ToList();
-            }
+            //if (filter != "")
+            //{
+            //    List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
+            //    relationships = theUKS.FilterResults(relationships, filterThings).ToList();
+            //}
 
-            if (paramCount == 2)
-            {
-                foreach (Relationship r in relationships)
-                {
-                    if (sourceIn == "") thingResult.Add(r.source);
-                    if (targetIn == "") thingResult.Add(r.target);
-                    if (relTypeIn == "") thingResult.Add(r.relType);
-                }
-            }
+            //if (paramCount == 2)
+            //{
+            //    foreach (Relationship r in relationships)
+            //    {
+            //        if (sourceIn == "") thingResult.Add(r.source);
+            //        if (targetIn == "") thingResult.Add(r.target);
+            //        if (relTypeIn == "") thingResult.Add(r.relType);
+            //    }
+            //}
         }
     }
 }

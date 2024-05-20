@@ -64,6 +64,7 @@ public partial class UKS
     //TODO This is hardcoded to only follow "has" and "has-child" transitive relationships
     private  List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
     {
+
         List<ThingWithQueryParams> thingsToExamine = new();
         int maxHops = 20;
         int hopCount = 0;
@@ -85,9 +86,8 @@ public partial class UKS
             Thing reachedWith = thingsToExamine[i].reachedWith;
 
             foreach (Relationship r in t.RelationshipsFrom)  //has-child et al
-                if (r.relType == null) continue;
-                else if ((r.relType.HasAncestorLabeled("has-child") && !reverse) ||
-                    (r.relType.HasAncestorLabeled("has") && reverse))// ||
+                if ((r.reltype != null && r.relType.HasAncestorLabeled("has-child") && !reverse) ||
+                    (r.reltype != null && r.relType.HasAncestorLabeled("has") && reverse))// ||
 //                   (r.relType.HasAncestorLabeled("is") && reverse))
                 {
                     if (r.target.Label == "has") continue;
@@ -116,35 +116,34 @@ public partial class UKS
                     }
                 }
 
-            foreach (Relationship r in t.Relationships) //has-a et al
-                if (r.relType == null) continue;
-                else if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
-                    (r.relType.HasAncestorLabeled("has") && !reverse))
-                {
-                    if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twqp)
-                    {
-                        twqp.hitCount++;
-                    }
-                    else
-                    {
-                        bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
-                            thingsToExamine[i].reachedWith != null;
-                        if (corner)
-                        { }
-                        thingsToExamine[i].corner |= corner;
-                        ThingWithQueryParams thingToAdd = new ThingWithQueryParams
-                        {
-                            thing = r.target,
-                            hopCount = hopCount,
-                            weight = curWeight * r.Weight,
-                            reachedWith = r.relType,
-                        };
-                        thingsToExamine.Add(thingToAdd);
-                        //if things have counts, they are multiplied
-                        int val = GetCount(r.reltype);
-                        thingToAdd.haveCount = curCount * val;
-                    }
-                }
+            //foreach (Relationship r in t.Relationships) //has-a et al
+            //    if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
+            //        (r.relType.HasAncestorLabeled("has") && !reverse))
+            //    {
+            //        if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twqp)
+            //        {
+            //            twqp.hitCount++;
+            //        }
+            //        else
+            //        {
+            //            bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
+            //                thingsToExamine[i].reachedWith != null;
+            //            if (corner)
+            //            { }
+            //            thingsToExamine[i].corner |= corner;
+            //            ThingWithQueryParams thingToAdd = new ThingWithQueryParams
+            //            {
+            //                thing = r.target,
+            //                hopCount = hopCount,
+            //                weight = curWeight * r.Weight,
+            //                reachedWith = r.relType,
+            //            };
+            //            thingsToExamine.Add(thingToAdd);
+            //            //if things have counts, they are multiplied
+            //            int val = GetCount(r.reltype);
+            //            thingToAdd.haveCount = curCount * val;
+            //        }
+            //    }
             if (i == currentEnd - 1)
             {
                 hopCount++;
@@ -176,6 +175,8 @@ public partial class UKS
                 bool ignoreSource = thingsToExamine[i].hopCount > 1;
                 Relationship existing = result.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));
                 if (existing != null) continue;
+                if (r.target.Label.Contains("eye"))
+                { }
 
                 if (haveCount > 1 && r.relType?.Label == "has")
                 {
@@ -219,8 +220,7 @@ public partial class UKS
                 }
 
             }
-        }
-    
+        } 
     }
     private void RemoveFalseConditionals(List<Relationship> result)
     {
