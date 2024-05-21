@@ -285,3 +285,17 @@ AutomatedTests/*.png
 /BrainSimulator/python-3.10.8/Scripts
 /BrainSimulator/App.config
 /UKS/Documentation/html
+
+
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
+*/*/*/.DS_Store
+*/*/*/*/.DS_Store
+.ipynb_checkpoints
+*/.ipynb_checkpoints
+*/*/.ipynb_checkpoints
+*/*/*/.ipynb_checkpoints
+*/*/*/*/.ipynb_checkpoints
+/PythonAttributeBubblingExperiment/_trash/
+
