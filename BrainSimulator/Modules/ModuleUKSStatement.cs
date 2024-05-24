@@ -126,7 +126,7 @@ namespace BrainSimulator.Modules
             }
             else if (retVal.Count > 1) //do things represent a list of attributes
             {
-                retVal = MainWindow.theUKS.FindThingsWithAttributes(retVal);
+                    retVal = MainWindow.theUKS.FindThingsWithAttributes(retVal);
             }
 
             return retVal;

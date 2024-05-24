@@ -66,7 +66,7 @@ public partial class UKS
     {
 
         List<ThingWithQueryParams> thingsToExamine = new();
-        int maxHops = 20;
+        int maxHops = 8;
         int hopCount = 0;
         foreach (Thing t in q)
             thingsToExamine.Add(new ThingWithQueryParams
@@ -86,11 +86,11 @@ public partial class UKS
             Thing reachedWith = thingsToExamine[i].reachedWith;
 
             foreach (Relationship r in t.RelationshipsFrom)  //has-child et al
-                if ((r.reltype != null && r.relType.HasAncestorLabeled("has-child") && !reverse) ||
-                    (r.reltype != null && r.relType.HasAncestorLabeled("has") && reverse))// ||
-//                   (r.relType.HasAncestorLabeled("is") && reverse))
+                if ((r.relType.HasAncestorLabeled("has-child") && !reverse) ||
+                    (r.relType.HasAncestorLabeled("has") && reverse))
                 {
-                    if (r.target.Label == "has") continue;
+                    if (r.target.Label == "has") 
+                        continue;
                     if (thingsToExamine.FindFirst(x => x.thing == r.source) is ThingWithQueryParams twgp)
                     {
                         twgp.hitCount++;

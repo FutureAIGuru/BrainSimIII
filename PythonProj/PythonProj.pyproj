@@ -25,6 +25,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="MainWindow.py" />
+    <Compile Include="module_Fry.py" />
     <Compile Include="module_template.py" />
     <Compile Include="module_uks_tree.py" />
     <Compile Include="utils.py" />

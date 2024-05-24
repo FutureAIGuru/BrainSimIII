@@ -8,6 +8,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 
 namespace BrainSimulator.Modules
 {
@@ -23,8 +24,21 @@ namespace BrainSimulator.Modules
             public string prompt { get; set; }
             public string created { get; set; }
             public string id { get; set; }
+            public CompletionUsage usage { get; set; }
             public Choice[] choices { get; set; }
             public Error error { get; set; }
+
+            public class CompletionUsage
+            {
+                [JsonProperty("completion_tokens")]
+                public int CompletionTokens { get; set; }
+
+                [JsonProperty("prompt_tokens")]
+                public int PromptTokens { get; set; }
+
+                [JsonProperty("total_tokens")]
+                public int TotalTokens { get; set; }
+            }
 
             public class Choice
             {
@@ -43,6 +57,7 @@ namespace BrainSimulator.Modules
             }
         }
 
+        public static int totalTokensUsed = 0;
         public static async Task<string> GetGPTResult(string userText, string systemText)
         {
             string apiKey = ConfigurationManager.AppSettings["APIKey"];
@@ -54,12 +69,13 @@ namespace BrainSimulator.Modules
             // Define the request body
             var requestBody = new
             {
-                temperature = 0,
-                max_tokens = 200,
+                temperature = 0.2,
+                max_tokens = 100,
                 // OBSOLETE: IMPORTANT: Add your model here after fine tuning on OpenAI using word_only_dataset.jsonl.
                 //model = "<YOUR_FINETUNED_MODEL_HERE>",
-                model = "gpt-4o",// ConfigurationManager.AppSettings["FineTunedModel"],
-                                 //model = "gpt-3.5-turbo-0125",// ConfigurationManager.AppSettings["FineTunedModel"],
+                //model = ConfigurationManager.AppSettings["FineTunedModel"],
+                model = "gpt-4o", //not fine-tuned
+                //model = "gpt-3.5-turbo", //not fine-tuned
                 messages = new[] { new { role = "system", content = systemText }, new { role = "user", content = userText } },
             };
 
@@ -77,6 +93,11 @@ namespace BrainSimulator.Modules
             // Deserialize the response body to a CompletionResult object
             var responseJson = await response.Content.ReadAsStringAsync();
             CompletionResult completionResult = JsonConvert.DeserializeObject<CompletionResult>(responseJson);
+            if (completionResult.usage != null)
+            {
+                int tokensUsed = completionResult.usage.TotalTokens;
+                totalTokensUsed += tokensUsed;
+            }
             if (completionResult.choices != null)
             {
                 // Extract the generated text from the CompletionResult object

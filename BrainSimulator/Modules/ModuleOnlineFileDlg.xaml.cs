@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Pluralize.NET;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
@@ -24,7 +25,7 @@ namespace BrainSimulator.Modules
         public static int relationshipCount;
 
         // Word max set to 10 by default. *Modify/Increase Value at your own risk!*
-        int wordMax = 1000;
+        int wordMax = 100;
         List<string> words = new List<string>();  // List to hold all words
 
         public ModuleOnlineFileDlg()
@@ -37,8 +38,13 @@ namespace BrainSimulator.Modules
             Draw(false);
         }
 
-        //this handles both the load and the merge buttons
-        [STAThread]
+        private void SetOutputText(string theText)
+        {
+            txtOutput.Text = theText;
+            ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
+            StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("unknownObject")?.Children.Count} unknown Things.  ";
+        }
+
         private void LoadButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn)
@@ -100,7 +106,7 @@ namespace BrainSimulator.Modules
                     catch (IOException error)
                     {
                         Debug.WriteLine("An error occurred while reading the file:");
-                        txtOutput.Text = "An error occurred while reading the file:\n" + error.Message;
+                        SetOutputText("An error occurred while reading the file:\n" + error.Message);
                         Debug.WriteLine(error.Message);
                     }
                 }
@@ -118,7 +124,7 @@ namespace BrainSimulator.Modules
             {
                 if (words.Count == 0)
                 {
-                    txtOutput.Text = "No file has been added! Cannot run.";
+                    SetOutputText("No file has been added! Cannot run.");
                 }
                 else
                 {
@@ -132,36 +138,75 @@ namespace BrainSimulator.Modules
         {
             ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
 
-            txtOutput.Text = "Running through words... Word count is: " + words.Count + ".";
+            SetOutputText("Running through words... Word count is: " + words.Count + ".");
             Debug.WriteLine("Running through words... Word count is: " + words.Count + ".");
 
             foreach (string word in words)
             {
                 if (word == words.Last())
-                    await mf.GetChatGPTDataFine(word.Trim());
+                    await mf.GetChatGPTData(word.Trim());
                 if (word.Trim() != "")
-                    mf.GetChatGPTDataFine(word.Trim());
+                    mf.GetChatGPTData(word.Trim());
             }
 
             txtOutput.Text = $"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.";
             Debug.WriteLine($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
         }
+        // Task to process the words.
+        public async Task ProcessParentsAsync(List<string> words)
+        {
+            ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
 
+            txtOutput.Text = "Getting Parents: Running through words... Word count is: " + words.Count + ".";
+            Debug.WriteLine("Getting Parents: Running through words... Word count is: " + words.Count + ".");
+
+            foreach (string word in words)
+            {
+                if (word == words.Last())
+                    await mf.GetChatGPTParents(word.Trim());
+                if (word.Trim() != "")
+                    mf.GetChatGPTParents(word.Trim());
+            }
+
+            SetOutputText($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+            Debug.WriteLine($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+        }
+
+        public async Task VerifyAsync(string label)
+        {
+            ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
+            if (!label.StartsWith(".")) label = "." + label;
+            UKS.Thing child = mf.theUKS.Labeled(label);
+            if (child == null) return;
+            foreach (Thing parent in child.Parents)
+            {
+                mf.GetChatGPTVerifyParentChild(child.Label, parent.Label);
+            }
+        }
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
-            txtOutput.Text = "";
+            SetOutputText(txtOutput.Text = "");
         }
 
         private async void textInput_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                txtOutput.Text = "Working...";
+                SetOutputText("Working...");
                 string txt = textInput.Text;
                 ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
-                await mf.GetChatGPTDataFine(txt);
-                txtOutput.Text = mf.Output;
+                await mf.GetChatGPTData(txt);
+                SetOutputText(mf.Output);
+            }
+            if (e.Key == Key.Up)
+            {
+                SetOutputText("Working...");
+                string txt = textInput.Text;
+                ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
+                await mf.GetChatGPTParents(txt);
+                SetOutputText(mf.Output);
+
             }
         }
 
@@ -171,20 +216,38 @@ namespace BrainSimulator.Modules
             {
                 ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
                 if (b.Content.ToString() == "Re-Parse")
-                { 
+                {
                     mf.ParseGPTOutput(textInput.Text, txtOutput.Text);
+                }
+                else if (b.Content.ToString() == "Verify")
+                {
+                    VerifyAsync(textInput.Text);
+                }
+                else if (b.Content.ToString() == "Verify All")
+                {
+                    SetOutputText("Verifying all is-a relationships");
+                    foreach (Thing t in mf.theUKS.UKSList)
+                    {
+                        if (t.Parents.FindFirst(x => x.Label == "unknownObject") != null) continue;
+                        if (!t.Label.StartsWith('.')) continue;
+                        if (t.Label == ".") continue;
+                        VerifyAsync(t.Label);
+                    }
+                    SetOutputText("Done");
                 }
                 else
                 {
                     List<string> words = new List<string>();
                     var thingList = mf.theUKS.Labeled("unknownObject").Children;
+
+                    SetOutputText($"Getting parents for {thingList.Count} Things");
                     foreach (var thing in thingList)
                     {
                         if (words.Count >= wordMax) break;
                         words.Add(thing.Label);
                     }
 
-                    ProcessWordsAsync(words);
+                    ProcessParentsAsync(words);
                 }
             }
         }

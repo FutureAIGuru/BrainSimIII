@@ -1,6 +1,7 @@
 ball
 bat
 bed
+bird
 book
 boy
 bun
@@ -19,11 +20,13 @@ doll
 dust
 fan
 feet
+fish
 girl
 gun
 hall
 hat
 hen
+horse
 jar
 kite
 man
