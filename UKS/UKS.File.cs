@@ -32,8 +32,11 @@ public partial class UKS
         AddStatement("isExclusive", "is-a", "RelationshipType");
         AddStatement("isTransitive", "is-a", "RelationshipType");
         AddStatement("has", "is-a", "RelationshipType");
+//        AddStatement("is-part-of", "is-a", "RelationshipType");
+//        AddStatement("has", "inverseOf", "is-part-of");
+
         AddStatement("ClauseType", "is-a", "RelationshipType");
-        AddStatement("has", "hasProperty", "isTransitive");
+//        AddStatement("is-part-of", "hasProperty", "isTransitive");
         AddStatement("has-child", "hasProperty", "isTransitive");
 
         AddBrainSimConfigSectionIfNeeded();

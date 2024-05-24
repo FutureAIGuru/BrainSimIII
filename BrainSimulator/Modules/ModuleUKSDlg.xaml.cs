@@ -22,6 +22,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     public static readonly DependencyProperty ThingObjectProperty =
     DependencyProperty.Register("Thing", typeof(Thing), typeof(TreeViewItem));
+    public static readonly DependencyProperty TreeViewItemProperty =
+    DependencyProperty.Register("TreeViewItem", typeof(TreeViewItem), typeof(TreeViewItem));
     public static readonly DependencyProperty RelationshipObjectProperty =
     DependencyProperty.Register("RelationshipType", typeof(Relationship), typeof(TreeViewItem));
 
@@ -32,7 +34,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private bool busy;
     private List<string> expandedItems = new();
     private bool updateFailed;
-    //private List<Thing> uks;
     private DispatcherTimer dt;
     private string expandAll = "";  //all the children below this named node will be expanded
 
@@ -91,7 +92,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             totalItemCount = 0;
             TreeViewItem tvi = new() { Header = thing.ToString() };
-            tvi.ContextMenu = GetContextMenu(thing);
+            tvi.ContextMenu = GetContextMenu(thing,tvi);
             tvi.IsExpanded = true; //always expand the top-level item
             theTreeView.Items.Add(tvi);
             tvi.SetValue(ThingObjectProperty, thing);
@@ -110,7 +111,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     if (t1.Parents.Count == 0)
                     {
                         TreeViewItem tvi = new() { Header = t1.Label };
-                        tvi.ContextMenu = GetContextMenu(t1);
+                        tvi.ContextMenu = GetContextMenu(t1,tvi);
                         theTreeView.Items.Add(tvi);
                     }
                 }
@@ -168,7 +169,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tvi.Items.Add(tviChild);
 
             totalItemCount++;
-            tviChild.ContextMenu = GetContextMenu(child);
+            tviChild.ContextMenu = GetContextMenu(child,tviChild);
             if (depth < maxDepth)
             {
                 int childCount = child.Children.Count;
@@ -223,7 +224,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (r.target != null && r.target.HasAncestorLabeled("Value"))
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r) };
-                tviRef.ContextMenu = GetContextMenu(r.target);
+                tviRef.ContextMenu = GetContextMenu(r.target,tviRef);
                 tviRefLabel.Items.Add(tviRef);
                 totalItemCount++;
             }
@@ -316,10 +317,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     }
 
     //Context Menu creation and handling
-    private ContextMenu GetContextMenu(Thing t)
+    private ContextMenu GetContextMenu(Thing t, TreeViewItem tvi)
     {
         ContextMenu menu = new ContextMenu();
         menu.SetValue(ThingObjectProperty, t);
+        menu.SetValue(TreeViewItemProperty, tvi);
         ModuleUKS parent = (ModuleUKS)ParentModule;
         int ID = parent.theUKS.UKSList.IndexOf(t);
         MenuItem mi = new();
@@ -350,11 +352,16 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         mi = new();
         mi.Click += Mi_Click;
+        mi.Header = "Delete Child";
+        menu.Items.Add(mi);
+
+        mi = new();
+        mi.Click += Mi_Click;
         mi.Header = "Make Root";
         menu.Items.Add(mi);
         mi = new();
         mi.Click += Mi_Click;
-        mi.Header = "Show All (make \"Thing\" root)";
+        mi.Header = "Fetch GPT Info";
         menu.Items.Add(mi);
         mi = new();
         mi.Header = "Parents:";
@@ -439,6 +446,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             UKS.UKS theUKS = ((ModuleUKS)ParentModule).theUKS;
             ContextMenu m = mi.Parent as ContextMenu;
+            //handle setting parent to root
             Thing tParent = (Thing)mi.GetValue(ThingObjectProperty);
             if (tParent != null)
             {
@@ -471,13 +479,24 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     updateFailed = true;
                     parent.SetAttribute("ExpandAll", expandAll);
                     break;
-                case "Show All (make \"Thing\" root)": //make "Thing" the root
-                    textBoxRoot.Text = "Thing";
-                    RefreshButton_Click(null, null);
+                case "Fetch GPT Info":
+                    //the following is an async call so an immediate refresh is not useful
+                    ModuleGPTInfo.GetChatGPTData(t.Label);
                     break;
                 case "Delete":
                     theUKS.DeleteAllChildren(t);
                     theUKS.DeleteThing(t);
+                    break;
+                case "Delete Child":
+                    //figure out which item (and its parent) clicked us
+                    TreeViewItem tvi = (TreeViewItem)m.GetValue(TreeViewItemProperty);
+                    DependencyObject parent1 = VisualTreeHelper.GetParent((DependencyObject)tvi);
+                    while (parent1 != null && !(parent1 is TreeViewItem))
+                        parent1 = VisualTreeHelper.GetParent(parent1);
+                    Thing parentThing = (Thing)parent1.GetValue(ThingObjectProperty);
+                    //now delete the relationship
+                    if (parentThing != null && t != null)
+                        parentThing.RemoveChild(t);
                     break;
                 case "Make Root":
                     textBoxRoot.Text = t.Label;

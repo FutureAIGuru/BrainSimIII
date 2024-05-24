@@ -18,7 +18,7 @@ using UKS;
 namespace BrainSimulator.Modules
 {
 
-    public partial class ModuleOnlineFileDlg : ModuleBaseDlg
+    public partial class ModuleGPTInfoDlg : ModuleBaseDlg
     {
         // Error count and relationship count, used for debugging (static for now, working on fix).
         public static int errorCount;
@@ -28,7 +28,7 @@ namespace BrainSimulator.Modules
         int wordMax = 100;
         List<string> words = new List<string>();  // List to hold all words
 
-        public ModuleOnlineFileDlg()
+        public ModuleGPTInfoDlg()
         {
             InitializeComponent();
         }
@@ -41,7 +41,7 @@ namespace BrainSimulator.Modules
         private void SetOutputText(string theText)
         {
             txtOutput.Text = theText;
-            ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
+            ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
             StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("unknownObject")?.Children.Count} unknown Things.  ";
         }
 
@@ -136,7 +136,7 @@ namespace BrainSimulator.Modules
         // Task to process the words.
         public async Task ProcessWordsAsync(List<string> words)
         {
-            ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
+            ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
 
             SetOutputText("Running through words... Word count is: " + words.Count + ".");
             Debug.WriteLine("Running through words... Word count is: " + words.Count + ".");
@@ -144,9 +144,9 @@ namespace BrainSimulator.Modules
             foreach (string word in words)
             {
                 if (word == words.Last())
-                    await mf.GetChatGPTData(word.Trim());
+                    await ModuleGPTInfo.GetChatGPTData(word.Trim());
                 if (word.Trim() != "")
-                    mf.GetChatGPTData(word.Trim());
+                    ModuleGPTInfo.GetChatGPTData(word.Trim());
             }
 
             txtOutput.Text = $"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.";
@@ -155,17 +155,15 @@ namespace BrainSimulator.Modules
         // Task to process the words.
         public async Task ProcessParentsAsync(List<string> words)
         {
-            ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
-
             txtOutput.Text = "Getting Parents: Running through words... Word count is: " + words.Count + ".";
             Debug.WriteLine("Getting Parents: Running through words... Word count is: " + words.Count + ".");
 
             foreach (string word in words)
             {
                 if (word == words.Last())
-                    await mf.GetChatGPTParents(word.Trim());
+                    await ModuleGPTInfo.GetChatGPTParents(word.Trim());
                 if (word.Trim() != "")
-                    mf.GetChatGPTParents(word.Trim());
+                    ModuleGPTInfo.GetChatGPTParents(word.Trim());
             }
 
             SetOutputText($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
@@ -174,13 +172,13 @@ namespace BrainSimulator.Modules
 
         public async Task VerifyAsync(string label)
         {
-            ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
+            ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
             if (!label.StartsWith(".")) label = "." + label;
             UKS.Thing child = mf.theUKS.Labeled(label);
             if (child == null) return;
             foreach (Thing parent in child.Parents)
             {
-                mf.GetChatGPTVerifyParentChild(child.Label, parent.Label);
+                ModuleGPTInfo.GetChatGPTVerifyParentChild(child.Label, parent.Label);
             }
         }
 
@@ -195,17 +193,15 @@ namespace BrainSimulator.Modules
             {
                 SetOutputText("Working...");
                 string txt = textInput.Text;
-                ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
-                await mf.GetChatGPTData(txt);
-                SetOutputText(mf.Output);
+                await ModuleGPTInfo.GetChatGPTData(txt);
+                SetOutputText(ModuleGPTInfo.Output);
             }
             if (e.Key == Key.Up)
             {
                 SetOutputText("Working...");
                 string txt = textInput.Text;
-                ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
-                await mf.GetChatGPTParents(txt);
-                SetOutputText(mf.Output);
+                await ModuleGPTInfo.GetChatGPTParents(txt);
+                SetOutputText(ModuleGPTInfo.Output);
 
             }
         }
@@ -214,10 +210,10 @@ namespace BrainSimulator.Modules
         {
             if (sender is Button b)
             {
-                ModuleOnlineFile mf = (ModuleOnlineFile)base.ParentModule;
+                ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
                 if (b.Content.ToString() == "Re-Parse")
                 {
-                    mf.ParseGPTOutput(textInput.Text, txtOutput.Text);
+                    ModuleGPTInfo.ParseGPTOutput(textInput.Text, txtOutput.Text);
                 }
                 else if (b.Content.ToString() == "Verify")
                 {

@@ -62,7 +62,7 @@ public partial class UKS
     }
 
     //TODO This is hardcoded to only follow "has" and "has-child" transitive relationships
-    private  List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
+    private List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
     {
 
         List<ThingWithQueryParams> thingsToExamine = new();
@@ -89,18 +89,18 @@ public partial class UKS
                 if ((r.relType.HasAncestorLabeled("has-child") && !reverse) ||
                     (r.relType.HasAncestorLabeled("has") && reverse))
                 {
-                    if (r.target.Label == "has") 
-                        continue;
+                    //if there are several relationship, ignore the is-a, it is likely wrong
+                    var existingRelationships = GetRelationshipsBetween(r.source, r.target);
+                    if (existingRelationships.Count > 1) continue;
+
                     if (thingsToExamine.FindFirst(x => x.thing == r.source) is ThingWithQueryParams twgp)
-                    {
-                        twgp.hitCount++;
-                    }
+                        twgp.hitCount++;//thing is in the list, increment its count
                     else
-                    {
+                    {//thing is not in the list, add it
                         bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
                             thingsToExamine[i].reachedWith != null;
                         if (corner)
-                        { }
+                        { } //corners are the reasons in a logic progression
                         thingsToExamine[i].corner |= corner;
                         ThingWithQueryParams thingToAdd = new ThingWithQueryParams
                         {
@@ -153,7 +153,19 @@ public partial class UKS
         }
         return thingsToExamine;
     }
-
+    private List<Relationship> GetRelationshipsBetween(Thing t1, Thing t2)
+    {
+        List<Relationship> retVal = new();
+        foreach (Relationship r in t1.Relationships)
+            if (r.target == t2) retVal.Add(r);
+        foreach (Relationship r in t1.RelationshipsFrom)
+            if (r.target == t2) retVal.Add(r);
+        foreach (Relationship r in t2.Relationships)
+            if (r.target == t1) retVal.Add(r);
+        foreach (Relationship r in t2.RelationshipsFrom)
+            if (r.target == t1) retVal.Add(r);
+        return retVal;
+    }
     private List<Relationship> GetAllRelationshipsInt(List<ThingWithQueryParams> thingsToExamine)
     {
         List<Relationship> result = new();
@@ -192,7 +204,7 @@ public partial class UKS
                         rootThing = GetOrAddThing(r.relType.Label.Substring(0, r.relType.Label.IndexOf(".")));
                     Thing bestMatch = r.relType;
                     List<Thing> missingAttributes = new();
-                    Thing newRelType = SubclassExists(r.relType, new List<Thing> { newCountType },ref bestMatch,ref missingAttributes);
+                    Thing newRelType = SubclassExists(r.relType, new List<Thing> { newCountType }, ref bestMatch, ref missingAttributes);
                     if (newRelType == null)
                         newRelType = CreateSubclass(rootThing, new List<Thing> { newCountType });
                     r1.reltype = newRelType;
@@ -220,7 +232,7 @@ public partial class UKS
                 }
 
             }
-        } 
+        }
     }
     private void RemoveFalseConditionals(List<Relationship> result)
     {
@@ -278,8 +290,8 @@ public partial class UKS
         return retVal;
     }
 
-           //find all the things containing the sequence of attributes
- private bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
+    //find all the things containing the sequence of attributes
+    private bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
     {
         //TODO modify to find closest match, return the matching score instead of bool
         //TODO this requires that all entries in a sequence must be adjascent without any intervening extraneous relationships
@@ -330,7 +342,7 @@ public partial class UKS
     }
 
     //TODO add parameter to allow some number of misses
-    private  bool HasAllAttributes(Thing t, List<Thing> targetAttributes)
+    private bool HasAllAttributes(Thing t, List<Thing> targetAttributes)
     {
         List<Thing> thingAttributes = GetAllAttributes(t);
         foreach (Thing t2 in targetAttributes)

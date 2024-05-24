@@ -13,12 +13,12 @@ using UKS;
 
 namespace BrainSimulator.Modules
 {
-    public class ModuleOnlineFile : ModuleBase
+    public class ModuleGPTInfo : ModuleBase
     {
-        public string Output = "";
+        public static string Output = "";
 
 
-        public ModuleOnlineFile()
+        public ModuleGPTInfo()
         {
 
         }
@@ -36,7 +36,7 @@ namespace BrainSimulator.Modules
             UpdateDialog();
         }
 
-        public async Task GetChatGPTVerifyParentChild(string child,string parent)
+        public static async Task GetChatGPTVerifyParentChild(string child,string parent)
         {
             child = child.ToLower();
             child = child.Replace(".", "");
@@ -59,11 +59,11 @@ namespace BrainSimulator.Modules
                     if (Output.Contains("language model")) return;
                     if (!answerString.Contains("yes"))
                     {
-                        Thing tParent = theUKS.Labeled(parent);
-                        if (tParent == null) tParent = theUKS.Labeled("."+parent);
+                        Thing tParent = MainWindow.theUKS.Labeled(parent);
+                        if (tParent == null) tParent = MainWindow.theUKS.Labeled("."+parent);
                         if (tParent == null) return;
-                        Thing tChild = theUKS.Labeled(child);
-                        if (tChild== null) tChild = theUKS.Labeled("." + child);
+                        Thing tChild = MainWindow.theUKS.Labeled(child);
+                        if (tChild== null) tChild = MainWindow.theUKS.Labeled("." + child);
                         if (tChild== null) return;
                         tChild.RemoveParent(tParent);
                         Debug.WriteLine($"Relationship: {child} is-a {parent} has been removed. ");
@@ -77,12 +77,13 @@ namespace BrainSimulator.Modules
 
         }
 
-        public async Task GetChatGPTParents(string textIn)
+        public static async Task GetChatGPTParents(string textIn)
         {
             try
             {
                 textIn = textIn.ToLower();
-                textIn = textIn.Replace(".", "");
+                if (textIn.StartsWith("."))
+                    textIn = textIn.Replace(".", "");
 
                 string answerString = "";
                 string userText = $"Provide commonsense clasification answer the request: what is-a {textIn}";
@@ -115,15 +116,13 @@ namespace BrainSimulator.Modules
             {
                 Debug.WriteLine($"Error with getting Chat GPT Fine tuning. Error is {ex}.");
             }
-
         }
-        public async Task GetChatGPTData(string textIn)
+        public static async Task GetChatGPTData(string textIn)
         {
             try
             {
-                bool isError = true;
-                string prompt;
                 textIn = textIn.ToLower();
+                textIn = textIn.Replace(".", "");
 
                 string answerString = "";
                 string userText = $"Provide commonsense facts to answer the request: what is a {textIn}";
@@ -140,7 +139,7 @@ namespace BrainSimulator.Modules
                                     "always contains parts (with counts), " +
                                     "usually contains parts (with counts) " +
                                     "has unique characteristics, " +
-                                    $"examples of {textIn} include (up to 5), " +
+                                    $"list examples of {textIn} (up to 5) do not include things which have a property of {textIn} , " +
                                     //the following are not very consistent/useful
                                     //"needs, " +
                                     //"is-part-of, " +
@@ -169,17 +168,18 @@ namespace BrainSimulator.Modules
             }
         }
 
-        public void ParseGPTOutput(string textIn, string GPTOutput)
+        public static void ParseGPTOutput(string textIn, string GPTOutput)
         {
             // Get the UKS
-            GetUKS();
+            UKS.UKS theUKS = MainWindow.theUKS;
+            //GetUKS();
             // Split by comma (,) to get individual pairs
             string[] valuePairs = GPTOutput.Split(';', '\n');
             // Error check
             if (valuePairs.Length == 0)
             {
                 Debug.WriteLine($"Error, length of value '{Output}' is 0.");
-                ModuleOnlineFileDlg.errorCount += 1;
+                ModuleGPTInfoDlg.errorCount += 1;
             }
 
             textIn = GPT.Singularize(textIn);
