@@ -123,10 +123,14 @@ namespace BrainSimulator
                 else
                 {
                     ModuleBase mod = CreateNewModule(moduleType, t.Label);
-                    activeModules.Add(mod);
+                    if (mod != null) 
+                        activeModules.Add(mod);
+                    else
+                    {
+                        theUKS.Labeled("ActiveModule").RemoveChild(t);
+                    }
                 }
             }
-
         }
         private bool SaveFile(string fileName)
         {
