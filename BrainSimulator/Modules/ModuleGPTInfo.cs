@@ -5,10 +5,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms.Integration;
+using System.Windows;
 using UKS;
 
 namespace BrainSimulator.Modules
@@ -28,6 +29,15 @@ namespace BrainSimulator.Modules
 
         }
 
+        public override void SetUpAfterLoad()
+        {
+            string apiKey = ConfigurationManager.AppSettings["APIKey"];
+            if (!apiKey.StartsWith("sk"))
+            {
+                MessageBox.Show("OpenAI GPT API Key not set in app.config file. GPT Info requests will be ignored.", "Not found", MessageBoxButton.OK);
+            }
+        }
+
         public override void Fire()
         {
             Init();  //be sure to leave this here
@@ -36,30 +46,20 @@ namespace BrainSimulator.Modules
             UpdateDialog();
         }
 
+        //these are static so they can be called from the UKS dialog context menu
+        //This can verify parent-child releationships.
         public static async Task GetChatGPTVerifyParentChild(string child,string parent)
         {
-            string child1 = child.ToLower();
-            if (child1[0] == '.') child1 = child1.Substring(1);
-            string[] s = child1.Split('.');
-            child1 = "";
-            for (int i = 1; i < s.Length; i++)
-                child1 += ((child1.Length == 0) ? "" : " ") + s[i];
-            child1 += ((child1.Length == 0) ? "" : " ") + s[0];
-            string parent1 = parent.ToLower();
-            if (parent1[0] == '.') parent1 = parent1.Substring(1);
-            s = parent1.Split('.');
-            parent1 = "";
-            for (int i = 1; i < s.Length; i++)
-                parent1 += ((parent1.Length == 0) ? "" : " ") + s[i];
-            parent1 += ((parent1.Length == 0) ? "" : " ") + s[0];
-
+            //these turns dotted names back into more english-language strings
+            string child1 = GetStringFromThingLabel(child);
+            string parent1 = GetStringFromThingLabel(parent);
 
             try
             {
 
                 string answerString = "";
                 string systemText = $"Provide commonsense facts about the following: ";
-                string userText = $"Is the following true: a(n) {child1} is a(n) {parent1}? (yes or no, no explanation)" ;
+                string userText = $"Is the following true: a(n) {child1} is a(n) {parent1}? (yes or no, no explanation)";
 
                 answerString = await GPT.GetGPTResult(userText, systemText);
                 if (!answerString.StartsWith("ERROR") && answerString != "")
@@ -101,6 +101,20 @@ namespace BrainSimulator.Modules
 
         }
 
+        //this turns dotted names back into more english-language strings
+        private static string GetStringFromThingLabel(string thingLabel)
+        {
+            string theString = thingLabel.ToLower();
+            if (theString[0] == '.') theString = theString.Substring(1);
+            string[] s = theString.Split('.');
+            theString = "";
+            for (int i = 1; i < s.Length; i++)
+                theString += ((theString.Length == 0) ? "" : " ") + s[i];
+            theString += ((theString.Length == 0) ? "" : " ") + s[0];
+            return theString;
+        }
+
+        //this is used to add parents to unknownObjects
         public static async Task GetChatGPTParents(string textIn)
         {
             try
@@ -115,14 +129,6 @@ namespace BrainSimulator.Modules
                     "This is a classification request. Examples: horse is-a | animal, mammal \n\r chimpanzee is-a | primate, mammal"+
                     "Answer is formatted: is-a | VALUE, VALUE, VALUE with no more than 3 values and VAIUES are 1 or 2 words\n\r" +
                     $"Answer should ONLY contain VALUEs where it is reasonable to say: '{textIn} is-a VALUE' and exclue: 'VALUE is-a {textIn}'";
-                //string systemText = "Provide answers that are common sense to a 10 year old. \n\r" +
-                //                                 $"if {textIn} is not a noun, answer with the word's part of speech. \r\n "+
-                //                                 "Each Answer is formatted: IS A | VALUE, VALUE, VALUE with no more than 3 values\n\r" +
-                //                                 "If there is more than one VALUE, these should be saparated by commas. \n\r" +
-                //                                 "Each VALUE should be anoun \r\n"+
-                //                                 "Individual VALUEs should not be more than two words. \n\r" +
-                //                                 "All answers should be reasonable to say in common useage. \n\r" +
-                //                                 "For example, if given dog, answer: is-a | animal, mammal, pet";
 
                 answerString = await GPT.GetGPTResult(userText, systemText);
                 if (!answerString.StartsWith("ERROR") && answerString != "")
@@ -141,6 +147,8 @@ namespace BrainSimulator.Modules
                 Debug.WriteLine($"Error with getting Chat GPT Fine tuning. Error is {ex}.");
             }
         }
+
+        //this is a general factual information request from GPT
         public static async Task GetChatGPTData(string textIn)
         {
             try
@@ -163,16 +171,14 @@ namespace BrainSimulator.Modules
                                     "always contains parts (with counts), " +
                                     "usually contains parts (with counts) " +
                                     "has unique characteristics, " +
-                                    //$"list examples of {textIn} (up to 5) do not include things which have a property of {textIn} , " +
-                                    //the following are not very consistent/useful
-                                    //"needs, " +
-                                    //"is-part-of, " +
-                                    //"is-bigger-than, " +
-                                    //"is-smaller-than, " +
-                                    //"is-similar-to, " +
                                     "is-part-of-speech, ";
-
-//                                         "then list up to 10 'values' for which it would be reasonable to say 'a ''value'' is-a "+textIn  
+                //the following have been tried but are not very consistent/useful
+                //$"list examples of {textIn} (up to 5) do not include things which have a property of {textIn} , " +
+                //"needs, " +
+                //"is-part-of, " +
+                //"is-bigger-than, " +
+                //"is-smaller-than, " +
+                //"is-similar-to, " +
 
                 answerString = await GPT.GetGPTResult(userText, systemText);
                 if (!answerString.StartsWith("ERROR") && answerString != "")
@@ -192,6 +198,7 @@ namespace BrainSimulator.Modules
             }
         }
 
+        //given general information output from GPT, parse it into UKS
         public static void ParseGPTOutput(string textIn, string GPTOutput)
         {
             // Get the UKS
@@ -313,7 +320,7 @@ namespace BrainSimulator.Modules
                         {
                             theUKS.AddStatement("." + textIn, valueType, "." + value, null, valueTypeAttributes, valueProperties);
                         }
-                        ///////   null reltypes?
+                        ///////   null reltypes? This was a safety check
                         ///
                         foreach (Thing t in theUKS.UKSList)
                             foreach (Relationship r in t.Relationships)

@@ -7,15 +7,13 @@
         mc:Ignorable="d"
         Title="ModuleOnlineFileDlg" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
     <Grid Name="theGrid" >
-        <TextBox x:Name="txtOutput" FontSize="14" TextWrapping="Wrap" Text="TextBox" Margin="58,137,79,54"/>
-        <Button Content="Clear Output" Height="29" Margin="0,0,152,10" VerticalAlignment="Bottom" Click="ClearButton_Click" HorizontalAlignment="Right" Width="102" />
-        <Button x:Name="LoadButton" Content="Load File" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="148" Click="LoadButton_Click" Margin="0,50,79,0" FontSize="16"  />
-        <Button x:Name="RunButton" Content="Run File" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="148" Click="RunButton_Click" Margin="0,83,79,0" FontSize="16" />
-        <TextBox x:Name="textInput" Height="37" Margin="58,73,458,0" TextWrapping="Wrap" Text="TextBox" FontSize="16" VerticalAlignment="Top" PreviewKeyDown="textInput_PreviewKeyDown" />
+        <TextBox x:Name="txtOutput" FontSize="14" TextWrapping="Wrap" Text="" Margin="58,137,79,54"/>
+        <Button x:Name="LoadButton" Content="Load Word File" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="148" Click="LoadButton_Click" Margin="0,83,79,0" FontSize="16"  />
+        <TextBox x:Name="textInput" Height="37" Margin="58,73,458,0" TextWrapping="Wrap" Text="" FontSize="16" VerticalAlignment="Top" PreviewKeyDown="textInput_PreviewKeyDown" />
         <Button Content="Re-Parse" HorizontalAlignment="Right" Margin="0,50,239,0" Height="27" Width="148" Click="Button_Click" FontSize="16" VerticalAlignment="Top" />
         <Button Content="Handle Unknowns" HorizontalAlignment="Right" Margin="0,83,239,0" Height="27" Width="148" Click="Button_Click" FontSize="16" VerticalAlignment="Top" />
-        <Button Content="Verify" HorizontalAlignment="Right" Margin="0,18,239,0" VerticalAlignment="Top" Height="27" Width="148" FontSize="16" Click="Button_Click" />
-        <Button Content="Verify All" HorizontalAlignment="Right" Margin="0,18,79,0" VerticalAlignment="Top" Height="27" Width="148" FontSize="16" Click="Button_Click" />
+        <Button Content="Verify All Parents" HorizontalAlignment="Right" Margin="0,50,79,0" VerticalAlignment="Top" Height="27" Width="148" FontSize="16" Click="Button_Click" />
         <Label x:Name="StatusLabel" Content="" Margin="58,0,300,10" Grid.Row="1" Height="29" VerticalAlignment="Bottom"/>
+        <Label Content="GPT Request. Follow by [Enter] for Info. &#10;Follow by [Up-arrow] for parents only." HorizontalAlignment="Left" Height="44" Margin="58,20,0,0" VerticalAlignment="Top" Width="309"/>
     </Grid>
 </local:ModuleBaseDlg>

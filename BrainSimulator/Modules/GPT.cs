@@ -1,17 +1,17 @@
 ﻿using Newtonsoft.Json;
 using Pluralize.NET;
-using System.Text.RegularExpressions;
 using System.Net.Http;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Markup;
 
 namespace BrainSimulator.Modules
 {
+    /// <summary>
+    /// encapsulate access to the GPT API
+    /// </summary>
     public static class GPT
     {
         static Pluralizer pluralizer = new Pluralizer();
@@ -61,6 +61,7 @@ namespace BrainSimulator.Modules
         public static async Task<string> GetGPTResult(string userText, string systemText)
         {
             string apiKey = ConfigurationManager.AppSettings["APIKey"];
+            if (!apiKey.StartsWith("sk")) return "";
             var url = "https://api.openai.com/v1/chat/completions";
             var client = new HttpClient();
             string answerString = "";
@@ -71,7 +72,7 @@ namespace BrainSimulator.Modules
             {
                 temperature = 0.2,
                 max_tokens = 100,
-                // OBSOLETE: IMPORTANT: Add your model here after fine tuning on OpenAI using word_only_dataset.jsonl.
+                // NOT CURRENTLY USED: IMPORTANT: If you use GPT "Fine Tuning" put the fine-tuning model key here in the app.config file and change the line here:.
                 //model = "<YOUR_FINETUNED_MODEL_HERE>",
                 //model = ConfigurationManager.AppSettings["FineTunedModel"],
                 model = "gpt-4o", //not fine-tuned
@@ -109,10 +110,12 @@ namespace BrainSimulator.Modules
             {
                 throw ex;
             }
+            
             // Deserialize the response body to a CompletionResult object
             return answerString;
         }
 
+        //encapsulates a place where you can call the pluralizer and handle known special cases
         public static string Singularize(string text)
         {
             List<string> ignoreWords = new() { "clothes", "wales", };

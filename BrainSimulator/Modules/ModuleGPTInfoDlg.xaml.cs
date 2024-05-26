@@ -33,6 +33,13 @@ namespace BrainSimulator.Modules
             InitializeComponent();
         }
 
+        public override bool Draw(bool checkDrawTimer)
+        {
+            ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
+            StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("unknownObject")?.Children.Count} unknown Things.  ";
+            return base.Draw(checkDrawTimer);
+        }
+
         private void TheCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Draw(false);
@@ -45,7 +52,7 @@ namespace BrainSimulator.Modules
             StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("unknownObject")?.Children.Count} unknown Things.  ";
         }
 
-        private void LoadButton_Click(object sender, RoutedEventArgs e)
+        private async void LoadButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn)
             {
@@ -92,15 +99,6 @@ namespace BrainSimulator.Modules
                                 words.AddRange(lineWords);
                             }
                         }
-
-                        // Optional: Display the words in the console (commented out by default)
-                        /*
-                        for (int i = 0; i < 5; i++)
-                        {
-                            Debug.WriteLine(words[i]);
-                        }
-                        */
-
                         txtOutput.Text = "File Successfully Read!";
                     }
                     catch (IOException error)
@@ -116,22 +114,9 @@ namespace BrainSimulator.Modules
                     Debug.WriteLine("No file selected.");
                 }
             }
+            await ProcessWordsAsync(words);
         }
 
-        private async void RunButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn)
-            {
-                if (words.Count == 0)
-                {
-                    SetOutputText("No file has been added! Cannot run.");
-                }
-                else
-                {
-                    await ProcessWordsAsync(words);
-                }
-            }
-        }
 
         // Task to process the words.
         public async Task ProcessWordsAsync(List<string> words)
@@ -166,10 +151,27 @@ namespace BrainSimulator.Modules
                     ModuleGPTInfo.GetChatGPTParents(word.Trim());
             }
 
-            SetOutputText($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+            SetOutputText($"Done processing unknowns! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
             Debug.WriteLine($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
         }
 
+        public async Task verifyAllAsync()
+        {
+            ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
+            SetOutputText("Verifying all is-a relationships");
+            foreach (Thing t in mf.theUKS.UKSList)
+            {
+                if (t.Parents.FindFirst(x => x.Label == "unknownObject") != null) continue;
+                if (!t.Label.StartsWith('.')) continue;
+                if (t.Label == ".") continue;
+                if (t == mf.theUKS.UKSList.Last())
+                    await VerifyAsync(t.Label);
+                else
+                    VerifyAsync(t.Label);
+            }
+            SetOutputText("Don verifying is-a relationships for reasonableness");
+
+        }
         public async Task VerifyAsync(string label)
         {
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
@@ -214,27 +216,15 @@ namespace BrainSimulator.Modules
             if (sender is Button b)
             {
                 ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
-                if (b.Content.ToString() == "Re-Parse")
+                if (b.Content.ToString().StartsWith("Re-Parse"))
                 {
                     ModuleGPTInfo.ParseGPTOutput(textInput.Text, txtOutput.Text);
                 }
-                else if (b.Content.ToString() == "Verify")
+                else if (b.Content.ToString().StartsWith("Verify All"))
                 {
-                    VerifyAsync(textInput.Text);
+                    verifyAllAsync();
                 }
-                else if (b.Content.ToString() == "Verify All")
-                {
-                    SetOutputText("Verifying all is-a relationships");
-                    foreach (Thing t in mf.theUKS.UKSList)
-                    {
-                        if (t.Parents.FindFirst(x => x.Label == "unknownObject") != null) continue;
-                        if (!t.Label.StartsWith('.')) continue;
-                        if (t.Label == ".") continue;
-                        VerifyAsync(t.Label);
-                    }
-                    SetOutputText("Done");
-                }
-                else
+                else //process unknowns
                 {
                     List<string> words = new List<string>();
                     var thingList = mf.theUKS.Labeled("unknownObject").Children;
