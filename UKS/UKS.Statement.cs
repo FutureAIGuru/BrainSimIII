@@ -65,7 +65,7 @@ public partial class UKS
         Relationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
 
         //does this relationship already exist (without conditions)?
-        Relationship existing = Relationship.GetRelationship(r);
+        Relationship existing = GetRelationship(r);
         if (existing != null)
         {
             WeakenConflictingRelationships(source, existing);

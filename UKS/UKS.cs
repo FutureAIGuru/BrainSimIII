@@ -327,6 +327,21 @@ public partial class UKS
         return false;
     }
 
+    public Relationship GetRelationship(string source, string relType, string target)
+    {
+        //create a temporary relationship
+        Relationship r = new() { source = Labeled(source), relType = Labeled(relType), target = Labeled(target) };
+        //see if it already exists
+        return GetRelationship(r);
+    }
+    public Relationship GetRelationship(Relationship r)
+    {
+        foreach (Relationship r1 in r.source.Relationships)
+        {
+            if (RelationshipsAreEqual (r,r1)) return r1;
+        }
+        return null;
+    }
 
 
     private List<Thing> ThingListFromStringList(List<string> modifiers, string defaultParent)

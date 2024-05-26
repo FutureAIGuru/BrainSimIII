@@ -174,11 +174,14 @@ namespace BrainSimulator.Modules
         {
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
             if (!label.StartsWith(".")) label = "." + label;
-            UKS.Thing child = mf.theUKS.Labeled(label);
-            if (child == null) return;
-            foreach (Thing parent in child.Parents)
+            UKS.Thing t = mf.theUKS.Labeled(label);
+            if (t == null) return;
+            foreach (Relationship r in t.Relationships)
             {
-                ModuleGPTInfo.GetChatGPTVerifyParentChild(child.Label, parent.Label);
+                if (r.GPTVerified) continue;
+                if (r.reltype.Label != "has-child") continue;
+
+                ModuleGPTInfo.GetChatGPTVerifyParentChild(r.target.Label, t.Label);
             }
         }
 

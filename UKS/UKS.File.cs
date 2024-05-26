@@ -143,6 +143,7 @@ public partial class UKS
             hits = l.Hits,
             misses = l.Misses,
             count = l.count,
+            GPTVerified = l.GPTVerified,
             clauses = clauseList,
         };
         return sR;
@@ -249,6 +250,7 @@ public partial class UKS
             Hits = p.hits,
             Misses = p.misses,
             Weight = p.weight,
+            GPTVerified = p.GPTVerified,
             count = p.count,
             //sentencetype = p.sentencetype as SentenceType,
         };

@@ -87,24 +87,29 @@ namespace BrainSimulator.Modules
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
             request.Content = new StringContent(requestBodyJson, Encoding.UTF8, "application/json");
 
-            // Send the request and get the response
-            var response = await client.SendAsync(request);
-
+            try
+            {            // Send the request and get the response
+                var response = await client.SendAsync(request);
+                var responseJson = await response.Content.ReadAsStringAsync();
+                CompletionResult completionResult = JsonConvert.DeserializeObject<CompletionResult>(responseJson);
+                if (completionResult.usage != null)
+                {
+                    int tokensUsed = completionResult.usage.TotalTokens;
+                    totalTokensUsed += tokensUsed;
+                }
+                if (completionResult.choices != null)
+                {
+                    // Extract the generated text from the CompletionResult object
+                    answerString = completionResult.choices[0].message.content.Trim().ToLower();
+                }
+                else
+                    if (completionResult.error != null) answerString = "ERROR: " + completionResult.error.message;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
             // Deserialize the response body to a CompletionResult object
-            var responseJson = await response.Content.ReadAsStringAsync();
-            CompletionResult completionResult = JsonConvert.DeserializeObject<CompletionResult>(responseJson);
-            if (completionResult.usage != null)
-            {
-                int tokensUsed = completionResult.usage.TotalTokens;
-                totalTokensUsed += tokensUsed;
-            }
-            if (completionResult.choices != null)
-            {
-                // Extract the generated text from the CompletionResult object
-                answerString = completionResult.choices[0].message.content.Trim().ToLower();
-            }
-            else
-                if (completionResult.error != null) answerString = "ERROR: " + completionResult.error.message;
             return answerString;
         }
 

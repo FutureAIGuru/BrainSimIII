@@ -391,7 +391,7 @@ public partial class UKS
                 q.target = query.target;
             if (query.target != null && query.target.AncestorList().Contains(q.source))
                 q.source = query.target;
-            var qResult = Relationship.GetRelationship(q);
+            var qResult = GetRelationship(q);
             if (qResult != null && qResult.Weight < 0.8)
                 return false;
             if (qResult == null)
