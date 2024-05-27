@@ -116,34 +116,34 @@ public partial class UKS
                     }
                 }
 
-            //foreach (Relationship r in t.Relationships) //has-a et al
-            //    if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
-            //        (r.relType.HasAncestorLabeled("has") && !reverse))
-            //    {
-            //        if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twqp)
-            //        {
-            //            twqp.hitCount++;
-            //        }
-            //        else
-            //        {
-            //            bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
-            //                thingsToExamine[i].reachedWith != null;
-            //            if (corner)
-            //            { }
-            //            thingsToExamine[i].corner |= corner;
-            //            ThingWithQueryParams thingToAdd = new ThingWithQueryParams
-            //            {
-            //                thing = r.target,
-            //                hopCount = hopCount,
-            //                weight = curWeight * r.Weight,
-            //                reachedWith = r.relType,
-            //            };
-            //            thingsToExamine.Add(thingToAdd);
-            //            //if things have counts, they are multiplied
-            //            int val = GetCount(r.reltype);
-            //            thingToAdd.haveCount = curCount * val;
-            //        }
-            //    }
+            foreach (Relationship r in t.Relationships) //has-a et al
+                if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
+                    (r.relType.HasAncestorLabeled("has") && !reverse))
+                {
+                    if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twqp)
+                    {
+                        twqp.hitCount++;
+                    }
+                    else
+                    {
+                        bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
+                            thingsToExamine[i].reachedWith != null;
+                        if (corner)
+                        { }
+                        thingsToExamine[i].corner |= corner;
+                        ThingWithQueryParams thingToAdd = new ThingWithQueryParams
+                        {
+                            thing = r.target,
+                            hopCount = hopCount,
+                            weight = curWeight * r.Weight,
+                            reachedWith = r.relType,
+                        };
+                        thingsToExamine.Add(thingToAdd);
+                        //if things have counts, they are multiplied
+                        int val = GetCount(r.reltype);
+                        thingToAdd.haveCount = curCount * val;
+                    }
+                }
             if (i == currentEnd - 1)
             {
                 hopCount++;
@@ -172,25 +172,20 @@ public partial class UKS
         for (int i = 0; i < thingsToExamine.Count; i++)
         {
             Thing t = thingsToExamine[i].thing;
-            if (t == null) continue;
+            if (t == null) continue; //safety
             int haveCount = thingsToExamine[i].haveCount;
             List<Relationship> relationshipsToAdd = null;
             relationshipsToAdd = new();
             relationshipsToAdd.AddRange(t.Relationships);
-            //relationshipsToAdd.AddRange(t.RelationshipsFrom);
-            //relationshipsToAdd.AddRange(t.RelationshipsAsTypeWriteable);
             foreach (Relationship r in relationshipsToAdd)
             {
                 if (r.reltype == Thing.HasChild) continue;
-
                 //only add the new relatinoship to the list if it is not already in the list
                 bool ignoreSource = thingsToExamine[i].hopCount > 1;
                 Relationship existing = result.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));
                 if (existing != null) continue;
-                if (r.target.Label.Contains("eye"))
-                { }
 
-                if (haveCount > 1 && r.relType?.Label == "has")
+                if (haveCount > 1 && r.relType?.HasAncestorLabeled("has")!= null)
                 {
                     //this creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
@@ -199,12 +194,11 @@ public partial class UKS
 
                     //hack for numeric labels
                     Thing rootThing = r1.reltype;
-                    //TODO  reenable
                     if (r.relType.Label.Contains("."))
                         rootThing = GetOrAddThing(r.relType.Label.Substring(0, r.relType.Label.IndexOf(".")));
                     Thing bestMatch = r.relType;
                     List<Thing> missingAttributes = new();
-                    Thing newRelType = SubclassExists(r.relType, new List<Thing> { newCountType }, ref bestMatch, ref missingAttributes);
+                    Thing newRelType = SubclassExists(rootThing, new List<Thing> { newCountType }, ref bestMatch, ref missingAttributes);
                     if (newRelType == null)
                         newRelType = CreateSubclass(rootThing, new List<Thing> { newCountType });
                     r1.reltype = newRelType;

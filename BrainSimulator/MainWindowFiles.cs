@@ -40,6 +40,8 @@ namespace BrainSimulator
                 CreateEmptyUKS();
 
             SetCurrentFileNameToProperties();
+
+            UpdateModuleListsInUKS();
             LoadActiveModules();
             ReloadActiveModulesSP();
             ShowAllModuleDialogs();
