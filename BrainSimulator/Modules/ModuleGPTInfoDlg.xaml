@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
-        Title="ModuleOnlineFileDlg" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
+        Title="Get data from the GPT API" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
     <Grid Name="theGrid" >
         <TextBox x:Name="txtOutput" FontSize="14" TextWrapping="Wrap" Text="" Margin="58,137,79,54"/>
         <Button x:Name="LoadButton" Content="Load Word File" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="148" Click="LoadButton_Click" Margin="0,83,79,0" FontSize="16"  />

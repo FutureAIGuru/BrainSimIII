@@ -143,9 +143,13 @@ namespace BrainSimulator
             }
             else
             {
-                //this is a file name from the File menu
-                currentFileName = Path.GetFullPath("./UKSContent/" + fileName + ".xml");
-                LoadCurrentFile();
+                if (sender is MenuItem mi)
+                {
+                    //this is a file name from the File menu
+                    currentFileName = mi.ToolTip.ToString(); //Path.GetFullPath("./UKSContent/" + fileName + ".xml");
+                    LoadCurrentFile();
+
+                }
             }
         }
 

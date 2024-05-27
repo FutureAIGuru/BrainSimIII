@@ -128,7 +128,8 @@ namespace BrainSimulator.Modules
                 string systemText = 
                     "This is a classification request. Examples: horse is-a | animal, mammal \n\r chimpanzee is-a | primate, mammal"+
                     "Answer is formatted: is-a | VALUE, VALUE, VALUE with no more than 3 values and VAIUES are 1 or 2 words\n\r" +
-                    $"Answer should ONLY contain VALUEs where it is reasonable to say: '{textIn} is-a VALUE' and exclue: 'VALUE is-a {textIn}'";
+                    $"Answer should ONLY contain VALUEs where it is reasonable to say: '{textIn} is-a VALUE' and exclude: 'VALUE is-a {textIn}' \r\n"+
+                    $"Never include {textIn} in the result.";
 
                 answerString = await GPT.GetGPTResult(userText, systemText);
                 if (!answerString.StartsWith("ERROR") && answerString != "")
@@ -297,10 +298,12 @@ namespace BrainSimulator.Modules
                         if (valueType.StartsWith("examples"))
                         {
                             theUKS.AddStatement("." + value, "is-a", "." + textIn); //note reversal
+                            ModuleGPTInfoDlg.relationshipCount += 1;
                         }
                         else if (valueType.StartsWith("is-part-of-speech"))
                         {
                             theUKS.AddStatement("." + textIn, "is-a", "." + value);
+                            ModuleGPTInfoDlg.relationshipCount += 1;
                         }
                         else if (valueType.StartsWith("has-properties"))
                         {
@@ -313,12 +316,14 @@ namespace BrainSimulator.Modules
                                 r = theUKS.AddStatement("." + textIn, "has", "." + value, null, null, valueProperties);
                             else
                                 r = theUKS.AddStatement("." + textIn, "has", "." + value, null, count, valueProperties);
+                            ModuleGPTInfoDlg.relationshipCount += 1;
                             if (valueType.Contains("usually"))
                                 r.Weight = .75f;
                         }
                         else
                         {
                             theUKS.AddStatement("." + textIn, valueType, "." + value, null, valueTypeAttributes, valueProperties);
+                            ModuleGPTInfoDlg.relationshipCount += 1;
                         }
                         ///////   null reltypes? This was a safety check
                         ///

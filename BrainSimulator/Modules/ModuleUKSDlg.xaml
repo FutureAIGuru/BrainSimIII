@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
-        Title="Universal Knowledge Store (UKS)" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
+        Title="Universal Knowledge Store (UKS)" Height="450" Width="800" Background="Gray" ShowInTaskbar="False" Loaded="Dlg_Loaded">
     <Grid >
         <TreeView x:Name="theTreeView" FontSize="16"
                   SizeChanged="TheTreeView_SizeChanged" 
@@ -14,7 +14,6 @@
                   MouseLeave="TheTreeView_MouseLeave"
                   PreviewMouseWheel="theTreeView_MouseWheel"
                   >
-
         </TreeView>
         <Button x:Name="refreshButton" Content="Refresh" HorizontalAlignment="Left" Margin="20,0,0,19" Width="79" Height="27" RenderTransformOrigin="0.519,5.667" VerticalAlignment="Bottom" Click="RefreshButton_Click" FontSize="16" />
         <CheckBox x:Name="detailsCB" Content="Show Details" HorizontalAlignment="Left" Margin="122,0,0,37" Width="120" Height="19" VerticalAlignment="Bottom" Checked="CheckBoxDetails_Checked" Unchecked="CheckBoxDetails_Unchecked" FontSize="16"/>
@@ -24,8 +23,5 @@
         <TextBox x:Name="textBoxRoot" HorizontalAlignment="Left" Margin="458,0,0,33" TextWrapping="Wrap" Text="Thing" Width="250" Height="25" VerticalAlignment="Bottom" TextChanged="textBoxRoot_TextChanged" PreviewKeyDown="TextBoxRoot_PreviewKeyDown" FontSize="16"/>
         <Label Content="" x:Name="statusLabel"  HorizontalAlignment="Left" Margin="415,0,0,-2" Width="300" Height="35" VerticalAlignment="Bottom" FontSize="16"/>
         <Button x:Name="InitializeButton" Content="Initialize" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="InitializeButton_Click" Margin="0,20,22,0" FontSize="16"   />
-        <!--<Button x:Name="LoadButton" Content="Load" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="LoadButton_Click" Margin="0,50,22,0" FontSize="16" />
-        <Button x:Name="SaveButton" Content="Save" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="SaveButton_Click" Margin="0,80,22,0" FontSize="16" />
-        <Button x:Name="MergeButton" Content="Merge" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="LoadButton_Click" Margin="0,110,22,0" FontSize="16"/>-->
     </Grid>
 </local:ModuleBaseDlg>

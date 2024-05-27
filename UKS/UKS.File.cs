@@ -5,7 +5,7 @@ namespace UKS;
 
 public partial class UKS
 {
-    string fileName = "";
+    static string fileName = "";
 
     public string FileName { get => fileName;}
 
@@ -430,7 +430,6 @@ public partial class UKS
             Debug.WriteLine("Could not open file because: " + e.Message);
             return false;
         }
-
 
         List<Type> extraTypes = GetTypesInUKS();
         XmlSerializer reader1 = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());

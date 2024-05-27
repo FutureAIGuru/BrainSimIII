@@ -170,7 +170,6 @@ namespace BrainSimulator
                 string shortName = Path.GetFileNameWithoutExtension(fileItem);
                 MenuItem mi = new MenuItem() { Header = shortName };
                 mi.Click += buttonLoad_Click;
-                //mi.Click += MRUListItem_Click;
                 mi.ToolTip = fileItem;
                 MRUListMenu.Items.Add(mi);
             }

@@ -301,7 +301,7 @@ public partial class UKS
         string newLabel = t.Label;
         foreach (Thing t1 in attributes)
         {
-            newLabel += "." + t1.Label;
+            newLabel += ((t1.Label.StartsWith("."))?"":".") + t1.Label;
         }
         //create the new thing which is child of the original
         Thing retVal = AddThing(newLabel, t);

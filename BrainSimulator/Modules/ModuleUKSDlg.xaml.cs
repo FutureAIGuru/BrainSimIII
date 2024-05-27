@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using UKS;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace BrainSimulator.Modules;
 
@@ -74,7 +75,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             return;
         }
         statusLabel.Content = parent.theUKS.UKSList.Count + " Things  " + (childCount + refCount) + " Relationships";
-        Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.fileName);
+        Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.theUKS.FileName);
     }
 
     private void LoadContentToTreeView()
@@ -711,7 +712,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         }
 
         parent.theUKS.CreateInitialStructure();
-        //parent.Initialize();
 
         CollapseAll();
         expandAll = parent.GetAttribute("ExpandAll");
@@ -728,6 +728,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             CollapseTreeviewItems(item);
     }
 
+    //recursively collapse all the children
     private void CollapseTreeviewItems(TreeViewItem Item)
     {
         Item.IsExpanded = false;
@@ -741,58 +742,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         }
     }
 
-    private void SaveButton_Click(object sender, RoutedEventArgs e)
+    private void Dlg_Loaded(object sender, RoutedEventArgs e)
     {
-        ModuleUKS parent = (ModuleUKS)base.ParentModule;
-        System.Windows.Forms.SaveFileDialog saveFileDialog = new()
-        {
-            Filter = Utils.FilterXMLs,
-            Title = Utils.TitleUKSFileSave,
-            InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.UKSContentFolder),
-        };
-
-        // Show the file Dialog.  
-        // If the user clicked OK in the dialog and  
-        System.Windows.Forms.DialogResult result = saveFileDialog.ShowDialog();
-        if (result == System.Windows.Forms.DialogResult.OK)
-        {
-            MainWindow.SuspendEngine();
-            parent.fileName = saveFileDialog.FileName;
-            parent.theUKS.SaveUKStoXMLFile(parent.fileName);
-            MainWindow.ResumeEngine();
-        }
-        saveFileDialog.Dispose();
+        ModuleUKS parent = (ModuleUKS)ParentModule;
+        textBoxRoot.Text = parent.GetAttribute("Root");
     }
-
-    //this handles both the load and the merge buttons
-    private void LoadButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn)
-        {
-            MainWindow.SuspendEngine();
-            ModuleUKS parent = (ModuleUKS)base.ParentModule;
-            System.Windows.Forms.OpenFileDialog openFileDialog = new()
-            {
-                Filter = Utils.FilterXMLs,
-                Title = Utils.TitleUKSFileLoad,
-                InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.UKSContentFolder),
-            };
-
-            // Show the file Dialog.  
-            System.Windows.Forms.DialogResult result = openFileDialog.ShowDialog();
-            // If the user clicked OK in the dialog and  
-            if (result == System.Windows.Forms.DialogResult.OK)
-            {
-                parent.fileName = openFileDialog.FileName;
-                parent.theUKS.LoadUKSfromXMLFile(parent.fileName, (btn.Content.ToString() == "Merge"));
-                MainWindow.ResumeEngine();
-            }
-            openFileDialog.Dispose();
-            updateFailed = true; //this forces the expanded items list not to rebuild
-            //force a repaint
-            RefreshButton_Click(null, null);
-            MainWindow.ResumeEngine();
-        }
-    }
-
 }

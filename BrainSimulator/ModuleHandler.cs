@@ -65,7 +65,7 @@ public class ModuleHandler
     }
 
 
-    public List<string> GetPythonModules()
+    public List<string> GetListOfExistingPythonModuleTypes()
     {
         //this is a buffer of python modules so they can be imported once and run many times.
         List<String> pythonFiles = new();

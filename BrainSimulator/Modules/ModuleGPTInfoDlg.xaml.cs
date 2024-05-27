@@ -155,8 +155,10 @@ namespace BrainSimulator.Modules
             Debug.WriteLine($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
         }
 
+        static int count = 0;
         public async Task verifyAllAsync()
         {
+            count = 0;
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
             SetOutputText("Verifying all is-a relationships");
             foreach (Thing t in mf.theUKS.UKSList)
@@ -169,7 +171,7 @@ namespace BrainSimulator.Modules
                 else
                     VerifyAsync(t.Label);
             }
-            SetOutputText("Don verifying is-a relationships for reasonableness");
+            SetOutputText($"Done verifying is-a relationships for reasonableness. Checked {count} relationships.");
 
         }
         public async Task VerifyAsync(string label)
@@ -183,6 +185,7 @@ namespace BrainSimulator.Modules
                 if (r.GPTVerified) continue;
                 if (r.reltype.Label != "has-child") continue;
 
+                count++;
                 ModuleGPTInfo.GetChatGPTVerifyParentChild(r.target.Label, t.Label);
             }
         }
@@ -200,6 +203,7 @@ namespace BrainSimulator.Modules
                 string txt = textInput.Text;
                 await ModuleGPTInfo.GetChatGPTData(txt);
                 SetOutputText(ModuleGPTInfo.Output);
+                txtOutput.Text += $"\n\rTotal relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.";
             }
             if (e.Key == Key.Up)
             {
