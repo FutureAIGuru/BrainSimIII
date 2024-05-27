@@ -34,7 +34,11 @@ namespace BrainSimulator.Modules
             string apiKey = ConfigurationManager.AppSettings["APIKey"];
             if (!apiKey.StartsWith("sk"))
             {
-                MessageBox.Show("OpenAI GPT API Key not set in app.config file. GPT Info requests will be ignored.", "Not found", MessageBoxButton.OK);
+                MessageBox.Show(@"OpenAI GPT API Key was not found in the app.config file. GPT Info requests will be ignored. To set up: after getting an API key from OpenAI, put it in the app.config file in the form:
+    <appSettings>
+        <add key=""APIKey"" value=""<YOUR_API_KEY_HERE>"" />
+    </appSettings>
+", "API Key Not found", MessageBoxButton.OK);
             }
         }
 
