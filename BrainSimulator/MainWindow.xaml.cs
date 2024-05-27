@@ -117,7 +117,7 @@ namespace BrainSimulator
             DispatcherTimer dt = new();
             dt.Interval = TimeSpan.FromSeconds(0.1);
             dt.Tick += Dt_Tick;
-            dt.Start();
+//            dt.Start();
         }
 
 
