@@ -130,10 +130,10 @@ namespace BrainSimulator.Modules
                 string answerString = "";
                 string userText = $"Provide commonsense clasification answer the request which is appropriate for a 5 year old: What is-a {textIn}";
                 string systemText = 
-                    "This is a classification request. Examples: horse is-a | animal, mammal \n\r chimpanzee is-a | primate, mammal"+
-                    "Answer is formatted: is-a | VALUE, VALUE, VALUE with no more than 3 values and VAIUES are 1 or 2 words\n\r" +
-                    $"Answer should ONLY contain VALUEs where it is reasonable to say: '{textIn} is-a VALUE' and exclude: 'VALUE is-a {textIn}' \r\n"+
-                    $"Never include {textIn} in the result.";
+$@"This is a classification request. Examples: horse is-a | animal, mammal \n\r chimpanzee is-a | primate, mammal
+Answer is formatted: is-a | VALUE, VALUE, VALUE with no more than 3 values and VAIUES are 1 or 2 words.
+Answer should ONLY contain VALUEs where it is reasonable to say: '{textIn} is-a VALUE' and exclude: 'VALUE is-a {textIn}' 
+Never include {textIn} in the result.";
 
                 answerString = await GPT.GetGPTResult(userText, systemText);
                 if (!answerString.StartsWith("ERROR") && answerString != "")
@@ -163,20 +163,21 @@ namespace BrainSimulator.Modules
 
                 string answerString = "";
                 string userText = $"Provide commonsense facts to answer the request: what is a {textIn}";
-                string systemText = "Provide answers that are common sense to a 10 year old. \n\r" +
-                                    "Each Answer in the formatted: VALUE-NAME | VALUE, VALUE, VALUE \r\n"+
-                                    "**Individual ANSWERS should contain no more than 3 values** \n\r" +
-                                    "**Individual VALUE should be ONE or TWO words.** \n\r" +
-                                    "Example for dog: is-a | animal, pet \r\n" +
-                                    "Example for numerical VALUE: contains (with counts) always contains parts | 2 eyes, 4 legs, 1 tail \n\r" +
-                                    "Use any VALUE only once. \r\n" +
-                                    "Use the following VALUE-NAMEs if appropriate: " +
-                                    "is-a (where each value is a physical thing), " +
-                                    "can, " +
-                                    "always contains parts (with counts), " +
-                                    "usually contains parts (with counts) " +
-                                    "has unique characteristics, " +
-                                    "is-part-of-speech, ";
+                string systemText = 
+@"Provide answers that are common sense to a 10 year old. 
+Each Answer in the formatted: VALUE-NAME | VALUE, VALUE, VALUE
+**Individual ANSWERS should contain no more than 3 values**
+**Individual VALUE should be ONE or TWO words.**
+Example for dog: is-a | animal, pet
+Example for numerical VALUE: contains (with counts) always contains parts | 2 eyes, 4 legs, 1 tail
+Use any VALUE only once. 
+Use the following VALUE-NAMEs if appropriate: 
+is-a (where each value is a physical thing), 
+can, 
+always contains parts (with counts),
+usually contains parts (with counts)
+has unique characteristics,
+is-part-of-speech, ";
                 //the following have been tried but are not very consistent/useful
                 //$"list examples of {textIn} (up to 5) do not include things which have a property of {textIn} , " +
                 //"needs, " +
