@@ -89,7 +89,10 @@ namespace BrainSimulator
                 if (fileName != "")
                 {
                     if (!LoadFile(fileName))
+                    {
+                        MessageBox.Show("Previous UKS File could not be opened, empty UKS initialized", "File not read", MessageBoxButton.OK);
                         CreateEmptyUKS();
+                    }
                 }
                 else //force a new file creation on startup if no file name set
                 {
