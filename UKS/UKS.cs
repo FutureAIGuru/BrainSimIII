@@ -32,8 +32,11 @@ public partial class UKS
         //ThingLabels.ClearLabelList();
 
         if (UKSList.Count == 0)
-           CreateInitialStructure();
-
+        {
+            UKSList.Clear();
+            ThingLabels.ClearLabelList();
+            CreateInitialStructure();
+        }
         UKSTemp.Clear();
 
         var autoEvent = new AutoResetEvent(false);
@@ -87,8 +90,8 @@ public partial class UKS
     public virtual void DeleteThing(Thing t)
     {
         if (t == null) return;
-        if (t.Children.Count != 0)
-            return; //can't delete something with children...must delete all children first.
+        //if (t.Children.Count != 0)
+        //    return; //can't delete something with children...must delete all children first.
         foreach (Relationship r in t.Relationships)
             t.RemoveRelationship(r);
         foreach (Relationship r in t.RelationshipsFrom)
@@ -96,6 +99,7 @@ public partial class UKS
         ThingLabels.RemoveThingLabel(t.Label);
         lock (UKSList)
             UKSList.Remove(t);
+
     }
 
     /// <summary>
@@ -305,14 +309,6 @@ public partial class UKS
         return false;
     }
 
-    bool HasDirectProperty(Thing t, string propertyName)
-    {
-        if (t == null) return false;
-        if (HasProperty(t, propertyName)) return true;
-        foreach (Thing p in t.Parents)
-            return HasProperty(p, propertyName);
-        return false;
-    }
     bool HasProperty(Thing t, string propertyName)
     {
         if (t == null) return false;
@@ -331,6 +327,21 @@ public partial class UKS
         return false;
     }
 
+    public Relationship GetRelationship(string source, string relType, string target)
+    {
+        //create a temporary relationship
+        Relationship r = new() { source = Labeled(source), relType = Labeled(relType), target = Labeled(target) };
+        //see if it already exists
+        return GetRelationship(r);
+    }
+    public Relationship GetRelationship(Relationship r)
+    {
+        foreach (Relationship r1 in r.source.Relationships)
+        {
+            if (RelationshipsAreEqual (r,r1)) return r1;
+        }
+        return null;
+    }
 
 
     private List<Thing> ThingListFromStringList(List<string> modifiers, string defaultParent)
@@ -418,15 +429,16 @@ public partial class UKS
         {
             while (t.Children.Count > 0)
             {
-                IList<Thing> children = t.Children;
-                if (t.Children[0].Parents.Count == 1)
+                Thing theChild = t.Children[0];
+                if (theChild.Parents.Count == 1)
                 {
-                    DeleteAllChildren(children[0]);
-                    DeleteThing(children[0]);
+                    DeleteAllChildren(theChild);
+                    if (t.Label == "Thing" && t.Children.Count == 0) return;
+                    DeleteThing(theChild);
                 }
                 else
                 {//this thing has multiple parents.
-                    t.RemoveChild(children[0]);
+                    t.RemoveChild(theChild);
                 }
             }
         }

@@ -5,17 +5,17 @@ namespace UKS;
 
 public partial class UKS
 {
-    string fileName = "";
+    static string fileName = "";
 
     public string FileName { get => fileName;}
 
-    private void CreateInitialStructure()
+    public void CreateInitialStructure()
     {
-        UKSList.Clear();
-        ThingLabels.ClearLabelList();
-        AddThing("Thing", null);
+        if (Labeled("Thing") == null)
+            AddThing("Thing", null);
         GetOrAddThing("Object", "Thing");
         GetOrAddThing("Action", "Thing");
+        GetOrAddThing("RelationshipType", "Thing");
         GetOrAddThing("unknownObject", "Object");
         GetOrAddThing("is-a", "RelationshipType");
         GetOrAddThing("inverseOf", "RelationshipType");
@@ -32,8 +32,11 @@ public partial class UKS
         AddStatement("isExclusive", "is-a", "RelationshipType");
         AddStatement("isTransitive", "is-a", "RelationshipType");
         AddStatement("has", "is-a", "RelationshipType");
+//        AddStatement("is-part-of", "is-a", "RelationshipType");
+//        AddStatement("has", "inverseOf", "is-part-of");
+
         AddStatement("ClauseType", "is-a", "RelationshipType");
-        AddStatement("has", "hasProperty", "isTransitive");
+//        AddStatement("is-part-of", "hasProperty", "isTransitive");
         AddStatement("has-child", "hasProperty", "isTransitive");
 
         AddBrainSimConfigSectionIfNeeded();
@@ -140,6 +143,7 @@ public partial class UKS
             hits = l.Hits,
             misses = l.Misses,
             count = l.count,
+            GPTVerified = l.GPTVerified,
             clauses = clauseList,
         };
         return sR;
@@ -246,6 +250,7 @@ public partial class UKS
             Hits = p.hits,
             Misses = p.misses,
             Weight = p.weight,
+            GPTVerified = p.GPTVerified,
             count = p.count,
             //sentencetype = p.sentencetype as SentenceType,
         };
@@ -425,7 +430,6 @@ public partial class UKS
             Debug.WriteLine("Could not open file because: " + e.Message);
             return false;
         }
-
 
         List<Type> extraTypes = GetTypesInUKS();
         XmlSerializer reader1 = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());

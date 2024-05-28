@@ -31,7 +31,8 @@ public partial class UKS
     {
         var result1 = BuildSearchList(sources, reverse);
         List<Relationship> result2 = GetAllRelationshipsInt(result1);
-        RemoveConflictingResults(result2);
+        if (result2.Count < 200)
+            RemoveConflictingResults(result2);
         RemoveFalseConditionals(result2);
         AlphabetizeRelationships(ref result2);
         return result2;
@@ -61,11 +62,11 @@ public partial class UKS
     }
 
     //TODO This is hardcoded to only follow "has" and "has-child" transitive relationships
-    private  List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
+    private List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
     {
 
         List<ThingWithQueryParams> thingsToExamine = new();
-        int maxHops = 20;
+        int maxHops = 8;
         int hopCount = 0;
         foreach (Thing t in q)
             thingsToExamine.Add(new ThingWithQueryParams
@@ -86,19 +87,20 @@ public partial class UKS
 
             foreach (Relationship r in t.RelationshipsFrom)  //has-child et al
                 if ((r.relType.HasAncestorLabeled("has-child") && !reverse) ||
-                    (r.relType.HasAncestorLabeled("has") && reverse) ||
-                   (r.relType.HasAncestorLabeled("is") && reverse))
+                    (r.relType.HasAncestorLabeled("has") && reverse))
                 {
+                    //if there are several relationship, ignore the is-a, it is likely wrong
+                    var existingRelationships = GetRelationshipsBetween(r.source, r.target);
+                    if (existingRelationships.Count > 1) continue;
+
                     if (thingsToExamine.FindFirst(x => x.thing == r.source) is ThingWithQueryParams twgp)
-                    {
-                        twgp.hitCount++;
-                    }
+                        twgp.hitCount++;//thing is in the list, increment its count
                     else
-                    {
+                    {//thing is not in the list, add it
                         bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
                             thingsToExamine[i].reachedWith != null;
                         if (corner)
-                        { }
+                        { } //corners are the reasons in a logic progression
                         thingsToExamine[i].corner |= corner;
                         ThingWithQueryParams thingToAdd = new ThingWithQueryParams
                         {
@@ -151,30 +153,39 @@ public partial class UKS
         }
         return thingsToExamine;
     }
-
+    private List<Relationship> GetRelationshipsBetween(Thing t1, Thing t2)
+    {
+        List<Relationship> retVal = new();
+        foreach (Relationship r in t1.Relationships)
+            if (r.target == t2) retVal.Add(r);
+        foreach (Relationship r in t1.RelationshipsFrom)
+            if (r.target == t2) retVal.Add(r);
+        foreach (Relationship r in t2.Relationships)
+            if (r.target == t1) retVal.Add(r);
+        foreach (Relationship r in t2.RelationshipsFrom)
+            if (r.target == t1) retVal.Add(r);
+        return retVal;
+    }
     private List<Relationship> GetAllRelationshipsInt(List<ThingWithQueryParams> thingsToExamine)
     {
         List<Relationship> result = new();
         for (int i = 0; i < thingsToExamine.Count; i++)
         {
             Thing t = thingsToExamine[i].thing;
-            if (t == null) continue;
+            if (t == null) continue; //safety
             int haveCount = thingsToExamine[i].haveCount;
             List<Relationship> relationshipsToAdd = null;
             relationshipsToAdd = new();
             relationshipsToAdd.AddRange(t.Relationships);
-            //relationshipsToAdd.AddRange(t.RelationshipsFrom);
-            //relationshipsToAdd.AddRange(t.RelationshipsAsTypeWriteable);
             foreach (Relationship r in relationshipsToAdd)
             {
                 if (r.reltype == Thing.HasChild) continue;
-
                 //only add the new relatinoship to the list if it is not already in the list
                 bool ignoreSource = thingsToExamine[i].hopCount > 1;
                 Relationship existing = result.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));
                 if (existing != null) continue;
 
-                if (haveCount > 1)
+                if (haveCount > 1 && r.relType?.HasAncestorLabeled("has")!= null)
                 {
                     //this creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
@@ -183,10 +194,13 @@ public partial class UKS
 
                     //hack for numeric labels
                     Thing rootThing = r1.reltype;
-                    //TODO  reenable
                     if (r.relType.Label.Contains("."))
                         rootThing = GetOrAddThing(r.relType.Label.Substring(0, r.relType.Label.IndexOf(".")));
-                    Thing newRelType = CreateSubclass(rootThing, new List<Thing> { newCountType });
+                    Thing bestMatch = r.relType;
+                    List<Thing> missingAttributes = new();
+                    Thing newRelType = SubclassExists(rootThing, new List<Thing> { newCountType }, ref bestMatch, ref missingAttributes);
+                    if (newRelType == null)
+                        newRelType = CreateSubclass(rootThing, new List<Thing> { newCountType });
                     r1.reltype = newRelType;
                     result.Add(r1);
                 }
@@ -270,8 +284,8 @@ public partial class UKS
         return retVal;
     }
 
-           //find all the things containing the sequence of attributes
- private bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
+    //find all the things containing the sequence of attributes
+    private bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
     {
         //TODO modify to find closest match, return the matching score instead of bool
         //TODO this requires that all entries in a sequence must be adjascent without any intervening extraneous relationships
@@ -303,7 +317,8 @@ public partial class UKS
         List<Thing> retVal = new();
         foreach (Thing t in targetAttributes)
             foreach (Relationship r in t.RelationshipsFrom)
-                if (r.relType.HasAncestorLabeled("has"))
+                if (r.reltype == null) continue;
+                else if (r.relType.HasAncestorLabeled("has"))
                     if (!retVal.Contains(r.source))
                         retVal.Add(r.source);
 
@@ -321,7 +336,7 @@ public partial class UKS
     }
 
     //TODO add parameter to allow some number of misses
-    private  bool HasAllAttributes(Thing t, List<Thing> targetAttributes)
+    private bool HasAllAttributes(Thing t, List<Thing> targetAttributes)
     {
         List<Thing> thingAttributes = GetAllAttributes(t);
         foreach (Thing t2 in targetAttributes)
@@ -370,7 +385,7 @@ public partial class UKS
                 q.target = query.target;
             if (query.target != null && query.target.AncestorList().Contains(q.source))
                 q.source = query.target;
-            var qResult = Relationship.GetRelationship(q);
+            var qResult = GetRelationship(q);
             if (qResult != null && qResult.Weight < 0.8)
                 return false;
             if (qResult == null)

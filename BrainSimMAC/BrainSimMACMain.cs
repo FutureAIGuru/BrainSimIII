@@ -36,7 +36,7 @@ if (args.Length > 0)
 }
 else
 {
-    var pythonFiles = moduleHandler.GetPythonModules();
+    var pythonFiles = moduleHandler.GetListOfExistingPythonModuleTypes();
     Thing availableModuleRoot = moduleHandler.theUKS.Labeled("AvailableModule");
     foreach (var moduleName in pythonFiles)
         moduleHandler.theUKS.AddThing(moduleName, availableModuleRoot);

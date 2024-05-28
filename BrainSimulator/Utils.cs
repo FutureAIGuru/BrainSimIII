@@ -920,7 +920,7 @@ namespace BrainSimulator
             }
         }
 
-        public static Type[] GetArrayOfModuleTypes()
+        public static List<Type> GetListOfExistingCSharpModuleTypes()
         {
             var listOfBs = (from domainAssembly in AppDomain.CurrentDomain.GetAssemblies()
                             from assemblyType in domainAssembly.GetTypes()
@@ -934,7 +934,7 @@ namespace BrainSimulator
                 if (t.Name != "ModuleBase")
                     retVal.Add(t);
             }
-            return retVal.ToArray();
+            return retVal;
         }
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace BrainSimulator
             InitializeComponent();
             moduleType = theModuleType;
             string fileName = Path.GetFullPath(".").ToLower();
-            var modules = Utils.GetArrayOfModuleTypes();
+            var modules = Utils.GetListOfExistingCSharpModuleTypes();
 
             foreach (var v in modules)
             {

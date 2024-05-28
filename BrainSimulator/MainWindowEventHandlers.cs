@@ -36,21 +36,18 @@ namespace BrainSimulator
             if (SaveAs())
             {
                 SaveButton.IsEnabled = true;
-                //Reload_network.IsEnabled = true;
-                //ReloadNetwork.IsEnabled = true;
             }
         }
 
         private void buttonReloadNetwork_click(object sender, RoutedEventArgs e)
         {
-            if (PromptToSaveChanges())
+            if (!PromptToSaveChanges())
                 return;
 
             if (currentFileName != "")
             {
                 LoadCurrentFile();
                 ShowAllModuleDialogs();
-                // Modules.Sallie.VideoQueue.Clear();
             }
         }
 
@@ -92,7 +89,7 @@ namespace BrainSimulator
         }
         private void button_FileNew_Click(object sender, RoutedEventArgs e)
         {
-            if (PromptToSaveChanges())
+            if (!PromptToSaveChanges())
                 return;
 
             SuspendEngine();
@@ -119,7 +116,7 @@ namespace BrainSimulator
 
         private void buttonLoad_Click(object sender, RoutedEventArgs e)
         {
-            if (PromptToSaveChanges())
+            if (!PromptToSaveChanges())
                 return;
             string fileName = "_Open";
             if (sender is MenuItem mainMenu)
@@ -143,18 +140,23 @@ namespace BrainSimulator
             }
             else
             {
-                //this is a file name from the File menu
-                currentFileName = Path.GetFullPath("./UKSContent/" + fileName + ".xml");
-                LoadCurrentFile();
+                if (sender is MenuItem mi)
+                {
+                    //this is a file name from the File menu
+                    currentFileName = mi.ToolTip.ToString(); //Path.GetFullPath("./UKSContent/" + fileName + ".xml");
+                    LoadCurrentFile();
+
+                }
             }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            PromptToSaveChanges();
+            if (!PromptToSaveChanges())
+                return;
             CloseAllModuleDialogs();
             CloseAllModules();
+            moduleHandler.ClosePythonEngine();
         }
     }
-
 }

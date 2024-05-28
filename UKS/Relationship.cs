@@ -116,7 +116,7 @@ public class Relationship
     private Thing targ = null;
     public Thing target
     {
-        get { Hits++; lastUsed = DateTime.Now; return targ; }
+        get { /*Hits++; lastUsed = DateTime.Now;*/ return targ; }
         set
         {
             targ = value;
@@ -172,18 +172,10 @@ public class Relationship
                 AddToTransientList();
         }
     }
+    public bool GPTVerified = false;
 
     public Relationship()
     { }
-
-    public static Relationship GetRelationship(Relationship r)
-    {
-        foreach (Relationship r1 in r.source.Relationships)
-        {
-            if (r1 == r) return r1;
-        }
-        return null;
-    }
 
     public void Fire()
     {
@@ -368,5 +360,6 @@ public class SRelationship
     public float weight = 0;
     public int relationshipType = -1;
     public int count = -1;
+    public bool GPTVerified = false;
     public List<SClauseType> clauses = new();
 }

@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using UKS;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace BrainSimulator.Modules;
 
@@ -22,6 +23,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     public static readonly DependencyProperty ThingObjectProperty =
     DependencyProperty.Register("Thing", typeof(Thing), typeof(TreeViewItem));
+    public static readonly DependencyProperty TreeViewItemProperty =
+    DependencyProperty.Register("TreeViewItem", typeof(TreeViewItem), typeof(TreeViewItem));
     public static readonly DependencyProperty RelationshipObjectProperty =
     DependencyProperty.Register("RelationshipType", typeof(Relationship), typeof(TreeViewItem));
 
@@ -32,7 +35,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private bool busy;
     private List<string> expandedItems = new();
     private bool updateFailed;
-    //private List<Thing> uks;
     private DispatcherTimer dt;
     private string expandAll = "";  //all the children below this named node will be expanded
 
@@ -46,6 +48,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         //only updates 10x per second
         if (!base.Draw(checkDrawTimer)) return false;
         if (busy) return false;
+        if (!checkBoxAuto.IsChecked == true) { return false; }
         RefreshButton_Click(null, null);
         return true;
     }
@@ -72,7 +75,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             return;
         }
         statusLabel.Content = parent.theUKS.UKSList.Count + " Things  " + (childCount + refCount) + " Relationships";
-        Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.fileName);
+        Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.theUKS.FileName);
     }
 
     private void LoadContentToTreeView()
@@ -90,12 +93,15 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             totalItemCount = 0;
             TreeViewItem tvi = new() { Header = thing.ToString() };
-            tvi.ContextMenu = GetContextMenu(thing);
+            tvi.ContextMenu = GetContextMenu(thing,tvi);
             tvi.IsExpanded = true; //always expand the top-level item
             theTreeView.Items.Add(tvi);
             tvi.SetValue(ThingObjectProperty, thing);
             totalItemCount++;
             AddChildren(thing, tvi, 0, thing.Label);
+            AddRelationships(thing,tvi,"");
+            if (reverseCB.IsChecked == true)
+                AddRelationshipsFrom(thing, tvi, "");
         }
         else if (string.IsNullOrEmpty(root)) //search for unattached Things
         {
@@ -106,7 +112,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     if (t1.Parents.Count == 0)
                     {
                         TreeViewItem tvi = new() { Header = t1.Label };
-                        tvi.ContextMenu = GetContextMenu(t1);
+                        tvi.ContextMenu = GetContextMenu(t1,tvi);
                         theTreeView.Items.Add(tvi);
                     }
                 }
@@ -164,7 +170,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tvi.Items.Add(tviChild);
 
             totalItemCount++;
-            tviChild.ContextMenu = GetContextMenu(child);
+            tviChild.ContextMenu = GetContextMenu(child,tviChild);
             if (depth < maxDepth)
             {
                 int childCount = child.Children.Count;
@@ -204,6 +210,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRefLabel.Header += CountNonChildRelationships(t.RelationshipsNoCount).ToString();
 
         string fullString = "|" + parentLabel + "|" + t.Label + "|:Relationships";
+        fullString = fullString.Replace("||", "|"); //needed to make top level work
         if (expandedItems.Contains(fullString))
             tviRefLabel.IsExpanded = true;
         if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
@@ -211,14 +218,14 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         tvi.Items.Add(tviRefLabel);
 
         totalItemCount++;
-        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => x.relType.Label).ToList();
+        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => x.relType?.Label).ToList();
         foreach (Relationship r in sortedReferences)
         {
             if (r.relType?.Label == "has-child") continue;
             if (r.target != null && r.target.HasAncestorLabeled("Value"))
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r) };
-                tviRef.ContextMenu = GetContextMenu(r.target);
+                tviRef.ContextMenu = GetContextMenu(r.target,tviRef);
                 tviRefLabel.Items.Add(tviRef);
                 totalItemCount++;
             }
@@ -247,6 +254,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRefLabel.Header += CountNonChildRelationships(t.RelationshipsFrom).ToString();
 
         string fullString = "|" + parentLabel + "|" + t.Label + "|:RelationshipsFrom";
+        fullString = fullString.Replace("||", "|"); //needed to make top level work
         if (expandedItems.Contains(fullString))
             tviRefLabel.IsExpanded = true;
         if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
@@ -310,10 +318,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     }
 
     //Context Menu creation and handling
-    private ContextMenu GetContextMenu(Thing t)
+    private ContextMenu GetContextMenu(Thing t, TreeViewItem tvi)
     {
         ContextMenu menu = new ContextMenu();
         menu.SetValue(ThingObjectProperty, t);
+        menu.SetValue(TreeViewItemProperty, tvi);
         ModuleUKS parent = (ModuleUKS)ParentModule;
         int ID = parent.theUKS.UKSList.IndexOf(t);
         MenuItem mi = new();
@@ -344,11 +353,16 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         mi = new();
         mi.Click += Mi_Click;
+        mi.Header = "Delete Child";
+        menu.Items.Add(mi);
+
+        mi = new();
+        mi.Click += Mi_Click;
         mi.Header = "Make Root";
         menu.Items.Add(mi);
         mi = new();
         mi.Click += Mi_Click;
-        mi.Header = "Show All (make \"Thing\" root)";
+        mi.Header = "Fetch GPT Info";
         menu.Items.Add(mi);
         mi = new();
         mi.Header = "Parents:";
@@ -433,6 +447,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             UKS.UKS theUKS = ((ModuleUKS)ParentModule).theUKS;
             ContextMenu m = mi.Parent as ContextMenu;
+            //handle setting parent to root
             Thing tParent = (Thing)mi.GetValue(ThingObjectProperty);
             if (tParent != null)
             {
@@ -448,13 +463,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 RefreshButton_Click(null, null);
                 return;
             }
+            ModuleUKS parent = (ModuleUKS)ParentModule;
             switch (mi.Header)
             {
                 case "Expand All":
                     expandAll = t.Label;
                     expandedItems.Clear();
                     expandedItems.Add("|Thing|Object");
-                    ModuleUKS parent = (ModuleUKS)ParentModule;
                     parent.SetAttribute("ExpandAll", expandAll);
                     updateFailed = true; //this forces the expanded items list not to rebuild
                     break;
@@ -463,14 +478,26 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     expandedItems.Clear();
                     expandedItems.Add("|Thing|Object");
                     updateFailed = true;
+                    parent.SetAttribute("ExpandAll", expandAll);
                     break;
-                case "Show All (make \"Thing\" root)": //make "Thing" the root
-                    textBoxRoot.Text = "Thing";
-                    RefreshButton_Click(null, null);
+                case "Fetch GPT Info":
+                    //the following is an async call so an immediate refresh is not useful
+                    ModuleGPTInfo.GetChatGPTData(t.Label);
                     break;
                 case "Delete":
                     theUKS.DeleteAllChildren(t);
                     theUKS.DeleteThing(t);
+                    break;
+                case "Delete Child":
+                    //figure out which item (and its parent) clicked us
+                    TreeViewItem tvi = (TreeViewItem)m.GetValue(TreeViewItemProperty);
+                    DependencyObject parent1 = VisualTreeHelper.GetParent((DependencyObject)tvi);
+                    while (parent1 != null && !(parent1 is TreeViewItem))
+                        parent1 = VisualTreeHelper.GetParent(parent1);
+                    Thing parentThing = (Thing)parent1.GetValue(ThingObjectProperty);
+                    //now delete the relationship
+                    if (parentThing != null && t != null)
+                        parentThing.RemoveChild(t);
                     break;
                 case "Make Root":
                     textBoxRoot.Text = t.Label;
@@ -571,7 +598,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void textBoxRoot_TextChanged(object sender, TextChangedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)ParentModule;
-        if (parent == null) return; 
+        if (parent == null) return;
         parent.SetAttribute("Root", textBoxRoot.Text);
         RefreshButton_Click(null, null);
 
@@ -665,16 +692,33 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void InitializeButton_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
-        parent.theUKS.UKSList.Clear();
-        parent.Initialize();
+
+        //parent.theUKS.UKSList.Clear();
+        for (int i = 0; i < parent.theUKS.UKSList.Count; i++)
+        {
+            Thing t = parent.theUKS.UKSList[i];
+            if (t.HasAncestorLabeled("BrainSim")) 
+                continue;
+            if (t.Label == "has-child") continue;
+            if (t.Label == "Thing") continue;
+            if (t.Label == "RelationshipType") continue;
+            if (t.Label == "hasAttribute") continue;
+            if (t != null)
+            {
+                //                    parent.theUKS.DeleteAllChildren(t);
+                parent.theUKS.DeleteThing(t);
+                i--;
+            }
+        }
+
+        parent.theUKS.CreateInitialStructure();
 
         CollapseAll();
         expandAll = parent.GetAttribute("ExpandAll");
         if (expandAll == null) expandAll = "";
-        string root= parent.GetAttribute("root"); ;
-        if (root == "") root = "Thing";
+        string root = parent.GetAttribute("root");
+        if (string.IsNullOrEmpty(root)) root = "Thing";
         textBoxRoot.Text = root;
-        //expandAll = "";
         RefreshButton_Click(null, null);
     }
 
@@ -684,6 +728,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             CollapseTreeviewItems(item);
     }
 
+    //recursively collapse all the children
     private void CollapseTreeviewItems(TreeViewItem Item)
     {
         Item.IsExpanded = false;
@@ -697,58 +742,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         }
     }
 
-    private void SaveButton_Click(object sender, RoutedEventArgs e)
+    private void Dlg_Loaded(object sender, RoutedEventArgs e)
     {
-        ModuleUKS parent = (ModuleUKS)base.ParentModule;
-        System.Windows.Forms.SaveFileDialog saveFileDialog = new()
-        {
-            Filter = Utils.FilterXMLs,
-            Title = Utils.TitleUKSFileSave,
-            InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.UKSContentFolder),
-        };
-
-        // Show the file Dialog.  
-        // If the user clicked OK in the dialog and  
-        System.Windows.Forms.DialogResult result = saveFileDialog.ShowDialog();
-        if (result == System.Windows.Forms.DialogResult.OK)
-        {
-            MainWindow.SuspendEngine();
-            parent.fileName = saveFileDialog.FileName;
-            parent.theUKS.SaveUKStoXMLFile(parent.fileName);
-            MainWindow.ResumeEngine();
-        }
-        saveFileDialog.Dispose();
+        ModuleUKS parent = (ModuleUKS)ParentModule;
+        textBoxRoot.Text = parent.GetAttribute("Root");
     }
-
-    //this handles both the load and the merge buttons
-    private void LoadButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button btn)
-        {
-            MainWindow.SuspendEngine();
-            ModuleUKS parent = (ModuleUKS)base.ParentModule;
-            System.Windows.Forms.OpenFileDialog openFileDialog = new()
-            {
-                Filter = Utils.FilterXMLs,
-                Title = Utils.TitleUKSFileLoad,
-                InitialDirectory = Utils.GetOrAddLocalSubFolder(Utils.UKSContentFolder),
-            };
-
-            // Show the file Dialog.  
-            System.Windows.Forms.DialogResult result = openFileDialog.ShowDialog();
-            // If the user clicked OK in the dialog and  
-            if (result == System.Windows.Forms.DialogResult.OK)
-            {
-                parent.fileName = openFileDialog.FileName;
-                parent.theUKS.LoadUKSfromXMLFile(parent.fileName, (btn.Content.ToString() == "Merge"));
-                MainWindow.ResumeEngine();
-            }
-            openFileDialog.Dispose();
-            updateFailed = true; //this forces the expanded items list not to rebuild
-            //force a repaint
-            RefreshButton_Click(null, null);
-            MainWindow.ResumeEngine();
-        }
-    }
-
 }

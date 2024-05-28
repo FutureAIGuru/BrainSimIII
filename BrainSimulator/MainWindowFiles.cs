@@ -40,11 +40,14 @@ namespace BrainSimulator
                 CreateEmptyUKS();
 
             SetCurrentFileNameToProperties();
+
+            UpdateModuleListsInUKS();
             LoadActiveModules();
             ReloadActiveModulesSP();
             ShowAllModuleDialogs();
             SetTitleBar();
             ResumeEngine();
+            AddFileToMRUList(fileName); 
             return true;
         }
 
@@ -148,6 +151,7 @@ namespace BrainSimulator
             MRUList.Insert(0, filePath); //add it to the top of the list
             Properties.Settings.Default["MRUList"] = MRUList;
             Properties.Settings.Default.Save();
+            LoadMRUMenu();
         }
         public static void RemoveFileFromMRUList(string filePath)
         {
@@ -170,7 +174,6 @@ namespace BrainSimulator
                 string shortName = Path.GetFileNameWithoutExtension(fileItem);
                 MenuItem mi = new MenuItem() { Header = shortName };
                 mi.Click += buttonLoad_Click;
-                //mi.Click += MRUListItem_Click;
                 mi.ToolTip = fileItem;
                 MRUListMenu.Items.Add(mi);
             }
@@ -191,10 +194,10 @@ namespace BrainSimulator
         {
             var result = MessageBox.Show("Save current UKS content first?", "Save?", MessageBoxButton.YesNoCancel);
             if (result == MessageBoxResult.Cancel)
-                return true;
+                return false;
             if (result == MessageBoxResult.Yes)
                 Save();
-            return false;
+            return true;
         }
 
         private bool Save()

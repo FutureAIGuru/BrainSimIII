@@ -12,31 +12,26 @@ namespace UKS;
 public partial class Thing
 {
     //This hack is needed because add-parent/add-child rely on the has-child relationship which may not exist yet
-    private static Thing hasChildType;
     public static Thing HasChild
     {
         get
         {
-            if (hasChildType == null)
+            Thing hasChild = ThingLabels.GetThing("has-child");
+            if (hasChild == null)
             {
-                hasChildType = ThingLabels.GetThing("has-child");
-                if (hasChildType == null)
+                Thing thingRoot = ThingLabels.GetThing("Thing");
+                if (thingRoot == null) return null;
+                Thing relTypeRoot = ThingLabels.GetThing("RelationshipType");
+                if (relTypeRoot == null)
                 {
-                    Thing thingRoot = ThingLabels.GetThing("Thing");
-                    if (thingRoot == null) return null;
-                    Thing relTypeRoot = ThingLabels.GetThing("RelationshipType");
-                    if (relTypeRoot == null)
-                    {
-                        hasChildType = new Thing() { Label = "has-child" };
-                        relTypeRoot = new Thing() { Label = "RelationshipType" };
-                        thingRoot.AddRelationship(relTypeRoot, hasChildType);
-                        relTypeRoot.AddRelationship(hasChildType, hasChildType);
-                    }
+                    hasChild = new Thing() { Label = "has-child" };
+                    relTypeRoot = new Thing() { Label = "RelationshipType" };
+                    thingRoot.AddRelationship(relTypeRoot, hasChild);
+                    relTypeRoot.AddRelationship(hasChild, hasChild);
                 }
             }
-            return hasChildType;
+            return hasChild;
         }
-        set { hasChildType = value; }
     }
 }
 
@@ -76,7 +71,6 @@ public class ThingLabels
     public static void ClearLabelList()
     {
         labelList.Clear();
-        Thing.HasChild = null;
     }
     public static List<Thing> AllThingsInLabelList()
     {
@@ -87,7 +81,7 @@ public class ThingLabels
     public static void RemoveThingLabel(string existingLabel)
     {
         if (existingLabel == "") return;
-        labelList.Remove(existingLabel,out Thing oldThing);
+        labelList.Remove(existingLabel.ToLower(), out Thing oldThing);
     }
 
 }

@@ -89,7 +89,10 @@ namespace BrainSimulator
                 if (fileName != "")
                 {
                     if (!LoadFile(fileName))
+                    {
+                        MessageBox.Show("Previous UKS File could not be opened, empty UKS initialized", "File not read", MessageBoxButton.OK);
                         CreateEmptyUKS();
+                    }
                 }
                 else //force a new file creation on startup if no file name set
                 {
@@ -104,6 +107,8 @@ namespace BrainSimulator
             //safety check
             if (theUKS.Labeled("BrainSim") == null)
                 CreateEmptyUKS();
+
+            UpdateModuleListsInUKS();
 
             LoadModuleTypeMenu();
 
@@ -155,6 +160,52 @@ namespace BrainSimulator
 
             InsertMandatoryModules();
             InitializeActiveModules();
+        }
+
+        public void UpdateModuleListsInUKS()
+        {
+            theUKS.GetOrAddThing("BrainSim", null);
+            theUKS.GetOrAddThing("AvailableModule", "BrainSim");
+            theUKS.GetOrAddThing("ActiveModule", "BrainSim");
+            var listInUKS = theUKS.Labeled("AvailableModule").Children;
+            //add any missing modules
+            var CSharpModules = Utils.GetListOfExistingCSharpModuleTypes();
+            foreach (var module in CSharpModules)
+            {
+                string name = module.Name;
+                name = name.Replace("Module", "");
+                Thing availableModule = listInUKS.FindFirst(x => x.Label == name);
+                if (availableModule == null)
+                    theUKS.GetOrAddThing(name, "AvailableModule");
+            }
+            var PythonModules = moduleHandler.GetListOfExistingPythonModuleTypes();
+            foreach (var name in PythonModules)
+            {
+                Thing availableModule = listInUKS.FindFirst(x => x.Label == name);
+                if (availableModule == null)
+                    theUKS.GetOrAddThing(name, "AvailableModule");
+            }
+            //delete any non-existant modules
+            listInUKS = theUKS.Labeled("AvailableModule").Children;
+            foreach (Thing t in listInUKS)
+            {
+                string name = t.Label;
+                if (CSharpModules.FindFirst(x=>x.Name == "Module"+name) != null) continue;
+                if (PythonModules.FindFirst(x => x == name) != null) continue;
+                theUKS.DeleteAllChildren(t);
+                theUKS.DeleteThing(t);
+            }
+
+            //reconnect/delete any active modules
+            var activeListInUKS = theUKS.Labeled("ActiveModule").Children;
+            foreach(Thing t in activeListInUKS)
+            {
+                Thing parent = listInUKS.FindFirst(x => x.Label == t.Label.Substring(0, t.Label.Length - 1));
+                if (parent != null)
+                    t.AddParent(parent);
+                else
+                    theUKS.DeleteThing(t);
+            }
         }
 
         public void InsertMandatoryModules()
@@ -257,7 +308,7 @@ namespace BrainSimulator
 
         private void LoadModuleTypeMenu()
         {
-            var moduleTypes = Utils.GetArrayOfModuleTypes();
+            var moduleTypes = Utils.GetListOfExistingCSharpModuleTypes();
 
             foreach (var moduleType in moduleTypes)
             {
@@ -266,7 +317,7 @@ namespace BrainSimulator
                 theUKS.GetOrAddThing(moduleName, "AvailableModule");
             }
 
-            var pythonModules = moduleHandler.GetPythonModules();
+            var pythonModules = moduleHandler.GetListOfExistingPythonModuleTypes();
             foreach (var moduleType in pythonModules)
             {
                 theUKS.GetOrAddThing(moduleType, "AvailableModule");

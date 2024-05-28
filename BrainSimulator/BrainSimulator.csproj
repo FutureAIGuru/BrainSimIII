@@ -35,9 +35,6 @@
     <Compile Remove="Modules\ModuleFrequencyConfidence2.cs" />
     <Compile Remove="Modules\ModuleMove.cs" />
     <Compile Remove="Modules\ModuleObject.cs" />
-    <Compile Remove="Modules\ModuleObjectDlg.xaml.cs" />
-    <Compile Remove="Modules\ModuleOnlineInfo.cs" />
-    <Compile Remove="Modules\ModuleOnlineInfoDlg.xaml.cs" />
     <Compile Remove="Modules\ModulePodArmExtension.cs" />
     <Compile Remove="Modules\ModulePremise.cs" />
     <Compile Remove="Modules\ModulePremiseDlg.xaml.cs" />
@@ -47,7 +44,6 @@
     <Compile Remove="Modules\PhysicalObject.cs" />
     <Compile Remove="Modules\UnknownArea.cs" />
     <Compile Remove="Modules\WaveMemoryStream.cs" />
-    <Compile Remove="Network.cs" />
     <Compile Remove="Sallie.cs" />
     <Compile Remove="XmlFile.cs" />
   </ItemGroup>
@@ -196,7 +192,6 @@
   <ItemGroup>
     <Page Remove="Modules\Module2DSimDlg.xaml" />
     <Page Remove="Modules\ModuleObjectDlg.xaml" />
-    <Page Remove="Modules\ModuleOnlineInfoDlg.xaml" />
     <Page Remove="Modules\ModulePremiseDlg.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -406,8 +401,10 @@
     <Resource Include="Resources\UserInterface\MainWindow\WINDOWS-ICON-Move.png" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
     <PackageReference Include="pythonnet" Version="3.0.3" />
+    <PackageReference Include="System.Text.Json" Version="8.0.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UKS\UKS.csproj" />

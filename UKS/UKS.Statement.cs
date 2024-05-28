@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net.Http.Headers;
 
 namespace UKS;
 
@@ -28,7 +30,8 @@ public partial class UKS
         object oTargetProperties = null
                     )
     {
-//        try
+        Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
+//        try  //let any exceptions be trapped above
         {
             Thing source = ThingFromObject(oSource);
             Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
@@ -62,7 +65,7 @@ public partial class UKS
         Relationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
 
         //does this relationship already exist (without conditions)?
-        Relationship existing = Relationship.GetRelationship(r);
+        Relationship existing = GetRelationship(r);
         if (existing != null)
         {
             WeakenConflictingRelationships(source, existing);
@@ -85,7 +88,7 @@ public partial class UKS
         ClearExtraneousParents(r.source);
         ClearExtraneousParents(r.target);
         ClearExtraneousParents(r.relType);
-        ClearRedundancyInAncestry(r.target);
+        //ClearRedundancyInAncestry(r.target); //This should be converted to an agent
 
         return r;
     }
@@ -108,9 +111,7 @@ public partial class UKS
     }
 
     //these are used by the subclass searching system to report back the closest match and what attributes are missing
-    private Thing bestMatch = null;
-    private List<Thing> missingAttributes;
-
+    
     public Relationship CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target,
         ref List<Thing> sourceProperties, List<Thing> typeProperties, ref List<Thing> targetProperties)
     {
@@ -123,31 +124,27 @@ public partial class UKS
             relType = inverseType1;
         }
 
-        //CAUTION: this code is not multithreadable
         //CREATE new subclasses if needed
-        Thing source1 = SubclassExists(source, sourceProperties);
+        Thing bestMatch = new Thing();
+        List<Thing> missingAttributes = new();
+
+        Thing source1 = SubclassExists(source, sourceProperties,ref bestMatch,ref missingAttributes);
         if (source1 == null)
         {
-            if (bestMatch == null) bestMatch = source;
-            if (missingAttributes.Count == 0) missingAttributes = new List<Thing>(sourceProperties);
             source1 = CreateSubclass(bestMatch, missingAttributes);
         }
         source = source1;
 
-        Thing target1 = SubclassExists(target, targetProperties);
+        Thing target1 = SubclassExists(target, targetProperties,ref bestMatch, ref missingAttributes);
         if (target1 == null)
         {
-            if (bestMatch == null) bestMatch = target;
-            if (missingAttributes.Count == 0) missingAttributes = new List<Thing>(targetProperties);
             target1 = CreateSubclass(bestMatch, missingAttributes);
         }
         target = target1;
 
-        Thing relType1 = SubclassExists(relType, typeProperties);
+        Thing relType1 = SubclassExists(relType, typeProperties, ref bestMatch, ref missingAttributes);
         if (relType1 == null)
         {
-            if (bestMatch == null) bestMatch = relType;
-            if (missingAttributes.Count == 0) missingAttributes = new List<Thing>(typeProperties);
             relType1 = CreateSubclass(bestMatch, missingAttributes);
         }
         relType = relType1;
@@ -218,7 +215,7 @@ public partial class UKS
             t.AddParent(ThingLabels.GetThing("unknownObject"));
     }
 
-    public Thing SubclassExists(Thing t, List<Thing> thingAttributes)
+    public Thing SubclassExists(Thing t, List<Thing> thingAttributes, ref Thing bestMatch, ref List<Thing> missingAttributes)
     {
         //TODO this doesn't work as needed if some attributes are inherited from an ancestor
         if (t == null) return null;
@@ -231,7 +228,8 @@ public partial class UKS
         List<Thing> attrs = new List<Thing>(thingAttributes);
 
         //get the attributes of t
-        var existingRelationships = GetAllRelationships(new List<Thing> { t }, false);
+        //var existingRelationships = GetAllRelationships(new List<Thing> { t }, false);
+        var existingRelationships = t.Relationships;
         foreach (Relationship r in existingRelationships)
         {
             if (attrs.Contains(r.target)) attrs.Remove(r.target);
@@ -243,22 +241,33 @@ public partial class UKS
             return t;
 
         //attrs now contains the remaing attributes we need to find in a descendent
-        bestMatch = null;
-        missingAttributes = new List<Thing>();
-        return ChildContainsAttrs(t, attrs);
+        //bestMatch = null;
+        //missingAttributes = new List<Thing>();
+        return ChildHasAllAttributes(t, attrs,ref bestMatch, ref missingAttributes);
     }
 
-    private Thing ChildContainsAttrs(Thing t, List<Thing> attrs, List<Thing> alreadyVisited = null)
+    List<Thing> GetDirectAttributes(Thing t)
+    {
+        List<Thing> retVal = new();
+        foreach (Relationship r in t.Relationships)
+        {
+            if (r.reltype.Label == "is")
+                retVal.Add(r.target);
+        }
+        return retVal;
+    }
+    private Thing ChildHasAllAttributes(Thing t, List<Thing> attrs,ref Thing bestMatch, ref List<Thing>missingAttributes, List<Thing> alreadyVisited = null)
     {
         //circular reference protection
         if (alreadyVisited == null) alreadyVisited = new List<Thing>();
         if (alreadyVisited.Contains(t)) return null;
+        alreadyVisited.Add(t);
 
         //Localattrs lets us remove attrs from the required list without clobbering the parent list
         List<Thing> localAttrs = new List<Thing>(attrs);
         foreach (Thing child in t.Children)
         {
-            List<Thing> childAttrs = GetAllAttributes(child);
+            List<Thing> childAttrs = GetDirectAttributes(child);
             foreach (Thing t3 in childAttrs)
                 localAttrs.Remove(t3);
 
@@ -271,12 +280,11 @@ public partial class UKS
                 bestMatch = child;
             }
             //search any children with the remaining needed attributes
-            Thing retVal = ChildContainsAttrs(child, localAttrs);
+            Thing retVal = ChildHasAllAttributes(child, localAttrs,ref bestMatch, ref missingAttributes,alreadyVisited);
             if (retVal != null)
                 return retVal;
             localAttrs = new List<Thing>(attrs);
         }
-        alreadyVisited.Add(t);
         return null;
     }
 
@@ -287,13 +295,13 @@ public partial class UKS
     Thing CreateSubclass(Thing t, List<Thing> attributes)
     {
         if (t == null) return null;
-        Thing t2 = SubclassExists(t, attributes);
-        if (t2 != null && attributes.Count != 0) return t2;
+        //Thing t2 = SubclassExists(t, attributes);
+        //if (t2 != null && attributes.Count != 0) return t2;
 
         string newLabel = t.Label;
         foreach (Thing t1 in attributes)
         {
-            newLabel += "." + t1.Label;
+            newLabel += ((t1.Label.StartsWith("."))?"":".") + t1.Label;
         }
         //create the new thing which is child of the original
         Thing retVal = AddThing(newLabel, t);
@@ -363,6 +371,7 @@ public partial class UKS
                             r.target.RelationshipsFromWriteable.Add(r);
                         if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
                             r.reltype.RelationshipsAsTypeWriteable.Add(r);
+                    
                     }
         }
     }

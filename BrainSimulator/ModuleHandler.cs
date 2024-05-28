@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+
 
 #if !CONSOLE_APP
 using System.Windows.Interop;
@@ -65,7 +67,7 @@ public class ModuleHandler
     }
 
 
-    public List<string> GetPythonModules()
+    public List<string> GetListOfExistingPythonModuleTypes()
     {
         //this is a buffer of python modules so they can be imported once and run many times.
         List<String> pythonFiles = new();
@@ -87,6 +89,11 @@ public class ModuleHandler
         return pythonFiles;
     }
 
+    public bool ClosePythonEngine()
+    {
+        PythonEngine.Shutdown();
+        return true;
+    }
     public bool InitPythonEngine()
     {
         try
