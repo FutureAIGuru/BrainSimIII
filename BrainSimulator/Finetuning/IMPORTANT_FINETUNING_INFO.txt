@@ -1,0 +1,17 @@
+This is important information about the fine tuning datasets.
+
+common_words_ds_12.jsonl
+- provides 12 examples of is-a and some other relationships.
+
+common_words_ds_50.jsonl
+- provides 50 examples similar to the 12 dataset.
+
+word_only_dataset.jsonl
+- provides 20 examples of is-a relationships only.
+
+clause_dataset.jsonl
+- [WORK IN PROGRESS]
+- provides 20 examples of IF clauses for common nouns.
+
+words_extracted.txt
+- provides the 5000 most common words from Simple Wikipedia.
