@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Linq;
 using static System.Math;
-using Emgu.CV.OCR;
 using System.Windows.Media;
 
 namespace BrainSimulator.Modules.Vision

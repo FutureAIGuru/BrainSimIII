@@ -41,7 +41,7 @@ namespace BrainSimulator.Modules
             public Angle orientation;
             public override string ToString()
             {
-                return $" ({(int)Round(location.X)},{(int)Round(location.Y)}) A: {angle}";// O: {orientation}";
+                return $"[x,y:({(int)Round(location.X)},{(int)Round(location.Y)}) A: {angle}]";// O: {orientation}";
             }
         }
 
@@ -363,7 +363,7 @@ namespace BrainSimulator.Modules
                         }
                     }
                     if (!IsEndPoint((int)s.P1.X, (int)s.P1.Y))
-                        p1isOrphanEnd=false;
+                        p1isOrphanEnd = false;
                     if (!IsEndPoint((int)s.P2.X, (int)s.P2.Y))
                         p2isOrphanEnd = false;
                 }
@@ -447,7 +447,7 @@ namespace BrainSimulator.Modules
                         curr = bestCorner;
                         if (curr == start) outlineClosed = true;
                     }
-                    else 
+                    else
                         outlineClosed = true;
                 }
                 //make this a right-handed list of points  
@@ -460,16 +460,17 @@ namespace BrainSimulator.Modules
                 }
                 if (sum > 0) outline.Reverse();
 
-            //we now have an ordered, right-handed outline
-            //let's add it to the UKS
+                //we now have an ordered, right-handed outline
+                //let's add it to the UKS
 
-            //TODO: here's where we'll have a loop for multiple outlines
-            Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
-            foreach (Corner c in outline)
-            {
-                Thing corner = theUKS.GetOrAddThing("corner*", tCorners);
-                corner.V = c;
-                theUKS.AddStatement(currOutline, "has*", corner);
+                //TODO: here's where we'll have a loop for multiple outlines
+                Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
+                foreach (Corner c in outline)
+                {
+                    Thing corner = theUKS.GetOrAddThing("corner*", tCorners);
+                    corner.V = c;
+                    theUKS.AddStatement(currOutline, "has*", corner);
+                }
             }
         }
 
@@ -490,6 +491,27 @@ namespace BrainSimulator.Modules
 
         public override void SetUpAfterLoad()
         {
+            //here we parse Corner objects out of the Xml stream
+            foreach (Thing t in theUKS.UKSList)
+            {
+                if (t.V is System.Xml.XmlNode[] nodes)
+                {
+                    if (nodes[0].Value == "Corner")
+                    {
+                        Corner c = new();
+                        float x = float.Parse(nodes[1].FirstChild.InnerText);
+                        float y = float.Parse(nodes[1].FirstChild.NextSibling.InnerText);
+                        float conf = float.Parse(nodes[1].FirstChild.NextSibling.NextSibling.InnerText);
+                        c.location = new PointPlus { X = x, Y = y, Conf=conf,};
+                        float theta = float.Parse(nodes[2].FirstChild.InnerText);
+                        c.angle = Angle.FromDegrees(theta);
+                        float theta1 = float.Parse(nodes[3].FirstChild.InnerText);
+                        c.orientation = Angle.FromDegrees(theta1);
+                        t.V = c;
+                    }
+                }
+            }
+
         }
 
         // called whenever the size of the module rectangle changes

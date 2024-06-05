@@ -7,7 +7,7 @@ public partial class UKS
 {
     static string fileName = "";
 
-    public string FileName { get => fileName;}
+    public string FileName { get => fileName; }
 
     public void CreateInitialStructure()
     {
@@ -32,11 +32,11 @@ public partial class UKS
         AddStatement("isExclusive", "is-a", "RelationshipType");
         AddStatement("isTransitive", "is-a", "RelationshipType");
         AddStatement("has", "is-a", "RelationshipType");
-//        AddStatement("is-part-of", "is-a", "RelationshipType");
-//        AddStatement("has", "inverseOf", "is-part-of");
+        //        AddStatement("is-part-of", "is-a", "RelationshipType");
+        //        AddStatement("has", "inverseOf", "is-part-of");
 
         AddStatement("ClauseType", "is-a", "RelationshipType");
-//        AddStatement("is-part-of", "hasProperty", "isTransitive");
+        //        AddStatement("is-part-of", "hasProperty", "isTransitive");
         AddStatement("has-child", "hasProperty", "isTransitive");
 
         AddBrainSimConfigSectionIfNeeded();
@@ -358,15 +358,8 @@ public partial class UKS
             if (t.V != null)
             {
                 var theType = t.V.GetType();
-                if (theType.IsSerializable)
-                {
-                    if (!extraTypes.Contains(theType))
-                        extraTypes.Add(theType);
-                }
-                else
-                {
-                    Debug.Write("Type " + theType.FullName + " is not serializable");
-                }
+                if (!extraTypes.Contains(theType))
+                    extraTypes.Add(theType);
             }
         }
         /*

@@ -45,6 +45,8 @@
     <Compile Remove="Modules\UnknownArea.cs" />
     <Compile Remove="Modules\WaveMemoryStream.cs" />
     <Compile Remove="Sallie.cs" />
+    <Compile Remove="Tools\Module.cs" />
+    <Compile Remove="Tools\ModuleDlg.xaml.cs" />
     <Compile Remove="XmlFile.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -14,7 +14,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using UKS;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace BrainSimulator.Modules;
 

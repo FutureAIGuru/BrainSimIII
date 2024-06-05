@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using static System.Math;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
@@ -32,10 +33,10 @@ namespace BrainSimulator.Modules
             Init();
 
             GetUKS();
-            if (UKS == null) return;
-            UKS.GetOrAddThing("Sense", "Thing");
-            UKS.GetOrAddThing("Visual", "Sense");
-            Thing tCorners = UKS.GetOrAddThing("corner", "Visual");
+            if (theUKS == null) return;
+            theUKS.GetOrAddThing("Sense", "Thing");
+            theUKS.GetOrAddThing("Visual", "Sense");
+            Thing tCorners = theUKS.GetOrAddThing("corner", "Visual");
 
             //check to see if there are any new corners which need checking
             foreach (Thing tCorner in tCorners.Children)
@@ -58,28 +59,28 @@ namespace BrainSimulator.Modules
         void CreateShapeFromCorners()
         {
             //UKS setup
-            Thing currentShape = UKS.GetOrAddThing("currentShape", "Visual");
-            UKS.GetOrAddThing("Distance", "Visual");
-            UKS.GetOrAddThing("Angle", "Visual");
-            UKS.GetOrAddThing("Go", "RelationshipType");
-            UKS.GetOrAddThing("Turn", "RelationshipType");
+            Thing currentShape = theUKS.GetOrAddThing("currentShape", "Visual");
+            theUKS.GetOrAddThing("Distance", "Visual");
+            theUKS.GetOrAddThing("Angle", "Visual");
+            theUKS.GetOrAddThing("Go", "RelationshipType");
+            theUKS.GetOrAddThing("Turn", "RelationshipType");
 
             //clear out any previous currentShape
             foreach (var r in currentShape.Relationships)
                 currentShape.RemoveRelationship(r);
 
-            Thing outline = UKS.Labeled("outline0");
+            Thing outline = theUKS.Labeled("outline0");
             if (outline == null) return;
-            var corners = outline.GetRelationshipsWithAncestor(UKS.Labeled("corner"));
+            var corners = outline.GetRelationshipsWithAncestor(theUKS.Labeled("corner"));
 
             //setup to normalize the distance
             float maxDist = 0;
             for (int i = 0; i < corners.Count; i++)
             {
-                var corner = corners[i].T.V as ModuleVision.Corner;
+                var corner = corners[i].target.V as ModuleVision.Corner;
                 if (corner == null) continue;
                 int next = i + 1; if (next >= corners.Count) next = 0;
-                var nextCorner = corners[next].T.V as ModuleVision.Corner;
+                var nextCorner = corners[next].target.V as ModuleVision.Corner;
                 float dist = (nextCorner.location - corner.location).R;
                 if (dist > maxDist) maxDist = dist;
             }
@@ -87,11 +88,11 @@ namespace BrainSimulator.Modules
             //add the corners to the currentShape
             for (int i = 0; i < corners.Count; i++)
             {
-                var corner = corners[i].T.V as ModuleVision.Corner;
+                var corner = corners[i].target.V as ModuleVision.Corner;
                 if (corner == null) continue;
                 int next = i + 1; 
                 if (next >= corners.Count) next = 0;
-                var nextCorner = corners[next].T.V as ModuleVision.Corner;
+                var nextCorner = corners[next].target.V as ModuleVision.Corner;
                 float dist = (nextCorner.location - corner.location).R;
                 dist /= maxDist;
                 int a = (int)Round(corner.angle.Degrees/10)*10;
@@ -99,10 +100,10 @@ namespace BrainSimulator.Modules
                 a = a * 10;
                 string distName = "distance."+((int)Round(dist * 10)).ToString();
                 if (Round(dist*10) == 10) distName = "distance1.0";
-                Thing theDist = UKS.GetOrAddThing(distName, "distance");
-                UKS.AddStatement(currentShape, "go*", theDist);
-                Thing theAngle = UKS.GetOrAddThing("angle" + a, "Angle");
-                UKS.AddStatement(currentShape, "turn*", theAngle);
+                Thing theDist = theUKS.GetOrAddThing(distName, "distance");
+                theUKS.AddStatement(currentShape, "go*", theDist);
+                Thing theAngle = theUKS.GetOrAddThing("angle" + a, "Angle");
+                theUKS.AddStatement(currentShape, "turn*", theAngle);
             }
 
 
@@ -112,9 +113,9 @@ namespace BrainSimulator.Modules
 
         public void AddShapeToLibrary()
         {
-            UKS.GetOrAddThing("StoredShape", "Visual");
-            Thing newShape = UKS.GetOrAddThing("shape*", "StoredShape");
-            Thing currentShape = UKS.GetOrAddThing("currentShape", "Visual");
+            theUKS.GetOrAddThing("StoredShape", "Visual");
+            Thing newShape = theUKS.GetOrAddThing("shape*", "StoredShape");
+            Thing currentShape = theUKS.GetOrAddThing("currentShape", "Visual");
             foreach (Relationship r in currentShape.Relationships)
             {
                 newShape.AddRelationship(r.target, r.relType);
@@ -122,8 +123,8 @@ namespace BrainSimulator.Modules
         }
         Thing SearchForShape(out float bestScore)
         {
-            Thing storedShapes = UKS.GetOrAddThing("StoredShape", "Visual");
-            Thing currentShape = UKS.GetOrAddThing("currentShape", "Visual");
+            Thing storedShapes = theUKS.GetOrAddThing("StoredShape", "Visual");
+            Thing currentShape = theUKS.GetOrAddThing("currentShape", "Visual");
             Thing bestMatch = null;
             bestScore = 0;
             foreach (Thing testShape in storedShapes.Descendents)
