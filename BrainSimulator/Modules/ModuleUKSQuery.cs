@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
@@ -67,7 +68,7 @@ Follow has ONLY if called out in type
             thingResult = new();
             relationships = new();
             GetUKS();
-            if (UKS == null) return;
+            if (theUKS == null) return;
             string source = sourceIn.Trim();
             string relType = relTypeIn.Trim();
             string target = targetIn.Trim();
@@ -90,6 +91,7 @@ Follow has ONLY if called out in type
             List<Thing> targetList = ModuleUKSStatement.ThingListFromString(target);
 
             //Handle is-a queries as a special case
+            if (sourceList.Count == 0) return;
             if (relType.Contains("is-a") && reverse ||
                 relType.Contains("has-child") && !reverse)
             {
@@ -103,7 +105,7 @@ Follow has ONLY if called out in type
                 return;
             }
 
-            relationships = UKS.GetAllRelationships(sourceList, reverse);
+            relationships = theUKS.GetAllRelationships(sourceList, reverse);
 
             //unreverse the source and target
             if (reverse)
@@ -123,25 +125,25 @@ Follow has ONLY if called out in type
                 Relationship r = relationships[i];
                 if (target != "" && !r.target.HasAncestor(targetList[0]))
                 { relationships.RemoveAt(i); i--; continue; }
-                if (relType != "" && !r.reltype.HasAncestorLabeled(relType))
+                if (r.reltype != null && relType != "" && !r.relType.HasAncestorLabeled(relType))
                 { relationships.RemoveAt(i); i--; continue; }
             }
 
-            if (filter != "")
-            {
-                List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
-                relationships = UKS.FilterResults(relationships, filterThings).ToList();
-            }
+            //if (filter != "")
+            //{
+            //    List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
+            //    relationships = theUKS.FilterResults(relationships, filterThings).ToList();
+            //}
 
-            if (paramCount == 2)
-            {
-                foreach (Relationship r in relationships)
-                {
-                    if (sourceIn == "") thingResult.Add(r.source);
-                    if (targetIn == "") thingResult.Add(r.target);
-                    if (relTypeIn == "") thingResult.Add(r.relType);
-                }
-            }
+            //if (paramCount == 2)
+            //{
+            //    foreach (Relationship r in relationships)
+            //    {
+            //        if (sourceIn == "") thingResult.Add(r.source);
+            //        if (targetIn == "") thingResult.Add(r.target);
+            //        if (relTypeIn == "") thingResult.Add(r.relType);
+            //    }
+            //}
         }
     }
 }

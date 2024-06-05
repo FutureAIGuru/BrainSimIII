@@ -9,15 +9,13 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
-using System.Xml.Serialization;
 using System.Windows.Threading;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
     abstract public class ModuleBase
     {
-        //this is public so it will be included in the saved xml file.  That way
-        //initialized data content can be preserved from run to run and only reinitialized when requested.
         public bool initialized = false;
 
         public bool isEnabled = true;
@@ -28,12 +26,11 @@ namespace BrainSimulator.Modules
         public Point dlgSize;
         public bool dlgIsOpen = false;
         protected bool allowMultipleDialogs = false;
-        private List<ModuleBaseDlg> dlgList = null;
 
-        [XmlIgnore]
-        public static ModuleUKS UKS = null;
+        //public static ModuleUKS UKS = null;
+        public UKS.UKS theUKS = null;
 
-        public ModuleBase() 
+        public ModuleBase()
         {
             string moduleName = this.GetType().Name;
             if (moduleName.StartsWith("Module"))
@@ -45,14 +42,14 @@ namespace BrainSimulator.Modules
         abstract public void Fire();
 
         abstract public void Initialize();
-        
+
         public virtual void UKSInitializedNotification()
         {
         }
 
         public void UKSInitialized()
         {
-            foreach (ModuleBase module in MainWindow.BrainSim3Data.modules)
+            foreach (ModuleBase module in MainWindow.theWindow.activeModules)
             {
                 if (module.isEnabled)
                     module.UKSInitializedNotification();
@@ -65,7 +62,7 @@ namespace BrainSimulator.Modules
 
         public void UKSReloaded()
         {
-            foreach (ModuleBase module in MainWindow.BrainSim3Data.modules)
+            foreach (ModuleBase module in MainWindow.theWindow.activeModules)
             {
                 if (module.isEnabled)
                     module.UKSReloadedNotification();
@@ -74,43 +71,11 @@ namespace BrainSimulator.Modules
 
         public void GetUKS()
         {
-            if (UKS is null)
-            {
-                UKS = (ModuleUKS)FindModule(typeof(ModuleUKS));
-            }
-        }
-
-        private List<string> notFoundModules = new();
-
-        public void MarkModuleTypeAsNotLoaded(string typeName)
-        {
-            string moduleName = typeName;
-            if (typeName.StartsWith("BrainSimulator.Modules."))
-            {
-                moduleName = moduleName[23..];
-            }
-            if (!notFoundModules.Contains(moduleName))
-            {
-                notFoundModules.Add(moduleName);
-                MessageBox.Show(" Module of type " + moduleName + " does not exist in this network.", "Module Not Found", MessageBoxButton.OK,
-                    MessageBoxImage.None, MessageBoxResult.None, MessageBoxOptions.DefaultDesktopOnly);
-            }
-        }
-
-        public void MarkModuleNameAsNotLoaded(string moduleName)
-        {
-            if (!notFoundModules.Contains(moduleName))
-            {
-                notFoundModules.Add(moduleName);
-                MessageBox.Show("Module named " + moduleName + " does not exist in this network.", "Module Not Found", MessageBoxButton.OK,
-                    MessageBoxImage.None, MessageBoxResult.None, MessageBoxOptions.DefaultDesktopOnly);
-            }
+            theUKS = MainWindow.theUKS;
         }
 
         protected void Init(bool forceInit = false)
         {
-            // SetModuleView();
-
             if (initialized && !forceInit) return;
             initialized = true;
 
@@ -124,17 +89,13 @@ namespace BrainSimulator.Modules
                 dlgIsOpen = true;
             }
         }
-
+        public void OpenDlg()
+        {
+            SetAttribute("Open", "True");
+            ShowDialog();
+        }
         public void CloseDlg()
         {
-            if (dlgList != null)
-            for (int i = dlgList.Count-1 ; i >= 0; i--)
-            {
-                Application.Current.Dispatcher.Invoke((Action)delegate
-                {
-                    dlgList[i].Close();
-                });
-            }
             if (dlg != null)
             {
                 Application.Current.Dispatcher.Invoke((Action)delegate
@@ -142,10 +103,26 @@ namespace BrainSimulator.Modules
                     dlg.Close();
                 });
             }
+            SetAttribute("Open", "");
         }
 
         public virtual void ShowDialog()
         {
+            if (GetAttribute("Open") != "True") return;
+            string infoString = GetDlgWindow();
+            if ( infoString != null)
+            {
+                if (string.IsNullOrEmpty(infoString)) return;
+                string[] info = infoString.Split('+', 'x');
+                if (info.Length == 4)
+                {
+                    dlgSize.X = int.Parse(info[0]);
+                    dlgSize.Y = int.Parse(info[1]);
+                    dlgPos.X = int.Parse(info[2]);
+                    dlgPos.Y = int.Parse(info[3]);
+                }
+            }
+
             ApartmentState aps = Thread.CurrentThread.GetApartmentState();
             if (aps != ApartmentState.STA) return;
             Type t = this.GetType();
@@ -160,8 +137,6 @@ namespace BrainSimulator.Modules
             if (!allowMultipleDialogs && dlg != null) dlg.Close();
             if (allowMultipleDialogs && dlg != null)
             {
-                if (dlgList == null) dlgList = new List<ModuleBaseDlg>();
-                dlgList.Add(dlg);
                 dlgPos.X += 10;
                 dlgPos.Y += 10;
             }
@@ -178,9 +153,7 @@ namespace BrainSimulator.Modules
             // so the same functionality is called from within FileLoad
             Window mainWindow = Application.Current.MainWindow;
             if (mainWindow.GetType() == typeof(MainWindow))
-                 dlg.Owner = Application.Current.MainWindow;
-            // else
-            //     Utils.Noop();
+                dlg.Owner = Application.Current.MainWindow;
 
             //restore the size and position
             if (dlgPos != new Point(0, 0))
@@ -205,7 +178,7 @@ namespace BrainSimulator.Modules
             if (GetType().ToString() != "BrainSimulator.Modules.ModuleUserInterface" && !GetType().ToString().StartsWith("BrainSimulator.Modules.ModuleUI_"))
                 dlg.WindowState = WindowState.Minimized;
 #endif
-            
+
             dlg.Show();
             dlgIsOpen = true;
 
@@ -215,45 +188,86 @@ namespace BrainSimulator.Modules
 #endif
         }
 
+        public  string GetAttribute(string attribName)
+        {
+            Thing thisDlg = theUKS.Labeled(Label);
+            if (thisDlg == null) return null;   
+            foreach (var r in thisDlg.Relationships)
+            {
+                if (r.reltype.Label == "hasAttribute" && r.target.Label.StartsWith(attribName))
+                {
+                    string retVal = (string)r.target.V;
+                    return retVal;
+                }
+            }
+            return null;
+        }
+        public void SetAttribute(string attribName, string attribValue)
+        {
+            if (string.IsNullOrEmpty(attribName)) { return; }
+            Thing thisDlg = theUKS.Labeled(Label);
+            if (thisDlg == null) { return; }
+            foreach (var r in thisDlg.Relationships)
+            {
+                if (r.reltype.Label == "hasAttribute" && r.target.Label.StartsWith(attribName))
+                {
+                    if (attribValue == null)
+                    {
+                        theUKS.DeleteThing(r.target);
+                        return;
+                    }
+                    r.target.V = attribValue;
+                    return;
+                }
+            }
+            if (attribName == null) return;
+            Thing dlgAttribParent = theUKS.GetOrAddThing("DlgAttrib", "BrainSim");
+            Thing dlgInfo = theUKS.AddThing(attribName, dlgAttribParent);
+            Thing hasAttribute = theUKS.GetOrAddThing("hasAttribute", "RelationshipType");
+            thisDlg.AddRelationship(dlgInfo,hasAttribute);
+            dlgInfo.V = attribValue;
+            dlgInfo.SetFired();
+        }
+        string GetDlgWindow()
+        {
+            return GetAttribute("DlgWindow");
+        }
+        void SetDlgWindow()
+        {
+            string infoString = "";
+            if (dlg != null)
+                infoString = dlg.Width + "x" + dlg.Height + "+" + dlg.Left + "+" + dlg.Top;
+            SetAttribute("DlgWindow", infoString);
+
+        }
         private void Dlg_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             dlgSize = new Point()
             { Y = dlg.Height, X = dlg.Width };
+            SetDlgWindow();
         }
 
         private void Dlg_LocationChanged(object sender, EventArgs e)
         {
             dlgPos = new Point()
             { Y = dlg.Top, X = dlg.Left };
+            SetDlgWindow();
         }
 
         private void Dlg_Closed(object sender, EventArgs e)
         {
-           if (dlg == null) 
+            if (dlg == null)
                 dlgIsOpen = false;
+            SetAttribute("Open", "True");
         }
 
         private void Dlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (dlgList != null && dlgList.Count > 0)
-            {
-                if (dlgList.Contains((ModuleBaseDlg)sender))
-                {
-                    dlgList.Remove((ModuleBaseDlg)sender);
-                }
-                else
-                {
-                    dlg = dlgList[0];
-                    dlgList.RemoveAt(0);
-                }
-            }
-            else
-                dlg = null;
+            dlg = null;
         }
 
         private DispatcherTimer timer;
         private DateTime dt;
-        [XmlIgnore]
         public TimeSpan DialogLockSpan = new TimeSpan(0, 0, 0, 0, 500);
         public void UpdateDialog()
         {
@@ -302,20 +316,6 @@ namespace BrainSimulator.Modules
 
         public virtual MenuItem CustomContextMenuItems()
         {
-            return null;
-        }
-
-        public ModuleBase FindModule(Type t, bool suppressWarning = true)
-        {
-            foreach (ModuleBase na1 in MainWindow.BrainSim3Data.modules)
-            {
-                if (na1 != null && na1.GetType() == t)
-                {
-                    return na1;
-                }
-            }
-            if (!suppressWarning)
-                MarkModuleTypeAsNotLoaded(t.ToString());
             return null;
         }
     }

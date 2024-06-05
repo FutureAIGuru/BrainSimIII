@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "UKS": {
+      "commandName": "Project",
+      "commandLineArgs": "PythonUKSTest.py",
+      "workingDirectory": "C:\\Users\\c_sim\\source\\repos\\BrainSimIIINEW\\PythonUKSTest"
+    },
+    "RunWithPython": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Users\\c_sim\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+      "commandLineArgs": "pythonUKStest.py",
+      "workingDirectory": "C:\\Users\\c_sim\\source\\repos\\BrainSimIIINEW\\PythonUKSTest",
+      "nativeDebugging": false
+    }
+  }
+}

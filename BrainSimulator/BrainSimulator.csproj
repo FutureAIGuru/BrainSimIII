@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Remove="GlobalSuppressions.cs" />
     <Compile Remove="ImgUtils.cs" />
+    <Compile Remove="MainWindowPythonModules.cs" />
     <Compile Remove="Modules\Module2DSim.cs" />
     <Compile Remove="Modules\Module2DSimDlg.xaml.cs" />
     <Compile Remove="Modules\Module2DVision.cs" />
@@ -34,9 +35,6 @@
     <Compile Remove="Modules\ModuleFrequencyConfidence2.cs" />
     <Compile Remove="Modules\ModuleMove.cs" />
     <Compile Remove="Modules\ModuleObject.cs" />
-    <Compile Remove="Modules\ModuleObjectDlg.xaml.cs" />
-    <Compile Remove="Modules\ModuleOnlineInfo.cs" />
-    <Compile Remove="Modules\ModuleOnlineInfoDlg.xaml.cs" />
     <Compile Remove="Modules\ModulePodArmExtension.cs" />
     <Compile Remove="Modules\ModulePremise.cs" />
     <Compile Remove="Modules\ModulePremiseDlg.xaml.cs" />
@@ -46,25 +44,11 @@
     <Compile Remove="Modules\PhysicalObject.cs" />
     <Compile Remove="Modules\UnknownArea.cs" />
     <Compile Remove="Modules\WaveMemoryStream.cs" />
-    <Compile Remove="ModuleView.cs" />
-    <Compile Remove="Network.cs" />
     <Compile Remove="Sallie.cs" />
-    <Compile Remove="Tools\Module.cs" />
-    <Compile Remove="Tools\ModuleDlg.xaml.cs" />
+    <Compile Remove="XmlFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="BrainSim3SplashScreen.jpg" />
-    <None Remove="Networks\3DSim.xml" />
-    <None Remove="Networks\BabyTalk.xml" />
-    <None Remove="Networks\BasicNeurons.xml" />
-    <None Remove="Networks\GameOfLife.xml" />
-    <None Remove="Networks\Imagination.xml" />
-    <None Remove="Networks\Maze.xml" />
-    <None Remove="Networks\NeuralGraph.xml" />
-    <None Remove="Networks\ObjectMotion.xml" />
-    <None Remove="Networks\Perception.xml" />
-    <None Remove="Networks\SallieKeyword.table" />
-    <None Remove="Networks\SalliePod.xml" />
     <None Remove="Resources\charactergrowfont.png" />
     <None Remove="Resources\charactershrinkfont.png" />
     <None Remove="Resources\ClearHistory.png" />
@@ -208,13 +192,14 @@
   <ItemGroup>
     <Page Remove="Modules\Module2DSimDlg.xaml" />
     <Page Remove="Modules\ModuleObjectDlg.xaml" />
-    <Page Remove="Modules\ModuleOnlineInfoDlg.xaml" />
     <Page Remove="Modules\ModulePremiseDlg.xaml" />
     <Page Remove="Tools\ModuleDlg.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="BrainSim3SplashScreen.jpg" />
-    <Content Include="Iconsmall.ico" />
+    <Content Include="Iconsmall.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Fonts\OpenSans-Bold.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -417,22 +402,13 @@
     <Resource Include="Resources\UserInterface\MainWindow\WINDOWS-ICON-Move.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Betalgo.OpenAI.GPT3" Version="6.7.2" />
-    <PackageReference Include="Catalyst" Version="1.0.33442" />
-    <PackageReference Include="Catalyst.Models.English" Version="1.0.30952" />
-    <PackageReference Include="Catalyst.Spacy" Version="1.0.33442" />
-    <PackageReference Include="Emgu.CV" Version="4.5.5.4823" />
-    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.5.5.4823" />
-    <PackageReference Include="Emgu.CV.UI" Version="4.5.5.4823" />
-    <PackageReference Include="HelixToolkit.Wpf" Version="2.24.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.23.0" />
-    <PackageReference Include="NAudio" Version="2.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
-    <PackageReference Include="Python.Included" Version="3.7.3.13" />
-    <PackageReference Include="SharpDX" Version="4.2.0" />
-    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
-    <PackageReference Include="System.Management" Version="8.0.0" />
-    <PackageReference Include="System.Speech" Version="8.0.0" />
+    <PackageReference Include="pythonnet" Version="3.0.3" />
+    <PackageReference Include="System.Text.Json" Version="8.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UKS\UKS.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
@@ -453,45 +429,16 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Update="Networks\ModuleDescriptions.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Networks\SallieShapes.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Networks\SallieSpeech.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <None Update="Resources\KeywordTables\MagentaKeyword.table">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\KeywordTables\SusieKeyword.table">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ryanHexOutput">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ryanHexOutput %281%29">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ryanHexOutput - Copy">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ryanHexOutput_2">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\ryanHexOutput_3.bin">
+    <None Update="ModuleDescriptions.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Modules\ModuleUI_MotionDlg - Copy.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
+    <None Include="..\PythonProj\utils.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\PythonProj\module*.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

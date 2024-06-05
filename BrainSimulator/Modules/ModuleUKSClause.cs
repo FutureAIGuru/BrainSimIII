@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using Pluralize.NET;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
@@ -57,15 +58,15 @@ namespace BrainSimulator.Modules
         public Thing GetClauseType(string newThing)
         {
             GetUKS();
-            if (UKS == null) return null;
+            if (theUKS == null) return null;
 
-            return UKS.GetOrAddThing(newThing, "ClauseType");
+            return theUKS.GetOrAddThing(newThing, "ClauseType");
         }
 
         public Relationship AddRelationship(string source, string target, string relationshipType)
         {
             GetUKS();
-            if (UKS == null) return null;
+            if (theUKS == null) return null;
             IPluralize pluralizer = new Pluralizer();
 
 
@@ -88,7 +89,7 @@ namespace BrainSimulator.Modules
             relationshipType= pluralizer.Singularize(tempStringArray[0]);
             for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
-            Relationship r = UKS.AddStatement(source, relationshipType, target,sourceModifiers, typeModifiers, targetModifiers);
+            Relationship r = theUKS.AddStatement(source, relationshipType, target,sourceModifiers, typeModifiers, targetModifiers);
             
             return r;
         }
@@ -96,25 +97,25 @@ namespace BrainSimulator.Modules
         public Thing GetUKSThing(string thing, string parent)
         {
             GetUKS();
-            if (UKS == null) return null;
+            if (theUKS == null) return null;
 
-            return UKS.GetOrAddThing(thing, parent);
+            return theUKS.GetOrAddThing(thing, parent);
         }
 
         public Thing SearchLabelUKS(string label)
         {
             GetUKS();
-            if (UKS == null) return null;
+            if (theUKS == null) return null;
 
-            return UKS.Labeled(label);
+            return theUKS.Labeled(label);
         }
 
         public List<string> RelationshipTypes()
         {
             GetUKS();
-            if (UKS == null) return null;
+            if (theUKS == null) return null;
 
-            Thing relParent = UKS.GetOrAddThing("RelationshipType", "Thing");
+            Thing relParent = theUKS.GetOrAddThing("RelationshipType", "Thing");
             List<string> relTypes = new();
 
             foreach (Thing relationshipType in relParent.Children)

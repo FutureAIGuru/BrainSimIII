@@ -18,11 +18,7 @@ namespace BrainSimulator
             InitializeComponent();
             moduleType = theModuleType;
             string fileName = Path.GetFullPath(".").ToLower();
-            if (fileName.Contains("program"))
-            {
-                buttonSave.IsEnabled = false;
-            }
-            var modules = Utils.GetArrayOfModuleTypes();
+            var modules = Utils.GetListOfExistingCSharpModuleTypes();
 
             foreach (var v in modules)
             {
@@ -86,7 +82,7 @@ namespace BrainSimulator
         {
             Stream file;
             string location = AppDomain.CurrentDomain.BaseDirectory;
-            location += "\\Networks\\ModuleDescriptions.xml";
+            location += "ModuleDescriptions.xml";
             file = File.Open(location, FileMode.Open, FileAccess.Read);
             try
             {
@@ -107,10 +103,12 @@ namespace BrainSimulator
             Stream file;
             string fileName = Path.GetFullPath(".").ToLower();
             //we're running with source...save to the source version
-            if (fileName.Contains("\\bin"))
-                fileName = fileName.Substring(0, fileName.IndexOf("\\bin"));
-
-            fileName += "\\Networks\\ModuleDescriptions.xml";
+            int index = fileName.IndexOf("bin\\");
+            if (index != -1)
+            {
+                fileName = fileName.Substring(0, index);
+            }
+            fileName += "ModuleDescriptions.xml";
             try
             {
                 file = File.Create(fileName);

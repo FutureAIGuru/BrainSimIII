@@ -9,10 +9,11 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Specialized;
 using System.IO;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using UKS;
 
 namespace BrainSimulator
 {
@@ -22,129 +23,125 @@ namespace BrainSimulator
     public partial class MainWindow : Window
     {
         private static StackPanel loadedModulesSP;
-        private async void LoadFile(string fileName)
+        private bool LoadFile(string fileName)
         {
+            SuspendEngine();
             CloseAllModuleDialogs();
-            CloseAllModules();
-            SuspendEngine();
+            UnloadActiveModules();
 
-            bool success = false;
-            await Task.Run(delegate { success = XmlFile.Load(fileName); });
-            if (!success)
+            if (!theUKS.LoadUKSfromXMLFile(fileName))
             {
-                CreateEmptyNetwork();
-                Properties.Settings.Default["CurrentFile"] = currentFileName;
-                Properties.Settings.Default.Save();
-                ResumeEngine();
-                return;
-            }
-            currentFileName = fileName;
-            Properties.Settings.Default["CurrentFile"] = currentFileName;
-            Properties.Settings.Default.Save();
-
-            ReloadNetwork.IsEnabled = true;
-            Reload_network.IsEnabled = true;
-            //if (XmlFile.CanWriteTo(currentFileName))
-            //    SaveButton.IsEnabled = true;
-            //else
-            //    SaveButton.IsEnabled = false;
-            SetTitleBar();
-            // await Task.Delay(1000).ContinueWith(t => ShowDialogs());
-            loadedModulesSP = LoadedModuleSP;
-            LoadedModuleSP.Children.Clear();
-
-            for ( int i = 0; i < MainWindow.BrainSim3Data.modules.Count; i++ )
-            {
-                ModuleBase mod = MainWindow.BrainSim3Data.modules[i];
-                if (mod != null)
-                {
-                    mod.SetUpAfterLoad();
-                }
-            }
-
-            ReloadLoadedModules();
-            ShowAllModuleDialogs();
-
-        }
-
-        public static void ReloadLoadedModules()
-        {
-            if (loadedModulesSP == null) return;
-            loadedModulesSP.Children.Clear();
-
-            System.Collections.Generic.SortedDictionary<string, int> nameList = new();
-            for (int i = 0; i < BrainSim3Data.modules.Count; i++)
-            {
-                if (BrainSim3Data.modules[i].Label == "")
-                {
-                    continue;
-                }
-                    
-                nameList.Add(BrainSim3Data.modules[i].Label, i);
-            }
-
-            //add the modules to the stackPanel
-            foreach (var x in nameList)
-            {
-                ModuleBase mod = BrainSim3Data.modules[x.Value];
-                AddModuleToLoadedModules(x.Value, mod);
-            }
-        }
-
-        private static void AddModuleToLoadedModules(int i, ModuleBase mod)
-        {
-            TextBlock tb = new TextBlock();
-            tb.Text = mod.Label;
-            tb.Margin = new Thickness(5, 2, 5, 2);
-            tb.Padding = new Thickness(10, 3, 10, 3);
-            tb.ContextMenu = new ContextMenu();
-            ModuleView.CreateContextMenu(i, mod, tb, tb.ContextMenu);
-            if (mod.isEnabled) tb.Background = new SolidColorBrush(Colors.LightGreen);
-            else tb.Background = new SolidColorBrush(Colors.Pink);
-            loadedModulesSP.Children.Add(tb);
-        }
-
-        private bool SaveFile(string fileName)
-        {
-            SuspendEngine();
-            //If the path contains "bin\64\debug" change the path to the actual development location instead
-            //because file in bin..debug can be clobbered on every rebuild.
-            if (fileName.ToLower().Contains("bin\\debug\\net6.0-windows"))
-            {
-                MessageBoxResult mbResult = System.Windows.MessageBox.Show(this, "Save to source folder instead?", "Save", MessageBoxButton.YesNoCancel,
-                MessageBoxImage.Asterisk, MessageBoxResult.No);
-                if (mbResult == MessageBoxResult.Yes)
-                    fileName = fileName.ToLower().Replace("bin\\debug\\net6.0-windows\\", "");
-                if (mbResult == MessageBoxResult.Cancel)
-                    return false;
-            }
-
-            foreach (ModuleBase mod in BrainSim3Data.modules)
-            {
-                try
-                {
-                    mod.SetUpBeforeSave();
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show("SetupBeforeSave failed on module " + mod.Label + ".   Message: " + e.Message);
-                }
-            }
-
-            if (XmlFile.Save(fileName))
-            {
-                currentFileName = fileName;
-                SetCurrentFileNameToProperties();
-                ResumeEngine();
-                return true;
-            }
-            else
-            {
-                ResumeEngine();
+                theUKS = new UKS.UKS();
                 return false;
             }
+            currentFileName = fileName;
+
+            if (theUKS.Labeled("BrainSim") == null)
+                CreateEmptyUKS();
+
+            SetCurrentFileNameToProperties();
+
+            UpdateModuleListsInUKS();
+            LoadActiveModules();
+            ReloadActiveModulesSP();
+            ShowAllModuleDialogs();
+            SetTitleBar();
+            ResumeEngine();
+            AddFileToMRUList(fileName); 
+            return true;
         }
-        
+
+        public void ReloadActiveModulesSP()
+        {
+            ActiveModuleSP.Children.Clear();
+
+            Thing activeModuleParent = theUKS.Labeled("ActiveModule");
+            if (activeModuleParent == null) { return; }
+            var activeModules1 = activeModuleParent.Children;
+            activeModules1 = activeModules1.OrderBy(x => x.Label).ToList();
+
+            foreach (Thing t in activeModules1)
+            {
+                //what kind of module is this?
+                Thing t1 = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+                if (t1 == null) continue;
+                string moduleType = t1.Label;
+
+                TextBlock tb = new TextBlock();
+                tb.Text = t.Label;
+                tb.Margin = new Thickness(5, 2, 5, 2);
+                tb.Padding = new Thickness(10, 3, 10, 3);
+                tb.ContextMenu = new ContextMenu();
+                if (moduleType.Contains(".py"))
+                { }
+                else
+                {
+                    ModuleBase mod = activeModules.FindFirst(x => x.Label == t.Label);
+                    CreateContextMenu(mod, tb, tb.ContextMenu);
+                }
+                tb.Background = new SolidColorBrush(Colors.LightGreen);
+                ActiveModuleSP.Children.Add(tb);
+            }
+        }
+        void UnloadActiveModules()
+        {
+            Thing activeModulesParent = theUKS.Labeled("ActiveModule");
+            if (activeModulesParent == null) return;
+            var activeModules1 = activeModulesParent.Children;
+
+            foreach (Thing t in activeModules1)
+            {
+                for (int i = 0; i < t.Relationships.Count; i++)
+                {
+                    Relationship r = t.Relationships[i];
+                    theUKS.DeleteThing(r.target);
+                    t.RemoveRelationship(r);
+                }
+                theUKS.DeleteThing(t);
+            }
+        }
+
+        void LoadActiveModules()
+        {
+            activeModules.Clear();
+            pythonModules.Clear();
+            moduleHandler.pythonModules.Clear();
+            moduleHandler.activePythonModules.Clear();
+
+
+            var activeModules1 = theUKS.Labeled("ActiveModule").Children;
+            activeModules1 = activeModules1.OrderBy(x => x.Label).ToList();
+
+            foreach (Thing t in activeModules1)
+            {
+                //what kind of module is this?
+                Thing tModuleType = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+                if (tModuleType == null) continue;
+                string moduleType = tModuleType.Label;
+
+                if (moduleType.Contains(".py"))
+                {
+                    pythonModules.Add(t.Label);
+                }
+                else
+                {
+                    ModuleBase mod = CreateNewModule(moduleType, t.Label);
+                    if (mod != null) 
+                        activeModules.Add(mod);
+                    else
+                    {
+                        theUKS.Labeled("ActiveModule").RemoveChild(t);
+                    }
+                }
+            }
+        }
+        private bool SaveFile(string fileName)
+        {
+            Save();
+            AddFileToMRUList(fileName);
+            return true;
+        }
+
         private void AddFileToMRUList(string filePath)
         {
             StringCollection MRUList = (StringCollection)Properties.Settings.Default["MRUList"];
@@ -154,6 +151,32 @@ namespace BrainSimulator
             MRUList.Insert(0, filePath); //add it to the top of the list
             Properties.Settings.Default["MRUList"] = MRUList;
             Properties.Settings.Default.Save();
+            LoadMRUMenu();
+        }
+        public static void RemoveFileFromMRUList(string filePath)
+        {
+            StringCollection MRUList = (StringCollection)Properties.Settings.Default["MRUList"];
+            if (MRUList == null)
+                MRUList = new StringCollection();
+            MRUList.Remove(filePath); //remove it if it's already there
+            Properties.Settings.Default["MRUList"] = MRUList;
+            Properties.Settings.Default.Save();
+        }
+        private void LoadMRUMenu()
+        {
+            MRUListMenu.Items.Clear();
+            StringCollection MRUList = (StringCollection)Properties.Settings.Default["MRUList"];
+            if (MRUList == null)
+                MRUList = new StringCollection();
+            foreach (string fileItem in MRUList)
+            {
+                if (fileItem == null) continue;
+                string shortName = Path.GetFileNameWithoutExtension(fileItem);
+                MenuItem mi = new MenuItem() { Header = shortName };
+                mi.Click += buttonLoad_Click;
+                mi.ToolTip = fileItem;
+                MRUListMenu.Items.Add(mi);
+            }
         }
 
         private void LoadCurrentFile()
@@ -167,72 +190,51 @@ namespace BrainSimulator
             Properties.Settings.Default.Save();
         }
 
-        public int undoCountAtLastSave = 0;
         private bool PromptToSaveChanges()
         {
-            bool canWrite = XmlFile.CanWriteTo(currentFileName, out string message);
-
-            SuspendEngine();
-
-            bool retVal = false;
-            MessageBoxResult mbResult = System.Windows.MessageBox.Show(this, "Do you want to save changes?", "Save", MessageBoxButton.YesNoCancel,
-            MessageBoxImage.Asterisk, MessageBoxResult.No);
-            if (mbResult == MessageBoxResult.Yes)
-            {
-                if (currentFileName.Length != 0 && canWrite)
-                {
-                    SaveFile(currentFileName);
-                }
-                else
-                {
-                    if (!SaveAs())
-                    {
-                        retVal = true;
-                    }
-                }
-            }
-            if (mbResult == MessageBoxResult.Cancel)
-            {
-                retVal = true;
-            }
-            ResumeEngine();
-            return retVal;
+            var result = MessageBox.Show("Save current UKS content first?", "Save?", MessageBoxButton.YesNoCancel);
+            if (result == MessageBoxResult.Cancel)
+                return false;
+            if (result == MessageBoxResult.Yes)
+                Save();
+            return true;
         }
-      
+
+        private bool Save()
+        {
+            return theUKS.SaveUKStoXMLFile(currentFileName);
+        }
         private bool SaveAs()
         {
-            string defaultPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            defaultPath += "\\BrainSim";
-            try
-            {
-                if (Directory.Exists(defaultPath)) defaultPath = "";
-                else Directory.CreateDirectory(defaultPath);
-            }
-            catch
-            {
-                //maybe myDocuments is readonly of offline? let the user do whatever they want
-                defaultPath = "";
-            }
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog
+            System.Windows.Forms.SaveFileDialog saveFileDialog = new()
             {
                 Filter = Utils.FilterXMLs,
-                Title = Utils.TitleBrainSimSave,
-                InitialDirectory = defaultPath
+                Title = Utils.TitleUKSFileSave,
+                InitialDirectory = Utils.GetOrAddLocalSubFolder(Directory.GetCurrentDirectory() + "\\" + Utils.UKSContentFolder),
             };
 
-            // Show the Dialog.  
+            // Show the file Dialog.  
             // If the user clicked OK in the dialog and  
-            Nullable<bool> result = saveFileDialog1.ShowDialog();
-            if (result ?? false)// System.Windows.Forms.DialogResult.OK)
+            System.Windows.Forms.DialogResult result = saveFileDialog.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
             {
-                if (SaveFile(saveFileDialog1.FileName))
-                {
-                    AddFileToMRUList(currentFileName);
-                    SetTitleBar();
-                    return true;
-                }
+                MainWindow.SuspendEngine();
+                currentFileName = saveFileDialog.FileName;
+                theUKS.SaveUKStoXMLFile(currentFileName);
+                AddFileToMRUList(currentFileName);
+                SetCurrentFileNameToProperties();
+
+                SetTitleBar();
+                ResumeEngine();
             }
-            return false;
+            else
+            {
+                saveFileDialog.Dispose();
+                return false;
+            }
+            saveFileDialog.Dispose();
+            ResumeEngine();
+            return true;
         }
     }
 }

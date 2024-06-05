@@ -1,17 +1,27 @@
 # BrainSim3
 Adding Common Sense to Artificial Intelligence.
 
-READ THIS!!! THIS IS PRE-ALPHA.  Download the code, see if it compiles, try it out a bit. Help files and documentation will be coming soon. 
-TO AVOID FRUSTRATION, DO NOT edit this code without first contacting the Future AI Society "https://futureaisociety.org".  This project is a migration from a much larger commercial endeavor and there is a likelihood that whatever you want already exists and hasn't been migrated yet.
+Brain Simulator III is a knowledge system capable of representing and relating information needed to implement Common Sense. Centered on the Universal Knowledge Store (UKS), the system creates a web of nodes and edges and has a growing library if modular software agents which can preform any desired function.
 
-I appreciate your interest in this project and hope your experience will be positive. There are many ways to participate at all levels of AI ability. As a first-timer, you can download a release, try things out, report any bugs, and make a few suggestions. At the other end of the spectrum, you can dive into the code, create modules and training sets. and more.
+Agents are independent modules and can be written in C# or Python. The Brain Simulator system runs on Windows or MAC. A growing library of modules is being adapted from previous research and development.
 
-**Brain Simulator 3** is a free, open-source software project aimed at adding common sense to  Artificial Intelligence. The design philosophy is based on:
-1. we cannot have adult-level common sense without first investigating and implementing the capabilities of a young child
-2. information in the brain is arranged in a graph of nodes connected by edges (with numerous other features)
-3. our Universal Knowledge Store (UKS) can store and retrieve any concepts the human mind can create
+The Brain Simulator is supported by the non-profit “Future AI Society” which has additional information and holds regular online development meetings.  You can join free at: https://futureaisociety.org Or support continuing development with a paid membership.
+With the UKS, this project is leapfrogging other AI technologies which are unable to represent the information needed for the understanding which underpins Common Sense. The Brain Simulator system can 
+•	Represent multi-sensory information so that sounds, words, and images can be related. 
+•	Represent a real-time mental model of immediate surroundings akin to the mind’s similar ability. 
+•	Handle nebulous and/or conflicting information. 
+•	Store action information so it learns which actions lead to positive outcomes for a current situation. 
+•	Update content in real time to handle real-world robotic applications.
+•	Incorporate agent software Modules  to perform any desired functionality.
 
-Although not migrated yet, the **Brain Simulator** implements an artificial entity named “Sallie” who lives in a simulated world and can integrate input from multiple senses. She can recognize objects with binocular vision and associate them with words she hears, plan a sequence of actions, and manipulate objects to achieve a goal. As she advances to understanding her world, interfaces already exist for cameras, microphones, and robotic control to bring AGI to life.
+# About the UKS
+The UKS includes a graph of nodes connected by edges. Within the UKS, nodes are called “Things”. Things can be related by edges called “Relationships” which consist of a source Thing, a target Thing, and a relationship Type (which is also a Thing).  For example: Fido is-a dog would be represented by a single is-a relationship relating Things representing “Fido” and “dog” with the “is-a” Relationship type. 
 
-Again, thanks for your interest!
-Charlie Simon, originator of the Brain Simulator
+The UKS implements inheritance so that Relationships which add attributes to the dog Thing will also be expressed as attributes of Fido and any other dog. Given that “dogs have 4 legs”; querying Fido will automatically include the fact that Fido has 4 legs even though that information is never explicitly represented. The inheritance process supports exceptions so that adding the information that Tripper, a dog, has 3 legs will override the inheritance process. This combination of inheritance and exceptions is a huge step forward in efficiency similar to the human mind…you don’t ever need to store all the attributes of a Thing, only those attributes which make a given Thing unique.
+
+In the same way that Relationships relate multiple Things, “Clauses” relate multiple Relationships. This is important because not all “facts” are either true or false but are dependent on other information. Consider “Fido can play fetch IF the weather is sunny.” 
+
+How to Install, Run and Develop documentation coming soon.
+
+Thanks for your interest! 
+

@@ -284,3 +284,5 @@ AutomatedTests/*.png
 /BrainSimulator/python-3.10.8/Lib/site-packages
 /BrainSimulator/python-3.10.8/Scripts
 /BrainSimulator/App.config
+/UKS/Documentation/html
+/BrainSimulator/Properties/Settings.Designer.cs

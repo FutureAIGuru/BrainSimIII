@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "BrainSimMAC": {
+      "commandName": "Project"
+    },
+    "Startup": {
+      "commandName": "Project"
+    }
+  }
+}

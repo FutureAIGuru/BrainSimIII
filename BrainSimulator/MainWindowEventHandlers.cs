@@ -6,13 +6,10 @@
 
 using Microsoft.Win32;
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using BrainSimulator.Modules;
-using System.Linq;
 
 namespace BrainSimulator
 {
@@ -21,7 +18,6 @@ namespace BrainSimulator
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static bool WasClosed = false;
 
         private void buttonSave_Click(object sender, RoutedEventArgs e)
         {
@@ -40,127 +36,41 @@ namespace BrainSimulator
             if (SaveAs())
             {
                 SaveButton.IsEnabled = true;
-                Reload_network.IsEnabled = true;
-                ReloadNetwork.IsEnabled = true;
             }
         }
 
         private void buttonReloadNetwork_click(object sender, RoutedEventArgs e)
         {
-            if (PromptToSaveChanges())
+            if (!PromptToSaveChanges())
                 return;
-            
+
             if (currentFileName != "")
             {
                 LoadCurrentFile();
                 ShowAllModuleDialogs();
-                // Modules.Sallie.VideoQueue.Clear();
             }
         }
 
         private void button_Exit_Click(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.Save();
-            MainWindow.WasClosed = true;
             CloseAllModuleDialogs();
             CloseAllModules();
             this.Close();
         }
 
-        [DllImport("user32.dll", SetLastError = true)]
-        internal static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
-        [DllImport("user32.dll")]
-        public static extern bool GetWindowRect(IntPtr hwnd, ref Rect rectangle);
-        [DllImport("User32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        private void MenuItemHelp_Click(object sender, RoutedEventArgs e)
+        public ModuleBase CreateNewModule(string moduleTypeLabel, string moduleLabel = "")
         {
-            //first check to see if help is already open
-            Process[] theProcesses1 = Process.GetProcesses();
-            Process latestProcess = null;
-            for (int i = 1; i < theProcesses1.Length; i++)
-            {
-                try
-                {
-                    if (theProcesses1[i].MainWindowTitle != "")
-                    {
-                        if (theProcesses1[i].MainWindowTitle.Contains("GettingStarted"))
-                            latestProcess = theProcesses1[i];
-                    }
-                }
-                catch (Exception e1)
-                {
-                    MessageBox.Show("Opening Help Item Failed, Message: " + e1.Message);
-                }
-            }
-
-
-            if (latestProcess == null)
-            {
-                OpenApp("https://futureai.guru/BrainSimHelp/gettingstarted.html");
-
-                //gotta wait for the page to render before it shows in the processes list
-                DateTime starttTime = DateTime.Now;
-
-                while (latestProcess == null && DateTime.Now < starttTime + new TimeSpan(0, 0, 3))
-                {
-                    theProcesses1 = Process.GetProcesses();
-                    for (int i = 1; i < theProcesses1.Length; i++)
-                    {
-                        try
-                        {
-                            if (theProcesses1[i].MainWindowTitle != "")
-                            {
-                                if (theProcesses1[i].MainWindowTitle.Contains("GettingStarted"))
-                                    latestProcess = theProcesses1[i];
-                            }
-                        }
-                        catch (Exception e1)
-                        {
-                            MessageBox.Show("Opening Help Item Failed, Message: " + e1.Message);
-                        }
-                    }
-                }
-            }
-
-            try
-            {
-                if (latestProcess != null)
-                {
-                    IntPtr id = latestProcess.MainWindowHandle;
-
-                    Rect theRect = new Rect();
-                    GetWindowRect(id, ref theRect);
-
-                    bool retVal = MoveWindow(id, 300, 100, 1200, 700, true);
-                    this.Activate();
-                    SetForegroundWindow(id);
-                }
-            }
-            catch (Exception e1)
-            {
-                MessageBox.Show("Opening Help Failed, Message: " + e1.Message);
-            }
-        }
-
-        //This opens an app depending on the assignments of the file extensions in Windows
-        public static Process OpenApp(string fileName)
-        {
-            Process p = new Process();
-            p.StartInfo.FileName = fileName;
-            p.StartInfo.UseShellExecute = true;
-            p.Start();
-            return p;
-        }
-
-        private ModuleBase CreateNewModule(string moduleLabel)
-        {
-            Type t = Type.GetType("BrainSimulator.Modules.Module" + moduleLabel);
+            Type t = Type.GetType("BrainSimulator.Modules.Module" + moduleTypeLabel);
+            if (t == null) 
+                return null;
             ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(t);
 
-            //ensure no name collistions
-            theModule.Label = MainWindow.GetUniqueModuleLabel(moduleLabel);
+            theModule.Label = moduleLabel;
+            if (moduleLabel == "")
+                theModule.Label = moduleTypeLabel;
+            theModule.GetUKS();
             return theModule;
         }
         private void ModuleList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -171,50 +81,42 @@ namespace BrainSimulator
                 {
                     string moduleName = ((Label)cb.SelectedItem).Content.ToString();
                     cb.SelectedIndex = -1;
-                    ModuleBase newModule = CreateNewModule(moduleName);
-                    MainWindow.BrainSim3Data.modules.Add(newModule);
-                }
-            }
-            loadedModulesSP = LoadedModuleSP;
-            LoadedModuleSP.Children.Clear();
-
-            for (int i = 0; i < MainWindow.BrainSim3Data.modules.Count; i++)
-            {
-                ModuleBase mod = MainWindow.BrainSim3Data.modules[i];
-                if (mod != null)
-                {
-                    mod.SetUpAfterLoad();
+                    ActivateModule(moduleName);
                 }
             }
 
-            ReloadLoadedModules();
+            ReloadActiveModulesSP();
         }
         private void button_FileNew_Click(object sender, RoutedEventArgs e)
         {
-            if (PromptToSaveChanges())
+            if (!PromptToSaveChanges())
                 return;
 
             SuspendEngine();
-            CreateEmptyNetwork(); // to avoid keeping too many bytes occupied...
+            CloseAllModuleDialogs();
+            CloseAllModules();
+            UnloadActiveModules();
 
-            ReloadNetwork.IsEnabled = false;
-            Reload_network.IsEnabled = false;
-            
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            CreateEmptyUKS(); // to avoid keeping too many bytes occupied...
 
             currentFileName = "";
             SetCurrentFileNameToProperties();
+
+            LoadModuleTypeMenu();
+
+            InitializeActiveModules();
+
+            LoadMRUMenu();
+
+
             SetTitleBar();
-                
-            Update();
-            //Modules.Sallie.VideoQueue.Clear();
+
             ResumeEngine();
         }
 
         private void buttonLoad_Click(object sender, RoutedEventArgs e)
         {
-            if (PromptToSaveChanges())
+            if (!PromptToSaveChanges())
                 return;
             string fileName = "_Open";
             if (sender is MenuItem mainMenu)
@@ -225,7 +127,7 @@ namespace BrainSimulator
                 OpenFileDialog openFileDialog1 = new OpenFileDialog
                 {
                     Filter = Utils.FilterXMLs,
-                    Title = Utils.TitleBrainSimLoad,
+                    Title = Utils.TitleUKSFileLoad,
                 };
                 // Show the Dialog.  
                 // If the user clicked OK in the dialog and  
@@ -238,16 +140,23 @@ namespace BrainSimulator
             }
             else
             {
-                //this is a file name from the File menu
-                currentFileName = Path.GetFullPath("./Networks/" + fileName + ".xml");
-                LoadCurrentFile();
+                if (sender is MenuItem mi)
+                {
+                    //this is a file name from the File menu
+                    currentFileName = mi.ToolTip.ToString(); //Path.GetFullPath("./UKSContent/" + fileName + ".xml");
+                    LoadCurrentFile();
+
+                }
             }
         }
 
-
-        internal static string GetUniqueModuleLabel(string searchString)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            string number = (BrainSim3Data.modules.Count(module => module.Label.StartsWith(searchString + "_", StringComparison.OrdinalIgnoreCase)) + 1).ToString();            return searchString + "_" + number;
+            if (!PromptToSaveChanges())
+                return;
+            CloseAllModuleDialogs();
+            CloseAllModules();
+            moduleHandler.ClosePythonEngine();
         }
     }
 }

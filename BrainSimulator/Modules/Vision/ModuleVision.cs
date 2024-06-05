@@ -12,9 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
 using System.Diagnostics;
 using static System.Math;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.Xml;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
@@ -401,13 +399,13 @@ namespace BrainSimulator.Modules
 
             //set up the UKS structure for outlines
             GetUKS();
-            if (UKS == null) return;
-            UKS.GetOrAddThing("Sense", "Thing");
-            UKS.GetOrAddThing("Visual", "Sense");
-            Thing outlines = UKS.GetOrAddThing("Outline", "Visual");
-            Thing tCorners = UKS.GetOrAddThing("corner", "Visual");
-            UKS.DeleteAllChildren(outlines);
-            UKS.DeleteAllChildren(tCorners);
+            if (theUKS == null) return;
+            theUKS.GetOrAddThing("Sense", "Thing");
+            theUKS.GetOrAddThing("Visual", "Sense");
+            Thing outlines = theUKS.GetOrAddThing("Outline", "Visual");
+            Thing tCorners = theUKS.GetOrAddThing("Corners", "Visual");
+            theUKS.DeleteAllChildren(outlines);
+            theUKS.DeleteAllChildren(tCorners);
 
             if (corners.Count == 0) return;
 
@@ -462,16 +460,16 @@ namespace BrainSimulator.Modules
                 }
                 if (sum > 0) outline.Reverse();
 
-                //let's add it to the UKS
-                //TODO: here's where we'll possibly add have a loop for multiple outlines
-                Thing currOutline = UKS.GetOrAddThing("outline*", "Outline");
-                foreach (Corner c in outline)
-                {
-                    if (c.angle > PI / 2) c.angle = PI - c.angle;
-                    Thing corner = UKS.GetOrAddThing("corner*", tCorners);
-                    corner.V = c;
-                    UKS.AddStatement(currOutline, "has*", corner);
-                }
+            //we now have an ordered, right-handed outline
+            //let's add it to the UKS
+
+            //TODO: here's where we'll have a loop for multiple outlines
+            Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
+            foreach (Corner c in outline)
+            {
+                Thing corner = theUKS.GetOrAddThing("corner*", tCorners);
+                corner.V = c;
+                theUKS.AddStatement(currOutline, "has*", corner);
             }
         }
 
