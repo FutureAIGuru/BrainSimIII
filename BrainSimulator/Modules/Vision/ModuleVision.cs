@@ -117,6 +117,7 @@ namespace BrainSimulator.Modules
                     int index = j * stride + i * 4; // Assuming 32 bits per pixel (4 bytes: BGRA)
                     if (bitmap.Format.BitsPerPixel == 8)
                         index = j * stride * 3 + i * 3;
+                    if (index >= pixelBuffer.Length) continue;
 
                     if (bitmap.Format.BitsPerPixel != 8 && index < pixelBuffer.Length - 3)
                     {
@@ -129,10 +130,21 @@ namespace BrainSimulator.Modules
                     }
                     else
                     {
-                        var c = bitmap.Palette.Colors[pixelBuffer[index]];
-                        byte blue = c.B;
-                        byte red = c.R;
-                        byte green = c.G;
+                        byte red, green, blue, alpha;
+                        if (bitmap.Palette != null)
+                        {
+                            var c = bitmap.Palette.Colors[pixelBuffer[index]];
+                            blue = c.B;
+                            red = c.R;
+                            green = c.G;
+                        }
+                        else
+                        {
+                            blue = pixelBuffer[index];
+                            green = pixelBuffer[index + 1];
+                            red = pixelBuffer[index + 2];
+                            alpha = pixelBuffer[index + 3];
+                        }
                         HSLColor pixelColor = new HSLColor(1, red, green, blue);
                         imageArray[i, j] = pixelColor;
 
@@ -156,8 +168,6 @@ namespace BrainSimulator.Modules
                 int[] bRay = new int[imageArray.GetLength(0)];
                 var rayThruImage = LineThroughArray(dx, dy, sx, sy, imageArray);
                 FindBoundariesInRay(bRay, rayThruImage);
-                if (sy == 57)
-                { }
                 for (int i = 0; i < bRay.GetLength(0); i++)
                 {
                     if (boundaryArray[i, sy] == 0)
@@ -304,6 +314,20 @@ namespace BrainSimulator.Modules
                     Segment s2 = segments[j];
                     if (Utils.FindIntersection(s1, s2, out PointPlus intersection, out Angle angle))
                     {
+                        //find the angle properly
+                        PointPlus A, B, C;
+                        B = intersection;
+                        if ((s1.P1 - intersection).R > (s1.P2 - intersection).R)
+                            A = s1.P1;
+                        else
+                            A = s1.P2;
+                        if ((s2.P1 - intersection).R > (s2.P2 - intersection).R)
+                            C = s2.P1;
+                        else
+                            C = s2.P2;
+                        Segment sA = new() { P1 = A, P2 = B };
+                        Segment sB = new() { P1 = C, P2 = B };
+                        angle = Abs(sA.Angle - sB.Angle);
                         AddCornerToList(s1, s2, intersection, angle);
                     }
                 }
@@ -314,9 +338,11 @@ namespace BrainSimulator.Modules
         {
             //ignore angles whih are nearly straight
             //if the segments are short, the angle between them must be larger
+            if (angle.Degrees > 180)
+                angle.Degrees = 360 - angle.Degrees;
             Angle minAngle = new Angle();
-            minAngle.Degrees = 10;
-            if (s1.Length < 20 || s2.Length < 20) minAngle.Degrees = 20;
+            minAngle.Degrees = 5;
+            //if (s1.Length < 20 || s2.Length < 20) minAngle.Degrees = 20;
 
 
             if (Abs(angle.Degrees) > minAngle.Degrees && 180 - Abs(angle.Degrees) > minAngle.Degrees)
@@ -326,6 +352,8 @@ namespace BrainSimulator.Modules
                 if (alreadyInList == null)
                     corners.Add(new Corner { location = intersection, angle = Abs(angle), orientation = cornerOrientation });
             }
+            else
+            {}
         }
 
         void FindOrphanSegmentEnds()
@@ -499,12 +527,15 @@ namespace BrainSimulator.Modules
                     if (nodes[0].Value == "Corner")
                     {
                         Corner c = new();
+                        //get a pointplus node
                         float x = float.Parse(nodes[1].FirstChild.InnerText);
                         float y = float.Parse(nodes[1].FirstChild.NextSibling.InnerText);
                         float conf = float.Parse(nodes[1].FirstChild.NextSibling.NextSibling.InnerText);
                         c.location = new PointPlus { X = x, Y = y, Conf=conf,};
+                        //get the angle node
                         float theta = float.Parse(nodes[2].FirstChild.InnerText);
                         c.angle = Angle.FromDegrees(theta);
+                        //get the orientation node
                         float theta1 = float.Parse(nodes[3].FirstChild.InnerText);
                         c.orientation = Angle.FromDegrees(theta1);
                         t.V = c;

@@ -127,6 +127,7 @@ namespace BrainSimulator
         }
         public HSLColor(HSLColor c)
         {
+            if (c == null) return;
             hue = c.hue;
             saturation = c.saturation;
             luminance = c.luminance;

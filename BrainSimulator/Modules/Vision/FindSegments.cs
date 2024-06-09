@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Linq;
 using static System.Math;
-using System.Windows.Media;
+using System.Security.Cryptography.Xml;
+using System.Windows.Navigation;
 
 namespace BrainSimulator.Modules.Vision
 {
@@ -15,9 +16,10 @@ namespace BrainSimulator.Modules.Vision
         private double angleStep; // Angle step size
         private double rhoStep = 1; // Rho step size (can be adjusted based on image resolution)
         public int maxDistance; // Maximum possible distance from the origin to the image corner
-        private List<Point>[,] accumulator; // Accumulator array
-        public List<Tuple<int, int, int>> localMaxima;
+        public List<Point>[,] accumulator; // Accumulator array
+        public List<Tuple<int, int, int, float>> localMaxima;
         private float[,] boundaries;
+        int minLength = 5;
 
         // Constructor
         public HoughTransform(int width, int height)
@@ -51,6 +53,7 @@ namespace BrainSimulator.Modules.Vision
                         for (int thetaIndex = 0; thetaIndex < numAngles; thetaIndex++)
                         {
                             double theta = thetaIndex * angleStep;
+                            Angle a = theta;
                             double rho = x * Cos(theta) + y * Sin(theta);
                             int rhoIndex = (int)Round(rho / rhoStep + maxDistance);
 
@@ -59,59 +62,99 @@ namespace BrainSimulator.Modules.Vision
                     }
                 }
             }
-            FindMaxima(boundaries);
+            FindMaxima();
         }
-        private void FindMaxima(float[,] edges)
+        private void FindMaxima()
         {
             //find the top vote-getters
-            localMaxima = new List<Tuple<int, int, int>>(); // (votes,rhoIndex,thetaIndex)
+            localMaxima = new List<Tuple<int, int, int, float>>(); // (votes,rhoIndex,thetaIndex,lineVotes)
 
             int maxRho = accumulator.GetLength(0);
             int maxTheta = accumulator.GetLength(1);
             for (int rhoIndex = 0; rhoIndex < maxRho; rhoIndex++)
-           {
+            {
                 for (int thetaIndex = 0; thetaIndex < maxTheta; thetaIndex++)
                 {
                     float votes = accumulator[rhoIndex, thetaIndex].Count;
-                    if (votes < 4) continue;
-                    votes = LineWeight(rhoIndex, thetaIndex);
-                    if (votes < 4) continue;
-
-                    bool isLocalMaximum = true;
-                    int distToSearch = 1; //noise reduction...how broad must this hill be?
-                    for (int dx = -distToSearch; dx <= distToSearch; dx++)
+                    if (votes < minLength) continue;
+                    float votesLine = LineWeight(rhoIndex, thetaIndex);
+                    if (votesLine < minLength) continue;
+                    int minRhoDifference = 4; //pixels
+                    int minThetaDifference = 12; //degrees
+                    for (int rhoOffset = -minRhoDifference; rhoOffset <= minRhoDifference; rhoOffset++)
                     {
-                        for (int dy = -distToSearch; dy <= distToSearch; dy++)
+                        for (int thetaOffset = -minThetaDifference; thetaOffset <= minThetaDifference; thetaOffset++)
                         {
-                            //bounds check
-                            if (dx == 0 && dy == 0) continue;
-                            int testRho = rhoIndex + dx;
+                            int testRho = rhoIndex + rhoOffset;
+                            int testTheta = thetaIndex + thetaOffset;
+                            //bounds checks
+                            if (rhoOffset == 0 && thetaOffset == 0) continue;
                             if (testRho < 0) continue;
                             if (testRho >= maxRho) continue;
-                            int testTheta = thetaIndex + dy;
                             if (testTheta < 0) continue;
                             if (testTheta >= maxTheta) continue;
 
+                            //is this a better candidate than the main one?
                             float votes1 = accumulator[testRho, testTheta].Count;
-                            if (votes1 < 4) continue;
-                            votes1 = LineWeight(testRho, testTheta);
-                            if (votes1 < 4) continue;
-                            if (votes1 >= votes)
+                            float votes1Line = LineWeight(testRho, testTheta);
+                            if (votes1Line > votesLine)// || votes1Line > votesLine)
                             {
-                                isLocalMaximum = false;
-                                break;
+                                goto NotAMax;
+                            }
+                            else
+                            {
+                                var existingEntry = localMaxima.FindFirst(x => x.Item2 == testRho && x.Item3 == testTheta);
+                                if (existingEntry != null)
+                                {
+                                    localMaxima.Remove(existingEntry);
+                                }
                             }
                         }
-                        if (!isLocalMaximum) break;
                     }
-                    if (isLocalMaximum)
-                        localMaxima.Add(new Tuple<int, int, int>((int)votes, rhoIndex, thetaIndex));
+                    localMaxima.Add(new Tuple<int, int, int, float>((int)votes, rhoIndex, thetaIndex, votesLine));
+                NotAMax: continue;
                 }
             }
+            localMaxima = localMaxima.OrderByDescending(x => x.Item1).ToList();
+        }
+
+        void OrderPointsAlongSegment(ref List<Point> points)
+        {
+            float bestDist = 0;
+            if (points.Count == 0) return;
+            Point p1 = points[0];
+            Point p2 = points[0];
+            foreach (Point pa in points)
+                foreach (Point pb in points)
+                {
+                    float newDist = (float)(Sqrt((pa.X - pb.X) * (pa.X - pb.X) + (pa.Y - pb.Y) * (pa.Y - pb.Y)));
+                    if (newDist > bestDist)
+                    {
+                        bestDist = newDist;
+                        p1 = pa;
+                        p2 = pb;
+                    }
+                }
+
+            double dx = p2.X - p1.X;
+            double dy = p2.Y - p1.Y;
+            double dSquared = dx * dx + dy * dy;
+
+            // Project each point onto the direction vector and compute the projection scalar t
+            var projectionScalars = points.Select(p => new
+            {
+                Point = p,
+                Scalar = ((p.X - p1.X) * dx + (p.Y - p1.Y) * dy) / dSquared
+            });
+            // Sort the points based on the projection scalar
+            points = projectionScalars.OrderBy(ps => ps.Scalar).Select(ps => ps.Point).ToList();
         }
 
         public float LineWeight(int rhoIndex, int thetaIndex)
         {
+            if (accumulator[rhoIndex, thetaIndex].Count == 0) return 0;
+            OrderPointsAlongSegment(ref accumulator[rhoIndex, thetaIndex]);
+
             Segment s = new Segment()
             {
                 P1 = accumulator[rhoIndex, thetaIndex].First(),
@@ -138,7 +181,7 @@ namespace BrainSimulator.Modules.Vision
             {
                 //step out in the X direction
                 PointPlus step = new PointPlus((dx > 0) ? 1 : -1, dy / Abs(dx));
-                for (int x = 0; x < Abs(dx); x++)
+                for (int x = 0; x <= Abs(dx); x++)
                 {
                     //if curPos is exactly on a boundary point OR curPos,
                     //OR curPos is between two boundary points, Add 1
@@ -153,8 +196,10 @@ namespace BrainSimulator.Modules.Vision
                         boundaries[(int)curPos.X, (int)curPos.Y] > 0 &&
                         boundaries[(int)curPos.X, (int)curPos.Y - 1] > 0)
                         retVal += 1;
-                    else if (boundaries[(int)curPos.X, (int)Round(curPos.Y)] == 1)
-                        retVal += 1 - (float)Abs(curPos.Y - Round(curPos.Y));
+                    else if (boundaries[(int)curPos.X, (int)Floor(curPos.Y)] > 0)
+                        retVal += 1 - (float)Abs(curPos.Y - Floor(curPos.Y));
+                    else if (boundaries[(int)curPos.X, (int)Ceiling(curPos.Y)] > 0)
+                        retVal += 1 - (float)Abs(curPos.Y - Ceiling(curPos.Y));
                     else
                         missCount++;
                     curPos += step;
@@ -164,7 +209,7 @@ namespace BrainSimulator.Modules.Vision
             {
                 //step out in the Y direction
                 PointPlus step = new PointPlus(dx / Abs(dy), (dy > 0) ? 1f : -1f);
-                for (int y = 0; y < Abs(dy); y++)
+                for (int y = 0; y <= Abs(dy); y++)
                 {
                     if (curPos.X == Round(curPos.X) && boundaries[(int)curPos.X, (int)curPos.Y] == 1)
                         retVal += 1;
@@ -176,8 +221,10 @@ namespace BrainSimulator.Modules.Vision
                         boundaries[(int)curPos.X, (int)curPos.Y] > 0 &&
                         boundaries[(int)curPos.X - 1, (int)curPos.Y] > 0)
                         retVal += 1;
-                    else if (boundaries[(int)Round(curPos.X), (int)Round(curPos.Y)] == 1)
-                        retVal += 1 - (float)Abs(curPos.X - Round(curPos.X));
+                    else if (boundaries[(int)Round(curPos.X), (int)Floor(curPos.Y)] > 0)
+                        retVal += 1 - (float)Abs(curPos.X - Floor(curPos.X));
+                    else if (boundaries[(int)Round(curPos.X), (int)Ceiling(curPos.Y)] > 0)
+                        retVal += 1 - (float)Abs(curPos.X - Ceiling(curPos.X));
                     else
                         missCount++;
                     curPos += step;
@@ -187,58 +234,151 @@ namespace BrainSimulator.Modules.Vision
             return retVal;
         }
 
+        void AddNearbyPointsToLines()
+        {
+            foreach (var max in localMaxima)
+            {
+                AddNearbyPointsToLine(max.Item2, max.Item3);
+            }
+        }
+        void AddNearbyPointsToLine(int rho, int theta)
+        {
+            PointPlus start;
+            PointPlus step;
+
+            if (theta == 0 || theta == 180) //line is vertical
+            {
+                step = new PointPlus(0, 1f);
+                start = new PointPlus(rho - maxDistance, 0f);
+            }
+            else
+            {
+                //calculate (m,b) for y=mx+b
+                Angle fTheta = theta * Math.PI / numAngles;
+                double b = (rho - maxDistance) / Math.Sin(fTheta);
+                double m = -Math.Cos(fTheta) / Math.Sin(fTheta);
+                start = new PointPlus(0, (float)b);
+                if (Abs(m) < 1)
+                    step = new PointPlus(1, (float)m);
+                else
+                    step = new PointPlus((float)(1 / Abs(m)), (float)Sign(m));
+
+            }
+            accumulator[rho, theta].Clear();
+            while ((step.X != 0 && start.X < boundaries.GetLength(0)) || (step.X == 0  && start.Y < boundaries.GetLength(1)))
+            {
+                if (start.X == 15)
+                { }
+                if (start.X < 0 || start.X >= boundaries.GetLength(0) ||
+                       start.Y < 0 || start.Y >= boundaries.GetLength(1))
+                { }
+                else 
+                if (PointNearABoundaryPoint(start,theta,out PointPlus thePoint) > 0)
+                {
+                    //if (!accumulator[rho, theta].Contains(thePoint))
+                        accumulator[rho, theta].Add(new PointPlus((int)start.X,(float)(int)start.Y));
+                }
+                start = start + step;
+            }
+            OrderPointsAlongSegment(ref accumulator[rho, theta]);
+        }
+
+        float PointNearABoundaryPoint(PointPlus start, int theta, out PointPlus thePoint)
+        {
+            thePoint = new PointPlus(0, 0f);
+            float GetValue(PointPlus pt, int dx, int dy, ref PointPlus thePoint)
+            {
+                if (pt.X + dx < 0 || pt.X + dx >= boundaries.GetLength(0) || pt.Y + dy < 0 || pt.Y + dy >= boundaries.GetLength(1)) return 0;
+                thePoint = new PointPlus((int)start.X+dx,(float)(int)start.Y+dy);
+                return boundaries[(int)start.X+dx, (int)start.Y+dy];
+            }
+            float val = GetValue(start, 0, 0,ref thePoint);
+            if (val > 0) return val;
+            if (theta > 158)
+            {
+                val = GetValue(start, 1, 0, ref thePoint);
+                if (val > 0) return val;
+                val = GetValue(start, -1, 0, ref thePoint);
+                if (val > 0) return val;
+            }
+            else if (theta > 112)
+            {
+                val = GetValue(start, 1, -1, ref thePoint);
+                if (val > 0) return val;
+                val = GetValue(start, -1, 1, ref thePoint);
+                if (val > 0) return val;
+            }
+            else if (theta > 68)
+            {
+                val = GetValue(start, 0, 1, ref thePoint);
+                if (val > 0) 
+                    return val;
+                val = GetValue(start, 0, -1, ref thePoint);
+                if (val > 0) 
+                    return val;
+            }
+            else if (theta > 22)
+            {
+                val = GetValue(start, -1, 1, ref thePoint);
+                if (val > 0) return val;
+                val = GetValue(start, 1, -1, ref thePoint);
+                if (val > 0) return val;
+                val = GetValue(start, 0, 1, ref thePoint);
+                if (val > 0) return val;
+                val = GetValue(start, 0, -1, ref thePoint);
+                if (val > 0) return val;
+            }
+            else
+            {
+                val = GetValue(start, 1, 0, ref thePoint);
+                if (val > 0) return val;
+                val = GetValue(start, -1, 0, ref thePoint);
+                if (val > 0) return val;
+            }
+            return 0;
+        }
+
 
         // Extract line segments from accumulator array
         public List<Segment> ExtractLineSegments()
         {
             localMaxima = localMaxima.OrderByDescending(x => x.Item1).ToList();
+            AddNearbyPointsToLines();
             List<Segment> segments = new List<Segment>();
             foreach (var max in localMaxima)
             {
                 List<Point> points = accumulator[max.Item2, max.Item3];
                 int votes = points.Count;
-                if (votes > 4)
+
+                if (votes < minLength) continue;
+                //the final endpoints are significantly further than point run...must be multiple segments
+                Point start = points[0];
+                Point end = points[0];
+                Point prev = points[0];
+                int minimumSegmentLength = minLength;
+                int maximumGapSize = 4;
+
+                for (int i = 1; i < points.Count; i++)
                 {
-                    Point p1 = points.First();
-                    Point p2 = points.Last();
-                    if (p1.Y > p2.Y)
-                    {
-                        points = points.OrderByDescending(x => x.Y).ToList();
+                    Point current = points[i];
+                    float dist = (float)DistanceBetweenPoints(prev, current);
+                    if (dist < maximumGapSize)// && boundaries[(int)Round(current.X), (int)Round(current.Y)] == 1)
+                    { //points are contignous
+                        prev = current;
+                        end = current;
                     }
                     else
-                        points = points.OrderBy(x => x.Y).ToList();
-                    p1 = points.First();
-                    p2 = points.Last();
-
-                    //the final endpoints are significantly further than point run...must be multiple segments
-                    Point start = points[0];
-                    Point end = points[0];
-                    Point prev = points[0];
-                    int minimumSegmentLength = 4;
-                    int maximumGapSize = 3;
-
-                    for (int i = 1; i < points.Count; i++)
                     {
-                        Point current = points[i];
-                        float dist = (float)DistanceBetweenPoints(prev, current);
-                        if (dist < maximumGapSize && boundaries[(int)Round(current.X), (int)Round(current.Y)] == 1)
-                        { //points are contignous
-                            prev = current;
-                            end = current;
-                        }
-                        else
-                        {
-                            //pts are discontiguous 
-                            if (DistanceBetweenPoints(start, end) >= minimumSegmentLength)
-                                AddSegment(start, end, segments);
-                            start = current;
-                            end = current;
-                            prev = current;
-                        }
+                        //pts are discontiguous 
+                        if (DistanceBetweenPoints(start, end) >= minimumSegmentLength)
+                            AddSegment(start, end, segments);
+                        start = current;
+                        end = current;
+                        prev = current;
                     }
-                    if (DistanceBetweenPoints(start, end) > minimumSegmentLength)
-                        AddSegment(start, end, segments);
                 }
+                if (DistanceBetweenPoints(start, end) > minimumSegmentLength)
+                    AddSegment(start, end, segments);
             }
 
             return segments;
@@ -252,7 +392,7 @@ namespace BrainSimulator.Modules.Vision
                 Segment s = segments[i];
                 Angle angleBetweenSegments = Math.Abs(s.Angle - newSegment.Angle);
                 //segments nearly match
-                if (Utils.FindDistanceToSegment(p1, s) < 4 && Utils.FindDistanceToSegment(p2, s) < 4)
+                if (Utils.FindDistanceToSegment(p1, s) < minLength && Utils.FindDistanceToSegment(p2, s) < 4)
                 {
                     float w = SegmentWeight(s);
                     float newW = SegmentWeight(newSegment);

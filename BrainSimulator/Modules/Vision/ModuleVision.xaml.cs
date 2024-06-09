@@ -115,16 +115,20 @@ namespace BrainSimulator.Modules
             {
                 for (int i = parent.segmentFinder.localMaxima.Count-1; i >=0 ; i--)
                 {
-                    Tuple<int, int, int> line = parent.segmentFinder.localMaxima[i];
+                    Tuple<int, int, int,float> line = parent.segmentFinder.localMaxima[i];
+                    var points = parent.segmentFinder.accumulator[line.Item2, line.Item3];
                     float maxVotes = parent.segmentFinder.localMaxima[0].Item1;
                     float votes = line.Item1;
-                    int minVodes = 5;
-                    if (votes < minVodes) continue;
-                    float intensity = (votes - minVodes) / maxVotes;
+                    float lineVotes = line.Item4;
+                    int minVotes = 4;
+                    if (votes < minVotes) continue;
+                    float intensity = (votes - minVotes) / maxVotes;
+                    intensity *= 2;
                     HSLColor hSLColor = new HSLColor(Colors.Green);
                     hSLColor.luminance = intensity;
                     Brush brush = new SolidColorBrush(hSLColor.ToColor());
-                    int rho = line.Item2 - parent.segmentFinder.maxDistance;
+                    int rhoIndex = line.Item2;
+                    int rho = rhoIndex - parent.segmentFinder.maxDistance;
                     int theta = line.Item3;
                     if (theta == 0 || theta == 180) //line is vertical
                     {
@@ -135,6 +139,7 @@ namespace BrainSimulator.Modules
                             Y1 = 0 * scale,
                             Y2 = theCanvas.ActualHeight * scale,
                             Stroke = brush,
+                            ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 200, Content = $"({(int)rhoIndex},{(int)theta},{(int)votes},{(int)lineVotes}) (r,t,v,vl)" },
                         };
                         theCanvas.Children.Add(l);
                     }
@@ -151,6 +156,7 @@ namespace BrainSimulator.Modules
                             Y1 = b * scale,
                             Y2 = (b+m*1000)* scale,
                             Stroke = brush,
+                            ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 200, Content = $"({(int)rhoIndex},{(int)theta},{(int)votes},{(int)lineVotes}) (r,t,v,vl)" },
                         };
                         theCanvas.Children.Add(l);
                     }
