@@ -13,6 +13,7 @@ using System.Xml.Serialization;
 using System.Diagnostics;
 using static System.Math;
 using UKS;
+using System.Runtime.Intrinsics.Arm;
 
 namespace BrainSimulator.Modules
 {
@@ -39,9 +40,13 @@ namespace BrainSimulator.Modules
             public PointPlus location;
             public Angle angle;
             public Angle orientation;
+            public Segment s1;
+            public Segment s2;
             public override string ToString()
             {
-                return $"[x,y:({(int)Round(location.X)},{(int)Round(location.Y)}) A: {angle}]";// O: {orientation}";
+                return $"[x,y:({(int)Round(location.X)},{(int)Round(location.Y)}) A: {angle}] " +
+                    $"s1:[({s1.P1.X},{s1.P1.Y}),({s1.P2.X},{s1.P2.Y})]] " +
+                    $"s2:[({s2.P1.X},{s2.P1.Y}),({s2.P2.X},{s2.P2.Y})]]";
             }
         }
 
@@ -348,12 +353,12 @@ namespace BrainSimulator.Modules
             if (Abs(angle.Degrees) > minAngle.Degrees && 180 - Abs(angle.Degrees) > minAngle.Degrees)
             {
                 Angle cornerOrientation = ((s1.Angle - s2.Angle) > 0) ? s1.Angle : s2.Angle + (s1.Angle + s2.Angle) / 2;
-                Corner alreadyInList = corners.FindFirst(x => (x.location - intersection).R < 4);
+                Corner alreadyInList = corners.FindFirst(x => (x.location - intersection).R < 2); //allow things to be offset by a few pixels
                 if (alreadyInList == null)
-                    corners.Add(new Corner { location = intersection, angle = Abs(angle), orientation = cornerOrientation });
+                    corners.Add(new Corner { location = intersection, angle = Abs(angle), orientation = cornerOrientation, s1 = s1, s2 = s2 });
             }
             else
-            {}
+            { }
         }
 
         void FindOrphanSegmentEnds()
@@ -396,9 +401,9 @@ namespace BrainSimulator.Modules
                         p2isOrphanEnd = false;
                 }
                 if (p1isOrphanEnd)
-                    corners.Add(new Corner { location = s.P1, angle = 0 });
+                    corners.Add(new Corner { location = s.P1, angle = 0, s1 = s, s2 = s });
                 if (p2isOrphanEnd)
-                    corners.Add(new Corner { location = s.P2, angle = 0 });
+                    corners.Add(new Corner { location = s.P2, angle = 0, s1 = s, s2 = s });
             }
         }
 
@@ -421,10 +426,9 @@ namespace BrainSimulator.Modules
             return true;
         }
 
-        //trace around an outline to get the order of corners and relative distances
+        //trace around the outlines to get the order of corners and relative distances
         private void FindOutlines()
         {
-
             //set up the UKS structure for outlines
             GetUKS();
             if (theUKS == null) return;
@@ -445,39 +449,31 @@ namespace BrainSimulator.Modules
             for (int i = 0; i < corners.Count; i++)
                 cornerAvailable.Add(corners[i]);
 
-            while (cornerAvailable.Count > 1)
+            while (cornerAvailable.Count > 0)
             {
+                Corner curr = cornerAvailable[0];
                 List<Corner> outline = new();
                 bool outlineClosed = false;
-                Corner start = cornerAvailable[0];
-                Corner curr = cornerAvailable[0];
-                outline.Add(start);
-                cornerAvailable.Remove(start);
+                Corner start = curr;
+                outline.Add(curr);
+                cornerAvailable.Remove(curr);
                 while (!outlineClosed)
                 {
-                    Corner bestCorner = null;
-                    float bestWeight = 0;
                     foreach (Corner next in corners)
                     {
                         if (outline.Contains(next)) continue;
-                        float connectionWeight = segmentFinder.SegmentWeight(new Segment() { P1 = curr.location, P2 = next.location });
-                        connectionWeight /= (curr.location - next.location).R;
-                        if (connectionWeight > bestWeight)
+                        if (next.s1 == curr.s1 || next.s1 == curr.s2 || next.s2 == curr.s1 || next.s2 == curr.s2)
                         {
-                            bestCorner = next;
-                            bestWeight = connectionWeight;
+                            outline.Add(next);
+                            cornerAvailable.Remove(next);
+                            curr = next;
+                            goto pointAdded;
                         }
                     }
-                    if (bestWeight > .9f)
-                    {
-                        outline.Add(bestCorner);
-                        cornerAvailable.Remove(bestCorner);
-                        curr = bestCorner;
-                        if (curr == start) outlineClosed = true;
-                    }
-                    else
-                        outlineClosed = true;
+                    outlineClosed = true; //no more points to add 
+                pointAdded: continue;
                 }
+
                 //make this a right-handed list of points  
                 double sum = 0;
                 int cnt = outline.Count;
@@ -495,6 +491,7 @@ namespace BrainSimulator.Modules
                 Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
                 foreach (Corner c in outline)
                 {
+                    //TODO: modify to reuse existing (shared) points
                     Thing corner = theUKS.GetOrAddThing("corner*", tCorners);
                     corner.V = c;
                     theUKS.AddStatement(currOutline, "has*", corner);
@@ -531,7 +528,7 @@ namespace BrainSimulator.Modules
                         float x = float.Parse(nodes[1].FirstChild.InnerText);
                         float y = float.Parse(nodes[1].FirstChild.NextSibling.InnerText);
                         float conf = float.Parse(nodes[1].FirstChild.NextSibling.NextSibling.InnerText);
-                        c.location = new PointPlus { X = x, Y = y, Conf=conf,};
+                        c.location = new PointPlus { X = x, Y = y, Conf = conf, };
                         //get the angle node
                         float theta = float.Parse(nodes[2].FirstChild.InnerText);
                         c.angle = Angle.FromDegrees(theta);

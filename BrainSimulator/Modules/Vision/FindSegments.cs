@@ -323,6 +323,7 @@ namespace BrainSimulator.Modules.Vision
                 if (val > 0) return val;
                 val = GetValue(start, 1, -1, ref thePoint);
                 if (val > 0) return val;
+                //TODO fix this problem
                 val = GetValue(start, 0, 1, ref thePoint);
                 if (val > 0) return val;
                 val = GetValue(start, 0, -1, ref thePoint);
