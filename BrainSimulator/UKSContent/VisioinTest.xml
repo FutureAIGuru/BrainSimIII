@@ -7,7 +7,7 @@
         <source>0</source>
         <target>8</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -17,7 +17,7 @@
         <source>0</source>
         <target>1</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -27,7 +27,7 @@
         <source>0</source>
         <target>2</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -37,7 +37,7 @@
         <source>0</source>
         <target>54</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -53,7 +53,7 @@
         <source>1</source>
         <target>3</target>
         <hits>0</hits>
-        <misses>1043</misses>
+        <misses>9898</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -63,7 +63,7 @@
         <source>1</source>
         <target>17</target>
         <hits>0</hits>
-        <misses>1043</misses>
+        <misses>9898</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -89,7 +89,7 @@
         <source>4</source>
         <target>9</target>
         <hits>0</hits>
-        <misses>426</misses>
+        <misses>3971</misses>
         <weight>1</weight>
         <relationshipType>5</relationshipType>
         <count>-1</count>
@@ -120,7 +120,7 @@
         <source>8</source>
         <target>9</target>
         <hits>0</hits>
-        <misses>937</misses>
+        <misses>8022</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -130,7 +130,7 @@
         <source>8</source>
         <target>4</target>
         <hits>0</hits>
-        <misses>937</misses>
+        <misses>8022</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -140,7 +140,7 @@
         <source>8</source>
         <target>5</target>
         <hits>0</hits>
-        <misses>937</misses>
+        <misses>8022</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -150,7 +150,7 @@
         <source>8</source>
         <target>6</target>
         <hits>0</hits>
-        <misses>937</misses>
+        <misses>8022</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -160,7 +160,7 @@
         <source>8</source>
         <target>7</target>
         <hits>0</hits>
-        <misses>937</misses>
+        <misses>8022</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -170,7 +170,7 @@
         <source>8</source>
         <target>10</target>
         <hits>0</hits>
-        <misses>925</misses>
+        <misses>8010</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -180,7 +180,7 @@
         <source>8</source>
         <target>11</target>
         <hits>0</hits>
-        <misses>911</misses>
+        <misses>7996</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -190,7 +190,7 @@
         <source>8</source>
         <target>12</target>
         <hits>0</hits>
-        <misses>895</misses>
+        <misses>7980</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -200,7 +200,7 @@
         <source>8</source>
         <target>13</target>
         <hits>0</hits>
-        <misses>877</misses>
+        <misses>7962</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -210,7 +210,7 @@
         <source>8</source>
         <target>18</target>
         <hits>0</hits>
-        <misses>857</misses>
+        <misses>7942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -220,7 +220,7 @@
         <source>8</source>
         <target>19</target>
         <hits>0</hits>
-        <misses>835</misses>
+        <misses>7920</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -230,7 +230,7 @@
         <source>8</source>
         <target>21</target>
         <hits>0</hits>
-        <misses>835</misses>
+        <misses>7920</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -240,7 +240,7 @@
         <source>8</source>
         <target>22</target>
         <hits>0</hits>
-        <misses>835</misses>
+        <misses>7920</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -250,7 +250,27 @@
         <source>8</source>
         <target>59</target>
         <hits>0</hits>
-        <misses>835</misses>
+        <misses>7920</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>8</source>
+        <target>71</target>
+        <hits>0</hits>
+        <misses>6948</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>8</source>
+        <target>72</target>
+        <hits>0</hits>
+        <misses>6948</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -266,7 +286,7 @@
         <source>9</source>
         <target>11</target>
         <hits>0</hits>
-        <misses>1708</misses>
+        <misses>35353</misses>
         <weight>1</weight>
         <relationshipType>6</relationshipType>
         <count>-1</count>
@@ -292,7 +312,47 @@
         <source>12</source>
         <target>23</target>
         <hits>0</hits>
-        <misses>419</misses>
+        <misses>3964</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>65</target>
+        <hits>0</hits>
+        <misses>3476</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>66</target>
+        <hits>0</hits>
+        <misses>3476</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>67</target>
+        <hits>0</hits>
+        <misses>3476</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>12</source>
+        <target>84</target>
+        <hits>0</hits>
+        <misses>207</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -313,7 +373,7 @@
         <source>14</source>
         <target>15</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -323,7 +383,7 @@
         <source>14</source>
         <target>16</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -333,7 +393,7 @@
         <source>14</source>
         <target>57</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -349,7 +409,7 @@
         <source>15</source>
         <target>39</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -359,7 +419,7 @@
         <source>15</source>
         <target>41</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -369,7 +429,7 @@
         <source>15</source>
         <target>43</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -379,7 +439,7 @@
         <source>15</source>
         <target>44</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -389,7 +449,7 @@
         <source>15</source>
         <target>45</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -399,7 +459,7 @@
         <source>15</source>
         <target>46</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -409,7 +469,7 @@
         <source>15</source>
         <target>47</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -419,7 +479,7 @@
         <source>15</source>
         <target>48</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -429,7 +489,7 @@
         <source>15</source>
         <target>49</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -439,7 +499,7 @@
         <source>15</source>
         <target>50</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -449,7 +509,7 @@
         <source>15</source>
         <target>51</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -465,7 +525,7 @@
         <source>16</source>
         <target>40</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -475,7 +535,7 @@
         <source>16</source>
         <target>42</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -485,7 +545,7 @@
         <source>16</source>
         <target>52</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -495,7 +555,7 @@
         <source>16</source>
         <target>53</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -511,7 +571,7 @@
         <source>17</source>
         <target>10</target>
         <hits>0</hits>
-        <misses>1043</misses>
+        <misses>9898</misses>
         <weight>1</weight>
         <relationshipType>6</relationshipType>
         <count>-1</count>
@@ -521,7 +581,7 @@
         <source>17</source>
         <target>20</target>
         <hits>0</hits>
-        <misses>1043</misses>
+        <misses>9898</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -531,7 +591,7 @@
         <source>17</source>
         <target>35</target>
         <hits>0</hits>
-        <misses>1043</misses>
+        <misses>9898</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -541,7 +601,7 @@
         <source>17</source>
         <target>36</target>
         <hits>0</hits>
-        <misses>1043</misses>
+        <misses>9898</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -551,7 +611,7 @@
         <source>17</source>
         <target>37</target>
         <hits>0</hits>
-        <misses>1043</misses>
+        <misses>9898</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -567,7 +627,7 @@
         <source>18</source>
         <target>11</target>
         <hits>0</hits>
-        <misses>419</misses>
+        <misses>3964</misses>
         <weight>1</weight>
         <relationshipType>6</relationshipType>
         <count>-1</count>
@@ -583,7 +643,7 @@
         <source>19</source>
         <target>18</target>
         <hits>0</hits>
-        <misses>419</misses>
+        <misses>3964</misses>
         <weight>1</weight>
         <relationshipType>5</relationshipType>
         <count>-1</count>
@@ -599,7 +659,7 @@
         <source>20</source>
         <target>24</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -609,7 +669,7 @@
         <source>20</source>
         <target>25</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -619,7 +679,7 @@
         <source>20</source>
         <target>26</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -629,7 +689,7 @@
         <source>20</source>
         <target>27</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -639,7 +699,7 @@
         <source>20</source>
         <target>28</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -649,7 +709,7 @@
         <source>20</source>
         <target>29</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -659,7 +719,7 @@
         <source>20</source>
         <target>30</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -669,7 +729,7 @@
         <source>20</source>
         <target>31</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -679,7 +739,7 @@
         <source>20</source>
         <target>32</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -689,7 +749,7 @@
         <source>20</source>
         <target>33</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -699,7 +759,7 @@
         <source>20</source>
         <target>34</target>
         <hits>0</hits>
-        <misses>627</misses>
+        <misses>5942</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -715,7 +775,7 @@
         <source>21</source>
         <target>22</target>
         <hits>0</hits>
-        <misses>419</misses>
+        <misses>3964</misses>
         <weight>1</weight>
         <relationshipType>6</relationshipType>
         <count>-1</count>
@@ -816,7 +876,7 @@
         <source>39</source>
         <target>40</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -832,7 +892,7 @@
         <source>40</source>
         <target>58</target>
         <hits>0</hits>
-        <misses>638</misses>
+        <misses>5976</misses>
         <weight>1</weight>
         <relationshipType>59</relationshipType>
         <count>-1</count>
@@ -842,7 +902,7 @@
         <source>40</source>
         <target>60</target>
         <hits>0</hits>
-        <misses>635</misses>
+        <misses>5973</misses>
         <weight>1</weight>
         <relationshipType>59</relationshipType>
         <count>-1</count>
@@ -852,7 +912,7 @@
         <source>40</source>
         <target>61</target>
         <hits>0</hits>
-        <misses>630</misses>
+        <misses>5968</misses>
         <weight>1</weight>
         <relationshipType>59</relationshipType>
         <count>-1</count>
@@ -868,7 +928,7 @@
         <source>41</source>
         <target>42</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -904,7 +964,7 @@
         <source>46</source>
         <target>53</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -930,7 +990,7 @@
         <source>49</source>
         <target>52</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -956,7 +1016,7 @@
         <source>52</source>
         <target>62</target>
         <hits>0</hits>
-        <misses>298</misses>
+        <misses>2081</misses>
         <weight>1</weight>
         <relationshipType>59</relationshipType>
         <count>-1</count>
@@ -966,7 +1026,7 @@
         <source>52</source>
         <target>63</target>
         <hits>0</hits>
-        <misses>295</misses>
+        <misses>2078</misses>
         <weight>1</weight>
         <relationshipType>59</relationshipType>
         <count>-1</count>
@@ -987,7 +1047,7 @@
         <source>54</source>
         <target>55</target>
         <hits>0</hits>
-        <misses>835</misses>
+        <misses>9670</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -1003,7 +1063,57 @@
         <source>55</source>
         <target>56</target>
         <hits>0</hits>
-        <misses>419</misses>
+        <misses>10964</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>55</source>
+        <target>64</target>
+        <hits>0</hits>
+        <misses>10372</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>55</source>
+        <target>68</target>
+        <hits>0</hits>
+        <misses>10372</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>55</source>
+        <target>69</target>
+        <hits>0</hits>
+        <misses>10372</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>55</source>
+        <target>70</target>
+        <hits>0</hits>
+        <misses>10372</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>55</source>
+        <target>82</target>
+        <hits>0</hits>
+        <misses>10372</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -1024,7 +1134,7 @@
         <source>57</source>
         <target>58</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -1034,7 +1144,7 @@
         <source>57</source>
         <target>60</target>
         <hits>0</hits>
-        <misses>211</misses>
+        <misses>1986</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -1044,7 +1154,7 @@
         <source>57</source>
         <target>61</target>
         <hits>0</hits>
-        <misses>210</misses>
+        <misses>1985</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -1054,7 +1164,7 @@
         <source>57</source>
         <target>62</target>
         <hits>0</hits>
-        <misses>194</misses>
+        <misses>1969</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -1064,7 +1174,7 @@
         <source>57</source>
         <target>63</target>
         <hits>0</hits>
-        <misses>194</misses>
+        <misses>1969</misses>
         <weight>1</weight>
         <relationshipType>9</relationshipType>
         <count>-1</count>
@@ -1088,7 +1198,7 @@
     <label>DlgWindow</label>
     <relationships />
     <useCount>1</useCount>
-    <V xsi:type="xsd:string">800x450+250+250</V>
+    <V xsi:type="xsd:string">800x713+250+250</V>
   </SThing>
   <SThing>
     <label>Root</label>
@@ -1107,5 +1217,478 @@
     <relationships />
     <useCount>1</useCount>
     <V xsi:type="xsd:string">530x534+1174+258</V>
+  </SThing>
+  <SThing>
+    <label>Outline</label>
+    <relationships />
+    <useCount>0</useCount>
+  </SThing>
+  <SThing>
+    <label>has0</label>
+    <relationships />
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>has1</label>
+    <relationships />
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>has2</label>
+    <relationships />
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>currentShape</label>
+    <relationships>
+      <SRelationship>
+        <source>68</source>
+        <target>73</target>
+        <hits>0</hits>
+        <misses>427</misses>
+        <weight>1</weight>
+        <relationshipType>74</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>68</source>
+        <target>75</target>
+        <hits>0</hits>
+        <misses>422</misses>
+        <weight>1</weight>
+        <relationshipType>76</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>68</source>
+        <target>77</target>
+        <hits>0</hits>
+        <misses>414</misses>
+        <weight>1</weight>
+        <relationshipType>78</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>68</source>
+        <target>75</target>
+        <hits>0</hits>
+        <misses>404</misses>
+        <weight>1</weight>
+        <relationshipType>79</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>68</source>
+        <target>77</target>
+        <hits>0</hits>
+        <misses>391</misses>
+        <weight>1</weight>
+        <relationshipType>80</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>68</source>
+        <target>75</target>
+        <hits>0</hits>
+        <misses>376</misses>
+        <weight>1</weight>
+        <relationshipType>81</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+    </relationships>
+    <useCount>26</useCount>
+  </SThing>
+  <SThing>
+    <label>Distance</label>
+    <relationships>
+      <SRelationship>
+        <source>69</source>
+        <target>73</target>
+        <hits>0</hits>
+        <misses>10402</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>69</source>
+        <target>77</target>
+        <hits>0</hits>
+        <misses>10402</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+    </relationships>
+    <useCount>0</useCount>
+  </SThing>
+  <SThing>
+    <label>Angle</label>
+    <relationships>
+      <SRelationship>
+        <source>70</source>
+        <target>75</target>
+        <hits>0</hits>
+        <misses>10402</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>70</source>
+        <target>85</target>
+        <hits>0</hits>
+        <misses>637</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+    </relationships>
+    <useCount>0</useCount>
+  </SThing>
+  <SThing>
+    <label>Go</label>
+    <relationships>
+      <SRelationship>
+        <source>71</source>
+        <target>74</target>
+        <hits>0</hits>
+        <misses>3476</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>71</source>
+        <target>78</target>
+        <hits>0</hits>
+        <misses>3476</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>71</source>
+        <target>80</target>
+        <hits>0</hits>
+        <misses>3476</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>71</source>
+        <target>86</target>
+        <hits>0</hits>
+        <misses>207</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+    </relationships>
+    <useCount>0</useCount>
+  </SThing>
+  <SThing>
+    <label>Turn</label>
+    <relationships>
+      <SRelationship>
+        <source>72</source>
+        <target>76</target>
+        <hits>0</hits>
+        <misses>3476</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>72</source>
+        <target>79</target>
+        <hits>0</hits>
+        <misses>3476</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>72</source>
+        <target>81</target>
+        <hits>0</hits>
+        <misses>3476</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>72</source>
+        <target>87</target>
+        <hits>0</hits>
+        <misses>207</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+    </relationships>
+    <useCount>0</useCount>
+  </SThing>
+  <SThing>
+    <label>distance1.0</label>
+    <relationships />
+    <useCount>7</useCount>
+  </SThing>
+  <SThing>
+    <label>go0</label>
+    <relationships />
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>angle60</label>
+    <relationships />
+    <useCount>9</useCount>
+  </SThing>
+  <SThing>
+    <label>turn0</label>
+    <relationships />
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>distance.9</label>
+    <relationships />
+    <useCount>6</useCount>
+  </SThing>
+  <SThing>
+    <label>go1</label>
+    <relationships />
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>turn1</label>
+    <relationships />
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>go2</label>
+    <relationships />
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>turn2</label>
+    <relationships />
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>StoredShape</label>
+    <relationships>
+      <SRelationship>
+        <source>82</source>
+        <target>83</target>
+        <hits>0</hits>
+        <misses>11777</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>82</source>
+        <target>88</target>
+        <hits>0</hits>
+        <misses>722</misses>
+        <weight>1</weight>
+        <relationshipType>9</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+    </relationships>
+    <useCount>0</useCount>
+  </SThing>
+  <SThing>
+    <label>triangle</label>
+    <relationships>
+      <SRelationship>
+        <source>83</source>
+        <target>73</target>
+        <hits>0</hits>
+        <misses>11161</misses>
+        <weight>1</weight>
+        <relationshipType>74</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>83</source>
+        <target>75</target>
+        <hits>0</hits>
+        <misses>11161</misses>
+        <weight>1</weight>
+        <relationshipType>76</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>83</source>
+        <target>77</target>
+        <hits>0</hits>
+        <misses>11161</misses>
+        <weight>1</weight>
+        <relationshipType>78</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>83</source>
+        <target>75</target>
+        <hits>0</hits>
+        <misses>11161</misses>
+        <weight>1</weight>
+        <relationshipType>79</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>83</source>
+        <target>77</target>
+        <hits>0</hits>
+        <misses>11161</misses>
+        <weight>1</weight>
+        <relationshipType>80</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>83</source>
+        <target>75</target>
+        <hits>0</hits>
+        <misses>11161</misses>
+        <weight>1</weight>
+        <relationshipType>81</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+    </relationships>
+    <useCount>3</useCount>
+  </SThing>
+  <SThing>
+    <label>has3</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>angle90</label>
+    <relationships />
+    <useCount>4</useCount>
+  </SThing>
+  <SThing>
+    <label>go3</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>turn3</label>
+    <relationships />
+    <useCount>1</useCount>
+  </SThing>
+  <SThing>
+    <label>square</label>
+    <relationships>
+      <SRelationship>
+        <source>88</source>
+        <target>73</target>
+        <hits>0</hits>
+        <misses>754</misses>
+        <weight>1</weight>
+        <relationshipType>74</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>88</source>
+        <target>85</target>
+        <hits>0</hits>
+        <misses>754</misses>
+        <weight>1</weight>
+        <relationshipType>76</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>88</source>
+        <target>73</target>
+        <hits>0</hits>
+        <misses>754</misses>
+        <weight>1</weight>
+        <relationshipType>78</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>88</source>
+        <target>85</target>
+        <hits>0</hits>
+        <misses>754</misses>
+        <weight>1</weight>
+        <relationshipType>79</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>88</source>
+        <target>73</target>
+        <hits>0</hits>
+        <misses>754</misses>
+        <weight>1</weight>
+        <relationshipType>80</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>88</source>
+        <target>85</target>
+        <hits>0</hits>
+        <misses>754</misses>
+        <weight>1</weight>
+        <relationshipType>81</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>88</source>
+        <target>73</target>
+        <hits>0</hits>
+        <misses>754</misses>
+        <weight>1</weight>
+        <relationshipType>86</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+      <SRelationship>
+        <source>88</source>
+        <target>85</target>
+        <hits>0</hits>
+        <misses>754</misses>
+        <weight>1</weight>
+        <relationshipType>87</relationshipType>
+        <count>-1</count>
+        <GPTVerified>false</GPTVerified>
+      </SRelationship>
+    </relationships>
+    <useCount>0</useCount>
   </SThing>
 </ArrayOfSThing>

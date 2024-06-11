@@ -512,6 +512,12 @@ namespace BrainSimulator.Modules
         // delete if not needed
         public override void SetUpBeforeSave()
         {
+            Thing t = theUKS.Labeled("currentShape");
+            if (t != null) { theUKS.DeleteAllChildren(t); }
+            t = theUKS.Labeled("corner");
+            if (t != null) { theUKS.DeleteAllChildren(t); }
+            t = theUKS.Labeled("Outline");
+            if (t != null) { theUKS.DeleteAllChildren(t); }
         }
 
         public override void SetUpAfterLoad()

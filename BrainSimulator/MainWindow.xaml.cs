@@ -135,6 +135,18 @@ namespace BrainSimulator
                 }
             }
         }
+        public void SetupBeforeSave()
+        {
+            for (int i = 0; i < activeModules.Count; i++)
+            {
+                ModuleBase mod = activeModules[i];
+                if (mod != null)
+                {
+                    mod.SetUpBeforeSave();
+                }
+            }
+        }
+
 
         public void ShowAllModuleDialogs()
         {
