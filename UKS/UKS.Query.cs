@@ -185,7 +185,7 @@ public partial class UKS
                 Relationship existing = result.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));
                 if (existing != null) continue;
 
-                if (haveCount > 1 && r.relType?.HasAncestorLabeled("has")!= null)
+                if (haveCount > 1 && r.relType?.HasAncestorLabeled("has") != null)
                 {
                     //this creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
@@ -414,5 +414,79 @@ public partial class UKS
     public List<Relationship> Why()
     {
         return succeededConditions;
+    }
+
+    Dictionary<Thing, float> searchCandidates;
+    /// <summary>
+    /// Given that you have performed a search with SearchForClosestMatch, this returns the next-best result
+    /// given the previous best.
+    /// </summary>
+    /// <param name="prevBest"></param>
+    /// <param name="confidence">value representin the quality of the match</param>
+    /// <returns></returns>
+    public Thing GetNextClosestMatch(Thing prevBest, ref float confidence)
+    {
+        Thing bestThing = null;
+        confidence = -1;
+        if (searchCandidates == null) return bestThing;
+
+        float maxConfidence = searchCandidates[prevBest];
+
+        //find the best match with a value LESS THAN the previous best
+        //TODO: this does not handle the possibility of multiple entries having the same value
+        foreach (var key in searchCandidates)
+            if (key.Value > confidence && key.Value < maxConfidence)
+            {
+                confidence = key.Value;
+                bestThing = key.Key;
+            }
+        return bestThing;
+    }
+
+    /// <summary>
+    /// Search for the Thing which most closely resembles the target Thing based on the attributes of the target
+    /// </summary>
+    /// <param name="target">The Relationships of this Thing are the attributes to search on</param>
+    /// <param name="root">All searching is done within the descendents of this Thing</param>
+    /// <param name="confidence">value representing the quality of the match. </param>
+    /// <returns></returns>
+    public Thing SearchForClosestMatch(Thing target, Thing root, ref float confidence)
+    {
+        searchCandidates = new();
+        foreach (Relationship r in target.Relationships)
+        {
+            foreach (Relationship r1 in r.target.RelationshipsFrom)
+            {
+                if (r1.reltype.Label == "has-child") continue;//this is likely unnecessary
+                if (r1.source.HasAncestor(root))
+                {
+                    if (!searchCandidates.ContainsKey(r1.source))
+                        searchCandidates[r1.source] = 0; //initialize a new dictionary entry
+                    searchCandidates[r1.source] += r1.Weight;
+                }
+            }
+        }
+        Thing bestThing = null;
+        confidence = -1;
+
+        //normalize the confidences
+        foreach (var key in searchCandidates)
+            searchCandidates[key.Key] /= target.Relationships.Count;
+
+        ////handle inheritance
+        ////TODO: check if this messes up on multiple inheritance and/or problems with the order of processing
+        foreach (Thing t in searchCandidates.Keys)
+            foreach (Thing t1 in t.Descendents)
+                if (t1 != t && searchCandidates.ContainsKey(t1))
+                    searchCandidates[t1] += searchCandidates[t];
+
+        //find the best value
+        foreach (var key in searchCandidates)
+            if (key.Value > confidence)
+            {
+                confidence = key.Value;
+                bestThing = key.Key;
+            }
+        return bestThing;
     }
 }

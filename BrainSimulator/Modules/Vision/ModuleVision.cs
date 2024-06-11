@@ -435,7 +435,7 @@ namespace BrainSimulator.Modules
             theUKS.GetOrAddThing("Sense", "Thing");
             theUKS.GetOrAddThing("Visual", "Sense");
             Thing outlines = theUKS.GetOrAddThing("Outline", "Visual");
-            Thing tCorners = theUKS.GetOrAddThing("Corners", "Visual");
+            Thing tCorners = theUKS.GetOrAddThing("Corner", "Visual");
             theUKS.DeleteAllChildren(outlines);
             theUKS.DeleteAllChildren(tCorners);
 

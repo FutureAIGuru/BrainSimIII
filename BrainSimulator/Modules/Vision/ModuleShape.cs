@@ -49,6 +49,14 @@ namespace BrainSimulator.Modules
 
             CreateShapeFromCorners();
 
+            Thing foundShape = SearchForShape(out float score);
+
+            if (foundShape == null || score <=2)
+            {
+                AddShapeToLibrary();
+            }
+
+            foundShape?.SetFired();
             UpdateDialog();
         }
 
@@ -69,6 +77,7 @@ namespace BrainSimulator.Modules
             foreach (var r in currentShape.Relationships)
                 currentShape.RemoveRelationship(r);
 
+            //TODEO loop through outlines
             Thing outline = theUKS.Labeled("outline0");
             if (outline == null) return;
             var corners = outline.GetRelationshipsWithAncestor(theUKS.Labeled("corner"));
@@ -85,6 +94,7 @@ namespace BrainSimulator.Modules
                 if (dist > maxDist) maxDist = dist;
             }
 
+            //maxDist is the scale 
             //add the corners to the currentShape
             for (int i = 0; i < corners.Count; i++)
             {
@@ -105,76 +115,32 @@ namespace BrainSimulator.Modules
                 Thing theAngle = theUKS.GetOrAddThing("angle" + a, "Angle");
                 theUKS.AddStatement(currentShape, "turn*", theAngle);
             }
-
-
-            Thing foundShape = SearchForShape(out float score);
-            foundShape?.SetFired();
         }
+
+
 
         public void AddShapeToLibrary()
         {
             theUKS.GetOrAddThing("StoredShape", "Visual");
-            Thing newShape = theUKS.GetOrAddThing("shape*", "StoredShape");
+            Thing newShape = theUKS.GetOrAddThing("storedShape*", "StoredShape");
             Thing currentShape = theUKS.GetOrAddThing("currentShape", "Visual");
             foreach (Relationship r in currentShape.Relationships)
             {
                 newShape.AddRelationship(r.target, r.relType);
             }
         }
-        Thing SearchForShape(out float bestScore)
+        Thing SearchForShape(out float bestValue)
         {
             Thing storedShapes = theUKS.GetOrAddThing("StoredShape", "Visual");
             Thing currentShape = theUKS.GetOrAddThing("currentShape", "Visual");
-            Thing bestMatch = null;
-            bestScore = 0;
-            foreach (Thing testShape in storedShapes.Descendents)
-            {
-                float score = ScoreMatch(currentShape, testShape);
-                if (score > bestScore)
-                {
-                    bestScore = score;
-                    bestMatch = testShape;
-                }
-            }
-            return bestMatch; ;
-        }
-        float ScoreMatch (Thing t1, Thing t2)
-        {
-            float score = 0;
-            //TODO add some score for things which are nearby
-            List<Thing> t1Targets = new List<Thing>();
-            List<Thing> t2Targets = new List<Thing>();
-            foreach (Relationship r in t1.Relationships)
-                t1Targets.Add(r.target);
-            foreach (Relationship r in t2.Relationships)
-                t2Targets.Add(r.target);
 
-            for (int i = 0; i < t1Targets.Count; i++)
-            {
-                Thing t = t1Targets[i];
-                if (t2Targets.Contains(t)) 
-                { 
-                    t2Targets.Remove(t);
-                    t1Targets.Remove(t);
-                    score++;
-                    i--;
-                }
-            };
-            for (int i = 0; i < t2Targets.Count; i++)
-            {
-                Thing t = t2Targets[i];
-                if (t1Targets.Contains(t))
-                {
-                    t2Targets.Remove(t);
-                    t1Targets.Remove(t);
-                    score++;
-                    i--;
-                }
-            }
+            bestValue = 0;
 
-            //normalize the score 
-            score /= t1Targets.Count+t2Targets.Count;
-            return score;
+            //currehtShape has a set of attriburtes. We search the descendents of StoredShape for the
+            // entry with the best match.
+            Thing bestThing = theUKS.SearchForClosestMatch(currentShape, storedShapes,ref bestValue);
+
+            return bestThing;
         }
 
         // Fill this method in with code which will execute once
