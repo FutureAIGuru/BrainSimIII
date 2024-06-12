@@ -7,20 +7,42 @@
         mc:Ignorable="d"
         Title="UKS Query" Height="550" Width="530" Background="Gray" ShowInTaskbar="False"  >
     <Grid Name="theGrid" Margin="0,0,0,0" >
-        <Label Content="Source"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
-        <Label Content="Type"        HorizontalAlignment="Left"   Height="33"   Margin="10,70,0,0"    FontSize="16" Width="68" VerticalAlignment="Top"/>
-        <Label Content="Target"      HorizontalAlignment="Left"   Height="33"   Margin="10,120,0,0"   FontSize="16" Width="68" VerticalAlignment="Top"/>
-        <Label Content="Filter"      HorizontalAlignment="Left"   Height="33"   Margin="10,170,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
-        <Label Content="Result"      HorizontalAlignment="Left"   Height="33"   Margin="10,280,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
+        <TabControl Background="Gray">
+            <TabItem Header="Get Attribs" FontSize="18" Background="LightGray">
+                <Grid>
+                    <Label Content="Source"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
+                    <Label Content="Type"        HorizontalAlignment="Left"   Height="33"   Margin="10,70,0,0"    FontSize="16" Width="68" VerticalAlignment="Top"/>
+                    <Label Content="Target"      HorizontalAlignment="Left"   Height="33"   Margin="10,120,0,0"   FontSize="16" Width="68" VerticalAlignment="Top"/>
+                    <Label Content="Filter"      HorizontalAlignment="Left"   Height="33"   Margin="10,170,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
+                    <Label Content="Result"      HorizontalAlignment="Left"   Height="33"   Margin="10,280,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
 
-        <TextBox  x:Name="sourceText"    TabIndex="1"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,0,0" HorizontalAlignment="Left" Width="278"/>
-        <TextBox  x:Name="typeText"      TabIndex="2"  Height="33" VerticalAlignment="Top"   FontSize="16"     Margin="78,70,0,0" HorizontalAlignment="Left" Width="278"/>
-        <TextBox  x:Name="targetText"    TabIndex="3"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,120,0,0" HorizontalAlignment="Left" Width="278" RenderTransformOrigin="0.454,1.602"/>
-        <TextBox  x:Name="filterText"    TabIndex="4"  Height="32" VerticalAlignment="Top"   FontSize="16"   Margin="78,170,0,0" HorizontalAlignment="Left" Width="278"/>
-        <TextBox  x:Name="resultText"    TabIndex="5"   FontSize="16" Margin="78,280,36,60"  TextWrapping="Wrap"/>
-        
-        <Button x:Name="BtnRelationships" IsDefault="True" Content="Query" Height="32" VerticalAlignment="Top" FontSize="16" Margin="375,120,0,25" Click="BtnRelationships_Click" HorizontalAlignment="Left" Width="120" RenderTransformOrigin="1.838,0.82"/>
-        <CheckBox x:Name="fullCB" Content="Full Relationships" FontSize="16" HorizontalAlignment="Left" Height="22" Margin="78,220,0,0" VerticalAlignment="Top" Width="226"/>
+                    <TextBox  x:Name="sourceText"    TabIndex="1"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,0,0" HorizontalAlignment="Left" Width="278"/>
+                    <TextBox  x:Name="typeText"      TabIndex="2"  Height="33" VerticalAlignment="Top"   FontSize="16"     Margin="78,70,0,0" HorizontalAlignment="Left" Width="278"/>
+                    <TextBox  x:Name="targetText"    TabIndex="3"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,120,0,0" HorizontalAlignment="Left" Width="278" RenderTransformOrigin="0.454,1.602"/>
+                    <TextBox  x:Name="filterText"    TabIndex="4"  Height="32" VerticalAlignment="Top"   FontSize="16"   Margin="78,170,0,0" HorizontalAlignment="Left" Width="278"/>
+                    <TextBox  x:Name="resultText"    TabIndex="5"   FontSize="16" Margin="78,280,36,60"  TextWrapping="Wrap"/>
 
+                    <Button x:Name="BtnRelationships" IsDefault="True" Content="Query" Height="32" VerticalAlignment="Top" FontSize="16" Margin="375,120,0,25" Click="BtnRelationships_Click" HorizontalAlignment="Left" Width="120" RenderTransformOrigin="1.838,0.82"/>
+                    <CheckBox x:Name="fullCB" Content="Full Relationships" FontSize="16" HorizontalAlignment="Left" Height="22" Margin="78,220,0,0" VerticalAlignment="Top" Width="226"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Search by Attribs" FontSize="18" Background="LightGray">
+                <Grid>
+                    <Label Content="Type"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"    FontSize="16" Width="68" VerticalAlignment="Top"/>
+                    <Label Content="Target"      HorizontalAlignment="Left"   Height="33"   Margin="10,70,0,0"   FontSize="16" Width="68" VerticalAlignment="Top"/>
+                    <Label Content="Ancestor"      HorizontalAlignment="Left"   Height="33"   Margin="10,120,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
+                    <Label Content="Query"      HorizontalAlignment="Left"   Height="33"   Margin="10,170,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
+                    <Label Content="Result"      HorizontalAlignment="Left"   Height="33"   Margin="10,280,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
+
+                    <TextBox  x:Name="typeText1"      TabIndex="2"  Height="33" VerticalAlignment="Top"   FontSize="16"     Margin="78,20,0,0" HorizontalAlignment="Left" Width="278"/>
+                    <TextBox  x:Name="targetText1"    TabIndex="3"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,70,0,0" HorizontalAlignment="Left" Width="278" RenderTransformOrigin="0.454,1.602"/>
+                    <TextBox  x:Name="ancestorText1"    TabIndex="4"  Height="32" VerticalAlignment="Top"   FontSize="16"   Margin="78,120,0,0" HorizontalAlignment="Left" Width="278"/>
+                    <TextBox  x:Name="queryText1"    TabIndex="5"   FontSize="16" Margin="78,170,36,220"  TextWrapping="Wrap"/>
+                    <TextBox  x:Name="resultText1"    TabIndex="5"   FontSize="16" Margin="78,280,36,60"  TextWrapping="Wrap"/>
+                    <Button x:Name="BtnAdd" IsDefault="True" Content="Add" Height="32" VerticalAlignment="Top" FontSize="16" Margin="375,70,0,25" Click="BtnRelationships_Click" HorizontalAlignment="Left" Width="120" RenderTransformOrigin="1.838,0.82"/>
+                    <Button x:Name="BtnClear" IsDefault="True" Content="Clear" Height="32" VerticalAlignment="Top" FontSize="16" Margin="375,120,0,25" Click="BtnRelationships_Click" HorizontalAlignment="Left" Width="120" RenderTransformOrigin="1.838,0.82"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </local:ModuleBaseDlg>

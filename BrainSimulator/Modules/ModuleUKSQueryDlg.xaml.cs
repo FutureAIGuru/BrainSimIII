@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using UKS;
 
 namespace BrainSimulator.Modules
@@ -31,24 +32,95 @@ namespace BrainSimulator.Modules
 
         private void BtnRelationships_Click(object sender, RoutedEventArgs e)
         {
-            string source = sourceText.Text;
-            string type = typeText.Text;
-            string target = targetText.Text;
-            string filter = filterText.Text;
+            if (sender is Button b)
+            {
+                if (b.Content.ToString() == "Add")
+                {
+                    string newText = typeText1.Text + " " + targetText1.Text;
+                    if (!queryText1.Text.Contains(newText))
+                    {
+                        if (!string.IsNullOrEmpty(queryText1.Text))
+                            queryText1.Text += "\n";
+                        queryText1.Text += newText;
+                    }
+                    QueryAttribs();
+                }
+                if (b.Content.ToString() == "Clear")
+                {
+                    queryText1.Text = "";
+                    resultText1.Text = "";
+                }
+                if (b.Content.ToString() == "Query")
+                {
+                    string source = sourceText.Text;
+                    string type = typeText.Text;
+                    string target = targetText.Text;
+                    string filter = filterText.Text;
 
-            List<Thing> things;
-            List<Relationship> relationships;
+                    List<Thing> things;
+                    List<Relationship> relationships;
+                    ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
+                    UKSQuery.QueryUKS(source, type, target, filter, out things, out relationships);
+
+                    if (things.Count > 0)
+                        OutputResults(things);
+                    else
+                        OutputResults(relationships, target == "", source == "");
+
+                }
+            }
+        }
+        private void QueryAttribs()
+        {
             ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-            UKSQuery.QueryUKS(source, type, target, filter, out things, out relationships);
+            Thing ancestor = UKSQuery.theUKS.Labeled(ancestorText1.Text);
+            if (ancestor == null)
+            {
+                resultText1.Text = "<Ancestor must be specified>";
+                return;
+            }
+            //build the query object
+            Thing queryThing = new Thing();
+            string[] rels = queryText1.Text.Split('\n');
+            foreach (string s in rels)
+            {
+                string[] relParams = s.Split(' ');
+                if (relParams.Length == 2)
+                {
+                    Thing relType = UKSQuery.theUKS.Labeled(relParams[0]);
+                    Thing relTarget = UKSQuery.theUKS.Labeled(relParams[1]);
+                    if (relType == null)
+                    {
+                        resultText1.Text = $"<{relParams[0]} not found>";
+                        return;
+                    }
+                    if (relTarget == null)
+                    {
+                        resultText1.Text = $"<{relParams[1]} not found>";
+                        return;
+                    }
 
-            if (things.Count > 0)
-                OutputResults(things);
-            else
-                OutputResults(relationships,target=="",source=="");
+                    queryThing.AddRelationship(relTarget, relType);
+                }
+            }
+            float confidence = 0;
+            Thing result = UKSQuery.theUKS.SearchForClosestMatch(queryThing, ancestor, ref confidence);
+            if (result == null)
+            {
+                resultText1.Text = "<No Results>";
+                return;
+            }
+            resultText1.Text = result.Label + "   " + confidence;
+            while (result != null)
+            {
+                result = UKSQuery.theUKS.GetNextClosestMatch(ref confidence);
+                if (result != null)
+                    resultText1.Text += "\n" + result.Label + "   " + confidence;
 
+            }
         }
 
-        private void OutputResults<T>(IList<T> r, bool noSource = false,bool noTarget = false)
+        private void OutputResults<T>(IList<T> r, bool noSource = false, bool noTarget = false)
         {
             string resultString = "";
             if (r == null || r.Count == 0)
@@ -60,7 +132,7 @@ namespace BrainSimulator.Modules
                     {
                         if (noSource && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
                             resultString += r2.relType?.ToString() + " " + r2.target.ToString() + "\n";
-                        else if (noTarget&& r2.Clauses.Count == 0 && fullCB.IsChecked == false)
+                        else if (noTarget && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
                             resultString += r2.source.ToString() + " " + r2.relType.ToString() + "\n";
                         else
                             resultString += r2.ToString() + "\n";

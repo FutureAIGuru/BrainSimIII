@@ -6,8 +6,10 @@
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
         Title="ModuleShapeDlg Module Dialog" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
-        <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" >
-        <Button Content="Store" HorizontalAlignment="Left" Height="30" Margin="34,45,0,0" VerticalAlignment="Top" Width="126" Click="Button_Click"/>
-
+    <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" >
+        <Button Content="No" HorizontalAlignment="Left" Height="30" Margin="167,290,0,0" VerticalAlignment="Top" Width="100" Click="Button_Click"/>
+        <TextBox x:Name="tbFound" HorizontalAlignment="Left" FontSize="16" Height="82" Margin="160,135,0,0" VerticalAlignment="Top" Width="300"/>
+        <Label Content="Detected Shapes" HorizontalAlignment="Left" Height="36" Margin="31,135,0,0" VerticalAlignment="Top" Width="124"/>
+        <Button Content="Next" x:Name="btnNext" HorizontalAlignment="Left" Height="30" Margin="361,290,0,0" VerticalAlignment="Top" Width="100" Click="btnNext_Click"/>
     </Grid>
 </local:ModuleBaseDlg>

@@ -12,11 +12,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
@@ -30,18 +32,12 @@ namespace BrainSimulator.Modules
         public override bool Draw(bool checkDrawTimer)
         {
             if (!base.Draw(checkDrawTimer)) return false;
-            //this has a timer so that no matter how often you might call draw, the dialog
-            //only updates 10x per second
 
-            //use a line like this to gain access to the parent's public variables
-            //ModuleEmpty parent = (ModuleEmpty)base.ParentModule;
-
-            //here are some other possibly-useful items
-            //theGrid.Children.Clear();
-            //Point windowSize = new Point(theGrid.ActualWidth, theGrid.ActualHeight);
-            //Point windowCenter = new Point(windowSize.X / 2, windowSize.Y / 2);
-            //float scale = (float)Math.Min(windowSize.X, windowSize.Y) / 12;
-            //if (scale == 0) return false;
+            ModuleShape parent = (ModuleShape)ParentModule;
+            if (parent.foundShape != null)
+            {
+                tbFound.Text = $"{parent.foundShape.Label}   {parent.confidence}   {parent.scale}" ;
+            }
 
             return true;
         }
@@ -55,6 +51,15 @@ namespace BrainSimulator.Modules
         {
             ModuleShape parent = (ModuleShape)ParentModule;
             parent.AddShapeToLibrary();
+        }
+
+        private void btnNext_Click(object sender, RoutedEventArgs e)
+        {
+            ModuleShape parent = (ModuleShape)ParentModule;
+            float confidence = -1;
+            Thing t = parent.theUKS.GetNextClosestMatch(ref confidence);
+            if (t != null) 
+                tbFound.Text += "\n"+t.Label + "   " + confidence;
         }
     }
 }

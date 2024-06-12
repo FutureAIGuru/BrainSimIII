@@ -421,25 +421,25 @@ public partial class UKS
     /// Given that you have performed a search with SearchForClosestMatch, this returns the next-best result
     /// given the previous best.
     /// </summary>
-    /// <param name="prevBest"></param>
     /// <param name="confidence">value representin the quality of the match</param>
     /// <returns></returns>
-    public Thing GetNextClosestMatch(Thing prevBest, ref float confidence)
+    public Thing GetNextClosestMatch(ref float confidence)
     {
         Thing bestThing = null;
         confidence = -1;
         if (searchCandidates == null) return bestThing;
 
-        float maxConfidence = searchCandidates[prevBest];
-
         //find the best match with a value LESS THAN the previous best
-        //TODO: this does not handle the possibility of multiple entries having the same value
         foreach (var key in searchCandidates)
-            if (key.Value > confidence && key.Value < maxConfidence)
+            if (key.Value > confidence)
             {
                 confidence = key.Value;
                 bestThing = key.Key;
             }
+
+        //remove the item from the dictionary
+        if (bestThing != null)
+            searchCandidates.Remove(bestThing);
         return bestThing;
     }
 
@@ -458,10 +458,12 @@ public partial class UKS
             foreach (Relationship r1 in r.target.RelationshipsFrom)
             {
                 if (r1.reltype.Label == "has-child") continue;//this is likely unnecessary
-                if (r1.source.HasAncestor(root))
+                //TODO: make this handle order-independency (go0,go1) vs relType params (has.2, has.4)
+                //note: order-descriptors DO NOT have attributes while params DO
+                if (r1.source.HasAncestor(root) && r1.relType == r.relType)
                 {
                     if (!searchCandidates.ContainsKey(r1.source))
-                        searchCandidates[r1.source] = 0; //initialize a new dictionary entry
+                        searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
                     searchCandidates[r1.source] += r1.Weight;
                 }
             }
@@ -487,6 +489,9 @@ public partial class UKS
                 confidence = key.Value;
                 bestThing = key.Key;
             }
+        //remove the item from the dictionary
+        if (bestThing != null)
+            searchCandidates.Remove(bestThing);
         return bestThing;
     }
 }

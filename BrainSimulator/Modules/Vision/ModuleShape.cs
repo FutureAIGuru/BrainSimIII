@@ -28,6 +28,9 @@ namespace BrainSimulator.Modules
         // Fill this method in with code which will execute
         // once for each cycle of the engine
         DateTime lastScan = new DateTime();
+        public Thing foundShape = null;
+        public float confidence = 0;
+        public float scale = 1.0f;
         public override void Fire()
         {
             Init();
@@ -49,13 +52,15 @@ namespace BrainSimulator.Modules
 
             CreateShapeFromCorners();
 
-            Thing foundShape = SearchForShape(out float score);
+            foundShape = SearchForShape(out float score);
 
-            if (foundShape == null || score <=2)
+            if (foundShape == null || score <0.5)
             {
-                AddShapeToLibrary();
+                foundShape = AddShapeToLibrary();
+                confidence = 1;
             }
 
+            confidence = score;
             foundShape?.SetFired();
             UpdateDialog();
         }
@@ -94,7 +99,8 @@ namespace BrainSimulator.Modules
                 if (dist > maxDist) maxDist = dist;
             }
 
-            //maxDist is the scale 
+            //maxDist is the scale
+            scale = maxDist;
             //add the corners to the currentShape
             for (int i = 0; i < corners.Count; i++)
             {
@@ -119,7 +125,7 @@ namespace BrainSimulator.Modules
 
 
 
-        public void AddShapeToLibrary()
+        public Thing AddShapeToLibrary()
         {
             theUKS.GetOrAddThing("StoredShape", "Visual");
             Thing newShape = theUKS.GetOrAddThing("storedShape*", "StoredShape");
@@ -128,6 +134,7 @@ namespace BrainSimulator.Modules
             {
                 newShape.AddRelationship(r.target, r.relType);
             }
+            return newShape;
         }
         Thing SearchForShape(out float bestValue)
         {
