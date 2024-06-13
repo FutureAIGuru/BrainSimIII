@@ -33,11 +33,14 @@ namespace BrainSimulator.Modules
             ModuleVision parent = (ModuleVision)base.ParentModule;
 
             if (parent.bitmap == null) return false;
-            labelProperties.Content = "Image: " + Math.Round(parent.bitmap.Width) + "x" + Math.Round(parent.bitmap.Height) +
-                "\r\nBit Depth: " + parent.bitmap.Format.BitsPerPixel +
-                "\r\nSegments: " + parent.segments.Count +
-                "\r\nCorners: " + parent.corners.Count;
-
+            try
+            {
+                labelProperties.Content = "Image: " + Math.Round(parent.bitmap.Width) + "x" + Math.Round(parent.bitmap.Height) +
+                    "\r\nBit Depth: " + parent.bitmap.Format.BitsPerPixel +
+                    "\r\nSegments: " + parent.segments.Count +
+                    "\r\nCorners: " + parent.corners.Count;
+            }
+            catch { return false; }
 
             theCanvas.Children.Clear();
 
@@ -181,7 +184,6 @@ namespace BrainSimulator.Modules
                 }
             }
 
-
             //draw the corners
             if (cbShowCorners.IsChecked == true && parent.corners != null && parent.corners.Count > 0)
             {
@@ -241,7 +243,7 @@ namespace BrainSimulator.Modules
                     fileList = GetFileList(openFileDialog1.FileName);
                     curPath = openFileDialog1.FileName;
                 }
-
+                parent.previousFilePath = "";
                 parent.currentFilePath = curPath;
                 //parent.SetParameters(fileList, curPath, (bool)cbAutoCycle.IsChecked, (bool)cbNameIsDescription.IsChecked);
             }

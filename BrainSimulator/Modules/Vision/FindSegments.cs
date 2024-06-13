@@ -5,6 +5,7 @@ using System.Linq;
 using static System.Math;
 using System.Security.Cryptography.Xml;
 using System.Windows.Navigation;
+using System.Diagnostics;
 
 namespace BrainSimulator.Modules.Vision
 {
@@ -19,7 +20,7 @@ namespace BrainSimulator.Modules.Vision
         public List<Point>[,] accumulator; // Accumulator array
         public List<Tuple<int, int, int, float>> localMaxima;
         private float[,] boundaries;
-        int minLength = 5;
+        int minLength = 6;
 
         // Constructor
         public HoughTransform(int width, int height)
@@ -265,34 +266,86 @@ namespace BrainSimulator.Modules.Vision
 
             }
             accumulator[rho, theta].Clear();
-            while ((step.X != 0 && start.X < boundaries.GetLength(0)) || (step.X == 0  && start.Y < boundaries.GetLength(1)))
+            while ((step.X != 0 && start.X < boundaries.GetLength(0)) || (step.X == 0 && start.Y < boundaries.GetLength(1)))
             {
-                if (start.X == 15)
-                { }
                 if (start.X < 0 || start.X >= boundaries.GetLength(0) ||
                        start.Y < 0 || start.Y >= boundaries.GetLength(1))
                 { }
-                else 
-                if (PointNearABoundaryPoint(start,theta,out PointPlus thePoint) > 0)
+                else
                 {
-                    //if (!accumulator[rho, theta].Contains(thePoint))
-                        accumulator[rho, theta].Add(new PointPlus((int)start.X,(float)(int)start.Y));
+                    ShowArray(start);
+                    if (PointNearABoundaryPoint(start, theta, out PointPlus thePoint) > 0)
+                    {
+                        //if (!accumulator[rho, theta].Contains(thePoint))
+                        //    accumulator[rho, theta].Add(thePoint);
+                        accumulator[rho, theta].Add(new PointPlus((int)start.X, (float)(int)start.Y));
+                    }
                 }
                 start = start + step;
             }
             OrderPointsAlongSegment(ref accumulator[rho, theta]);
         }
+        private void ShowArray(PointPlus start)
+        {
+            return;
+            Debug.Write(start.X + "," + start.Y);
+            bool allZero = true;
+            for (int i = -3; i < 4; i++)
+            {
+                for (int j = -3; j < 4; j++)
+                {
+                    int x = i + (int)Round(start.X);
+                    int y = j + (int)Round(start.Y);
+                    if (x < 0) continue;
+                    if (y < 0) continue;
+                    if (x > 99) continue;
+                    if (y > 99) continue;
+                    if (boundaries[x, y] != 0)
+                    {
+                        allZero = false;
+                        break;
+                    }
+                }
+                if (!allZero) break;
+            }
+            if (allZero) { Debug.WriteLine("----"); return; }
+            Debug.WriteLine("");
+            for (int j = -3; j < 4; j++)
+            {
+                for (int i = -3; i < 4; i++)
+                {
+                    int x = i + (int)Round(start.X);
+                    int y = j + (int)Round(start.Y);
+                    if (x < 0) continue;
+                    if (y < 0) continue;
+                    if (x > 99) continue;
+                    if (y > 99) continue;
+                    if (i == 0 && j == 0)
+                        Debug.Write("X");
+                    else
+                    {
+                        if (boundaries[x, y] == 1)
+                            Debug.Write("1");
+                        else
+                            Debug.Write("-");
+                    }
+                }
+                Debug.WriteLine("");
+            }
+        }
 
+
+        //determine if a given point is near a boundary
         float PointNearABoundaryPoint(PointPlus start, int theta, out PointPlus thePoint)
         {
             thePoint = new PointPlus(0, 0f);
             float GetValue(PointPlus pt, int dx, int dy, ref PointPlus thePoint)
             {
-                if (pt.X + dx < 0 || pt.X + dx >= boundaries.GetLength(0) || pt.Y + dy < 0 || pt.Y + dy >= boundaries.GetLength(1)) return 0;
-                thePoint = new PointPlus((int)start.X+dx,(float)(int)start.Y+dy);
-                return boundaries[(int)start.X+dx, (int)start.Y+dy];
+                thePoint = new PointPlus((int)Round(start.X) + dx, (float)(int)Round(start.Y) + dy);
+                if (thePoint.X < 0 || thePoint.X >= boundaries.GetLength(0) || thePoint.Y < 0 || thePoint.Y >= boundaries.GetLength(1)) return 0;
+                return boundaries[(int)thePoint.X, (int)thePoint.Y];
             }
-            float val = GetValue(start, 0, 0,ref thePoint);
+            float val = GetValue(start, 0, 0, ref thePoint);
             if (val > 0) return val;
             if (theta > 158)
             {
@@ -307,27 +360,34 @@ namespace BrainSimulator.Modules.Vision
                 if (val > 0) return val;
                 val = GetValue(start, -1, 1, ref thePoint);
                 if (val > 0) return val;
+                val = GetValue(start, 1, 0, ref thePoint) +
+                        GetValue(start, 0, -1, ref thePoint);
+                if (val > 1) return val;
+                val = GetValue(start, -1, 0, ref thePoint) +
+                        GetValue(start, 0, 1, ref thePoint);
+                if (val > 1) return val;
             }
             else if (theta > 68)
             {
                 val = GetValue(start, 0, 1, ref thePoint);
-                if (val > 0) 
+                if (val > 0)
                     return val;
                 val = GetValue(start, 0, -1, ref thePoint);
-                if (val > 0) 
+                if (val > 0)
                     return val;
             }
             else if (theta > 22)
             {
-                val = GetValue(start, -1, 1, ref thePoint);
+                val = GetValue(start, 1, 1, ref thePoint);
                 if (val > 0) return val;
-                val = GetValue(start, 1, -1, ref thePoint);
+                val = GetValue(start, -1, -1, ref thePoint);
                 if (val > 0) return val;
-                //TODO fix this problem
-                val = GetValue(start, 0, 1, ref thePoint);
-                if (val > 0) return val;
-                val = GetValue(start, 0, -1, ref thePoint);
-                if (val > 0) return val;
+                val = GetValue(start, -1, 0, ref thePoint) +
+                        GetValue(start, 0, -1, ref thePoint);
+                if (val > 1) return val;
+                val = GetValue(start, 1, 0, ref thePoint) +
+                        GetValue(start, 0, 1, ref thePoint);
+                if (val > 1) return val;
             }
             else
             {
@@ -357,7 +417,7 @@ namespace BrainSimulator.Modules.Vision
                 Point end = points[0];
                 Point prev = points[0];
                 int minimumSegmentLength = minLength;
-                int maximumGapSize = 4;
+                int maximumGapSize = 3;
 
                 for (int i = 1; i < points.Count; i++)
                 {

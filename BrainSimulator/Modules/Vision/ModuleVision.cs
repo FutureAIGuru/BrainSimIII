@@ -14,6 +14,8 @@ using System.Diagnostics;
 using static System.Math;
 using UKS;
 using System.Runtime.Intrinsics.Arm;
+using System.Windows.Media;
+using System.Xml;
 
 namespace BrainSimulator.Modules
 {
@@ -88,9 +90,10 @@ namespace BrainSimulator.Modules
                 return;
             }
 
-
             HSLColor[,] imageArray;
             imageArray = GetImageArrayFromBitmapImage();
+            //segY = 9;
+            //imageArray = GenerateImage();
             boundaryArray = FindBoundaries(imageArray);
 
             segmentFinder = new(boundaryArray.GetLength(0), boundaryArray.GetLength(1));
@@ -104,8 +107,62 @@ namespace BrainSimulator.Modules
 
             FindOutlines();
 
+            //if (corners.Count != 2)
+            //{ }
+            //if (corners[0].location.X != 10 && corners[1].location.X != 10)
+            //{ }
+
             UpdateDialog();
 
+        }
+
+        int segY = 3;
+
+        private HSLColor[,] GenerateImage()
+        {
+            HSLColor white = new HSLColor(0xff, 0xff, 0xff, 0xff);
+            imageArray = new HSLColor[100, 100];
+            for (int x = 0; x < 100; x++)
+                for (int y = 0; y < 100; y++)
+                    imageArray[x, y] = white;
+
+            SetSingleSegment(imageArray, new PointPlus(10, 20f), new PointPlus(22, (float)segY));
+            segY++;
+            if (segY == 96) segY = 1;
+            return imageArray;
+        }
+
+        private void SetSingleSegment(HSLColor[,] imageArray, PointPlus start, PointPlus end)
+        {
+            HSLColor theColor = new HSLColor(Colors.Red);
+
+            PointPlus curPos = new(start);
+
+            float dx = end.X - start.X;
+            float dy = end.Y - start.Y;
+
+            if (Abs(dx) > Abs(dy))
+            {
+                //step out in the X direction
+                PointPlus step = new PointPlus((dx > 0) ? 1 : -1, dy / Abs(dx));
+                for (int x = 0; x <= Abs(dx); x++)
+                {
+                    imageArray[(int)Round(curPos.X), (int)Round(curPos.Y)] = theColor;
+                    curPos += step;
+                }
+            }
+            else
+            {
+                //step out in the Y direction
+                PointPlus step = new PointPlus(dx / Abs(dy), (dy > 0) ? 1f : -1f);
+                for (int y = 0; y <= Abs(dy); y++)
+                {
+                    imageArray[(int)Round(curPos.X), (int)Round(curPos.Y)] = theColor;
+                    curPos += step;
+                }
+            }
+
+            return;
         }
 
         private HSLColor[,] GetImageArrayFromBitmapImage()
@@ -170,6 +227,8 @@ namespace BrainSimulator.Modules
             int sy = 0;
             for (sy = 0; sy < imageArray.GetLength(1); sy++)
             {
+                if (sy == 33)
+                { }
                 int[] bRay = new int[imageArray.GetLength(0)];
                 var rayThruImage = LineThroughArray(dx, dy, sx, sy, imageArray);
                 FindBoundariesInRay(bRay, rayThruImage);
@@ -200,12 +259,14 @@ namespace BrainSimulator.Modules
         {
             //given a ray of color values through an image, find the boundaries
             //todo: filter out noisy areas in the ray
-            float boundaryThreshold = 0.5f;
+            float boundaryThreshold = 0.35f;
 
             int start = -1;
             for (int i = 0; i < rayThruImage.Count - 1; i++)
             {
                 float diff = PixelDifference(rayThruImage[i], rayThruImage[i + 1]);
+                if (diff != 0)
+                { }
                 if (diff < boundaryThreshold)
                 {
                     //pixels are the same...could be the start of a boundary
@@ -523,6 +584,7 @@ namespace BrainSimulator.Modules
         public override void SetUpAfterLoad()
         {
             //here we parse Corner objects out of the Xml stream
+            //this should no lonber be necessary since we are no longer storing points and corners (these are transient)
             foreach (Thing t in theUKS.UKSList)
             {
                 if (t.V is System.Xml.XmlNode[] nodes)
