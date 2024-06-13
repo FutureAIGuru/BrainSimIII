@@ -495,6 +495,14 @@ public partial class Thing
         RemoveRelationship(r);
     }
 
+    public Thing AttributeOfType(string label)
+    {
+        foreach (Relationship r in relationships)
+            if (r.reltype.HasAncestorLabeled(label))
+                return r.target;
+        return null;
+    }
+
     public bool HasPropertyLabeled(string label)
     {
         foreach (Relationship r in relationships)

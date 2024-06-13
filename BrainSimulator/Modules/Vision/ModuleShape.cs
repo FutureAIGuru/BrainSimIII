@@ -30,7 +30,6 @@ namespace BrainSimulator.Modules
         DateTime lastScan = new DateTime();
         public Thing foundShape = null;
         public float confidence = 0;
-        public float scale = 1.0f;
         public override void Fire()
         {
             Init();
@@ -52,22 +51,36 @@ namespace BrainSimulator.Modules
 
             CreateShapeFromCorners();
 
-            foundShape = SearchForShape(out float score);
-
-            if (foundShape == null || score <0.5)
+            Thing storedShapes = theUKS.GetOrAddThing("StoredShape", "Visual");
+            Thing hasShape = theUKS.GetOrAddThing("hasShape", "RelationshipType");
+            foreach (Thing shape in theUKS.Labeled("currentShape").Children)
             {
-                foundShape = AddShapeToLibrary();
-                confidence = 1;
+                float bestValue = 0;
+                //currehtShape has a set of attriburtes. We search the descendents of StoredShape for the
+                // entry with the best match.
+                Thing foundShape = theUKS.SearchForClosestMatch(shape, storedShapes, ref bestValue);
+                if (foundShape != null)
+                {
+                    Relationship r = shape.AddRelationship(foundShape, hasShape);
+                    r.Weight = bestValue;
+                    foundShape.SetFired();
+                }
             }
+            //foundShape = SearchForShape(out float score);
 
-            confidence = score;
-            foundShape?.SetFired();
+            //if (foundShape == null || score < 0.5)
+            //{
+            //    foundShape = AddShapeToLibrary();
+            //    confidence = 1;
+            //}
+
+            //confidence = score;
             UpdateDialog();
         }
 
         //note there are two kinds of corners
-        //1. seen in space which has a position and an angle (descendent of visual | 
-        //2. abstract which has only an angle (perhaps a relative orientation)
+        //1. Transient: seen in space which has a position and an angle (descendent of visual | 
+        //2. abstract: which has only an angle (perhaps a relative orientation)
 
         void CreateShapeFromCorners()
         {
@@ -75,16 +88,21 @@ namespace BrainSimulator.Modules
             Thing currentShape = theUKS.GetOrAddThing("currentShape", "Visual");
             theUKS.GetOrAddThing("Distance", "Visual");
             theUKS.GetOrAddThing("Angle", "Visual");
+            theUKS.GetOrAddThing("Size", "Visual");
             theUKS.GetOrAddThing("Go", "RelationshipType");
             theUKS.GetOrAddThing("Turn", "RelationshipType");
 
             //clear out any previous currentShape
-            foreach (var r in currentShape.Relationships)
-                currentShape.RemoveRelationship(r);
+            theUKS.DeleteAllChildren(currentShape);
 
-            //TODEO loop through outlines
-            Thing outline = theUKS.Labeled("outline0");
-            if (outline == null) return;
+            foreach (Thing outline in theUKS.Labeled("outline").Children)
+            {
+                ExtractShape(theUKS.GetOrAddThing("currentShape*",currentShape), outline);
+            }
+        }
+
+        private void ExtractShape(Thing currentShape, Thing outline)
+        {
             var corners = outline.GetRelationshipsWithAncestor(theUKS.Labeled("corner"));
 
             //setup to normalize the distance
@@ -99,31 +117,37 @@ namespace BrainSimulator.Modules
                 if (dist > maxDist) maxDist = dist;
             }
 
-            //maxDist is the scale
-            scale = maxDist;
+            //TODO: put any other attributes on your shape here
+            //add the scale to the object
+            Thing hasSize = theUKS.GetOrAddThing("hasSize", "RelationshipType");
+            currentShape.AddRelationship(GetSizeThing(maxDist),hasSize);
+
             //add the corners to the currentShape
             for (int i = 0; i < corners.Count; i++)
             {
                 var corner = corners[i].target.V as ModuleVision.Corner;
                 if (corner == null) continue;
-                int next = i + 1; 
+                int next = i + 1;
                 if (next >= corners.Count) next = 0;
                 var nextCorner = corners[next].target.V as ModuleVision.Corner;
                 float dist = (nextCorner.location - corner.location).R;
                 dist /= maxDist;
-                int a = (int)Round(corner.angle.Degrees/10)*10;
-                a = a / 10;
+                int a = (int)Round(corner.angle.Degrees / 10) * 10;
+                a = a / 10; //round angles to the nearest 10 degrees
                 a = a * 10;
-                string distName = "distance."+((int)Round(dist * 10)).ToString();
-                if (Round(dist*10) == 10) distName = "distance1.0";
+                string distName = "distance." + ((int)Round(dist * 10)).ToString();
+                if (Round(dist * 10) == 10) distName = "distance1.0";
                 Thing theDist = theUKS.GetOrAddThing(distName, "distance");
                 theUKS.AddStatement(currentShape, "go*", theDist);
                 Thing theAngle = theUKS.GetOrAddThing("angle" + a, "Angle");
                 theUKS.AddStatement(currentShape, "turn*", theAngle);
             }
         }
-
-
+        Thing GetSizeThing(float size)
+        {
+            string sizeName = "size" + (int)size / 10;
+            return theUKS.GetOrAddThing(sizeName, "Size");
+        }
 
         public Thing AddShapeToLibrary()
         {
@@ -145,7 +169,7 @@ namespace BrainSimulator.Modules
 
             //currehtShape has a set of attriburtes. We search the descendents of StoredShape for the
             // entry with the best match.
-            Thing bestThing = theUKS.SearchForClosestMatch(currentShape, storedShapes,ref bestValue);
+            Thing bestThing = theUKS.SearchForClosestMatch(currentShape, storedShapes, ref bestValue);
 
             return bestThing;
         }

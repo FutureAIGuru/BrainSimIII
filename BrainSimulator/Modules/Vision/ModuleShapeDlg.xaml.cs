@@ -21,9 +21,13 @@ namespace BrainSimulator.Modules
             if (!base.Draw(checkDrawTimer)) return false;
 
             ModuleShape parent = (ModuleShape)ParentModule;
-            if (parent.foundShape != null)
+            tbFound.Text = "";
+            foreach (Thing shape in parent.theUKS.Labeled("currentShape").Children)
             {
-                tbFound.Text = $"{parent.foundShape.Label}   {parent.confidence}   {parent.scale}" ;
+                Thing shapeType = shape.AttributeOfType("hasShape");
+                Thing size = shape.AttributeOfType("hasSize");
+                Relationship confidence = parent.theUKS.GetRelationship(shape.Label,"hasShape", shapeType.Label);
+                tbFound.Text += $"{shape.Label}   {shapeType.Label}  conf:{confidence.Weight}  {shape.AttributeOfType("hasSize")}\n" ;
             }
 
             return true;
