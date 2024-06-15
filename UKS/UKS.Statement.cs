@@ -30,7 +30,7 @@ public partial class UKS
         object oTargetProperties = null
                     )
     {
-        Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
+        //Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
 //        try  //let any exceptions be trapped above
         {
             Thing source = ThingFromObject(oSource);
@@ -211,7 +211,7 @@ public partial class UKS
             t.RemoveParent(ThingLabels.GetThing("unknownObject"));
         //if this disconnects the Thing from the tree, reconnect it as a Unknown
         //this may happen in the case of a circular reference.
-        if (reconnectNeeded && !t.HasAncestor(ThingLabels.GetThing("Thing")))
+        if (reconnectNeeded && !t.HasAncestor("Thing"))
             t.AddParent(ThingLabels.GetThing("unknownObject"));
     }
 

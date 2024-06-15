@@ -25,11 +25,11 @@ namespace BrainSimulator.Modules
             foreach (Thing shape in parent.theUKS.Labeled("currentShape").Children)
             {
                 Thing shapeType = shape.AttributeOfType("hasShape");
+                if (shapeType == null) { continue; }
                 Thing size = shape.AttributeOfType("hasSize");
                 Relationship confidence = parent.theUKS.GetRelationship(shape.Label,"hasShape", shapeType.Label);
-                tbFound.Text += $"{shape.Label}   {shapeType.Label}  conf:{confidence.Weight}  {shape.AttributeOfType("hasSize")}\n" ;
+                tbFound.Text += $"{shape.Label}   {shapeType.Label}  conf:{confidence.Weight.ToString("0.00")}  {shape.AttributeOfType("hasSize")}\n" ;
             }
-
             return true;
         }
 

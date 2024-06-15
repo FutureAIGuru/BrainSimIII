@@ -68,24 +68,22 @@ namespace BrainSimulator.Modules
                 for (int x = 0; x < parent.imageArray.GetLength(0); x++)
                     for (int y = 0; y < parent.imageArray.GetLength(1); y++)
                     {
-                        {
-                            var pixel = new HSLColor(parent.imageArray[x, y]);
+                        var pixel = new HSLColor(parent.imageArray[x, y]);
 
-                            if (pixel != null)
+                        if (pixel != null)
+                        {
+                            pixel.luminance /= 2;
+                            SolidColorBrush b = new SolidColorBrush(pixel.ToColor());
+                            Ellipse e = new Ellipse()
                             {
-                                pixel.luminance /= 2;
-                                SolidColorBrush b = new SolidColorBrush(pixel.ToColor());
-                                Ellipse e = new Ellipse()
-                                {
-                                    Height = pixelSize,
-                                    Width = pixelSize,
-                                    Stroke = b,
-                                    ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y}) {pixel}" },
-                                };
-                                Canvas.SetLeft(e, x * scale - pixelSize / 2);
-                                Canvas.SetTop(e, y * scale - pixelSize / 2);
-                                theCanvas.Children.Add(e);
-                            }
+                                Height = pixelSize,
+                                Width = pixelSize,
+                                Stroke = b,
+                                ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y}) {pixel}" },
+                            };
+                            Canvas.SetLeft(e, x * scale - pixelSize / 2);
+                            Canvas.SetTop(e, y * scale - pixelSize / 2);
+                            theCanvas.Children.Add(e);
                         }
                     }
             }
@@ -116,9 +114,9 @@ namespace BrainSimulator.Modules
             //draw the lines
             if (cbShowLines.IsChecked == true && parent.segments != null & parent.segments.Count > 0)
             {
-                for (int i = parent.segmentFinder.localMaxima.Count-1; i >=0 ; i--)
+                for (int i = parent.segmentFinder.localMaxima.Count - 1; i >= 0; i--)
                 {
-                    Tuple<int, int, int,float> line = parent.segmentFinder.localMaxima[i];
+                    Tuple<int, int, int, float> line = parent.segmentFinder.localMaxima[i];
                     var points = parent.segmentFinder.accumulator[line.Item2, line.Item3];
                     float maxVotes = parent.segmentFinder.localMaxima[0].Item1;
                     float votes = line.Item1;
@@ -157,7 +155,7 @@ namespace BrainSimulator.Modules
                             X1 = 0,
                             X2 = 1000 * scale,
                             Y1 = b * scale,
-                            Y2 = (b+m*1000)* scale,
+                            Y2 = (b + m * 1000) * scale,
                             Stroke = brush,
                             ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 200, Content = $"({(int)rhoIndex},{(int)theta},{(int)votes},{(int)lineVotes}) (r,t,v,vl)" },
                         };

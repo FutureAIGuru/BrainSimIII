@@ -16,6 +16,11 @@ namespace UKS;
 /// </summary>
 public partial class Thing
 {
+    public static implicit operator Thing(string label)
+    {
+        Thing t = ThingLabels.GetThing(label);
+        return t;
+    }
     private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
     private List<Relationship> relationshipsFrom = new List<Relationship>(); //synapses from
     private List<Relationship> relationshipsAsType = new List<Relationship>(); //nodes which use this as a relationshipType
@@ -196,9 +201,7 @@ public partial class Thing
     /// <returns></returns>
     public bool HasAncestorLabeled(string label)
     {
-        Thing t = ThingLabels.GetThing(label);
-        if (t == null) return false;
-        return HasAncestor(t);
+        return HasAncestor(label);
     }
     /// <summary>
     /// Determines whether a Thing has a specific ancestor
@@ -275,19 +278,10 @@ public partial class Thing
     /// <summary>
     /// Updates the last-fired time on a Thing
     /// </summary>
-    /// <param name="t">optional: may select a different Thing</param>
-    public void SetFired(Thing t = null)
+    public void SetFired()
     {
-        if (t != null)
-        {
-            t.lastFiredTime = DateTime.Now;
-            t.useCount++;
-        }
-        else
-        {
-            lastFiredTime = DateTime.Now;
-            useCount++;
-        }
+        lastFiredTime = DateTime.Now;
+        useCount++;
     }
 
 

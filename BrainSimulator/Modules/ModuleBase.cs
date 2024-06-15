@@ -300,7 +300,7 @@ namespace BrainSimulator.Modules
             timer.Stop();
             if (Application.Current == null) return;
             if (dlg != null)
-                dlg.Draw(false);
+                dlg.Draw(true);
         }
 
         //this is called to allow for any data massaging needed before saving the file

@@ -121,6 +121,12 @@ namespace BrainSimulator.Modules
             //add the scale to the object
             Thing hasSize = theUKS.GetOrAddThing("hasSize", "RelationshipType");
             currentShape.AddRelationship(GetSizeThing(maxDist),hasSize);
+            Thing hasLocation = theUKS.GetOrAddThing("hasPosition", "RelationshipType");
+            Thing mmPosition = theUKS.GetOrAddThing("mmPosition", "Environment");
+            ModuleVision.Corner theLocation = (ModuleVision.Corner)corners[0].target.V;
+            string location = $"mmPos:{theLocation.location.X},{theLocation.location.Y}";
+            Thing locationThing = theUKS.GetOrAddThing(location, mmPosition);
+            currentShape.AddRelationship(locationThing,hasLocation);
 
             //add the corners to the currentShape
             for (int i = 0; i < corners.Count; i++)

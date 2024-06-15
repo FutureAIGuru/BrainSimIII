@@ -21,8 +21,6 @@ namespace BrainSimulator.Modules
 {
     public class ModuleVision : ModuleBase
     {
-        //any public variable you create here will automatically be saved and restored  with the network
-        //unless you precede it with the [XmlIgnore] directive
         public string currentFilePath = "";
         public string previousFilePath = "";
         [XmlIgnore]
@@ -107,14 +105,48 @@ namespace BrainSimulator.Modules
 
             FindOutlines();
 
-            //if (corners.Count != 2)
-            //{ }
-            //if (corners[0].location.X != 10 && corners[1].location.X != 10)
-            //{ }
+            WriteBitmapToMentalModel();
 
             UpdateDialog();
 
         }
+
+        private void WriteBitmapToMentalModel()
+        {
+            Thing environmentModel = theUKS.GetOrAddThing("Environment", "Thing");
+            Thing environmentModelArray = theUKS.GetOrAddThing("envPointArray","Environment");
+            environmentModel.SetFired();
+            //TODO Make angular
+            //TODO Make 0 center
+            for (int x = 0; x < 25; x++)
+                for (int y = 0; y < 25; y++)
+                {
+                    string name = $"mm{x},{y}";
+                    Thing theEntry = theUKS.GetOrAddThing(name, environmentModelArray);
+                    theEntry.V = GetAverageColor(x*4, y*4);
+                }
+        }
+        private HSLColor GetAverageColor (int x, int y)
+        {
+            HSLColor retVal = new(1,0,0,0);
+            int size = 2;
+            for (int i = -size; i <= size; i++)
+                for (int j = -size; j <= size; j++)
+                {
+                    if (x + i < 0)continue;
+                    if (y + j < 0)continue;
+                    if (x + i >= imageArray.GetLength(0)) continue;
+                    if (y + j >= imageArray.GetLength(1)) continue;
+                    retVal.hue += imageArray[x + i, y + j].hue;
+                    retVal.luminance += imageArray[x + i, y + j].luminance;
+                    retVal.saturation += imageArray[x + i, y + j].saturation;
+                }
+            retVal.hue /= 25;
+            retVal.luminance /= 25;
+            retVal.saturation /= 25;
+            return retVal;
+        }
+
 
         int segY = 3;
 
@@ -578,6 +610,8 @@ namespace BrainSimulator.Modules
             t = theUKS.Labeled("corner");
             if (t != null) { theUKS.DeleteAllChildren(t); }
             t = theUKS.Labeled("Outline");
+            if (t != null) { theUKS.DeleteAllChildren(t); }
+            t = theUKS.Labeled("MentalModel");
             if (t != null) { theUKS.DeleteAllChildren(t); }
         }
 
