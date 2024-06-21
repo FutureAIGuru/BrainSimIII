@@ -75,12 +75,10 @@ namespace BrainSimulator.Modules
             ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
             Thing ancestor = UKSQuery.theUKS.Labeled(ancestorText1.Text);
             if (ancestor == null)
-            {
-                resultText1.Text = "<Ancestor must be specified>";
-                return;
-            }
+                ancestor = UKSQuery.theUKS.Labeled("Thing");
+
             //build the query object
-            Thing queryThing = new Thing();
+            Thing queryThing = new Thing() ;
             string[] rels = queryText1.Text.Split('\n');
             foreach (string s in rels)
             {
@@ -105,6 +103,7 @@ namespace BrainSimulator.Modules
             }
             float confidence = 0;
             Thing result = UKSQuery.theUKS.SearchForClosestMatch(queryThing, ancestor, ref confidence);
+            UKSQuery.theUKS.DeleteThing(queryThing);
             if (result == null)
             {
                 resultText1.Text = "<No Results>";

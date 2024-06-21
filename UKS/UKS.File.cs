@@ -13,6 +13,9 @@ public partial class UKS
     {
         if (Labeled("Thing") == null)
             AddThing("Thing", null);
+        Thing hasChild = AddThing("has-child", null);
+        Thing relType = GetOrAddThing("RelationshipType", "Thing");
+        hasChild.AddParent(relType);
         GetOrAddThing("Object", "Thing");
         GetOrAddThing("Action", "Thing");
         GetOrAddThing("RelationshipType", "Thing");
@@ -21,12 +24,6 @@ public partial class UKS
         GetOrAddThing("inverseOf", "RelationshipType");
         GetOrAddThing("hasProperty", "RelationshipType");
         GetOrAddThing("is", "RelationshipType");
-
-        //This hack is here because at startup some Things don't get put into the UKS List.
-        foreach (Thing t in ThingLabels.AllThingsInLabelList())
-            if (!UKSList.Contains(t))
-                UKSList.Add(t);
-
 
         AddStatement("is-a", "inverseOf", "has-child");
         AddStatement("isExclusive", "is-a", "RelationshipType");
@@ -76,14 +73,14 @@ public partial class UKS
 
 
         //demo to add PI to the structure
-        //AddStatement("pi", "is-a", "number");
-        //AddStatement("pi", "hasDigit*", "3");
-        //AddStatement("pi", "hasDigit*", ".");
-        //AddStatement("pi", "hasDigit*", "1");
-        //AddStatement("pi", "hasDigit*", "4");
-        //AddStatement("pi", "hasDigit*", "1");
-        //AddStatement("pi", "hasDigit*", "5");
-        //AddStatement("pi", "hasDigit*", "9");
+        AddStatement("pi", "is-a", "number");
+        AddStatement("pi", "hasDigit*", "3");
+        AddStatement("pi", "hasDigit*", ".");
+        AddStatement("pi", "hasDigit*", "1");
+        AddStatement("pi", "hasDigit*", "4");
+        AddStatement("pi", "hasDigit*", "1");
+        AddStatement("pi", "hasDigit*", "5");
+        AddStatement("pi", "hasDigit*", "9");
     }
 
     void AddBrainSimConfigSectionIfNeeded()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace UKS;
 public partial class UKS
@@ -284,55 +285,59 @@ public partial class UKS
         return retVal;
     }
 
-    //find all the things containing the sequence of attributes
-    private bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
-    {
-        //TODO modify to find closest match, return the matching score instead of bool
-        //TODO this requires that all entries in a sequence must be adjascent without any intervening extraneous relationships
-        //TODO some sequences (spatial) are circular and the search must loop back to the beginning (not for anything temporal)
-        IList<Relationship> sortedReferences = relationships.OrderBy(x => x.relType.Label).ToList();
-
-        //TODO the for loop below allows for matching a partial which does not start at the beginning of the stored sequence
-        int i = 0;
-        //for (int i = 0; i < sortedReferences.Count - targetAttributes.Count + 1; i++)
-        {
-            for (int j = 0; j < targetAttributes.Count; j++)
-            {
-                if (sortedReferences[i + j].target != targetAttributes[j]) goto misMatch;
-            }
-            return true;
-        misMatch:;
-        }
-        return false;
-    }
-
+    //TODO add concept of "near" Things
+    //TODO add option to require first and/or last entries to match
     /// <summary>
-    /// Returns a list of Things which have all the target attributes as Relationships
+    /// This determines how well two Things match in terms of the order of their ordered attributes.
     /// </summary>
-    /// <param name="targetAttributes">An ordered list of Things which must occur as attributes in the search target</param>
-    /// <returns>All the Things which match the criteria</returns>
-    public List<Thing> HasSequence(List<Thing> targetAttributes)
+    /// <param name="pattern">This is the pattern we are searching for</param>
+    /// <param name="candidate">This is the item suggested as a possible sequence match< (the stored pattern)</param>
+    /// <param name="bestOffset">Return value of offset into the candidate where the pattern match begins.</param>
+    /// <param name="relType">If specified, specifees the relationship type to follow, otherwise all sequential relTypes are matched</param>
+    /// <param name="circularSearch">If true, circularizes the search of the candidate (for visuals)</param>
+    /// <returns>Confidence that the pattern exists in the candidate</returns>
+    public float HasSequence(Thing pattern, Thing candidate, out int bestOffset, bool circularSearch = false, Thing relType = null)
     {
-        //get a list of all things with the given attributes
-        List<Thing> retVal = new();
-        foreach (Thing t in targetAttributes)
-            foreach (Relationship r in t.RelationshipsFrom)
-                if (r.reltype == null) continue;
-                else if (r.relType.HasAncestorLabeled("has"))
-                    if (!retVal.Contains(r.source))
-                        retVal.Add(r.source);
+        bestOffset = -1;
+        if (candidate == null) return -1;
+        if (pattern == null) return -1;
+        if (candidate.Relationships.Count == 0) return -1;
+        if (pattern.Relationships.Count == 0) return -1;
 
-        //remove the onew without the sequence
-        for (int i = 0; i < retVal.Count; i++)
+        //get the needed relationships and put them in the order specified by the relationshipType digits
+        float bestScore = -1;
+        List<Relationship> patternRelationships = new(pattern.Relationships);
+        patternRelationships = patternRelationships.FindAll(
+            x => x.relType == null || Regex.IsMatch(x.reltype.Label, @"\d+") && x.relType == null ||  x.relType.Parents.Contains(relType));
+        patternRelationships = patternRelationships.OrderBy(s => (s.relType == null) ? 0 : int.Parse(Regex.Match(s.reltype.Label, @"\d+").Value)).ToList();
+        List<Relationship> candidateRelationships = new(candidate.Relationships);
+        candidateRelationships = candidateRelationships.FindAll(
+            x => x.relType == null || Regex.IsMatch(x.reltype.Label, @"\d+") && relType == null || x.relType.Parents.Contains(relType));
+        candidateRelationships = candidateRelationships.OrderBy(s => (s.relType == null) ? 0 : int.Parse(Regex.Match(s.reltype.Label, @"\d+").Value)).ToList();
+
+        //offset is the number of rels to skip at the beginning of the stored pattern
+        for (int offset = 0; offset < candidateRelationships.Count; offset++)
         {
-            if (!HasSequence(retVal[i].Relationships, targetAttributes))
+            float score = 0;
+            for (int i = 0; i < patternRelationships.Count; i++)
             {
-                retVal.RemoveAt(i);
-                if (i != 0)
-                    i--;
+                //if circular search is requested and the offset is off the end of the candidate, loop back
+                if (!circularSearch && offset  + i >= candidateRelationships.Count) break;
+                int index = (offset + i) % candidateRelationships.Count;
+                if (patternRelationships[i].target == candidateRelationships[index].target)
+                {
+                    score += candidateRelationships[index].Weight;
+                }
+            }
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestOffset = offset;
             }
         }
-        return retVal;
+
+        bestScore /= pattern.Relationships.Count;
+        return bestScore;
     }
 
     //TODO add parameter to allow some number of misses
@@ -460,7 +465,7 @@ public partial class UKS
                 if (r1.reltype.Label == "has-child") continue;//this is likely unnecessary
                 //TODO: make this handle order-independency (go0,go1) vs relType params (has.2, has.4)
                 //note: order-descriptors DO NOT have attributes while params DO
-                if (r1.source.HasAncestor(root) && r1.relType == r.relType)
+                if (r1.source.HasAncestor(root) && (r.reltype == null || r1.relType == r.relType))
                 {
                     if (!searchCandidates.ContainsKey(r1.source))
                         searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed

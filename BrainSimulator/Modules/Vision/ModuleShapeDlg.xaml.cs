@@ -21,6 +21,7 @@ namespace BrainSimulator.Modules
             if (!base.Draw(checkDrawTimer)) return false;
 
             ModuleShape parent = (ModuleShape)ParentModule;
+            if (parent.theUKS.Labeled("currentShape") == null) return false;
             tbFound.Text = "";
             foreach (Thing shape in parent.theUKS.Labeled("currentShape").Children)
             {

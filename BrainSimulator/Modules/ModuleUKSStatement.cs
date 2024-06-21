@@ -110,7 +110,7 @@ namespace BrainSimulator.Modules
             IPluralize pluralizer = new Pluralizer();
             source = source.Trim();
             string[] tempStringArray = source.Split(' ');
-            //first, build a list of all the things in the list
+            //first, build a list of all the Things in the list
             for (int i = 0; i < tempStringArray.Length; i++)
             {
                 if (tempStringArray[i] == "") continue;
@@ -118,16 +118,16 @@ namespace BrainSimulator.Modules
                 if (t == null) return retVal;
                 retVal.Add(t);
             }
-            //is this a sequence?
-            List<Thing> tSequence = MainWindow.theUKS.HasSequence(retVal);
-            if (tSequence != null && tSequence.Count > 0)
-            {
-                retVal = tSequence;
-            }
-            else if (retVal.Count > 1) //do things represent a list of attributes
-            {
-                    retVal = MainWindow.theUKS.FindThingsWithAttributes(retVal);
-            }
+            ////is this a sequence?
+            //List<Thing> tSequence = MainWindow.theUKS.HasSequence(retVal);
+            //if (tSequence != null && tSequence.Count > 0)
+            //{
+            //    retVal = tSequence;
+            //}
+            //else if (retVal.Count > 1) //do things represent a list of attributes
+            //{
+            //    //retVal = MainWindow.theUKS.FindThingsWithAttributes(retVal);
+            //}
 
             return retVal;
         }

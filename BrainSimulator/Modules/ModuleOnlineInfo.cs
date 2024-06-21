@@ -1043,7 +1043,7 @@ namespace BrainSimulator.Modules
                 {
                     bool found = false;
                     string[] fn = new string[xn.ChildNodes.Count];
-                    Thing prop = new Thing();
+                    //Thing prop = new Thing();
                     for (int i = 0; i < xn.ChildNodes.Count; i++)
                     {
                         Debug.WriteLine(xn.ChildNodes[i].InnerText + " :: ");

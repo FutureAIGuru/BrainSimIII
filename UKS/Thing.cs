@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 
 namespace UKS;
 
@@ -16,11 +17,20 @@ namespace UKS;
 /// </summary>
 public partial class Thing
 {
+    /// <summary>
+    /// This is the magic which allows for strings to be put in place of Things for any metho Paramter
+    /// </summary>
+    /// <param name="label"></param>
+    /// Throse 
     public static implicit operator Thing(string label)
     {
         Thing t = ThingLabels.GetThing(label);
+        if (t == null)
+            throw new ArgumentNullException($"No Thing found with label: {label}");
         return t;
     }
+    public static Thing HasChild { get => ThingLabels.GetThing("has-child");}
+
     private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
     private List<Relationship> relationshipsFrom = new List<Relationship>(); //synapses from
     private List<Relationship> relationshipsAsType = new List<Relationship>(); //nodes which use this as a relationshipType
@@ -59,14 +69,9 @@ public partial class Thing
         get => value;
         set
         {
-            //Object x = value;
-            //var v = x.GetType();
-            //if (value is not null && !value.GetType().IsSerializable)
-            //    throw new ArgumentException("Cannot set nonserializable value");
             this.value = value;
         }
     }
-
 
     /// <summary>
     /// Returns a Thing's label
@@ -136,6 +141,8 @@ public partial class Thing
         }
         return retVal;
     }
+
+    //TODO: same as hasAncestor...
     private bool IsKindOf(Thing thingType)
     {
         if (this == thingType) return true;
@@ -201,6 +208,8 @@ public partial class Thing
     /// <returns></returns>
     public bool HasAncestorLabeled(string label)
     {
+        Thing t = ThingLabels.GetThing(label);
+        if (t == null) return false;
         return HasAncestor(label);
     }
     /// <summary>
@@ -286,6 +295,7 @@ public partial class Thing
 
 
     //RELATIONSHIPS
+    //TODO reverse the parameters so it's type,target
     /// <summary>
     /// Adds a relationship to a Thing if it does not already exist.  The Thing is the source of the relationship.
     /// </summary>
@@ -294,8 +304,10 @@ public partial class Thing
     /// <returns>the new or existing Relationship</returns>
     public Relationship AddRelationship(Thing target, Thing relationshipType)
     {
-        if (relationshipType == null)
+        if (relationshipType == null)  //NULL relationship types could be allowed in search Thingys Parameter?
+        {
             return null;
+        }
 
         //does the relationship already exist?
         Relationship r = HasRelationship(target, relationshipType);
@@ -310,7 +322,7 @@ public partial class Thing
             source = this,
             target = target,
         };
-        if (target != null)
+        if (target != null && relationshipType != null)
         {
             lock (relationships)
                 lock (target.relationshipsFrom)
@@ -322,7 +334,14 @@ public partial class Thing
                             relationshipType.RelationshipsAsTypeWriteable.Add(r);
                     }
         }
-        else
+        else if (relationshipType == null)
+        {
+            lock (relationships)
+                {
+                    RelationshipsWriteable.Add(r);
+                }
+        }
+        else if (relationshipType != null)
         {
             lock (relationships)
                 lock (relationshipType.relationshipsAsType)
@@ -334,6 +353,8 @@ public partial class Thing
         }
         return r;
     }
+
+    //TODO reverse the parameters so it's type,target
     private Relationship HasRelationship(Thing target, Thing relationshipType)
     {
         foreach (Relationship r in relationships)

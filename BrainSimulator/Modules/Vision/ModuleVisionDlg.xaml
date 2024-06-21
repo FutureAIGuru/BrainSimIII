@@ -6,15 +6,11 @@
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
         Title="Vision" Height="500" Width="530" Background="Gray" ShowInTaskbar="False">
-    <Grid Name="theGrid" Margin="0,0,0,0" >
-
-
+    <Grid Name="theGrid" Margin="0,0,0,-6" >
         <Button x:Name="BtnBrowseFile"   IsDefault="True" Content="Open Image File" Click="Button_Browse_Click" FontSize="16" Margin="78,0,0,82" HorizontalAlignment="Left" Width="159" VerticalAlignment="Bottom"/>
-
         <Label  x:Name="errorText"            Content=""   HorizontalContentAlignment="Center"   FontSize="16" Margin="10,405,10,46" Background="Gray" Foreground="#FFF80902" VerticalAlignment="Bottom"/>
         <Label Content="Path"        HorizontalAlignment="Left"   Margin="10,320,0,131"   FontSize="16"  Width="68" VerticalAlignment="Bottom"/>
         <TextBox  x:Name="textBoxPath"               TabIndex="7"   FontSize="16"   Margin="78,320,120,131"  VerticalAlignment="Bottom" />
-        <!--<CheckBox Content="Open Sub0-folders" x:Name="cbSubFolders" HorizontalAlignment="Left" Margin="328,386,0,83" VerticalAlignment="Bottom"/>-->
         <Canvas x:Name="theCanvas" ClipToBounds="True" Margin="27,17,203,267" />
         <Label x:Name="labelProperties" Content="Image" HorizontalAlignment="Left" Margin="334,224,0,160" FontSize="16" Width="177"  VerticalAlignment="Bottom" Height="100"/>
         <CheckBox x:Name="cbShowImage" Content="Image" HorizontalAlignment="Left" Margin="74,0,0,234" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" Height="20" VerticalAlignment="Bottom"/>

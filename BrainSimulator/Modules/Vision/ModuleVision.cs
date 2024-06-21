@@ -572,15 +572,16 @@ namespace BrainSimulator.Modules
                 int cnt = outline.Count;
                 for (int i = 0; i < outline.Count; i++)
                 {
-                    sum += (outline[i].location.X - outline[(i + 1) % cnt].location.X) *
-                        (outline[i].location.Y - outline[(i + 1) % cnt].location.Y);
+                    Corner p1 = outline[i];
+                    Corner p2 = outline[(i + 1) % cnt];
+                    sum += (p2.location.X - p1.location.X) *
+                        (p2.location.Y+ p1.location.Y);
                 }
-                if (sum > 0) outline.Reverse();
+                if (sum > 0) 
+                    outline.Reverse();
 
                 //we now have an ordered, right-handed outline
                 //let's add it to the UKS
-
-                //TODO: here's where we'll have a loop for multiple outlines
                 Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
                 foreach (Corner c in outline)
                 {

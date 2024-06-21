@@ -46,34 +46,75 @@ namespace BrainSimulator.Modules
             int pixelSize = 6;
             int scale = (int)(theCanvas.ActualHeight / 25);
             theCanvas.Children.Clear();
-            for (int x = 0; x < 25; x++)
-                for (int y = 0; y < 25; y++)
-                {
-                    string name = $"mm{x},{y}";
-                    Thing pixel = parent.theUKS.Labeled(name);
-                    if (pixel == null) continue;
-                    HSLColor pixelColor = (HSLColor)pixel.V;
-
-                    if (pixelColor != null)
-                    {
-                        //pixelColor.luminance /= 2;
-                        SolidColorBrush b = new SolidColorBrush(pixelColor.ToColor());
-                        Ellipse e = new Ellipse()
-                        {
-                            Height = pixelSize,
-                            Width = pixelSize,
-                            Stroke = b,
-                            Fill = b,
-                        };
-                        Canvas.SetLeft(e, 10+ x * scale - pixelSize / 2);
-                        Canvas.SetTop(e,10+ y * scale - pixelSize / 2);
-                        theCanvas.Children.Add(e);
-                    }
-                }
 
             foreach (Thing t in parent.theUKS.Labeled("CurrentShape").Children)
             {
-                var shape = t.GetRelationshipsWithAncestor("shape");
+                var shapeList = t.GetRelationshipsWithAncestor("storedshape");
+                var sizeLists = t.GetRelationshipsWithAncestor("size");
+                var positionList = t.GetRelationshipsWithAncestor("mmposition");
+                var rotationList = t.GetRelationshipsWithAncestor("mmrotation");
+                if (sizeLists.Count == 0) continue;
+
+                float size = float.Parse(sizeLists[0].target.Label.Replace("size", ""));
+                string[] temp1 = positionList[0].target.Label.Split(':');
+                string[] temp2 = temp1[1].Split(',');
+                float x1 = float.Parse(temp2[0]) * scale / 4 + 10;
+                float y1 = float.Parse(temp2[1]) * scale / 4 + 10;
+                PointPlus curPos = new(x1, y1);
+                var rels = shapeList[0].target.Relationships;
+                Angle currDir = Angle.FromDegrees(float.Parse(rotationList[0].target.Label[6..]));
+                //currDir = 0;
+
+                Polyline poly = new Polyline() 
+                {
+                    Fill=new SolidColorBrush(Colors.Red), 
+                    Stroke=new SolidColorBrush(Colors.Green),
+                };
+                poly.Points.Add(curPos);
+
+                foreach (Relationship r in t.Relationships)
+                {
+                    if (!r.reltype.Label.StartsWith("go")) continue;
+                    if (r.target.HasAncestor("Angle"))
+                    {
+                        Angle theta = Angle.FromDegrees(float.Parse(r.target.Label[5..]));
+                        currDir += Angle.FromDegrees(180) - theta;
+                    }
+                    else if (r.target.HasAncestor("Distance"))
+                    {
+                        float dist = float.Parse(r.target.Label[8..]) * scale * 2.5f;
+                        PointPlus offset = new PointPlus(dist * size, currDir);
+                        curPos += offset;
+                        poly.Points.Add(curPos);
+                    }
+                }
+                theCanvas.Children.Add(poly);
+
+                for (int x = 0; x < 25; x++)
+                    for (int y = 0; y < 25; y++)
+                    {
+                        string name = $"mm{x},{y}";
+                        Thing pixel = parent.theUKS.Labeled(name);
+                        if (pixel == null) continue;
+                        HSLColor pixelColor = (HSLColor)pixel.V;
+
+                        if (pixelColor != null)
+                        {
+                            //pixelColor.luminance /= 2;
+                            SolidColorBrush b = new SolidColorBrush(pixelColor.ToColor());
+                            Ellipse e = new Ellipse()
+                            {
+                                Height = pixelSize,
+                                Width = pixelSize,
+                                Stroke = b,
+                                Fill = b,
+                            };
+                            Canvas.SetLeft(e, 10 + x * scale - pixelSize / 2);
+                            Canvas.SetTop(e, 10 + y * scale - pixelSize / 2);
+                            theCanvas.Children.Add(e);
+                        }
+                    }
+
             }
 
             return true;

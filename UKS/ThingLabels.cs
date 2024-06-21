@@ -9,31 +9,6 @@ using System.Collections.Concurrent;
 
 namespace UKS;
 
-public partial class Thing
-{
-    //This hack is needed because add-parent/add-child rely on the has-child relationship which may not exist yet
-    public static Thing HasChild
-    {
-        get
-        {
-            Thing hasChild = ThingLabels.GetThing("has-child");
-            if (hasChild == null)
-            {
-                Thing thingRoot = ThingLabels.GetThing("Thing");
-                if (thingRoot == null) return null;
-                Thing relTypeRoot = ThingLabels.GetThing("RelationshipType");
-                if (relTypeRoot == null)
-                {
-                    hasChild = new Thing() { Label = "has-child" };
-                    relTypeRoot = new Thing() { Label = "RelationshipType" };
-                    thingRoot.AddRelationship(relTypeRoot, hasChild);
-                    relTypeRoot.AddRelationship(hasChild, hasChild);
-                }
-            }
-            return hasChild;
-        }
-    }
-}
 
 public class ThingLabels
 {
