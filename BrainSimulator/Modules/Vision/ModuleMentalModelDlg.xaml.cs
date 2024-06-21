@@ -41,7 +41,7 @@ namespace BrainSimulator.Modules
 
             Thing environmentModel = parent.theUKS.Labeled("Environment");
             if (environmentModel == null) return false;
-            if (environmentModel.lastFiredTime < DateTime.Now - TimeSpan.FromSeconds(1)) return false;
+            //if (environmentModel.lastFiredTime < DateTime.Now - TimeSpan.FromSeconds(1)) return false;
 
             int pixelSize = 6;
             int scale = (int)(theCanvas.ActualHeight / 25);
@@ -63,11 +63,14 @@ namespace BrainSimulator.Modules
                 PointPlus curPos = new(x1, y1);
                 var rels = shapeList[0].target.Relationships;
                 Angle currDir = Angle.FromDegrees(float.Parse(rotationList[0].target.Label[6..]));
-                //currDir = 0;
 
+                HSLColor theColor = new HSLColor(Colors.Pink);
+                Thing t1 = t.AttributeOfType("hasColor");
+                if (t1 != null)
+                    theColor = (HSLColor)t1.V;
                 Polyline poly = new Polyline() 
                 {
-                    Fill=new SolidColorBrush(Colors.Red), 
+                    Fill=new SolidColorBrush(theColor.ToColor()), 
                     Stroke=new SolidColorBrush(Colors.Green),
                 };
                 poly.Points.Add(curPos);

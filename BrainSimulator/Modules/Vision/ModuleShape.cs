@@ -113,6 +113,9 @@ namespace BrainSimulator.Modules
             //setup to normalize the distance
             float maxDist = 0;
             Angle prefTheta = (corners[1].location - corners[0].location).Theta;
+            Thing t = outline.AttributeOfType("hascolor");
+            if (t != null)
+                theUKS.AddStatement(currentShape, "hasColor", t);
 
 
             int offset = -1;
@@ -166,9 +169,11 @@ namespace BrainSimulator.Modules
                 string distName = "distance." + ((int)Round(dist * 10)).ToString();
                 if (Round(dist * 10) == 10) distName = "distance1.0";
                 Thing theDist = theUKS.GetOrAddThing(distName, "distance");
-                theUKS.AddStatement(currentShape, "go*", theDist);
+                Relationship r = theUKS.AddStatement(currentShape, "go*", theDist);
+                r.TimeToLive = TimeSpan.FromSeconds(10);
                 Thing theAngle = theUKS.GetOrAddThing("angle" + a, "Angle");
-                theUKS.AddStatement(currentShape, "go*", theAngle);
+                r = theUKS.AddStatement(currentShape, "go*", theAngle);
+                r.TimeToLive = TimeSpan.FromSeconds(10);
             }
         }
         Thing GetSizeThing(float size)

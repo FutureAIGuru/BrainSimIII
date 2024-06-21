@@ -16,6 +16,7 @@ using UKS;
 using System.Runtime.Intrinsics.Arm;
 using System.Windows.Media;
 using System.Xml;
+using System.Windows;
 
 namespace BrainSimulator.Modules
 {
@@ -579,10 +580,19 @@ namespace BrainSimulator.Modules
                 }
                 if (sum > 0) 
                     outline.Reverse();
+                //find the color at the center of the polygon
+                List<Point> thePoints = new();
+                foreach (Corner c in outline)
+                    thePoints.Add(c.location);
+                Point centroid = Utils.GetCentroid(thePoints);
+                HSLColor theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
+                //TODO Add color-to-Thing interpreter here
+                Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
+                Relationship r = theUKS.AddStatement(currOutline, "hasColor", "color*");
+                r.target.V = theCenterColor;
 
                 //we now have an ordered, right-handed outline
                 //let's add it to the UKS
-                Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
                 foreach (Corner c in outline)
                 {
                     //TODO: modify to reuse existing (shared) points
