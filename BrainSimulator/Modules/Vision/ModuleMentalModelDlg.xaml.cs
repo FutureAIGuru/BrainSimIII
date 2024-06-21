@@ -91,6 +91,30 @@ namespace BrainSimulator.Modules
                         poly.Points.Add(curPos);
                     }
                 }
+                if (poly.Points.Count < 2) //there is no recenetly-refreshed data, use the stored shape
+                {
+                    Thing storedShape = t.AttributeOfType("hasShape");
+                    if (storedShape != null)
+                    {
+                        foreach (Relationship r in storedShape.Relationships)
+                        {
+                            if (!r.reltype.Label.StartsWith("go")) continue;
+                            if (r.target.HasAncestor("Angle"))
+                            {
+                                Angle theta = Angle.FromDegrees(float.Parse(r.target.Label[5..]));
+                                currDir += Angle.FromDegrees(180) - theta;
+                            }
+                            else if (r.target.HasAncestor("Distance"))
+                            {
+                                float dist = float.Parse(r.target.Label[8..]) * scale * 2.5f;
+                                PointPlus offset = new PointPlus(dist * size, currDir);
+                                curPos += offset;
+                                poly.Points.Add(curPos);
+                            }
+                        }
+
+                    }
+                }
                 theCanvas.Children.Add(poly);
 
                 for (int x = 0; x < 25; x++)
