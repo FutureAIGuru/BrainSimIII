@@ -413,10 +413,13 @@ public partial class Thing
             RemoveRelationship(c.clause);
     }
 
-    public Relationship HasRelationship(Thing t)
+    public Relationship HasRelationship(Thing source, Thing relType, Thing targett)
     {
+        if (source == null && relType == null && targett == null) return null;
         foreach (Relationship r in Relationships)
-            if (r.target == t) return r;
+            if ((source == null || r.source == source) &&
+                (relType == null || r.relType == relType) &&
+                (targett == null || r.target == targett)) return r;
         return null;
     }
 

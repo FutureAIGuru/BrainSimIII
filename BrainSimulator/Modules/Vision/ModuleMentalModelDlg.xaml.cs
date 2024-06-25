@@ -49,25 +49,27 @@ namespace BrainSimulator.Modules
 
             foreach (Thing t in parent.theUKS.Labeled("CurrentShape").Children)
             {
-                var shapeList = t.GetRelationshipsWithAncestor("storedshape");
-                var sizeLists = t.GetRelationshipsWithAncestor("size");
-                var positionList = t.GetRelationshipsWithAncestor("mmposition");
-                var rotationList = t.GetRelationshipsWithAncestor("mmrotation");
-                if (sizeLists.Count == 0) continue;
+                Thing shape = t.HasRelationship(null,"hasshape",null)?.target;
+                Thing size = t.HasRelationship(null,"hasSize",null)?.target;
+                Thing position = t.HasRelationship(null, "hasPosition", null)?.target;  
+                Thing rotation = t.HasRelationship(null,"hasRotation",null)?.target;
+                Thing mmOffset = t.HasRelationship(null, "hasOffset", null)?.target;
+                int offsetVal = int.Parse( mmOffset.Label[9..]);
 
-                float size = float.Parse(sizeLists[0].target.Label.Replace("size", ""));
-                string[] temp1 = positionList[0].target.Label.Split(':');
+                if (size == null) continue;
+
+                float sizeVal = float.Parse(size.Label.Replace("size", ""));
+                string[] temp1 = position.Label.Split(':');
                 string[] temp2 = temp1[1].Split(',');
                 float x1 = float.Parse(temp2[0]) * scale / 4 + 10;
                 float y1 = float.Parse(temp2[1]) * scale / 4 + 10;
                 PointPlus curPos = new(x1, y1);
-                var rels = shapeList[0].target.Relationships;
-                Angle currDir = Angle.FromDegrees(float.Parse(rotationList[0].target.Label[6..]));
+                Angle currDir = Angle.FromDegrees(float.Parse(rotation.Label[6..]));
 
                 HSLColor theColor = new HSLColor(Colors.Pink);
                 Thing t1 = t.AttributeOfType("hasColor");
                 if (t1 != null)
-                    theColor = (HSLColor)t1.V;
+                    theColor = new HSLColor( (HSLColor)t1.V);
                 Polyline poly = new Polyline() 
                 {
                     Fill=new SolidColorBrush(theColor.ToColor()), 
@@ -86,18 +88,20 @@ namespace BrainSimulator.Modules
                     else if (r.target.HasAncestor("Distance"))
                     {
                         float dist = float.Parse(r.target.Label[8..]) * scale * 2.5f;
-                        PointPlus offset = new PointPlus(dist * size, currDir);
+                        PointPlus offset = new PointPlus(dist * sizeVal, currDir);
                         curPos += offset;
                         poly.Points.Add(curPos);
                     }
                 }
                 if (poly.Points.Count < 2) //there is no recenetly-refreshed data, use the stored shape
                 {
-                    Thing storedShape = t.AttributeOfType("hasShape");
-                    if (storedShape != null)
+                    theColor.saturation /= 2;
+                    poly.Fill = new SolidColorBrush(theColor.ToColor());
+                    if (shape != null)
                     {
-                        foreach (Relationship r in storedShape.Relationships)
+                        for (int i = 0; i < shape.Relationships.Count; i++)
                         {
+                            Relationship r = shape.Relationships[(i + offsetVal) % shape.Relationships.Count];
                             if (!r.reltype.Label.StartsWith("go")) continue;
                             if (r.target.HasAncestor("Angle"))
                             {
@@ -107,7 +111,7 @@ namespace BrainSimulator.Modules
                             else if (r.target.HasAncestor("Distance"))
                             {
                                 float dist = float.Parse(r.target.Label[8..]) * scale * 2.5f;
-                                PointPlus offset = new PointPlus(dist * size, currDir);
+                                PointPlus offset = new PointPlus(dist * sizeVal, currDir);
                                 curPos += offset;
                                 poly.Points.Add(curPos);
                             }

@@ -308,11 +308,11 @@ public partial class UKS
         float bestScore = -1;
         List<Relationship> patternRelationships = new(pattern.Relationships);
         patternRelationships = patternRelationships.FindAll(
-            x => x.relType == null || Regex.IsMatch(x.reltype.Label, @"\d+") && x.relType == null ||  x.relType.Parents.Contains(relType));
+            x => x.relType == null || Regex.IsMatch(x.reltype.Label, @"\d+") && (relType == null ||  x.relType.Parents.Contains(relType)));
         patternRelationships = patternRelationships.OrderBy(s => (s.relType == null) ? 0 : int.Parse(Regex.Match(s.reltype.Label, @"\d+").Value)).ToList();
         List<Relationship> candidateRelationships = new(candidate.Relationships);
         candidateRelationships = candidateRelationships.FindAll(
-            x => x.relType == null || Regex.IsMatch(x.reltype.Label, @"\d+") && relType == null || x.relType.Parents.Contains(relType));
+            x => x.relType == null || Regex.IsMatch(x.reltype.Label, @"\d+") && (relType == null || x.relType.Parents.Contains(relType)));
         candidateRelationships = candidateRelationships.OrderBy(s => (s.relType == null) ? 0 : int.Parse(Regex.Match(s.reltype.Label, @"\d+").Value)).ToList();
 
         //offset is the number of rels to skip at the beginning of the stored pattern

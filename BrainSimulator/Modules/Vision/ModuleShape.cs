@@ -63,8 +63,31 @@ namespace BrainSimulator.Modules
                 Thing foundShape = theUKS.SearchForClosestMatch(shape, storedShapes, ref bestValue);
                 if (foundShape != null)
                 {
-                    float score = theUKS.HasSequence(foundShape, shape,out int offset);
+                    Thing nextBest = foundShape;
+                    float bestSeqsScore = -1;
+                    float angleOffset = 0; //degrees
+                    int bestOffset = -1;
+                    while (nextBest != null)
+                    {
+                        float score = theUKS.HasSequence(nextBest, shape, out int offset,true);
+                        if (score > bestSeqsScore )
+                        {
+                            for (int i = 0; i < offset; i++)
+                            {
+                                if (nextBest.Relationships[i].target.HasAncestor("Angle"))
+                                {
+                                    angleOffset += float.Parse(nextBest.Relationships[i].target.Label[5..]);
+                                }
+                            }
+                            bestSeqsScore = score;
+                            bestOffset = offset;
+                            foundShape = nextBest;
+                        }
+                        nextBest = theUKS.GetNextClosestMatch(ref bestValue);
+                    }
                     Relationship r = shape.AddRelationship(foundShape, hasShape);
+                    shape.AddRelationship(theUKS.GetOrAddThing("mmOffset:" + bestOffset,"mmOffset"), theUKS.GetOrAddThing("hasOffset", "RelationshipType"));
+
                     r.Weight = bestValue;
                     foundShape.SetFired();
                 }
@@ -135,13 +158,19 @@ namespace BrainSimulator.Modules
             }
 
             //TODO: put any other attributes on your shape here
+
             //add the scale to the object
             Thing hasSize = theUKS.GetOrAddThing("hasSize", "RelationshipType");
             currentShape.AddRelationship(GetSizeThing(maxDist),hasSize);
+
+            //Position
             Thing hasLocation = theUKS.GetOrAddThing("hasPosition", "RelationshipType");
-            Thing hasRotation = theUKS.GetOrAddThing("hasRotation", "RelationshipType");
             Thing mmPosition = theUKS.GetOrAddThing("mmPosition", "Environment");
+            //rotation
+            Thing hasRotation = theUKS.GetOrAddThing("hasRotation", "RelationshipType");
             Thing mmRotation = theUKS.GetOrAddThing("mmRotation", "Environment");
+            Thing mmOffset = theUKS.GetOrAddThing("mmOffset", "Environment");
+
             offset = 0;
             string location = $"mmPos:{corners[0].location.X},{corners[0].location.Y}";
             Thing locationThing = theUKS.GetOrAddThing(location, mmPosition);
