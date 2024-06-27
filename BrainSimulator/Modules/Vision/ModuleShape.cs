@@ -21,17 +21,10 @@ namespace BrainSimulator.Modules
 {
     public class ModuleShape : ModuleBase
     {
-        // Any public variable you create here will automatically be saved and restored  
-        // with the network unless you precede it with the [XmlIgnore] directive
-        // [XmlIgnore] 
-        // public theStatus = 1;
 
-
-        // Fill this method in with code which will execute
-        // once for each cycle of the engine
+        //timer only processes recently-changed items.
         DateTime lastScan = new DateTime();
-        public Thing foundShape = null;
-        public float confidence = 0;
+
         public override void Fire()
         {
             Init();
@@ -86,9 +79,8 @@ namespace BrainSimulator.Modules
                         nextBest = theUKS.GetNextClosestMatch(ref bestValue);
                     }
                     Relationship r = shape.AddRelationship(foundShape, hasShape);
+                    r.Weight = bestSeqsScore;
                     shape.AddRelationship(theUKS.GetOrAddThing("mmOffset:" + bestOffset,"mmOffset"), theUKS.GetOrAddThing("hasOffset", "RelationshipType"));
-
-                    r.Weight = bestValue;
                     foundShape.SetFired();
                 }
             }
@@ -172,7 +164,7 @@ namespace BrainSimulator.Modules
             Thing mmOffset = theUKS.GetOrAddThing("mmOffset", "Environment");
 
             offset = 0;
-            string location = $"mmPos:{corners[0].location.X},{corners[0].location.Y}";
+            string location = $"mmPos:{(int)corners[0].location.X},{(int)corners[0].location.Y}";
             Thing locationThing = theUKS.GetOrAddThing(location, mmPosition);
             currentShape.AddRelationship(locationThing, hasLocation);
             
@@ -215,6 +207,7 @@ namespace BrainSimulator.Modules
         {
             theUKS.GetOrAddThing("StoredShape", "Visual");
             Thing newShape = theUKS.GetOrAddThing("storedShape*", "StoredShape");
+            //TODO: fix this so we can indicate which item we mearn
             Thing currentShape = theUKS.Labeled("currentShape0");
             if (currentShape == null) return null;
             foreach (Relationship r in currentShape.Relationships)
@@ -223,19 +216,6 @@ namespace BrainSimulator.Modules
                 newShape.AddRelationship(r.target, r.relType);
             }
             return newShape;
-        }
-        Thing SearchForShape(out float bestValue)
-        {
-            Thing storedShapes = theUKS.GetOrAddThing("StoredShape", "Visual");
-            Thing currentShape = theUKS.GetOrAddThing("currentShape", "Visual");
-
-            bestValue = 0;
-
-            //currehtShape has a set of attriburtes. We search the descendents of StoredShape for the
-            // entry with the best match.
-            Thing bestThing = theUKS.SearchForClosestMatch(currentShape, storedShapes, ref bestValue);
-
-            return bestThing;
         }
 
         // Fill this method in with code which will execute once

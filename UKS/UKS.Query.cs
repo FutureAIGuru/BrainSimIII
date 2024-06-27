@@ -101,7 +101,7 @@ public partial class UKS
                         bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
                             thingsToExamine[i].reachedWith != null;
                         if (corner)
-                        { } //corners are the reasons in a logic progression
+                        { } //TODO: corners are the reasons in a logic progression
                         thingsToExamine[i].corner |= corner;
                         ThingWithQueryParams thingToAdd = new ThingWithQueryParams
                         {
@@ -308,7 +308,7 @@ public partial class UKS
         float bestScore = -1;
         List<Relationship> patternRelationships = new(pattern.Relationships);
         patternRelationships = patternRelationships.FindAll(
-            x => x.relType == null || Regex.IsMatch(x.reltype.Label, @"\d+") && (relType == null ||  x.relType.Parents.Contains(relType)));
+            x => x.relType == null || Regex.IsMatch(x.reltype.Label, @"\d+") && (relType == null || x.relType.Parents.Contains(relType)));
         patternRelationships = patternRelationships.OrderBy(s => (s.relType == null) ? 0 : int.Parse(Regex.Match(s.reltype.Label, @"\d+").Value)).ToList();
         List<Relationship> candidateRelationships = new(candidate.Relationships);
         candidateRelationships = candidateRelationships.FindAll(
@@ -322,7 +322,7 @@ public partial class UKS
             for (int i = 0; i < patternRelationships.Count; i++)
             {
                 //if circular search is requested and the offset is off the end of the candidate, loop back
-                if (!circularSearch && offset  + i >= candidateRelationships.Count) break;
+                if (!circularSearch && offset + i >= candidateRelationships.Count) break;
                 int index = (offset + i) % candidateRelationships.Count;
                 if (patternRelationships[i].target == candidateRelationships[index].target)
                 {
@@ -448,6 +448,68 @@ public partial class UKS
         return bestThing;
     }
 
+    //This is cloned from BuildSearchList
+    private List<ThingWithQueryParams> BuildListOfSimilarThings(Thing q)
+    {
+        List<ThingWithQueryParams> thingsToExamine = new();
+        int maxHops = 8;
+        int hopCount = 0;
+        //foreach (Thing t in q)
+        thingsToExamine.Add(new ThingWithQueryParams
+        {
+            thing = q,
+            hopCount = hopCount,
+            weight = 1,
+            reachedWith = null
+        });
+        hopCount++;
+        int currentEnd = thingsToExamine.Count;
+        for (int i = 0; i < thingsToExamine.Count; i++)
+        {
+            Thing t = thingsToExamine[i].thing;
+            float curWeight = thingsToExamine[i].weight;
+            int curCount = thingsToExamine[i].haveCount;
+            Thing reachedWith = thingsToExamine[i].reachedWith;
+
+            foreach (Relationship r in t.Relationships)  //has-child et al
+            {
+                if (r.relType.Label != "isSimilarTo") continue;
+                //if there are several relationship, ignore the is-a, it is likely wrong
+                //var existingRelationships = GetRelationshipsBetween(r.source, r.target);
+                //if (existingRelationships.Count > 1) continue;
+
+                if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twgp)
+                    twgp.hitCount++;//thing is in the list, increment its count
+                else
+                {//thing is not in the list, add it
+                    //bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
+                    //    thingsToExamine[i].reachedWith != null;
+                    //if (corner)
+                    //{ } //TODO: corners are the reasons in a logic progression
+                    //thingsToExamine[i].corner |= corner;
+                    ThingWithQueryParams thingToAdd = new ThingWithQueryParams
+                    {
+                        thing = r.target,
+                        hopCount = hopCount,
+                        weight = curWeight * r.Weight,
+                        reachedWith = r.relType,
+                    };
+                    thingsToExamine.Add(thingToAdd);
+                    //if things have counts, they are multiplied
+                    int val = GetCount(r.reltype);
+                    thingToAdd.haveCount = curCount * val;
+                }
+            }
+            if (i == currentEnd - 1)
+            {
+                hopCount++;
+                currentEnd = thingsToExamine.Count;
+                if (hopCount > maxHops) break;
+            }
+        }
+        return thingsToExamine;
+    }
+
     /// <summary>
     /// Search for the Thing which most closely resembles the target Thing based on the attributes of the target
     /// </summary>
@@ -457,19 +519,69 @@ public partial class UKS
     /// <returns></returns>
     public Thing SearchForClosestMatch(Thing target, Thing root, ref float confidence)
     {
+        //TestCode
+        Relationship r2 = null;
+        r2 = AddStatement("isSimilarTo", "is-a", "relationshipType");
+        r2 = AddStatement("isSimilarTo", "hasProperty", "isCommutative");
+        r2 = AddStatement("isSimilarTo", "hasProperty", "isTransitive");
+
+        for (int i = 1; i < 9; i++)
+        {
+            AddStatement("distance." + i, "is-a", "distance");
+            r2 = AddStatement("distance." + i, "isSimilarTo", "distance." + (i + 1));
+            r2.Weight = 0.8f;
+        }
+        AddStatement("distance1.0", "is-a", "distance");
+        r2 = AddStatement("distance1.0", "isSimilarTo", "distance.9");
+        r2.Weight = 0.8f;
+
+        for (int i = 0; i < 35; i++)
+        {
+            AddStatement("angle" + (i*10), "is-a", "angle");
+            r2 = AddStatement("angle" + (i*10), "isSimilarTo", "angle" + ((i + 1)*10));
+            r2.Weight = 0.8f;
+        }
+        r2 = AddStatement("angle350", "is-a", "angle");
+        r2 = AddStatement("angle350", "isSimilarTo", "angle0");
+        r2.Weight = 0.8f;
+
         searchCandidates = new();
+
+        //perform the search
         foreach (Relationship r in target.Relationships)
         {
+            //debug hack
+            if (!r.reltype.Label.StartsWith("go")) continue;
+            List<Thing> targetList = new(); //this prevents a single relationship from creating multiple votes
             foreach (Relationship r1 in r.target.RelationshipsFrom)
             {
-                if (r1.reltype.Label == "has-child") continue;//this is likely unnecessary
                 //TODO: make this handle order-independency (go0,go1) vs relType params (has.2, has.4)
                 //note: order-descriptors DO NOT have attributes while params DO
-                if (r1.source.HasAncestor(root) && (r.reltype == null || r1.relType == r.relType))
+                if (targetList.Contains(r1.source)) continue;
+                if (r1.source.HasAncestor(root))
                 {
                     if (!searchCandidates.ContainsKey(r1.source))
                         searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
                     searchCandidates[r1.source] += r1.Weight;
+                    targetList.Add(r1.source);
+                }
+            }
+            //add any similar attributes
+            var similarValues = BuildListOfSimilarThings(r.target);
+            for (int i = 1; i < similarValues.Count; i++)
+            {
+                ThingWithQueryParams? item = similarValues[i];
+                if (item.weight < 0.4f) continue;
+                if (targetList.Contains(item.thing)) continue;
+                foreach (Relationship r1 in item.thing.RelationshipsFrom)
+                {
+                    if (r1.source.HasAncestor(root))
+                    {
+                        if (!searchCandidates.ContainsKey(r1.source))
+                            searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
+                        searchCandidates[r1.source] += item.weight;
+                        targetList.Add(r1.source);
+                    }
                 }
             }
         }

@@ -54,6 +54,7 @@ namespace BrainSimulator.Modules
                 Thing position = t.HasRelationship(null, "hasPosition", null)?.target;  
                 Thing rotation = t.HasRelationship(null,"hasRotation",null)?.target;
                 Thing mmOffset = t.HasRelationship(null, "hasOffset", null)?.target;
+                if (mmOffset == null) return false; ;
                 int offsetVal = int.Parse( mmOffset.Label[9..]);
 
                 if (size == null) continue;
@@ -96,6 +97,7 @@ namespace BrainSimulator.Modules
                 if (poly.Points.Count < 2) //there is no recenetly-refreshed data, use the stored shape
                 {
                     theColor.saturation /= 2;
+                    if (offsetVal < 0) offsetVal = 0;
                     poly.Fill = new SolidColorBrush(theColor.ToColor());
                     if (shape != null)
                     {
