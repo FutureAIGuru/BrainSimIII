@@ -13,9 +13,7 @@ using System.Xml.Serialization;
 using System.Diagnostics;
 using static System.Math;
 using UKS;
-using System.Runtime.Intrinsics.Arm;
 using System.Windows.Media;
-using System.Xml;
 using System.Windows;
 
 namespace BrainSimulator.Modules
@@ -114,16 +112,16 @@ namespace BrainSimulator.Modules
 
         private void WriteBitmapToMentalModel()
         {
-            Thing environmentModel = theUKS.GetOrAddThing("Environment", "Thing");
-            Thing environmentModelArray = theUKS.GetOrAddThing("envPointArray","Environment");
-            environmentModel.SetFired();
+            Thing mentalModel = theUKS.GetOrAddThing("MentalModel", "Thing");
+            Thing mentalModelArray = theUKS.GetOrAddThing("MentalModelArray","Environment");
+            mentalModel.SetFired();
             //TODO Make angular
             //TODO Make 0 center
             for (int x = 0; x < 25; x++)
                 for (int y = 0; y < 25; y++)
                 {
                     string name = $"mm{x},{y}";
-                    Thing theEntry = theUKS.GetOrAddThing(name, environmentModelArray);
+                    Thing theEntry = theUKS.GetOrAddThing(name, mentalModelArray);
                     theEntry.V = GetAverageColor(x*4, y*4);
                 }
         }
@@ -588,8 +586,9 @@ namespace BrainSimulator.Modules
                 HSLColor theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
                 //TODO Add color-to-Thing interpreter here
                 Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
-                Relationship r = theUKS.AddStatement(currOutline, "hasColor", "color*");
-                r.target.V = theCenterColor;
+                Thing theColor = theUKS.GetOrAddThing("color*", "Color");
+                currOutline.SetAttribute(theColor);
+                theColor.V = theCenterColor;
 
                 //we now have an ordered, right-handed outline
                 //let's add it to the UKS
@@ -628,12 +627,57 @@ namespace BrainSimulator.Modules
 
         public override void SetUpAfterLoad()
         {
-            //here we parse Corner objects out of the Xml stream
-            //this should no lonber be necessary since we are no longer storing points and corners (these are transient)
+            theUKS.AddStatement("Attribute", "is-a", "Thing");
+            theUKS.AddStatement("Color", "is-a", "Attribute");
+            theUKS.AddStatement("Size", "is-a", "Attribute");
+            theUKS.AddStatement("Position", "is-a", "Attribute");
+            theUKS.AddStatement("Rotation", "is-a", "Attribute");
+            theUKS.AddStatement("Shape", "is-a", "Attribute");
+            theUKS.AddStatement("Offset", "is-a", "Attribute");
+            theUKS.AddStatement("Distance", "is-a", "Attribute");
+
+            //Set up angles and distances so they are near each other
+            Relationship r2 = null;
+            r2 = theUKS.AddStatement("isSimilarTo", "is-a", "relationshipType");
+            r2 = theUKS.AddStatement("isSimilarTo", "hasProperty", "isCommutative");
+            r2 = theUKS.AddStatement("isSimilarTo", "hasProperty", "isTransitive");
+
+            for (int i = 1; i < 10; i++)
+            {
+                theUKS.AddStatement("distance." + i, "is-a", "distance");
+                r2 = theUKS.AddStatement("distance." + i, "isSimilarTo", "distance." + (i + 1));
+                r2.Weight = 0.8f;
+            }
+            theUKS.AddStatement("distance1.0", "is-a", "distance");
+            r2 = theUKS.AddStatement("distance1.0", "isSimilarTo", "distance.9");
+            r2.Weight = 0.8f;
+
+            for (int i = -17; i < 18; i++)
+            {
+                theUKS.AddStatement("angle" + (i * 10), "is-a", "Rotation");
+                r2 = theUKS.AddStatement("angle" + (i * 10), "isSimilarTo", "angle" + ((i + 1) * 10));
+                r2.Weight = 0.8f;
+            }
+            r2 = theUKS.AddStatement("angle180", "is-a", "rotation");
+            r2 = theUKS.AddStatement("angle180", "isSimilarTo", "angle-170");
+            r2.Weight = 0.8f;
+
+
+
+            //here we parse
+            //objects out of the Xml stream
             foreach (Thing t in theUKS.UKSList)
             {
                 if (t.V is System.Xml.XmlNode[] nodes)
                 {
+                    if (nodes[0].Value == "HSLColor")
+                    {
+                        float hue = float.Parse(nodes[1].InnerText);
+                        float saturation = float.Parse(nodes[2].InnerText);
+                        float luminance = float.Parse(nodes[3].InnerText);
+                        HSLColor theColor = new(hue,saturation, luminance);
+                        t.V = theColor;
+                    }
                     if (nodes[0].Value == "Corner")
                     {
                         Corner c = new();

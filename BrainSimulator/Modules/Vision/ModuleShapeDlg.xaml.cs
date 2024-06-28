@@ -23,13 +23,14 @@ namespace BrainSimulator.Modules
             ModuleShape parent = (ModuleShape)ParentModule;
             if (parent.theUKS.Labeled("currentShape") == null) return false;
             tbFound.Text = "";
-            foreach (Thing shape in parent.theUKS.Labeled("currentShape").Children)
+            foreach (Thing currentShape in parent.theUKS.Labeled("currentShape").Children)
             {
-                Thing shapeType = shape.AttributeOfType("hasShape");
+                Thing shapeType = currentShape.GetAttribute("storedShape");
                 if (shapeType == null) { continue; }
-                Thing size = shape.AttributeOfType("hasSize");
-                Relationship confidence = parent.theUKS.GetRelationship(shape.Label,"hasShape", shapeType.Label);
-                tbFound.Text += $"{shape.Label}   {shapeType.Label}  conf:{confidence.Weight.ToString("0.00")}  {shape.AttributeOfType("hasSize")}\n" ;
+                Thing size = currentShape.AttributeOfType("hasSize");
+                Relationship confidence = parent.theUKS.GetRelationship(currentShape.Label,"hasAttribute", shapeType.Label);
+                tbFound.Text += $"{currentShape.Label}   {shapeType.Label}  conf:{confidence.Weight.ToString("0.00")}  {currentShape.GetAttribute("size")}\n";
+                tbFound.Text += $"                  {currentShape.GetAttribute("Color")?.Label} orientation:{currentShape.GetAttribute("Rotation")?.Label[6..]}\n";
             }
             return true;
         }

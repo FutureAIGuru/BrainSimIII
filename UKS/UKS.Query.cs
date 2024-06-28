@@ -519,32 +519,6 @@ public partial class UKS
     /// <returns></returns>
     public Thing SearchForClosestMatch(Thing target, Thing root, ref float confidence)
     {
-        //TestCode
-        Relationship r2 = null;
-        r2 = AddStatement("isSimilarTo", "is-a", "relationshipType");
-        r2 = AddStatement("isSimilarTo", "hasProperty", "isCommutative");
-        r2 = AddStatement("isSimilarTo", "hasProperty", "isTransitive");
-
-        for (int i = 1; i < 9; i++)
-        {
-            AddStatement("distance." + i, "is-a", "distance");
-            r2 = AddStatement("distance." + i, "isSimilarTo", "distance." + (i + 1));
-            r2.Weight = 0.8f;
-        }
-        AddStatement("distance1.0", "is-a", "distance");
-        r2 = AddStatement("distance1.0", "isSimilarTo", "distance.9");
-        r2.Weight = 0.8f;
-
-        for (int i = 0; i < 35; i++)
-        {
-            AddStatement("angle" + (i*10), "is-a", "angle");
-            r2 = AddStatement("angle" + (i*10), "isSimilarTo", "angle" + ((i + 1)*10));
-            r2.Weight = 0.8f;
-        }
-        r2 = AddStatement("angle350", "is-a", "angle");
-        r2 = AddStatement("angle350", "isSimilarTo", "angle0");
-        r2.Weight = 0.8f;
-
         searchCandidates = new();
 
         //perform the search

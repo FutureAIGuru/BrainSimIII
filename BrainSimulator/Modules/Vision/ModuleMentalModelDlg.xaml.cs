@@ -39,26 +39,33 @@ namespace BrainSimulator.Modules
             //use a line like this to gain access to the parent's public variables
             ModuleMentalModel parent = (ModuleMentalModel)base.ParentModule;
 
-            Thing environmentModel = parent.theUKS.Labeled("Environment");
-            if (environmentModel == null) return false;
+            Thing mentalModel = parent.theUKS.Labeled("MentalModel");
+            if (mentalModel == null) return false;
             //if (environmentModel.lastFiredTime < DateTime.Now - TimeSpan.FromSeconds(1)) return false;
 
             int pixelSize = 6;
             int scale = (int)(theCanvas.ActualHeight / 25);
             theCanvas.Children.Clear();
 
-            foreach (Thing t in parent.theUKS.Labeled("CurrentShape").Children)
+            Thing currentShape = parent.theUKS.Labeled("CurrentShape");
+            if (currentShape == null) return false;
+            foreach (Thing t in currentShape?.Children)
             {
-                Thing shape = t.HasRelationship(null,"hasshape",null)?.target;
-                Thing size = t.HasRelationship(null,"hasSize",null)?.target;
-                Thing position = t.HasRelationship(null, "hasPosition", null)?.target;  
-                Thing rotation = t.HasRelationship(null,"hasRotation",null)?.target;
-                Thing mmOffset = t.HasRelationship(null, "hasOffset", null)?.target;
-                if (mmOffset == null) return false; ;
-                int offsetVal = int.Parse( mmOffset.Label[9..]);
+                Thing shape = t.GetAttribute("storedshape");
+                Thing size = t.GetAttribute("size");
+                Thing position = t.GetAttribute("position");
+                Thing rotation = t.GetAttribute("rotation");
+                Thing mmOffset = t.GetAttribute("offset");
+                Thing aColor = t.GetAttribute("color");
+                if (mmOffset == null || rotation == null || position == null || size == null || shape == null)
+                    return false;
 
-                if (size == null) continue;
+                HSLColor theColor = new HSLColor(Colors.Pink);
+                if (aColor != null)
+                    theColor = new HSLColor((HSLColor)aColor.V);
 
+                //hacks to get a few properties which are stashed in labels
+                int offsetVal = int.Parse(mmOffset.Label[9..]);
                 float sizeVal = float.Parse(size.Label.Replace("size", ""));
                 string[] temp1 = position.Label.Split(':');
                 string[] temp2 = temp1[1].Split(',');
@@ -67,21 +74,17 @@ namespace BrainSimulator.Modules
                 PointPlus curPos = new(x1, y1);
                 Angle currDir = Angle.FromDegrees(float.Parse(rotation.Label[6..]));
 
-                HSLColor theColor = new HSLColor(Colors.Pink);
-                Thing t1 = t.AttributeOfType("hasColor");
-                if (t1 != null)
-                    theColor = new HSLColor( (HSLColor)t1.V);
-                Polyline poly = new Polyline() 
+                Polyline poly = new Polyline()
                 {
-                    Fill=new SolidColorBrush(theColor.ToColor()), 
-                    Stroke=new SolidColorBrush(Colors.Green),
+                    Fill = new SolidColorBrush(theColor.ToColor()),
+                    Stroke = new SolidColorBrush(Colors.Green),
                 };
                 poly.Points.Add(curPos);
 
                 foreach (Relationship r in t.Relationships)
                 {
                     if (!r.reltype.Label.StartsWith("go")) continue;
-                    if (r.target.HasAncestor("Angle"))
+                    if (r.target.HasAncestor("Rotation"))
                     {
                         Angle theta = Angle.FromDegrees(float.Parse(r.target.Label[5..]));
                         currDir += Angle.FromDegrees(180) - theta;
@@ -105,7 +108,7 @@ namespace BrainSimulator.Modules
                         {
                             Relationship r = shape.Relationships[(i + offsetVal) % shape.Relationships.Count];
                             if (!r.reltype.Label.StartsWith("go")) continue;
-                            if (r.target.HasAncestor("Angle"))
+                            if (r.target.HasAncestor("Rotation"))
                             {
                                 Angle theta = Angle.FromDegrees(float.Parse(r.target.Label[5..]));
                                 currDir += Angle.FromDegrees(180) - theta;

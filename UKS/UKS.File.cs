@@ -323,14 +323,18 @@ public partial class UKS
             Debug.WriteLine("Could not save file because: " + message);
             return false;
         }
+
+        string tempFilePath = Path.GetTempFileName();
         FormatContentForSaving();
         List<Type> extraTypes = GetTypesInUKS();
-        Stream file = File.Create(fullPath);
+        Stream file = File.Create(tempFilePath);
         file.Position = 0;
         try
         {
             XmlSerializer writer = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());
             writer.Serialize(file, UKSTemp);
+            file.Close();
+            File.Replace(tempFilePath, fullPath,null);
         }
         catch (Exception e)
         {
@@ -338,11 +342,13 @@ public partial class UKS
                 Debug.WriteLine("Xml file write failed because: " + e.InnerException.Message);
             else
                 Debug.WriteLine("Xml file write failed because: " + e.Message);
-            file.Close();
             return false;
         }
-        file.Close();
-        UKSTemp = new();
+        finally
+        {
+            file.Close();
+            UKSTemp = new();
+        }
         return true;
     }
 
@@ -446,6 +452,21 @@ public partial class UKS
             MergeStringListIntoUKS(contentToRestore);
         }
 
+        // prepend "Module" to any module names which don't have it
+        // this is needed for the UKS content change from module names starting with the word "module" to avoid naming collisions
+        var activeModules = Labeled("ActiveModule").Children;
+        var avaialableModules = Labeled("AvailableModule").Children;
+
+        foreach (Thing t in avaialableModules)
+        {
+            if (!t.Label.ToLower().StartsWith("module"))
+                t.Label = "Module" + t.Label;
+        }
+        foreach (Thing t in activeModules)
+        {
+            if (!t.Label.ToLower().StartsWith("module"))
+                t.Label = "Module" + t.Label;
+        }
         return true;
     }
 }

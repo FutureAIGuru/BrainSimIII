@@ -5,20 +5,22 @@
 //
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-
 namespace UKS;
 
 /// <summary>
 /// In the lexicon of graphs, a Thing is a "node".  A Thing can represent anything, physical object, attribute, word, action, etc.
 /// </summary>
+/// Things often have labels which are any string. Like comments, these are typically used for programmer convenience and are not usually used for functionality.
+/// Labels are case-insensitive although the initial case is preserved within the UKS.
+/// Methods which return a Thing may return null in the event no Thing matches the result of the method. Methods which return lists of Things will
+/// return a list of zero elements if no Things match the result of the method.
+/// A Thing may be referenced by its Label. You can write AddParent("color") [where a Thing is a required parameter.] The system sill automatically retreive a Thing
+/// with the given label or throw an exception if none exists.
+
 public partial class Thing
 {
     /// <summary>
-    /// This is the magic which allows for strings to be put in place of Things for any metho Paramter
+    /// This is the magic which allows for strings to be put in place of Things for any method Paramter
     /// </summary>
     /// <param name="label"></param>
     /// Throse 
@@ -26,10 +28,11 @@ public partial class Thing
     {
         Thing t = ThingLabels.GetThing(label);
         if (t == null)
-            throw new ArgumentNullException($"No Thing found with label: {label}");
+        { }
+//            throw new ArgumentNullException($"No Thing found with label: {label}");
         return t;
     }
-    public static Thing HasChild { get => ThingLabels.GetThing("has-child");}
+    public static Thing HasChild { get => ThingLabels.GetThing("has-child"); }
 
     private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
     private List<Relationship> relationshipsFrom = new List<Relationship>(); //synapses from
@@ -74,8 +77,8 @@ public partial class Thing
     }
 
     /// <summary>
-    /// Returns a Thing's label
-    /// don't delete this ToString because the debugger uses it when mousing over a Thing
+    /// Returns a Thing's label.
+    /// Even though it shows zero references, don't delete this ToString() because the debugger uses it when mousing over a Thing
     /// </summary>
     /// <returns>the Thing's label</returns>
     public override string ToString()
@@ -337,9 +340,9 @@ public partial class Thing
         else if (relationshipType == null)
         {
             lock (relationships)
-                {
-                    RelationshipsWriteable.Add(r);
-                }
+            {
+                RelationshipsWriteable.Add(r);
+            }
         }
         else if (relationshipType != null)
         {
@@ -519,6 +522,21 @@ public partial class Thing
             if (r.reltype.HasAncestorLabeled(label))
                 return r.target;
         return null;
+    }
+
+    public Thing GetAttribute(Thing t)
+    {
+        foreach (Relationship r in relationships)
+        {
+            if (r.relType.Label != "hasAttribute") continue;
+            if (r.target.HasAncestor(t))
+                return r.target;
+        }
+        return null;
+    }
+    public Relationship SetAttribute(Thing attributeValue)
+    {
+        return AddRelationship(attributeValue, "hasAttribute");
     }
 
     public bool HasPropertyLabeled(string label)
