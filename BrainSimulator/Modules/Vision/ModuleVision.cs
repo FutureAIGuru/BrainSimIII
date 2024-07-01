@@ -113,7 +113,7 @@ namespace BrainSimulator.Modules
         private void WriteBitmapToMentalModel()
         {
             Thing mentalModel = theUKS.GetOrAddThing("MentalModel", "Thing");
-            Thing mentalModelArray = theUKS.GetOrAddThing("MentalModelArray","Environment");
+            Thing mentalModelArray = theUKS.GetOrAddThing("MentalModelArray","MentalModel");
             mentalModel.SetFired();
             //TODO Make angular
             //TODO Make 0 center
@@ -583,12 +583,13 @@ namespace BrainSimulator.Modules
                 foreach (Corner c in outline)
                     thePoints.Add(c.location);
                 Point centroid = Utils.GetCentroid(thePoints);
-                HSLColor theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
-                //TODO Add color-to-Thing interpreter here
+
                 Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
-                Thing theColor = theUKS.GetOrAddThing("color*", "Color");
+
+                //get the color
+                HSLColor theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
+                Thing theColor = GetOrAddColor(theCenterColor);
                 currOutline.SetAttribute(theColor);
-                theColor.V = theCenterColor;
 
                 //we now have an ordered, right-handed outline
                 //let's add it to the UKS
@@ -602,6 +603,17 @@ namespace BrainSimulator.Modules
             }
         }
 
+        Thing GetOrAddColor(HSLColor color)
+        {
+            foreach (Thing t in theUKS.Labeled("Color").Children)
+            {
+                if (t.V is HSLColor c && c.Equals(color))
+                    return t;
+            }
+            Thing theColor = theUKS.GetOrAddThing("color*", "Color");
+            theColor.V = color;
+            return theColor;
+        }
 
 
         // fill this method in with code which will execute once
@@ -625,44 +637,10 @@ namespace BrainSimulator.Modules
             if (t != null) { theUKS.DeleteAllChildren(t); }
         }
 
+
         public override void SetUpAfterLoad()
         {
-            theUKS.AddStatement("Attribute", "is-a", "Thing");
-            theUKS.AddStatement("Color", "is-a", "Attribute");
-            theUKS.AddStatement("Size", "is-a", "Attribute");
-            theUKS.AddStatement("Position", "is-a", "Attribute");
-            theUKS.AddStatement("Rotation", "is-a", "Attribute");
-            theUKS.AddStatement("Shape", "is-a", "Attribute");
-            theUKS.AddStatement("Offset", "is-a", "Attribute");
-            theUKS.AddStatement("Distance", "is-a", "Attribute");
-
-            //Set up angles and distances so they are near each other
-            Relationship r2 = null;
-            r2 = theUKS.AddStatement("isSimilarTo", "is-a", "relationshipType");
-            r2 = theUKS.AddStatement("isSimilarTo", "hasProperty", "isCommutative");
-            r2 = theUKS.AddStatement("isSimilarTo", "hasProperty", "isTransitive");
-
-            for (int i = 1; i < 10; i++)
-            {
-                theUKS.AddStatement("distance." + i, "is-a", "distance");
-                r2 = theUKS.AddStatement("distance." + i, "isSimilarTo", "distance." + (i + 1));
-                r2.Weight = 0.8f;
-            }
-            theUKS.AddStatement("distance1.0", "is-a", "distance");
-            r2 = theUKS.AddStatement("distance1.0", "isSimilarTo", "distance.9");
-            r2.Weight = 0.8f;
-
-            for (int i = -17; i < 18; i++)
-            {
-                theUKS.AddStatement("angle" + (i * 10), "is-a", "Rotation");
-                r2 = theUKS.AddStatement("angle" + (i * 10), "isSimilarTo", "angle" + ((i + 1) * 10));
-                r2.Weight = 0.8f;
-            }
-            r2 = theUKS.AddStatement("angle180", "is-a", "rotation");
-            r2 = theUKS.AddStatement("angle180", "isSimilarTo", "angle-170");
-            r2.Weight = 0.8f;
-
-
+            SetUpUKSEntries();
 
             //here we parse
             //objects out of the Xml stream
@@ -675,7 +653,7 @@ namespace BrainSimulator.Modules
                         float hue = float.Parse(nodes[1].InnerText);
                         float saturation = float.Parse(nodes[2].InnerText);
                         float luminance = float.Parse(nodes[3].InnerText);
-                        HSLColor theColor = new(hue,saturation, luminance);
+                        HSLColor theColor = new(hue, saturation, luminance);
                         t.V = theColor;
                     }
                     if (nodes[0].Value == "Corner")
@@ -699,12 +677,55 @@ namespace BrainSimulator.Modules
 
         }
 
+        private void SetUpUKSEntries()
+        {
+            theUKS.AddStatement("Attribute", "is-a", "Thing");
+            theUKS.AddStatement("Color", "is-a", "Attribute");
+            theUKS.AddStatement("Size", "is-a", "Attribute");
+            theUKS.AddStatement("Position", "is-a", "Attribute");
+            theUKS.AddStatement("Rotation", "is-a", "Attribute");
+            theUKS.AddStatement("Shape", "is-a", "Attribute");
+            theUKS.AddStatement("Offset", "is-a", "Attribute");
+            theUKS.AddStatement("Distance", "is-a", "Attribute");
+
+            //Set up angles and distances so they are near each other
+            Relationship r2 = null;
+            r2 = theUKS.AddStatement("isSimilarTo", "is-a", "relationshipType");
+            r2 = theUKS.AddStatement("isSimilarTo", "hasProperty", "isCommutative");
+            r2 = theUKS.AddStatement("isSimilarTo", "hasProperty", "isTransitive");
+
+            for (int i = 1; i < 10; i++)
+            {
+                theUKS.AddStatement("distance." + i, "is-a", "distance");
+                if (i < 9)
+                    r2 = theUKS.AddStatement("distance." + i, "isSimilarTo", "distance." + (i + 1));
+                r2.Weight = 0.8f;
+            }
+            theUKS.AddStatement("distance1.0", "is-a", "distance");
+            r2 = theUKS.AddStatement("distance1.0", "isSimilarTo", "distance.9");
+            r2.Weight = 0.8f;
+
+            for (int i = -17; i < 18; i++)
+            {
+                theUKS.AddStatement("angle" + (i * 10), "is-a", "Rotation");
+                r2 = theUKS.AddStatement("angle" + (i * 10), "isSimilarTo", "angle" + ((i + 1) * 10));
+                r2.Weight = 0.8f;
+            }
+            r2 = theUKS.AddStatement("angle180", "is-a", "rotation");
+            r2 = theUKS.AddStatement("angle180", "isSimilarTo", "angle-170");
+            r2.Weight = 0.8f;
+        }
+
         // called whenever the size of the module rectangle changes
         // for example, you may choose to reinitialize whenever size changes
         // delete if not needed
         public override void SizeChanged()
         {
 
+        }
+        public override void UKSInitializedNotification()
+        {
+            SetUpUKSEntries();
         }
 
     }

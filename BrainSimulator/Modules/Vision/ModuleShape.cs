@@ -67,7 +67,7 @@ namespace BrainSimulator.Modules
                         {
                             for (int i = 0; i < offset; i++)
                             {
-                                if (nextBest.Relationships[i].target.HasAncestor("Angle"))
+                                if (nextBest.Relationships[i].target.HasAncestorLabeled("Rotation"))
                                 {
                                     angleOffset += float.Parse(nextBest.Relationships[i].target.Label[5..]);
                                 }
@@ -130,19 +130,19 @@ namespace BrainSimulator.Modules
             if (theColor != null)
                 currentShape.SetAttribute(theColor);
 
-
+            //find the length of the longest segment of this shape
+            //offset is the index of the that segment
             int offset = -1;
             for (int i = 0; i < corners.Count; i++)
             {
                 int next = i + 1; 
                 if (next >= corners.Count) next = 0;
                 var nextCorner = corners[next];
-                float dist = (nextCorner.location - corners[i].location).R;
-                //Angle theta = (nextCorner.location - corner.location).Theta;
+                PointPlus theEdge  = (nextCorner.location - corners[i].location);
+                float dist = theEdge.R;
                 if (dist > maxDist)
                 {
                     maxDist = dist;
-                    //prefTheta = theta;
                     offset = i;
                 }
             }
@@ -166,14 +166,14 @@ namespace BrainSimulator.Modules
             //add the corners to the currentShape
             for (int i = 0; i < corners.Count; i++)
             {
-                int index = (i+offset) % corners.Count;
+                int index = (i) % corners.Count;
                 var corner = corners[index];
-                int next = i + 1;
-                if (next >= corners.Count) next = 0;
+                int next = (index + 1) % corners.Count;
+
                 var nextCorner = corners[next];
                 float dist = (nextCorner.location - corner.location).R;
                 dist /= maxDist;
-                int a = (int)Round(corner.angle.Degrees / 10) * 10;
+                int a = (int)Round(nextCorner.angle.Degrees / 10) * 10;
                 a = a / 10; //round angles to the nearest 10 degrees
                 a = a * 10;
                 string distName = "distance." + ((int)Round(dist * 10)).ToString();

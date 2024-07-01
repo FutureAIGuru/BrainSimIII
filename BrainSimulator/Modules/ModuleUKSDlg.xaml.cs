@@ -711,6 +711,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         }
 
         parent.theUKS.CreateInitialStructure();
+        parent.Initialize();
 
         CollapseAll();
         expandAll = parent.GetAttribute("ExpandAll");

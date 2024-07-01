@@ -27,7 +27,6 @@ namespace BrainSimulator.Modules
             {
                 Thing shapeType = currentShape.GetAttribute("storedShape");
                 if (shapeType == null) { continue; }
-                Thing size = currentShape.AttributeOfType("hasSize");
                 Relationship confidence = parent.theUKS.GetRelationship(currentShape.Label,"hasAttribute", shapeType.Label);
                 tbFound.Text += $"{currentShape.Label}   {shapeType.Label}  conf:{confidence.Weight.ToString("0.00")}  {currentShape.GetAttribute("size")}\n";
                 tbFound.Text += $"                  {currentShape.GetAttribute("Color")?.Label} orientation:{currentShape.GetAttribute("Rotation")?.Label[6..]}\n";
