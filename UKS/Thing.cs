@@ -439,8 +439,9 @@ public partial class Thing
         {
             if (L.target != null)
             {
-                Thing t = L.target.AncestorList().FindFirst(x => x.Label == s);
-                if (t != null) return L.target;
+                Thing t = L.target.AncestorList().FindFirst(x => x.Label.ToLower() == s.ToLower());
+                if (t != null) 
+                    return L.target;
             }
         }
         return null;

@@ -87,7 +87,7 @@ namespace BrainSimulator.Modules
                     if (r.target.HasAncestor("Rotation"))
                     {
                         Angle theta = Angle.FromDegrees(float.Parse(r.target.Label[5..]));
-                        currDir += Angle.FromDegrees(180) - theta;
+                        currDir += theta;
                     }
                     else if (r.target.HasAncestor("Distance"))
                     {
@@ -111,7 +111,7 @@ namespace BrainSimulator.Modules
                             if (r.target.HasAncestor("Rotation"))
                             {
                                 Angle theta = Angle.FromDegrees(float.Parse(r.target.Label[5..]));
-                                currDir += Angle.FromDegrees(180) - theta;
+                                currDir += theta;
                             }
                             else if (r.target.HasAncestor("Distance"))
                             {
@@ -121,7 +121,6 @@ namespace BrainSimulator.Modules
                                 poly.Points.Add(curPos);
                             }
                         }
-
                     }
                 }
                 theCanvas.Children.Add(poly);

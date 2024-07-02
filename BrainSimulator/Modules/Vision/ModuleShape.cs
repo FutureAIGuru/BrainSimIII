@@ -65,7 +65,7 @@ namespace BrainSimulator.Modules
                         float score = theUKS.HasSequence(nextBest, shape, out int offset,true);
                         if (score > bestSeqsScore )
                         {
-                            for (int i = 0; i < offset; i++)
+                            for (int i = 0; i < offset && i < nextBest.Relationships.Count; i++)
                             {
                                 if (nextBest.Relationships[i].target.HasAncestorLabeled("Rotation"))
                                 {
@@ -166,34 +166,46 @@ namespace BrainSimulator.Modules
             //add the corners to the currentShape
             for (int i = 0; i < corners.Count; i++)
             {
-                int index = (i) % corners.Count;
-                var corner = corners[index];
-                int next = (index + 1) % corners.Count;
+                var prevCorner = corners[i];
+                var currCorner = corners[(i + 1) % corners.Count];
+                var nextCorner = corners[(i + 2) % corners.Count];
 
-                var nextCorner = corners[next];
-                float dist = (nextCorner.location - corner.location).R;
+                //how far to move
+                float dist = (currCorner.location - prevCorner.location).R;
                 dist /= maxDist;
-                int a = (int)Round(nextCorner.angle.Degrees / 10) * 10;
-                a = a / 10; //round angles to the nearest 10 degrees
-                a = a * 10;
                 string distName = "distance." + ((int)Round(dist * 10)).ToString();
                 if (Round(dist * 10) == 10) distName = "distance1.0";
                 Thing theDist = theUKS.GetOrAddThing(distName, "distance");
                 Relationship r = theUKS.AddStatement(currentShape, "go*", theDist);
-                //r.TimeToLive = TimeSpan.FromSeconds(10);
+                r.TimeToLive = TimeSpan.FromSeconds(10);
+
+                //how much to turn
+                Segment s1 = new Segment(prevCorner.location, currCorner.location);
+                Segment s2 = new Segment(currCorner.location, nextCorner.location);
+                Angle turn = s2.Angle - s1.Angle;
+                while (turn.Degrees > 180) turn -= Angle.FromDegrees(360);
+                while (turn.Degrees <= -180) turn += Angle.FromDegrees(360);
+                int a = IRound(turn.Degrees, 10);
                 Thing theAngle = theUKS.GetOrAddThing("angle" + a, "Angle");
                 r = theUKS.AddStatement(currentShape, "go*", theAngle);
-                //r.TimeToLive = TimeSpan.FromSeconds(10);
+                r.TimeToLive = TimeSpan.FromSeconds(10);
             }
+        }
+
+        int IRound (float number, int multiple = 1)
+        {
+            float retVal = (float)Round(number / multiple) * multiple;
+            return (int)retVal;
         }
 
         public Thing AddShapeToLibrary()
         {
+            Thing currentShape = theUKS.Labeled("currentShape0");
+            if (currentShape == null) return null;
+            if (currentShape.HasRelationshipWithAncestorLabeled("distance") == null) return null;
             theUKS.GetOrAddThing("StoredShape", "Visual");
             Thing newShape = theUKS.GetOrAddThing("storedShape*", "StoredShape");
             //TODO: fix this so we can indicate which item we mearn
-            Thing currentShape = theUKS.Labeled("currentShape0");
-            if (currentShape == null) return null;
             foreach (Relationship r in currentShape.Relationships)
             {
                 if (r.relType.Label.StartsWith("has")) continue;
