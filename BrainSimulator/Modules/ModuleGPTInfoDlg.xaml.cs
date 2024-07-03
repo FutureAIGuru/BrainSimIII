@@ -28,6 +28,12 @@ namespace BrainSimulator.Modules
         int wordMax = 100;
         List<string> words = new List<string>();  // List to hold all words
 
+        // UKS call
+        // Needed when accessing all items in the UKS.
+        public static ModuleHandler moduleHandler = new();
+        public static UKS.UKS theUKS = moduleHandler.theUKS;
+
+
         public ModuleGPTInfoDlg()
         {
             InitializeComponent();
@@ -215,11 +221,21 @@ namespace BrainSimulator.Modules
             }
         }
 
+        private async void GetGPTClausesAsync()
+        {
+            SetOutputText("Working...");
+            await ModuleGPTInfo.GetChatGPTClauses();
+            SetOutputText($"\n\rTotal clause count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button b)
             {
                 ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
+                // Reset to 0 each time for error and relationship count
+                errorCount = 0;
+                relationshipCount = 0;
                 if (b.Content.ToString().StartsWith("Re-Parse"))
                 {
                     ModuleGPTInfo.ParseGPTOutput(textInput.Text, txtOutput.Text);
@@ -227,6 +243,10 @@ namespace BrainSimulator.Modules
                 else if (b.Content.ToString().StartsWith("Verify All"))
                 {
                     verifyAllAsync();
+                }
+                else if (b.Content.ToString().StartsWith("Add Clauses To All"))
+                {
+                    GetGPTClausesAsync();
                 }
                 else //process unknowns
                 {

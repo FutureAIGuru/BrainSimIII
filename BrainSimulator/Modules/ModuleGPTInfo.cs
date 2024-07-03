@@ -10,7 +10,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using Pluralize.NET;
 using UKS;
+using static BrainSimulator.Modules.ModuleOnlineInfo;
 
 namespace BrainSimulator.Modules
 {
@@ -202,6 +204,149 @@ is-part-of-speech, ";
             {
                 Debug.WriteLine($"Error with getting Chat GPT Fine tuning. Error is {ex}.");
             }
+        }
+
+        //this is a general attempt to add a single clause to every item that is a descedent of "Object".
+        public static async Task GetChatGPTClauses()
+        {
+            try
+            {
+                UKS.UKS theUKS = MainWindow.theUKS;
+                foreach (Thing t in theUKS.Labeled("Object").Descendents) {
+                    // Get the label and sanitize the input.
+                    String textIn = t.Label;
+                    textIn = textIn.ToLower();
+                    textIn = textIn.Replace(".", "");
+
+                    // ChatGPT request made.
+                    string answerString = "";
+                    string userText = $"Provide a commonsense clause to answer the request about the following: {textIn}";
+                    string systemText =
+                        @"Provide answers that are common sense to a 10 year old. 
+                    Format: Source1, Verb1, Target1, IF, Source2, Verb2, Target2
+                    Example 1: car, can, move, IF, car, has, fuel
+                    Example 2: dog, will, bark, IF, loud noise, is, heard
+                    Make sure to have 7 items seperated by 6 commas.";
+
+                    answerString = await GPT.GetGPTResult(userText, systemText);
+                    if (!answerString.StartsWith("ERROR") && answerString != "")
+                    {
+                        Output = answerString;
+                        Debug.WriteLine(">>>" + userText);
+                        Debug.WriteLine(Output);
+                        //some sort of error occurred
+                        if (Output.Contains("language model")) return;
+
+                        ParseGPTOutputClause(textIn, Output);
+                    }
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error with getting Chat GPT Clauses. Error is {ex}.");
+            }
+        }
+
+        // Given information from caluses, parse it into the UKS.
+        // The general format is all commas (,).
+        // It only creates exactly (1) clause per descendant of object.
+        public static void ParseGPTOutputClause(String textIn, string GPTOutput)
+        {
+            // Get the UKS
+            UKS.UKS theUKS = MainWindow.theUKS;
+            //GetUKS();
+            // Split by comma (,) to get individual pairs
+            string[] valuePairs = GPTOutput.Split(',');
+            // Error checks
+            if (valuePairs.Length == 0)
+            {
+                Debug.WriteLine($"Error, length of value '{Output}' is 0.");
+                ModuleGPTInfoDlg.errorCount += 1;
+            }
+            else if (valuePairs.Length != 7)
+            {
+                Debug.WriteLine($"Error, length of value '{Output}' is not 7.");
+                ModuleGPTInfoDlg.errorCount += 1;
+            }
+            // Make sure the clause is IF, used for testing purposes.
+            else if (valuePairs[3].Trim() != "if")
+            {
+                Debug.WriteLine($"Error, middle clause isn't IF, but is '{valuePairs[3]}'");
+                ModuleGPTInfoDlg.errorCount += 1;
+            }
+            else
+            {
+                textIn = GPT.Singularize(textIn);
+
+                // Setting up the values from GPT
+                string newThing = valuePairs[0].Trim();
+                string relationType = valuePairs[1].Trim();
+                string targetThing = valuePairs[2].Trim();
+
+                // Hard code clase to IF...
+                // Or to valuePairs[3].Trim() otherwise
+                string clauseType = "IF";
+
+                string newThing2 = valuePairs[4].Trim();
+                string relationType2 = valuePairs[5].Trim();
+                string targetThing2 = valuePairs[6].Trim();
+
+
+                // Add relationships and clause
+                Relationship r1 = AddRelationshipClause(newThing, targetThing, relationType);
+
+                Relationship r2 = AddRelationshipClause(newThing2, targetThing2, relationType2);
+
+                Thing theClauseType = GetClauseType(clauseType);
+
+                r1.AddClause(theClauseType, r2);
+
+                ModuleGPTInfoDlg.relationshipCount += 1;
+            }
+        }
+
+        // Add Relationship Clause.
+        // NOTES: Copied from ModuleUKSClause exactly, working on a fix.
+        public static Relationship AddRelationshipClause(string source, string target, string relationshipType)
+        {
+            UKS.UKS theUKS = MainWindow.theUKS;
+            if (theUKS == null) return null;
+            IPluralize pluralizer = new Pluralizer();
+
+
+            source = source.Trim();
+            target = target.Trim();
+            relationshipType = relationshipType.Trim();
+
+            string[] tempStringArray = source.Split(' ');
+            List<string> sourceModifiers = new();
+            source = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
+            for (int i = 0; i < tempStringArray.Length - 1; i++) sourceModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+
+            tempStringArray = target.Split(' ');
+            List<string> targetModifiers = new();
+            target = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
+            for (int i = 0; i < tempStringArray.Length - 1; i++) targetModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+
+            tempStringArray = relationshipType.Split(' ');
+            List<string> typeModifiers = new();
+            relationshipType = pluralizer.Singularize(tempStringArray[0]);
+            for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+
+            Relationship r = theUKS.AddStatement(source, relationshipType, target, sourceModifiers, typeModifiers, targetModifiers);
+
+            return r;
+        }
+
+        // Get clause type.
+        // NOTES: Copied directly from ModuleUKSClause like AddRelationshipClause, looking for a fix.
+        public static Thing GetClauseType(string newThing)
+        {
+            UKS.UKS theUKS = MainWindow.theUKS;
+            if (theUKS == null) return null;
+
+            return theUKS.GetOrAddThing(newThing, "ClauseType");
         }
 
         //given general information output from GPT, parse it into UKS
