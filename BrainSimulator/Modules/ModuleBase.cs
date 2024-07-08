@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Collections.Generic;
 using System.Windows.Threading;
 using UKS;
+using System.Diagnostics;
 
 namespace BrainSimulator.Modules
 {
@@ -114,6 +115,10 @@ namespace BrainSimulator.Modules
             {
                 if (string.IsNullOrEmpty(infoString)) return;
                 string[] info = infoString.Split('+', 'x');
+                // Makes sure we never have decimal points in the string.
+                for (int i = 0; i < info.Length; i++) {
+                    info[i] = info[i].Split(".")[0];
+                }
                 if (info.Length == 4)
                 {
                     dlgSize.X = int.Parse(info[0]);
