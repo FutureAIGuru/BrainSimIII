@@ -228,6 +228,13 @@ namespace BrainSimulator.Modules
             SetOutputText($"\n\rTotal clause count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
         }
 
+        private async void SolveAmbiguityGPTAsync()
+        {
+            SetOutputText("Working...");
+            await ModuleGPTInfo.DisambiguateTerms();
+            SetOutputText($"\n\rTotal disambiguity success count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button b)
@@ -247,6 +254,10 @@ namespace BrainSimulator.Modules
                 else if (b.Content.ToString().StartsWith("Add Clauses To All"))
                 {
                     GetGPTClausesAsync();
+                }
+                else if (b.Content.ToString().StartsWith("Solve Ambiguity"))
+                {
+                    SolveAmbiguityGPTAsync();
                 }
                 else //process unknowns
                 {

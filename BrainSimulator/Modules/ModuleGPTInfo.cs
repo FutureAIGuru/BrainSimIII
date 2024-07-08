@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Threading.Tasks;
 using System.Windows;
 using Pluralize.NET;
@@ -245,6 +246,95 @@ is-part-of-speech, ";
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error with getting Chat GPT Clauses. Error is {ex}.");
+            }
+        }
+
+        //this is a general attempt to disambiguate all words that are descendents of "Object".
+        public static async Task DisambiguateTerms()
+        {
+            try
+            {
+                UKS.UKS theUKS = MainWindow.theUKS;
+                foreach (Thing t in theUKS.Labeled("Object").Descendents)
+                {
+                    // Get the label and sanitize the input.
+                    String textIn = t.Label;
+                    textIn = textIn.ToLower();
+                    textIn = textIn.Replace(".", "");
+
+                    // ChatGPT request made.
+                    string answerString = "";
+                    string userText = $"Provide commonsense unambiguous parent(s) to answer the request about the following: {textIn}";
+                    string systemText =
+                        @"Provide answers that are common sense to a 10 year old. 
+                    Format: Item, Parent1 | Item, Parent2
+                    Example 1: can, action | can, container
+                    Example 2: bow, gesture | bow, weapon | bow, knot
+                    Example 3: oxygen, chemical
+                    Remember the goal is to disambiguiate the words by providing multiple parents if the word is ambiguous.";
+
+                    answerString = await GPT.GetGPTResult(userText, systemText);
+                    if (!answerString.StartsWith("ERROR") && answerString != "")
+                    {
+                        Output = answerString;
+                        Debug.WriteLine(">>>" + userText);
+                        Debug.WriteLine(Output);
+                        //some sort of error occurred
+                        if (Output.Contains("language model")) return;
+
+                        ParseGPTOutputAmbiguity(textIn, Output);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error with getting Chat GPT Clauses. Error is {ex}.");
+            }
+        }
+
+        // Given information from caluses, parse it into the UKS.
+        // The general format is all commas (,).
+        // It only creates exactly (1) clause per descendant of object.
+        public static void ParseGPTOutputAmbiguity(String textIn, string GPTOutput)
+        {
+            // Get the UKS
+            UKS.UKS theUKS = MainWindow.theUKS;
+            //GetUKS();
+            // Split by pipe (|) to get the individual parents
+            string[] parents = GPTOutput.Split('|');
+            // Count for different types of words.
+            int count = 1;
+            foreach(String parent in parents)
+            {
+                // Split by comma (,) to get individual pairs
+                string[] valuePairs = parent.Split(',');
+                // Error checks
+                if (valuePairs.Length == 0)
+                {
+                    Debug.WriteLine($"Error, length of value '{parent}' is 0.");
+                    ModuleGPTInfoDlg.errorCount += 1;
+                }
+                else if (valuePairs.Length != 2)
+                {
+                    Debug.WriteLine($"Error, length of value '{parent}' is not what is expected, 2.");
+                    ModuleGPTInfoDlg.errorCount += 1;
+                }
+                else
+                {
+                    textIn = GPT.Singularize(textIn);
+
+                    String labelWithNum = textIn + count.ToString();
+
+                    // The second value of the pair is the new parent.
+                    String newParent = valuePairs[1];
+
+                    theUKS.AddStatement(labelWithNum, "is-a", newParent);
+
+                    count++;
+
+                    ModuleGPTInfoDlg.relationshipCount += 1;
+                }
             }
         }
 
