@@ -6,6 +6,9 @@
 
 using System;
 using System.Collections.Generic;
+//using System.Drawing;
+
+//using System.Drawing;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,6 +29,7 @@ namespace BrainSimulator.Modules
         }
 
         // Draw gets called to draw the dialog when it needs refreshing
+        int scale;
         public override bool Draw(bool checkDrawTimer)
         {
             if (!base.Draw(checkDrawTimer)) return false;
@@ -45,7 +49,7 @@ namespace BrainSimulator.Modules
             theCanvas.Children.Clear();
 
             int pixelSize = 6;
-            int scale = (int)(theCanvas.ActualHeight / parent.imageArray.GetLength(1));
+            scale = (int)(theCanvas.ActualHeight / parent.imageArray.GetLength(1));
 
             //draw the image
             if (cbShowImage.IsChecked == true && parent.bitmap != null)
@@ -111,6 +115,42 @@ namespace BrainSimulator.Modules
                     }
             }
 
+            //draw the hough transform
+            if (cbShowHough.IsChecked == true && parent.segments != null & parent.segments.Count > 0)
+            {
+                var acc = parent.segmentFinder.accumulator;
+                int maxRho = acc.GetLength(0);
+                int maxTheta = acc.GetLength(1);
+                float scalex = (float)theCanvas.ActualWidth / acc.GetLength(0);
+                float scaley = (float)theCanvas.ActualHeight / acc.GetLength(1);
+                for (int rhoIndex = 0; rhoIndex < maxRho; rhoIndex++)
+                {
+                    for (int thetaIndex = 0; thetaIndex < maxTheta; thetaIndex++)
+                    {
+                        var votes = parent.segmentFinder.accumulator[rhoIndex, thetaIndex].Count;
+                        if (votes > 19) votes = 19;
+                        if (votes > 5)// && votes < 40)
+                        {
+                            HSLColor hSLColor = new HSLColor(Colors.Green);
+                            float intensity = (float)votes / 20;
+                            hSLColor.luminance = intensity;
+                            Brush brush1 = new SolidColorBrush(hSLColor.ToColor());
+                            Ellipse e = new Ellipse()
+                            {
+                                Height = pixelSize,
+                                Width = pixelSize,
+                                Stroke = brush1,
+                                Fill = brush1,
+                                ToolTip = new System.Windows.Controls.ToolTip { Content = $"({(int)rhoIndex},{(int)thetaIndex})" },
+                            };
+                            Canvas.SetLeft(e, rhoIndex*scalex - pixelSize / 2);
+                            Canvas.SetTop(e, thetaIndex*scaley - pixelSize / 2);
+                            e.MouseEnter += E_MouseEnter;
+                            theCanvas.Children.Add(e);
+                        }
+                    }
+                }
+            }
             //draw the lines
             if (cbShowLines.IsChecked == true && parent.segments != null & parent.segments.Count > 0)
             {
@@ -206,6 +246,60 @@ namespace BrainSimulator.Modules
 
             return true;
         }
+
+        Line tempLine;
+        private void E_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (sender is Ellipse e1)
+            {
+                if (tempLine != null)
+                    theCanvas.Children.Remove(tempLine);
+
+                var xx = e1.ToolTip.ToString();
+                xx = xx[xx.IndexOf("(")..];
+                xx = xx.Replace("(", "");
+                xx = xx.Replace(")", "");
+                string[] coords = xx.Split(",");
+                int.TryParse(coords[0], out int rho);
+                int.TryParse(coords[1], out int theta);
+                ModuleVision parent = (ModuleVision)base.ParentModule;
+                errorText.Content = $"{(int)rho},{(int)theta} : {parent.segmentFinder.accumulator[rho, theta].Count} votes";
+                errorText.Foreground = new SolidColorBrush(Colors.White);
+                rho = rho - parent.segmentFinder.maxDistance;
+
+                if (theta == 0 || theta == 180)
+                {
+                    tempLine = new Line()
+                    {
+                        X1 = rho * scale,
+                        X2 = rho * scale,
+                        Y1 = 0 * scale,
+                        Y2 = theCanvas.ActualHeight * scale,
+                        Stroke = new SolidColorBrush(Colors.Blue),
+                        StrokeThickness = 4,
+                    };
+                }
+                else
+                {
+
+                    //calculate (m,b) for y=mx+b
+                    double fTheta = theta * Math.PI / parent.segmentFinder.numAngles;
+                    double b = rho / Math.Sin(fTheta);
+                    double m = -Math.Cos(fTheta) / Math.Sin(fTheta);
+                    tempLine = new Line()
+                    {
+                        X1 = 0,
+                        X2 = 1000 * scale,
+                        Y1 = b * scale,
+                        Y2 = (b + m * 1000) * scale,
+                        Stroke = new SolidColorBrush(Colors.Blue),
+                        StrokeThickness = 4,
+                    };
+                }
+                theCanvas.Children.Add(tempLine);
+            }
+        }
+
         string defaultDirectory = "";
         private void Button_Browse_Click(object sender, RoutedEventArgs e)
         {

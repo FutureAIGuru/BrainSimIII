@@ -63,9 +63,18 @@ namespace BrainSimulator.Modules.Vision
                     }
                 }
             }
-            FindMaxima();
         }
-        private void FindMaxima()
+        public void FindArcs()
+        {
+            int maxRho = accumulator.GetLength(0);
+            int maxTheta = accumulator.GetLength(1);
+            for (int rhoIndex = 0; rhoIndex < maxRho; rhoIndex++)
+            {
+                for (int thetaIndex = 0; thetaIndex < maxTheta; thetaIndex++)
+                { }
+            }
+        }
+        public void FindMaxima()
         {
             //find the top vote-getters
             localMaxima = new List<Tuple<int, int, int, float>>(); // (votes,rhoIndex,thetaIndex,lineVotes)

@@ -95,6 +95,8 @@ namespace BrainSimulator.Modules
 
             segmentFinder = new(boundaryArray.GetLength(0), boundaryArray.GetLength(1));
             segmentFinder.Transform(boundaryArray);
+            segmentFinder.FindArcs();
+            segmentFinder.FindMaxima();
 
             segments = segmentFinder.ExtractLineSegments();
 
@@ -586,11 +588,14 @@ namespace BrainSimulator.Modules
 
                 Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
 
-                //get the color
-                HSLColor theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
-                Thing theColor = GetOrAddColor(theCenterColor);
-                currOutline.SetAttribute(theColor);
-
+                //get the color (the centroid might be outside the image)
+                try
+                {
+                    HSLColor theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
+                    Thing theColor = GetOrAddColor(theCenterColor);
+                    currOutline.SetAttribute(theColor);
+                }
+                catch (Exception e) { }
                 //we now have an ordered, right-handed outline
                 //let's add it to the UKS
                 foreach (Corner c in outline)

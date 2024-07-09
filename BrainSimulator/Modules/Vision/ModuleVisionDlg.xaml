@@ -18,6 +18,7 @@
         <CheckBox x:Name="cbShowLines" Content="Lines" HorizontalAlignment="Left" Margin="180,250,0,214" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom" />
         <CheckBox x:Name="cbShowSegments" Content="Segments" HorizontalAlignment="Left" Margin="74,270,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <CheckBox x:Name="cbShowCorners" Content="Corners" HorizontalAlignment="Left" Margin="74,290,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="cbShowHough" Content="Hough Array" HorizontalAlignment="Left" Margin="180,290,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <Button Content="Refresh" HorizontalAlignment="Left" Margin="254,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
         <CheckBox x:Name="cbShowPixels" Content="Pixel Array" HorizontalAlignment="Left" Margin="180,230,0,234" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
     </Grid>
