@@ -293,6 +293,45 @@ is-part-of-speech, ";
             }
         }
 
+        //this is a general attempt to disambiguate all words that are from a file.
+        public static async Task DisambiguateTermsFile(string textIn)
+        {
+            try
+            {
+                UKS.UKS theUKS = MainWindow.theUKS;
+                // Get the label and sanitize the input.
+                textIn = textIn.ToLower();
+                textIn = textIn.Replace(".", "");
+
+                // ChatGPT request made.
+                string answerString = "";
+                string userText = $"Provide commonsense unambiguous parent(s) to answer the request about the following: {textIn}";
+                string systemText =
+                        @"Provide answers that are common sense to a 10 year old. 
+                    Format: Item, Parent1 | Item, Parent2
+                    Example 1: can, action | can, container
+                    Example 2: bow, gesture | bow, weapon | bow, knot
+                    Example 3: oxygen, chemical
+                    Remember the goal is to disambiguiate the words by providing multiple parents if the word is ambiguous.";
+
+                answerString = await GPT.GetGPTResult(userText, systemText);
+                if (!answerString.StartsWith("ERROR") && answerString != "")
+                {
+                    Output = answerString;
+                    Debug.WriteLine(">>>" + userText);
+                    Debug.WriteLine(Output);
+                    //some sort of error occurred
+                    if (Output.Contains("language model")) return;
+                    ParseGPTOutputAmbiguity(textIn, Output);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error with getting Chat GPT Clauses. Error is {ex}.");
+            }
+        }
+
         // Given information from caluses, parse it into the UKS.
         // The general format is all commas (,).
         // It only creates exactly (1) clause per descendant of object.

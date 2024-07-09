@@ -123,6 +123,72 @@ namespace BrainSimulator.Modules
             await ProcessWordsAsync(words);
         }
 
+        private async void LoadAmbiguity_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                // Reset to 0 each time for error and relationship count
+                errorCount = 0;
+                relationshipCount = 0;
+                MainWindow.SuspendEngine();
+                words.Clear();
+                System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+                openFileDialog.Title = "Select a file";
+                openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*"; // Filter files by extension
+
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    string filePath = openFileDialog.FileName;
+
+                    try
+                    {
+                        var pluralizer = new Pluralizer();
+
+                        using (StreamReader reader = new StreamReader(filePath))
+                        {
+                            string line;
+                            while ((line = reader.ReadLine()) != null)
+                            {
+                                // Break if we are over word max (set to 50 by default) for testing.
+                                if (words.Count >= wordMax)
+                                {
+                                    break;
+                                }
+                                // Split the line into words, removing empty entries
+                                List<string> lineWords = line.Split(new char[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                                // Singularize the words.
+                                for (int i = 0; i < lineWords.Count; i++)
+                                {
+                                    if (lineWords[i].Trim() == "")
+                                    {
+                                        lineWords.RemoveAt(i);
+                                        i--;
+                                    }
+                                    lineWords[i] = pluralizer.Singularize(lineWords[i]);
+                                }
+                                // Add the words to the list from the line
+                                words.AddRange(lineWords);
+                            }
+                        }
+                        txtOutput.Text = "File Successfully Read!";
+                    }
+                    catch (IOException error)
+                    {
+                        Debug.WriteLine("An error occurred while reading the file:");
+                        SetOutputText("An error occurred while reading the file:\n" + error.Message);
+                        Debug.WriteLine(error.Message);
+                    }
+                }
+                else
+                {
+                    txtOutput.Text = "No file selected.";
+                    Debug.WriteLine("No file selected.");
+                }
+            }
+            await ProcessAmbiguityAsync(words);
+
+        }
+
 
         // Task to process the words.
         public async Task ProcessWordsAsync(List<string> words)
@@ -143,6 +209,28 @@ namespace BrainSimulator.Modules
             txtOutput.Text = $"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.";
             Debug.WriteLine($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
         }
+
+        // Task to process the words AND remove ambiguity.
+        public async Task ProcessAmbiguityAsync(List<string> words)
+        {
+            ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
+
+            SetOutputText("Running through words... Word count is: " + words.Count + ".");
+            Debug.WriteLine("Running through words... Word count is: " + words.Count + ".");
+
+            foreach (string word in words)
+            {
+                if (word == words.Last())
+                    await ModuleGPTInfo.DisambiguateTermsFile(word.Trim());
+                if (word.Trim() != "")
+                    ModuleGPTInfo.DisambiguateTermsFile(word.Trim());
+            }
+
+            txtOutput.Text = $"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.";
+            Debug.WriteLine($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+        }
+
+
         // Task to process the words.
         public async Task ProcessParentsAsync(List<string> words)
         {
