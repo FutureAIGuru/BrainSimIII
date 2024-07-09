@@ -54,7 +54,7 @@ namespace BrainSimulator.Modules
 
         //these are static so they can be called from the UKS dialog context menu
         //This can verify parent-child releationships.
-        public static async Task GetChatGPTVerifyParentChild(string child,string parent)
+        public static async Task GetChatGPTVerifyParentChild(string child, string parent)
         {
             //these turns dotted names back into more english-language strings
             string child1 = GetStringFromThingLabel(child);
@@ -131,7 +131,7 @@ namespace BrainSimulator.Modules
 
                 string answerString = "";
                 string userText = $"Provide commonsense clasification answer the request which is appropriate for a 5 year old: What is-a {textIn}";
-                string systemText = 
+                string systemText =
 $@"This is a classification request. Examples: horse is-a | animal, mammal \n\r chimpanzee is-a | primate, mammal
 Answer is formatted: is-a | VALUE, VALUE, VALUE with no more than 3 values and VAIUES are 1 or 2 words.
 Answer should ONLY contain VALUEs where it is reasonable to say: '{textIn} is-a VALUE' and exclude: 'VALUE is-a {textIn}' 
@@ -165,7 +165,7 @@ Never include {textIn} in the result.";
 
                 string answerString = "";
                 string userText = $"Provide commonsense facts to answer the request: what is a {textIn}";
-                string systemText = 
+                string systemText =
 @"Provide answers that are common sense to a 10 year old. 
 Each Answer in the formatted: VALUE-NAME | VALUE, VALUE, VALUE
 **Individual ANSWERS should contain no more than 3 values**
@@ -212,7 +212,11 @@ is-part-of-speech, ";
             try
             {
                 UKS.UKS theUKS = MainWindow.theUKS;
-                foreach (Thing t in theUKS.Labeled("Object").Descendents) {
+                int limit = 20;
+                foreach (Thing t in theUKS.Labeled("Object").Descendents)
+                {
+                    limit--;
+                    if (limit <= 0) break;
                     // Get the label and sanitize the input.
                     String textIn = t.Label;
                     textIn = textIn.ToLower();
@@ -240,7 +244,7 @@ is-part-of-speech, ";
                         ParseGPTOutputClause(textIn, Output);
                     }
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -394,7 +398,7 @@ is-part-of-speech, ";
                         if (subValues.Count > 2) continue;
                         if (valueType == "can" && subValues.Count > 1)
                         {
-                            valueTypeAttributes.Add("."+subValues[0]);
+                            valueTypeAttributes.Add("." + subValues[0]);
                             subValues.RemoveAt(0);
                         }
 
@@ -434,7 +438,7 @@ is-part-of-speech, ";
                             //turn all extra values into properties
                             while (subValues.Count > 1)
                             {
-                                valueProperties.Add("."+subValues[0]);
+                                valueProperties.Add("." + subValues[0]);
                                 subValues.RemoveAt(0);
                             }
                         }
