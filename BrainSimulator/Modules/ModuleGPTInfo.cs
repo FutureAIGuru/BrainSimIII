@@ -267,10 +267,10 @@ is-part-of-speech, ";
 
                     // ChatGPT request made.
                     string answerString = "";
-                    string userText = $"Provide commonsense unambiguous parent(s) to answer the request about the following: {textIn}";
+                    string userText = $"Provide commonsense unambiguous item(s) to answer the request about the following: {textIn}";
                     string systemText =
                         @"Provide answers that are common sense to a 10 year old. 
-                    Format: Item, Parent1 | Item, Parent2
+                    Format: Item, UnambiguousThing1 | Item, UnambiguousThing2 | <More Here>
                     Example 1: can, action | can, container
                     Example 2: bow, gesture | bow, weapon | bow, knot
                     Example 3: oxygen, chemical
@@ -311,7 +311,7 @@ is-part-of-speech, ";
                 string userText = $"Provide commonsense unambiguous parent(s) to answer the request about the following: {textIn}";
                 string systemText =
                         @"Provide answers that are common sense to a 10 year old. 
-                    Format: Item, Parent1 | Item, Parent2
+                    Format: Item, UnambiguousThing1 | Item, UnambiguousThing2 | <More Here>
                     Example 1: can, action | can, container
                     Example 2: bow, gesture | bow, weapon | bow, knot
                     Example 3: oxygen, chemical
@@ -345,9 +345,10 @@ is-part-of-speech, ";
             //GetUKS();
             // Split by pipe (|) to get the individual parents
             string[] parents = GPTOutput.Split('|');
-            // Count for different types of words.
-            int count = 1;
-            foreach(String parent in parents)
+            // First we make the label a word.
+            theUKS.AddStatement(textIn, "is-a", "Word");
+            // Then we run through each individual parent.
+            foreach (String parent in parents)
             {
                 // Split by comma (,) to get individual pairs
                 string[] valuePairs = parent.Split(',');
@@ -366,14 +367,13 @@ is-part-of-speech, ";
                 {
                     textIn = GPT.Singularize(textIn);
 
-                    String labelWithNum = textIn + count.ToString();
+                    // Add "." to indicate word, and add "*" to indicate count.
+                    String labelWithNum = "." + textIn + "*";
 
                     // The second value of the pair is the new parent.
                     String newParent = valuePairs[1];
 
-                    theUKS.AddStatement(labelWithNum, "is-a", newParent);
-
-                    count++;
+                    theUKS.AddStatement(labelWithNum, "means", newParent);
 
                     ModuleGPTInfoDlg.relationshipCount += 1;
                 }
