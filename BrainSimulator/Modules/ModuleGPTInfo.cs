@@ -346,7 +346,7 @@ is-part-of-speech, ";
             // Split by pipe (|) to get the individual parents
             string[] parents = GPTOutput.Split('|');
             // First we make the label a word.
-            theUKS.AddStatement(textIn, "is-a", "Word");
+            theUKS.AddStatement("."+textIn, "is-a", "Word");
             // Then we run through each individual parent.
             foreach (String parent in parents)
             {
