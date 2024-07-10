@@ -255,8 +255,11 @@ is-part-of-speech, ";
             try
             {
                 UKS.UKS theUKS = MainWindow.theUKS;
+                int limit = 20;
                 foreach (Thing t in theUKS.Labeled("Object").Descendents)
                 {
+                    limit--;
+                    if (limit <= 0) break;
                     // Get the label and sanitize the input.
                     String textIn = t.Label;
                     textIn = textIn.ToLower();
