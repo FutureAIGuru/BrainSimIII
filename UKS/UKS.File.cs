@@ -427,7 +427,7 @@ public partial class UKS
             return false;
         }
 
-        List<Type> extraTypes = GetTypesInUKS();
+        List<Type> extraTypes = new();
         XmlSerializer reader1 = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());
         try
         {

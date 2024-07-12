@@ -134,7 +134,8 @@ namespace BrainSimulator.Modules
                         else if (noTarget && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
                             resultString += r2.source.ToString() + " " + r2.relType.ToString() + "\n";
                         else
-                            resultString += r2.ToString() + "\n";
+                            resultString += r2.source.ToString() + " " + r2.relType.ToString() + " " + r2.target.ToString() + "\n";
+                        //                            resultString += r2.ToString() + "\n";
                     }
                     else
                         resultString += r1.ToString() + "\n";

@@ -13,6 +13,9 @@ namespace UKS;
 public class ThingLabels
 {
     static ConcurrentDictionary<string, Thing> labelList = new ConcurrentDictionary<string, Thing>();
+
+    public static ConcurrentDictionary<string, Thing> LabelList { get => labelList;}
+
     public static Thing GetThing(string label)
     {
         if (label == null || label == "") return null;

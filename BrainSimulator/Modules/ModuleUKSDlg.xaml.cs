@@ -14,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using UKS;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace BrainSimulator.Modules;
 
@@ -82,6 +83,10 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         ModuleUKS parent = (ModuleUKS)ParentModule;
         expandAll = parent.GetAttribute("ExpandAll");
         string root = parent.GetAttribute("Root");
+        string sizeString = parent.GetAttribute("fontSize");
+        int.TryParse(sizeString, out int fontSize);
+        if (fontSize != 0)
+            theTreeView.FontSize = fontSize;
         if (root == null)
         {
             root = "Thing";
@@ -92,13 +97,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             totalItemCount = 0;
             TreeViewItem tvi = new() { Header = thing.ToString() };
-            tvi.ContextMenu = GetContextMenu(thing,tvi);
+            tvi.ContextMenu = GetContextMenu(thing, tvi);
             tvi.IsExpanded = true; //always expand the top-level item
             theTreeView.Items.Add(tvi);
             tvi.SetValue(ThingObjectProperty, thing);
             totalItemCount++;
             AddChildren(thing, tvi, 0, thing.Label);
-            AddRelationships(thing,tvi,"");
+            AddRelationships(thing, tvi, "");
             if (reverseCB.IsChecked == true)
                 AddRelationshipsFrom(thing, tvi, "");
         }
@@ -111,7 +116,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     if (t1.Parents.Count == 0)
                     {
                         TreeViewItem tvi = new() { Header = t1.Label };
-                        tvi.ContextMenu = GetContextMenu(t1,tvi);
+                        tvi.ContextMenu = GetContextMenu(t1, tvi);
                         theTreeView.Items.Add(tvi);
                     }
                 }
@@ -144,7 +149,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 
             if (r.Weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
                 header = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
-            if (r.reltype.HasRelationship(null,null,UKS.theUKS.Labeled("not")) != null) //prepend ! for negative  children
+            if (r.reltype.HasRelationship(null, null, UKS.theUKS.Labeled("not")) != null) //prepend ! for negative  children
                 header = "!" + header;
             if (detailsCB.IsChecked == true)
                 header += ":" + child.Children.Count + "," + descCountStr;
@@ -169,7 +174,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tvi.Items.Add(tviChild);
 
             totalItemCount++;
-            tviChild.ContextMenu = GetContextMenu(child,tviChild);
+            tviChild.ContextMenu = GetContextMenu(child, tviChild);
             if (depth < maxDepth)
             {
                 int childCount = child.Children.Count;
@@ -214,6 +219,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRefLabel.IsExpanded = true;
         if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
             tviRefLabel.IsExpanded = true;
+        if (t.Children.Count == 0)
+            tviRefLabel.IsExpanded = true;
         tvi.Items.Add(tviRefLabel);
 
         totalItemCount++;
@@ -224,7 +231,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (r.target != null && r.target.HasAncestorLabeled("Value"))
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r) };
-                tviRef.ContextMenu = GetContextMenu(r.target,tviRef);
+                tviRef.ContextMenu = GetContextMenu(r.target, tviRef);
                 tviRefLabel.Items.Add(tviRef);
                 totalItemCount++;
             }
@@ -437,6 +444,30 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         mi.Click += Mi_Click;
         mi.Header = "Delete";
         menu.Items.Add(mi);
+        mi = new();
+        mi.Header = "Go To:";
+        mi.IsEnabled = false;
+        menu.Items.Add(mi);
+
+        mi = new();
+        mi.Click += Mi_Click;
+        mi.Header = "    " + r.source.Label;
+        mi.SetValue(ThingObjectProperty, r.source);
+        menu.Items.Add(mi);
+
+        mi = new();
+        mi.Click += Mi_Click;
+        mi.Header = "    " + r.relType.Label;
+        mi.SetValue(ThingObjectProperty, r.relType);
+        menu.Items.Add(mi);
+
+        mi = new();
+        mi.Click += Mi_Click;
+        mi.Header = "    " + r.target.Label;
+        mi.SetValue(ThingObjectProperty, r.target);
+        menu.Items.Add(mi);
+
+
         return menu;
     }
 
@@ -583,19 +614,62 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
 
     //EVENTS
+    private bool _isTextChangingInternally;
     private void TheTreeView_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         Draw(true);
     }
 
-    private void TextBoxRoot_PreviewKeyDown(object sender, KeyEventArgs e)
+    private void TextBoxRoot_KeyDown(object sender, KeyEventArgs e)
     {
-        //ModuleUKS parent = (ModuleUKS)ParentModule;
-        //parent.SetAttribute("Root", textBoxRoot.Text);
-        //RefreshButton_Click(null, null);
+        // Allow text changes when keys like backspace, delete are pressed
+       if (e.Key == Key.Back || e.Key == Key.Delete)
+        {
+            _isTextChangingInternally = true;
+            int caretIndex = textBoxRoot.CaretIndex;
+            if (e.Key == Key.Back) caretIndex--;
+            if (caretIndex < 0) caretIndex = 0;
+            textBoxRoot.Text = textBoxRoot.Text.Substring(0,caretIndex);
+            textBoxRoot.CaretIndex = caretIndex;
+            e.Handled = true;
+            _isTextChangingInternally = false;
+            //get a new suggestion
+            if (e.Key == Key.Back)
+                textBoxRoot_TextChanged(null, null);
+        }
+        if (e.Key == Key.Enter)
+        {
+            textBoxRoot.SelectionLength = 0;
+        }
     }
     private void textBoxRoot_TextChanged(object sender, TextChangedEventArgs e)
     {
+        if (_isTextChangingInternally)
+            return;
+
+        string searchText = textBoxRoot.Text;
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            //get the first label
+            var suggestion = ThingLabels.LabelList.Keys
+                .Where(key => key.StartsWith(searchText, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(key => key)
+                .FirstOrDefault();
+            //get the real label to get the capitalization right
+            if (suggestion != null) suggestion = ThingLabels.GetThing(suggestion).Label;
+
+            if (suggestion != null && !suggestion.Equals(searchText, StringComparison.OrdinalIgnoreCase))
+            {
+                int caretIndex = textBoxRoot.CaretIndex;
+                _isTextChangingInternally = true;
+                textBoxRoot.Text = suggestion;
+                textBoxRoot.CaretIndex = caretIndex;
+                textBoxRoot.SelectionStart = caretIndex;
+                textBoxRoot.SelectionLength = suggestion.Length - caretIndex;
+                textBoxRoot.SelectionOpacity = .4;
+                _isTextChangingInternally = false;
+            }
+        }
         ModuleUKS parent = (ModuleUKS)ParentModule;
         if (parent == null) return;
         parent.SetAttribute("Root", textBoxRoot.Text);
@@ -617,6 +691,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             {
                 theTreeView.FontSize += 1;
             }
+            ModuleUKS parent = (ModuleUKS)ParentModule;
+            parent.SetAttribute("fontSize", theTreeView.FontSize.ToString());
+
         }
     }
 
@@ -696,7 +773,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         for (int i = 0; i < parent.theUKS.UKSList.Count; i++)
         {
             Thing t = parent.theUKS.UKSList[i];
-            if (t.HasAncestorLabeled("BrainSim")) 
+            if (t.HasAncestorLabeled("BrainSim"))
                 continue;
             if (t.Label == "has-child") continue;
             if (t.Label == "Thing") continue;

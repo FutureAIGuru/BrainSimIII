@@ -190,6 +190,7 @@ public partial class UKS
         //  several other cases
 
         if (r1.target != r2.target && (r1.target == null || r2.target == null)) return false;
+        //if (r1.target == r2.target && r1.source != r2.source) return false;
 
         //return false;
         if (r1.source == r2.source ||

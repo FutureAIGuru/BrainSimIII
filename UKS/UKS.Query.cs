@@ -191,7 +191,8 @@ public partial class UKS
                     //this creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
                     Relationship r1 = new Relationship(r);
-                    Thing newCountType = GetOrAddThing((GetCount(r.reltype) * haveCount).ToString(), "number");
+                    //Thing newCountType = GetOrAddThing((GetCount(r.reltype) * haveCount).ToString(), "number");
+                    Thing newCountType = GetOrAddThing((haveCount).ToString(), "number");
 
                     //hack for numeric labels
                     Thing rootThing = r1.reltype;
@@ -525,13 +526,14 @@ public partial class UKS
         foreach (Relationship r in target.Relationships)
         {
             //debug hack
-            if (!r.reltype.Label.StartsWith("go")) continue;
+            //if (!r.reltype.Label.StartsWith("go")) continue;
             List<Thing> targetList = new(); //this prevents a single relationship from creating multiple votes
             foreach (Relationship r1 in r.target.RelationshipsFrom)
             {
                 //TODO: make this handle order-independency (go0,go1) vs relType params (has.2, has.4)
                 //note: order-descriptors DO NOT have attributes while params DO
                 if (targetList.Contains(r1.source)) continue;
+                if (r1.reltype.Label == "has-child") continue;
                 if (r1.source.HasAncestor(root))
                 {
                     if (!searchCandidates.ContainsKey(r1.source))
