@@ -62,7 +62,7 @@ namespace BrainSimulator.Modules
 
                 HSLColor theColor = new HSLColor(Colors.Pink);
                 if (aColor != null)
-                    theColor = new HSLColor((HSLColor)aColor.V);
+                    theColor = new HSLColor((Color)aColor.V);
 
                 //hacks to get a few properties which are stashed in labels
                 int offsetVal = int.Parse(mmOffset.Label[9..]);
@@ -131,12 +131,12 @@ namespace BrainSimulator.Modules
                         string name = $"mm{x},{y}";
                         Thing pixel = parent.theUKS.Labeled(name);
                         if (pixel == null) continue;
-                        HSLColor pixelColor = (HSLColor)pixel.V;
+                        Color pixelColor = (Color)pixel.V;
 
                         if (pixelColor != null)
                         {
                             //pixelColor.luminance /= 2;
-                            SolidColorBrush b = new SolidColorBrush(pixelColor.ToColor());
+                            SolidColorBrush b = new SolidColorBrush(pixelColor);
                             Ellipse e = new Ellipse()
                             {
                                 Height = pixelSize,

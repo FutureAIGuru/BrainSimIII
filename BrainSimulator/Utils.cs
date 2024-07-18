@@ -732,6 +732,12 @@ namespace BrainSimulator
                     Sqrt(Pow(P2.X - P1.X, 2) + Math.Pow(P2.Y - P1.Y, 2));
             return (float)distance;
         }
+        public static float DistancePointToLine2(Point P, Point P1, Point P2)
+        {
+            double distance = ((P2.X - P1.X) * (P1.Y - P.Y) - (P1.X - P.X) * (P2.Y - P1.Y)) /
+                    Sqrt(Pow(P2.X - P1.X, 2) + Math.Pow(P2.Y - P1.Y, 2));
+            return (float)distance;
+        }
         public static Segment ExtendSegment(Segment s, float dist)
         {
             Segment retVal = new Segment();
