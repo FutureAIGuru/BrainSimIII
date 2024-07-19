@@ -3,12 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Linq;
 using static System.Math;
-using System.Security.Cryptography.Xml;
-using System.Windows.Navigation;
 using System.Diagnostics;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
-using static BrainSimulator.Modules.ModuleOnlineInfo;
-using System.Numerics;
 
 namespace BrainSimulator.Modules.Vision
 {
@@ -24,7 +19,7 @@ namespace BrainSimulator.Modules.Vision
         public List<Tuple<int, int, int, float>> localMaxima;
         private float[,] boundaries;
         private List<Point> boundaryPoints;
-        int minLength = 7;
+        int minLength = 4;
 
         // Constructor
         public HoughTransform(int width, int height)
@@ -322,7 +317,7 @@ namespace BrainSimulator.Modules.Vision
 
             if (angleDiff > angleLimit && angleDiff < 180 - angleLimit || angleDiff > 180 + angleLimit && angleDiff < 360 - angleLimit) return false;
             //are the segments near each other?
-            float d1 = Utils.DistanceBetweenTwoSegments(s1.s.P1, s1.s.P2, s2.s.P1,s2.s.P2);
+            float d1 = Utils.DistanceBetweenTwoSegments(s1.s,s2.s);
             if (d1 > 5) return false;
 
             d1 = Utils.DistancePointToSegment(s1.s, s2.s.P1);

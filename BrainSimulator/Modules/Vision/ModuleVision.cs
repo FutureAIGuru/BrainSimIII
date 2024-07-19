@@ -332,7 +332,7 @@ namespace BrainSimulator.Modules
                                 //this will offset the boundary point based on the intensity of the intervening point
                                 HSLColor c0 = new(rayThruImage[start]);
                                 HSLColor c1 = new(rayThruImage[start + 1]);
-                                HSLColor c2 = new(rayThruImage[start+2]);
+                                HSLColor c2 = new(rayThruImage[start + 2]);
                                 HSLColor c3 = new(rayThruImage[j]);
                                 float offset = (c1.saturation - c3.saturation) * c2.saturation;
                                 if (y == 35)
@@ -394,27 +394,30 @@ namespace BrainSimulator.Modules
             //first lengthen the segments
             List<Segment> segments = new List<Segment>();
             foreach (Segment s in segmentsIn)
-                segments.Add(new Segment(s.P1, s.P2) { theColor = s.theColor,});
+                segments.Add(new Segment(s.P1, s.P2) { theColor = s.theColor, });
 
-            for (int i = 0; i < segments.Count; i++)
-            {
-                ////now extend another 3 or more pixels, just for good measure
-                //float distToExtend = (float)Math.Max(2, segments[i].Length * 0.10);
-                segments[i] = Utils.ExtendSegment(segments[i], 1); //one pixel extension
-            }
             segmentsIn = segments;
             //Now, find the corners
             corners = new List<Corner>();
 
             segments = segments.OrderByDescending(x => x.Length).ToList();
             corners = new();
-            for (int i = 0; i < segments.Count; i++)
+            for (int i = 0; i < segments.Count - 1; i++)
             {
-                Segment s1 = segments[i];
-                for (int j = i; j < segments.Count; j++)
+                Segment s1 = new(segments[i]);
+                for (int j = i + 1; j < segments.Count; j++)
                 {
-                    Segment s2 = segments[j];
-                    if (Utils.FindIntersection(s1, s2, out PointPlus intersection, out Angle angle))
+                    Segment s2 = new(segments[j]);
+                    bool segmentsIntersect = Utils.FindIntersection(s1, s2, out PointPlus intersection, out Angle angle);
+                    float dist = (Utils.DistanceBetweenTwoSegments(s1, s2));
+                    while (dist < 4 && !segmentsIntersect)
+                    {
+                        s2 = Utils.ExtendSegment(s2, 1); //one pixel extension
+                        s1 = Utils.ExtendSegment(s1, 1); //one pixel extension
+                        dist = (Utils.DistanceBetweenTwoSegments(s1, s2));
+                        segmentsIntersect = Utils.FindIntersection(s1, s2, out intersection, out angle);
+                    }
+                    if (segmentsIntersect)
                     {
                         //find the angle properly
                         PointPlus A, B, C;
@@ -443,7 +446,7 @@ namespace BrainSimulator.Modules
             if (angle.Degrees > 180)
                 angle.Degrees = 360 - angle.Degrees;
             Angle minAngle = new Angle();
-            minAngle.Degrees = 5;
+            minAngle.Degrees = 1;
             //if (s1.Length < 20 || s2.Length < 20) minAngle.Degrees = 20;
 
 

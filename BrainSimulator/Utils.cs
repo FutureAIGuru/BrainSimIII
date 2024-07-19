@@ -560,19 +560,19 @@ namespace BrainSimulator
             }
         }
 
-        public static float DistanceBetweenTwoSegments(Point p1, Point p2, Point p3, Point p4)
+        public static float DistanceBetweenTwoSegments(Segment s1, Segment s2)
         {
             float retVal = float.MaxValue;
-            double d1 = FindDistanceToSegment(p1, p3, p4, out Point closest);
+            double d1 = DistancePointToSegment(s1,s2.P1);
             if (d1 < retVal)
                 retVal = (float)d1;
-            d1 = FindDistanceToSegment(p2, p3, p4, out closest);
+            d1 = DistancePointToSegment(s1, s2.P2);
             if (d1 < retVal)
                 retVal = (float)d1;
-            d1 = FindDistanceToSegment(p3, p1, p2, out closest);
+            d1 = DistancePointToSegment(s2, s1.P1);
             if (d1 < retVal)
                 retVal = (float)d1;
-            d1 = FindDistanceToSegment(p4, p1, p2, out closest);
+            d1 = DistancePointToSegment(s2, s1.P1);
             if (d1 < retVal)
                 retVal = (float)d1;
             return retVal;

@@ -54,7 +54,7 @@ namespace BrainSimulator.Modules
         }
         public PointPlus(Point pp)
         {
-            X = (float)pp.X; 
+            X = (float)pp.X;
             Y = (float)pp.Y;
             Conf = 0;
         }
@@ -376,9 +376,9 @@ namespace BrainSimulator.Modules
             };
             return retVal;
         }
-        public static Point3DPlus operator *(Point3DPlus a ,float scale)
+        public static Point3DPlus operator *(Point3DPlus a, float scale)
         {
-            Point3DPlus p = new Point3DPlus((float)a.P.X *scale, a.P.Y *scale, a.P.Z * scale);
+            Point3DPlus p = new Point3DPlus((float)a.P.X * scale, a.P.Y * scale, a.P.Z * scale);
             return p;
         }
         public static Point3DPlus operator -(Point3DPlus a, Point3DPlus b)
@@ -436,6 +436,11 @@ namespace BrainSimulator.Modules
         public ColorInt theColor;
 
         public Segment() { }
+        public Segment(Segment s)
+        {
+            P1 = s.P1;
+            P2 = s.P2;
+        }
         public override string ToString()
         {
             string retVal = $"Length: {(int)Length} ({P1.X},{P1.Y}) : ({P2.X},{P2.Y}) A: {Angle}";
@@ -510,7 +515,7 @@ namespace BrainSimulator.Modules
         private float theAngle = 0;
         public Angle() { this.theAngle = 0; }  // Don't remove, needed to save Angles to XML!
         public Angle(float angle) { this.theAngle = angle; }
-        public static implicit operator float(Angle a) => (a != null)?a.theAngle:0;
+        public static implicit operator float(Angle a) => (a != null) ? a.theAngle : 0;
         public static implicit operator Angle(float a) => new Angle(a);
         public static implicit operator Angle(double a) => new Angle((float)a);
         public static Angle operator -(Angle a, Angle b)
