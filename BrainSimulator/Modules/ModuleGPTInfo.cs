@@ -346,7 +346,10 @@ is-part-of-speech, ";
             // Split by pipe (|) to get the individual parents
             string[] parents = GPTOutput.Split('|');
             // First we make the label a word.
-            theUKS.AddStatement("."+textIn, "is-a", "Word");
+            String englishWord = "." + textIn;
+            theUKS.AddStatement(englishWord, "is-a", "Word");
+            // Count to capture the amount of values being calculated.
+            int count = 0;
             // Then we run through each individual parent.
             foreach (String parent in parents)
             {
@@ -365,16 +368,22 @@ is-part-of-speech, ";
                 }
                 else
                 {
+                    // Singularize the word
                     textIn = GPT.Singularize(textIn);
-
-                    // Add "." to indicate word, and add "*" to indicate count.
-                    String labelWithNum = "." + textIn + "*";
 
                     // The second value of the pair is the new parent.
                     String newParent = valuePairs[1];
 
-                    theUKS.AddStatement(labelWithNum, "means", newParent);
+                    // Make the english word "means" the abstract item.
+                    theUKS.AddStatement(englishWord, "means", textIn + "*");
 
+                    // Make the disambiguated term a child of the parent.
+                    theUKS.AddStatement(textIn + count.ToString(), "is-a", newParent);
+
+                    // Increment count to see how many disambiguous items there are.
+                    count++;
+
+                    // Incrememnt successful relationships
                     ModuleGPTInfoDlg.relationshipCount += 1;
                 }
             }

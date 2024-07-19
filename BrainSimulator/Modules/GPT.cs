@@ -75,8 +75,9 @@ namespace BrainSimulator.Modules
                 // NOT CURRENTLY USED: IMPORTANT: If you use GPT "Fine Tuning" put the fine-tuning model key here in the app.config file and change the line here:.
                 //model = "<YOUR_FINETUNED_MODEL_HERE>",
                 //model = ConfigurationManager.AppSettings["FineTunedModel"],
-                model = "gpt-4o", //not fine-tuned
+                //model = "gpt-4o", //not fine-tuned
                 //model = "gpt-3.5-turbo", //not fine-tuned
+                model = "gpt-4o-mini",
                 messages = new[] { new { role = "system", content = systemText }, new { role = "user", content = userText } },
             };
 
