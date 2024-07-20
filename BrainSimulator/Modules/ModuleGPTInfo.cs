@@ -375,10 +375,10 @@ is-part-of-speech, ";
                     String newParent = valuePairs[1];
 
                     // Make the english word "means" the abstract item.
-                    theUKS.AddStatement(englishWord, "means", textIn + "*");
+                    Relationship r = theUKS.AddStatement(englishWord, "means", textIn + "*");
 
                     // Make the disambiguated term a child of the parent.
-                    theUKS.AddStatement(textIn + count.ToString(), "is-a", newParent);
+                    theUKS.AddStatement(r.target, "is-a", newParent);
 
                     // Increment count to see how many disambiguous items there are.
                     count++;
