@@ -82,8 +82,8 @@ namespace BrainSimulator.Modules
             {//keep theta within the range +/- PI
                 if (polarDirty) UpdatePolar();
                 theta = value;
-                if (theta > PI) theta -= 2 * (float)PI;
-                if (theta < -PI) theta += 2 * (float)PI;
+                //if (theta > PI) theta -= 2 * (float)PI;
+                //if (theta < -PI) theta += 2 * (float)PI;
                 xyDirty = true;
             }
         }
@@ -111,7 +111,8 @@ namespace BrainSimulator.Modules
         }
         public override string ToString()
         {
-            string s = "R: " + R.ToString("F3") + ", Theta: " + Degrees.ToString("F3") + "° (" + X.ToString("F2") + "," + Y.ToString("F2") + ") Conf:" + Conf.ToString("F3");
+            //            string s = "R: " + R.ToString("F3") + ", Theta: " + Degrees.ToString("F3") + "° (" + X.ToString("F2") + "," + Y.ToString("F2") + ") Conf:" + Conf.ToString("F3");
+            string s = $"({X.ToString("0.0")}.{Y.ToString("0.0")})";
             return s;
         }
 
@@ -142,6 +143,14 @@ namespace BrainSimulator.Modules
             PointPlus retVal = new PointPlus
             {
                 P = new Point(a.P.X - b.P.X, a.P.Y - b.P.Y)
+            };
+            return retVal;
+        }
+        public static PointPlus operator *(PointPlus a, double b)
+        {
+            PointPlus retVal = new PointPlus
+            {
+                P = new Point(a.P.X*b, a.P.Y * b)
             };
             return retVal;
         }
@@ -432,8 +441,7 @@ namespace BrainSimulator.Modules
     {
         public PointPlus P1;
         public PointPlus P2;
-        public PointPlus Motion;
-        public ColorInt theColor;
+        public int debugIndex;
 
         public Segment() { }
         public Segment(Segment s)
@@ -451,13 +459,13 @@ namespace BrainSimulator.Modules
         {
             P1 = P1i;
             P2 = P2i;
-            theColor = 0xffffff;
+            debugIndex = -1;
         }
         public Segment(PointPlus P1i, PointPlus P2i, ColorInt theColori)
         {
             P1 = P1i;
             P2 = P2i;
-            theColor = theColori;
+            debugIndex = theColori;
         }
         public PointPlus MidPoint
         {
@@ -500,10 +508,8 @@ namespace BrainSimulator.Modules
             {
                 P1 = this.P1.Clone(),
                 P2 = this.P2.Clone(),
-                theColor = this.theColor
+                debugIndex = this.debugIndex
             };
-            if (this.Motion != null)
-                Motion = this.Motion.Clone();
             return s;
         }
     }
@@ -521,7 +527,7 @@ namespace BrainSimulator.Modules
         public static Angle operator -(Angle a, Angle b)
         {
             Angle c = (float)a - (float)b;
-            c = ((float)c + PI) % (2 * PI) - PI;
+            //c = ((float)c + PI) % (2 * PI) - PI;
             return c;
         }
         public static Angle operator +(Angle a, Angle b)
@@ -532,7 +538,7 @@ namespace BrainSimulator.Modules
         public override string ToString()
         {
             float degrees = theAngle * 180 / (float)PI;
-            string s = theAngle.ToString("F3") + " " + degrees.ToString("F3") + "°";
+            string s = theAngle.ToString("0.00") + " " + degrees.ToString("0.0") + "°";
             return s;
         }
         public int CompareTo(Angle a)

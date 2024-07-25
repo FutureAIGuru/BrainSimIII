@@ -125,7 +125,7 @@ namespace BrainSimulator.Modules
             }
             //setup to normalize the distance
             float maxDist = 0;
-            Angle prefTheta = (corners[1].location - corners[0].location).Theta;
+            Angle prefTheta = (corners[1].pt - corners[0].pt).Theta;
             Thing theColor = outline.GetAttribute("Color");
             if (theColor != null)
                 currentShape.SetAttribute(theColor);
@@ -138,7 +138,7 @@ namespace BrainSimulator.Modules
                 int next = i + 1; 
                 if (next >= corners.Count) next = 0;
                 var nextCorner = corners[next];
-                PointPlus theEdge  = (nextCorner.location - corners[i].location);
+                PointPlus theEdge  = (nextCorner.pt - corners[i].pt);
                 float dist = theEdge.R;
                 if (dist > maxDist)
                 {
@@ -153,7 +153,7 @@ namespace BrainSimulator.Modules
             string sizeName = "size" + (int)maxDist / 10;
             currentShape.SetAttribute(theUKS.GetOrAddThing(sizeName, "Size"));
 
-            string location = $"mmPos:{(int)corners[0].location.X},{(int)corners[0].location.Y}";
+            string location = $"mmPos:{(int)corners[0].pt.X},{(int)corners[0].pt.Y}";
             Thing locationThing = theUKS.GetOrAddThing(location, "Position");
             currentShape.SetAttribute(locationThing);   
             
@@ -171,7 +171,7 @@ namespace BrainSimulator.Modules
                 var nextCorner = corners[(i + 2) % corners.Count];
 
                 //how far to move
-                float dist = (currCorner.location - prevCorner.location).R;
+                float dist = (currCorner.pt - prevCorner.pt).R;
                 dist /= maxDist;
                 string distName = "distance." + ((int)Round(dist * 10)).ToString();
                 if (Round(dist * 10) == 10) distName = "distance1.0";
@@ -180,8 +180,8 @@ namespace BrainSimulator.Modules
                 r.TimeToLive = TimeSpan.FromSeconds(10);
 
                 //how much to turn
-                Segment s1 = new Segment(prevCorner.location, currCorner.location);
-                Segment s2 = new Segment(currCorner.location, nextCorner.location);
+                Segment s1 = new Segment(prevCorner.pt, currCorner.pt);
+                Segment s2 = new Segment(currCorner.pt, nextCorner.pt);
                 Angle turn = s2.Angle - s1.Angle;
                 while (turn.Degrees > 180) turn -= Angle.FromDegrees(360);
                 while (turn.Degrees <= -180) turn += Angle.FromDegrees(360);

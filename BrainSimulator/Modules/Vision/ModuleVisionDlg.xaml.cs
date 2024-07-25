@@ -6,18 +6,14 @@
 
 using System;
 using System.Collections.Generic;
-//using System.Drawing;
-
-//using System.Drawing;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Input;
-
-
 using System.Windows.Shapes;
+using static System.Math;
+
 
 namespace BrainSimulator.Modules
 {
@@ -37,11 +33,11 @@ namespace BrainSimulator.Modules
 
             ModuleVision parent = (ModuleVision)base.ParentModule;
 
-            if (parent.bitmap == null) return false;
+            if (parent.imageArray == null) return false;
             try
             {
-                labelProperties.Content = "Image: " + Math.Round(parent.bitmap.Width) + "x" + Math.Round(parent.bitmap.Height) +
-                    "\r\nBit Depth: " + parent.bitmap.Format.BitsPerPixel +
+                labelProperties.Content = "Image: " + parent.imageArray.GetLength(0) + "x" + parent.imageArray.GetLength(1) +
+                //    "\r\nBit Depth: " + parent.bitmap.Format.BitsPerPixel +
                     "\r\nSegments: " + parent.segments.Count +
                     "\r\nCorners: " + parent.corners.Count;
             }
@@ -84,7 +80,7 @@ namespace BrainSimulator.Modules
                         {
                             //pixel.luminance /= 2;
                             SolidColorBrush b = new SolidColorBrush(pixel);
-                            Rectangle e = new ()
+                            Rectangle e = new()
                             {
                                 Height = pixelSize,
                                 Width = pixelSize,
@@ -99,28 +95,41 @@ namespace BrainSimulator.Modules
                     }
             }
 
-            //draw the boundaries
-            if (cbShowBoundaries.IsChecked == true && parent.boundaryArray != null)
+            //draw the strokes
+            if (cbShowSrokes.IsChecked == true && parent.strokePoints != null)
+            {
+                foreach (var pt in parent.strokePoints)
+                {
+                    Rectangle e = new()
+                    {
+                        Height = pixelSize / 2,
+                        Width = pixelSize / 2,
+                        Stroke = Brushes.Blue,
+                        Fill = Brushes.Blue,
+                        //                                ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y})" },
+                    };
+                    Canvas.SetLeft(e, pt.X * scale - pixelSize / 4);
+                    Canvas.SetTop(e, pt.Y * scale - pixelSize / 4);
+                    theCanvas.Children.Add(e);
+                }
+            }
+            //draw the strokes
+            if (cbShowBoundaries.IsChecked == true && parent.boundaryPoints != null)
             {
                 foreach (var pt in parent.boundaryPoints)
-                //for (int x = 0; x < parent.boundaryArray.GetLength(0); x++)
-                //    for (int y = 0; y < parent.boundaryArray.GetLength(1); y++)
+                {
+                    Rectangle e = new()
                     {
-//                        if (parent.boundaryArray[x, y] != 0)
-                        {
-                            Rectangle e = new ()
-                            {
-                                Height = pixelSize,
-                                Width = pixelSize,
-                                Stroke = Brushes.Black,
-                                Fill = Brushes.Black,
-//                                ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y})" },
-                            };
-                            Canvas.SetLeft(e, pt.X * scale - pixelSize / 2);
-                            Canvas.SetTop(e, pt.Y * scale - pixelSize / 2);
-                            theCanvas.Children.Add(e);
-                        }
-                    }
+                        Height = pixelSize / 2,
+                        Width = pixelSize / 2,
+                        Stroke = Brushes.Blue,
+                        Fill = Brushes.Blue,
+                        //                                ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y})" },
+                    };
+                    Canvas.SetLeft(e, pt.X * scale - pixelSize / 4);
+                    Canvas.SetTop(e, pt.Y * scale - pixelSize / 4);
+                    theCanvas.Children.Add(e);
+                }
             }
             //if (cbShowBoundaries.IsChecked == true && parent.boundaryArray != null)
             //{
@@ -161,7 +170,7 @@ namespace BrainSimulator.Modules
                         if (votes > 4)// && votes < 40)
                         {
 
-//                            var maxItem = parent.segmentFinder.localMaxima.FindFirst(x => x.Item2 == rhoIndex && x.Item3 == thetaIndex);
+                            //                            var maxItem = parent.segmentFinder.localMaxima.FindFirst(x => x.Item2 == rhoIndex && x.Item3 == thetaIndex);
 
                             HSLColor hSLColor = new HSLColor(Colors.Green);
                             float intensity = (float)votes / 20;
@@ -172,10 +181,10 @@ namespace BrainSimulator.Modules
                             //    hSLColor.luminance = 0.5f;
                             //}
                             Brush brush1 = new SolidColorBrush(hSLColor.ToColor());
-                            Rectangle e = new ()
+                            Rectangle e = new()
                             {
-                                Height = scaley-1,
-                                Width = scalex-1,
+                                Height = scaley - 1,
+                                Width = scalex - 1,
                                 Stroke = brush1,
                                 Fill = brush1,
                                 ToolTip = new System.Windows.Controls.ToolTip { Content = $"({(int)rhoIndex},{(int)thetaIndex})" },
@@ -188,59 +197,6 @@ namespace BrainSimulator.Modules
                     }
                 }
             }
-            //draw the lines
-            if (cbShowLines.IsChecked == true && parent.segmentFinder.localMaxima != null & parent.segmentFinder.localMaxima.Count > 0)
-            {
-                for (int i = parent.segmentFinder.localMaxima.Count - 1; i >= 0; i--)
-                {
-                    Tuple<int, int, int, float> line = parent.segmentFinder.localMaxima[i];
-                    var points = parent.segmentFinder.accumulator[line.Item2, line.Item3];
-                    float maxVotes = parent.segmentFinder.localMaxima[0].Item1;
-                    float votes = line.Item1;
-                    float lineVotes = line.Item4;
-                    int minVotes = 4;
-                    if (votes < minVotes) continue;
-                    float intensity = (votes - minVotes) / maxVotes;
-                    intensity *= 2;
-                    HSLColor hSLColor = new HSLColor(Colors.Green);
-                    hSLColor.luminance = intensity;
-                    Brush brush = new SolidColorBrush(hSLColor.ToColor());
-                    int rhoIndex = line.Item2;
-                    int rho = rhoIndex - parent.segmentFinder.maxDistance;
-                    int theta = line.Item3;
-                    if (theta == 0 || theta == 180) //line is vertical
-                    {
-                        Line l = new Line()
-                        {
-                            X1 = rho * scale,
-                            X2 = rho * scale,
-                            Y1 = 0 * scale,
-                            Y2 = theCanvas.ActualHeight * scale,
-                            Stroke = brush,
-                            ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 200, Content = $"({(int)rhoIndex},{(int)theta},{(int)votes},{(int)lineVotes}) (r,t,v,vl)" },
-                        };
-                        theCanvas.Children.Add(l);
-                    }
-                    else
-                    {
-                        //calculate (m,b) for y=mx+b
-                        double fTheta = theta * Math.PI / parent.segmentFinder.numAngles;
-                        double b = rho / Math.Sin(fTheta);
-                        double m = -Math.Cos(fTheta) / Math.Sin(fTheta);
-                        Line l = new Line()
-                        {
-                            X1 = 0,
-                            X2 = 1000 * scale,
-                            Y1 = b * scale,
-                            Y2 = (b + m * 1000) * scale,
-                            Stroke = brush,
-                            ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 200, Content = $"({(int)rhoIndex},{(int)theta},{(int)votes},{(int)lineVotes}) (r,t,v,vl)" },
-                        };
-                        theCanvas.Children.Add(l);
-                    }
-                }
-            }
-
             //draw the segments
             if (cbShowSegments.IsChecked == true && parent.segments != null & parent.segments.Count > 0)
             {
@@ -255,7 +211,7 @@ namespace BrainSimulator.Modules
                         Y2 = segment.P2.Y * scale,
                         Stroke = Brushes.Red,
                         StrokeThickness = 4,
-                        //ToolTip = new System.Windows.Controls.ToolTip { Content = $"/*{(int)segment.theColor}*/:({segment.P1.X},{segment.P1.Y}) - -({segment.P2.X},{segment.P2.Y})" },
+                        ToolTip = new System.Windows.Controls.ToolTip { Content = $"{segment.debugIndex}:({segment.P1.X},{segment.P1.Y}) - -({segment.P2.X},{segment.P2.Y})" },
                     };
                     theCanvas.Children.Add(l);
                 }
@@ -264,32 +220,155 @@ namespace BrainSimulator.Modules
             //draw the corners
             if (cbShowCorners.IsChecked == true && parent.corners != null && parent.corners.Count > 0)
             {
-                foreach (var corner in parent.corners)
+                for (int i = 0; i < parent.corners.Count; i++)
                 {
+                    ModuleVision.Corner corner = parent.corners[i];
                     float size = 15;
                     Brush b = Brushes.White;
-                    if (corner.angle == 0)
+                    if (corner.angle.Degrees == 180 || corner.angle.Degrees == -180)
                         b = Brushes.Pink;
                     Ellipse e = new Ellipse()
                     {
                         Height = size,
                         Width = size,
                         Stroke = b,
-                        Fill = b
+                        Fill = b,
+                        ToolTip = new System.Windows.Controls.ToolTip{ HorizontalOffset=100,  Content = $"{i}", },
                     };
-                    Canvas.SetTop(e, corner.location.Y * scale - size / 2);
-                    Canvas.SetLeft(e, corner.location.X * scale - size / 2);
+                    Canvas.SetTop(e, corner.pt.Y * scale - size / 2);
+                    Canvas.SetLeft(e, corner.pt.X * scale - size / 2);
                     theCanvas.Children.Add(e);
+
+                    //test out drawing little lines to represent the angle (then an elliptical arc, soon)
+                    int i1 = 5;
+                    PointPlus delta = corner.prevPt  - corner.pt;
+                    delta.R = i1;
+                    PointPlus pt1 = corner.pt + delta;
+
+                    Line l = new Line()
+                    {
+                        X1 = corner.pt.X * scale,
+                        Y1 = corner.pt.Y * scale,
+                        X2 = pt1.X * scale,
+                        Y2 = pt1.Y * scale,
+                        Stroke = Brushes.DarkGray,
+                        StrokeThickness = 2,
+                    };
+                    theCanvas.Children.Add(l);
+
+                    delta = corner.nextPt - corner.pt;
+                    delta.R = i1;
+                    PointPlus pt2 = corner.pt + delta;
+
+                    l = new Line()
+                    {
+                        X1 = corner.pt.X * scale,
+                        Y1 = corner.pt.Y * scale,
+                        X2 = pt2.X * scale,
+                        Y2 = pt2.Y * scale,
+                        Stroke = Brushes.DarkGray,
+                        StrokeThickness = 2,
+                    };
+                    theCanvas.Children.Add(l);
+
+                    var arc = new EllipticalCornerArc(corner.pt * scale, pt1 * scale, pt2 * scale);
+                    ////var arc = new EllipticalCornerArc(corner.location, s1.P2, s2.P2);
+                    var path = arc.GetEllipticalArcPath();
+                    if (path != null)
+                        theCanvas.Children.Add(path);
                 }
+
             }
 
             return true;
         }
 
+        public class EllipticalCornerArc
+        {
+            public PointPlus Corner { get; }
+            public PointPlus tangencyPoint1 { get; set; }
+            public PointPlus tangencyPoint2 { get; set; }
+            public double Distance1 { get; }
+            public double Distance2 { get; }
+
+            public EllipticalCornerArc(PointPlus corner, PointPlus tangencyPoint1, PointPlus tangencyPoint2)
+            {
+                Corner = corner;
+                this.tangencyPoint1 = tangencyPoint1;
+                this.tangencyPoint2 = tangencyPoint2;
+                Distance1 = (corner - tangencyPoint1).R;
+                Distance2 = (corner - tangencyPoint2).R;
+            }
+
+            public Polyline GetEllipticalArcPath()
+            {
+                //get the center of rotation
+                PointPlus pt1 = tangencyPoint1 - Corner;
+                pt1.Theta += Angle.FromDegrees(90);
+                pt1 += tangencyPoint1;
+                PointPlus pt2 = tangencyPoint2 - Corner;
+                pt2.Theta += Angle.FromDegrees(90);
+                pt2 += tangencyPoint2;
+
+                Utils.FindIntersection(tangencyPoint1, pt1, tangencyPoint2, pt2, out Point c1, out Angle a);
+                PointPlus center = new(c1);
+
+                //get the lengths of the major and minor axes
+                float r1 = (center - tangencyPoint1).R;
+                float r2 = (center - tangencyPoint2).R;
+
+                //get the angle of the major axis
+
+                //draw the arc from the major to the minor axis
+
+                //circular arc
+                Polyline poly = new Polyline()
+                {
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 1,
+                };
+                //poly.Points.Add(center);
+
+                PointPlus ptCurr = tangencyPoint1 - center;
+                PointPlus ptLast = tangencyPoint2 - center;
+                if (ptCurr.Theta - ptLast.Theta > Angle.FromDegrees(180))
+                { ptLast.Theta += Angle.FromDegrees(360); }
+                if (ptLast.Theta - ptCurr.Theta > Angle.FromDegrees(180))
+                { ptCurr.Theta += Angle.FromDegrees(360); }
+                float steps = (ptLast.Theta - ptCurr.Theta) / Angle.FromDegrees(5);
+                if (steps > 0)
+                {
+                    for (int i = 0; i < steps; i++)
+                    {
+                        Angle theta = i * Angle.FromDegrees(5);
+                        //heres the formula for a function defining an ellipse in terms of r(theta)
+                        //TODO: this only really works on circular arcs
+                        float r = r1 * r2 / (float)Math.Sqrt((r2 * r2 * Cos(theta) * Cos(theta)) + (r1 * r1 * Sin(theta) * Sin(theta)));
+                        PointPlus pp = new(r, theta + ptCurr.Theta);
+                        poly.Points.Add(center + pp);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < Abs(steps); i++)
+                    {
+                        Angle theta = i * Angle.FromDegrees(5);
+                        float r = r1 * r2 / (float)Math.Sqrt((r2 * r2 * Math.Cos(theta) * Math.Cos(theta)) + (r1 * r1 * Math.Sin(theta) * Math.Sin(theta)));
+                        PointPlus pp = new(r, theta + ptLast.Theta);
+                        poly.Points.Add(center + pp);
+                    }
+                }
+                return poly;
+            }
+        }
+
+
+
+
         Line tempLine;
         private void E_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            if (sender is Rectangle  e1)
+            if (sender is Rectangle e1)
             {
                 if (tempLine != null)
                     theCanvas.Children.Remove(tempLine);
@@ -382,14 +461,15 @@ namespace BrainSimulator.Modules
 
         private List<string> GetFileList(string filePath)
         {
-            SearchOption subFolder = SearchOption.AllDirectories;
+            //"using System.IO" conflicts with graphics
+            System.IO.SearchOption subFolder = System.IO.SearchOption.AllDirectories;
             //if (!(bool)cbSubFolders.IsChecked)
             //    subFolder = SearchOption.TopDirectoryOnly;
             string dir = filePath;
-            FileAttributes attr = File.GetAttributes(filePath);
-            if ((attr & FileAttributes.Directory) != FileAttributes.Directory)
+            System.IO.FileAttributes attr = System.IO.File.GetAttributes(filePath);
+            if ((attr & System.IO.FileAttributes.Directory) != System.IO.FileAttributes.Directory)
                 dir = System.IO.Path.GetDirectoryName(filePath);
-            return new List<string>(Directory.EnumerateFiles(dir, "*.png", subFolder));
+            return new List<string>(System.IO.Directory.EnumerateFiles(dir, "*.png", subFolder));
         }
 
         private void cb_Checked(object sender, RoutedEventArgs e)
@@ -410,8 +490,8 @@ namespace BrainSimulator.Modules
 
         private void ModuleBaseDlg_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == Key.R)
-                Button_Click(null,null);
-        } 
+            if (e.Key == Key.R || e.Key == Key.F5)
+                Button_Click(null, null);
+        }
     }
 }
