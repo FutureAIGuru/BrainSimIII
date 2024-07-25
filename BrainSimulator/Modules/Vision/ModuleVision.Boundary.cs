@@ -106,25 +106,28 @@ public partial class ModuleVision
 
     private void RemoveOrphanPoints(List<PointPlus> points)
     {
-        //Remove orpha points which can be caused by curved edges
-        for (int i = 0; i < points.Count - 1; i++)
+        //Remove orphan points which can be caused by curved edges
+        for (int i = 0; i < points.Count; i++)
         {
-            for (int j = i + 1; j < points.Count; j++)
+            PointPlus pt1 = points[i];
+            float dist = 0;
+            for (int j = 0; j < points.Count; j++)
             {
-                PointPlus pt1 = points[i];
+                if (j == i) continue;
                 PointPlus pt2 = points[j];
-                if ((pt1 - pt2).R < 2)
+                dist = (pt1 - pt2).R;
+                if (dist < 2)
                     goto neighborFound;
             }
             points.RemoveAt(i);
-            i--;
+            i = (i == 0) ? i - 1 : i - 2;
         neighborFound: continue;
         }
     }
     private List<PointPlus> FindStrokePtsInRay(float sx, float sy, float dx, float dy, List<Color> rayThruImage)
     {
         //find stroke centers in Ray
-        if (sy == 50)
+        if (sy == 10)
         { }
         List<PointPlus> ptsInThisScan = new();
         int startStroke = 0;
@@ -132,15 +135,15 @@ public partial class ModuleVision
         for (int i = 0; i < rayThruImage.Count - 1; i++)
         {
             Color colorVal = rayThruImage[i];
-            if (rayThruImage[i].B == 0 || colorVal == Colors.White) continue;
+            //TODO: fix the problem with background colors
+            if (rayThruImage[i].B == 0) continue;// || colorVal == Colors.White) continue;
             startStroke = i;
-            while (i < rayThruImage.Count && (rayThruImage[i].B != 0 && rayThruImage[i] != Colors.White))
+            while (i < rayThruImage.Count && (rayThruImage[i].B != 0))// && rayThruImage[i] != Colors.White))
             {
                 endStroke = i;
                 i++;
             }
 
-            //TODO: handle double peaks as two stroke points
             for (int j = startStroke; j <= endStroke - 2; j++)
             {
                 byte colorVal0 = rayThruImage[j].B;
@@ -163,15 +166,15 @@ public partial class ModuleVision
             float boundaryPos = (startStroke + endStroke) / 2f;
             float numerator = 0;
             float denominator = 0;
-            //find the actual brightest point in this range
+            //find the  brightest point in this range and calculate the position of this brightest point
             for (int j = startStroke; j <= endStroke; j++)
             {
                 byte colorVal3 = rayThruImage[j].B;
                 numerator += j * colorVal3;
                 denominator += rayThruImage[j].B;
             }
-            if (endStroke - startStroke > 5) continue;
-            if (brightest < 0x0b0) continue;
+            if (endStroke - startStroke > 4) continue; //stroke is too wide
+            if (brightest < 0x0b0) continue; //stroke is too dim
 
             boundaryPos = numerator / denominator;
             if (dx == 1 && dy == 0)

@@ -17,6 +17,8 @@ using System.Windows.Media;
 using System.Windows;
 using System.Windows.Media.Media3D;
 using System.Security.Cryptography.Xml;
+//using System.Drawing;
+using System.Windows.Media.Animation;
 
 namespace BrainSimulator.Modules
 {
@@ -74,12 +76,24 @@ namespace BrainSimulator.Modules
 
             using (System.Drawing.Bitmap bitmap2 = new(currentFilePath))
             {
-                imageArray = new Color[bitmap2.Width, bitmap2.Height];
-
-                for (int i = 0; i < bitmap2.Width; i++)
-                    for (int j = 0; j < bitmap2.Height; j++)
+                System.Drawing.Bitmap theBitmap = bitmap2;
+                if (bitmap2.Width > 50)
+                {
+                    System.Drawing.Bitmap resizedImage = new(50, 50);
+                    using (System.Drawing.Graphics graphics = System.Drawing.Graphics.FromImage(resizedImage))
                     {
-                        var c = bitmap2.GetPixel(i, j);
+                        graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        graphics.DrawImage(bitmap2, 0, 0, 50,50);
+                    }
+                    theBitmap = resizedImage;
+                }
+
+                imageArray = new Color[theBitmap.Width, theBitmap.Height];
+
+                for (int i = 0; i < theBitmap.Width; i++)
+                    for (int j = 0; j < theBitmap.Height; j++)
+                    {
+                        var c = theBitmap.GetPixel(i, j);
                         imageArray[i, j] = new Color() { A = 0xff, R = c.R, G = c.G, B = c.B };
                     }
             }
