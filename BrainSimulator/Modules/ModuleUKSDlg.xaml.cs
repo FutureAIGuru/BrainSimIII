@@ -126,7 +126,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     }
     private void AddChildren(Thing t, TreeViewItem tvi, int depth, string parentLabel)
     {
-        if (totalItemCount > 3000) return;
+        if (totalItemCount > 500) return;
 
         List<Relationship> theChildren = new();
         foreach (Relationship r in t.Relationships)
@@ -142,8 +142,10 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         foreach (Relationship r in theChildren)
         {
+            if (totalItemCount > 500) return;
             Thing child = r.target;
-            int descCount = child.GetDescendentsCount();
+            //int descCount = child.GetDescendentsCount(); //this makes the system too slow
+            int descCount = 10;
             string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
             string header = child.ToString();
             if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 

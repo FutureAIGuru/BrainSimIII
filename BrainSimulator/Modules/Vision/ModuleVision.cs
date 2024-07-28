@@ -17,8 +17,6 @@ using System.Windows.Media;
 using System.Windows;
 using System.Windows.Media.Media3D;
 using System.Security.Cryptography.Xml;
-//using System.Drawing;
-using System.Windows.Media.Animation;
 
 namespace BrainSimulator.Modules
 {
@@ -74,6 +72,36 @@ namespace BrainSimulator.Modules
             if (currentFilePath == previousFilePath) return;
             previousFilePath = currentFilePath;
 
+            LoadImageFileToPixelArray(currentFilePath);
+
+            FindBackgroundColor();
+
+            FindBoundaries(imageArray);
+
+            segmentFinder = new(imageArray.GetLength(0), imageArray.GetLength(1));
+            if (imageArray.GetLength(0) < 50)
+                segmentFinder.Transform2(strokePoints);
+            else
+                segmentFinder.Transform2(boundaryPoints);
+
+            //FindArcs();
+
+            segments = segmentFinder.FindSegments();
+
+            FindCorners(ref segments);
+
+            FindOrphanSegmentEnds();
+
+            //FindOutlines();
+
+            //WriteBitmapToMentalModel();
+
+            UpdateDialog();
+
+        }
+
+        private void LoadImageFileToPixelArray(string filePath)
+        {
             using (System.Drawing.Bitmap bitmap2 = new(currentFilePath))
             {
                 System.Drawing.Bitmap theBitmap = bitmap2;
@@ -83,7 +111,7 @@ namespace BrainSimulator.Modules
                     using (System.Drawing.Graphics graphics = System.Drawing.Graphics.FromImage(resizedImage))
                     {
                         graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                        graphics.DrawImage(bitmap2, 0, 0, 50,50);
+                        graphics.DrawImage(bitmap2, 0, 0, 50, 50);
                     }
                     theBitmap = resizedImage;
                 }
@@ -97,54 +125,19 @@ namespace BrainSimulator.Modules
                         imageArray[i, j] = new Color() { A = 0xff, R = c.R, G = c.G, B = c.B };
                     }
             }
-            //bitmap = new BitmapImage();
-            //try
+
+
+            //using (System.Drawing.Bitmap bitmap2 = new(filePath))
+            //{
+            //    imageArray = new Color[bitmap2.Width, bitmap2.Height];
+
+            //    for (int i = 0; i < bitmap2.Width; i++)
+            //        for (int j = 0; j < bitmap2.Height; j++)
             //        {
-            //    // Initialize the bitmap with the URI of the file
-            //    bitmap.BeginInit();
-            //    bitmap.UriSource = new Uri(currentFilePath, UriKind.Absolute);
-            //    bitmap.CacheOption = BitmapCacheOption.OnLoad; // To load the image fully at load time
-            //    bitmap.EndInit();
-            //    bitmap.Freeze(); // Make the BitmapImage thread safe
+            //            var c = bitmap2.GetPixel(i, j);
+            //            imageArray[i, j] = new Color() { A = 0xff, R = c.R, G = c.G, B = c.B };
+            //        }
             //}
-            //catch (Exception ex)
-            //{
-            //    // Handle exceptions such as file not found or invalid file format
-            //    Debug.WriteLine($"An error occurred: {ex.Message}");
-            //    return;
-            //}
-
-
-            //if (bitmap.Width > 200 || bitmap.Height > 200)
-            //{
-            //    Debug.WriteLine($"Image too large for current implementation");
-            //    return;
-            //}
-
-            //Color[,] imageArray;
-            //imageArray = GetImageArrayFromBitmapImage();
-            //segY = 9;
-            //imageArray = GenerateImage();
-            FindBoundaries(imageArray);
-
-            segmentFinder = new(imageArray.GetLength(0), imageArray.GetLength(1));
-            if (imageArray.GetLength(0) < 50)
-                segmentFinder.Transform2(strokePoints);
-            else
-                segmentFinder.Transform2(boundaryPoints);
-            FindArcs();
-            segments = segmentFinder.FindSegments();
-
-            FindCorners(ref segments);
-
-            //FindOrphanSegmentEnds();
-
-            FindOutlines();
-
-            WriteBitmapToMentalModel();
-
-            UpdateDialog();
-
         }
 
         private void WriteBitmapToMentalModel()

@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows.Shapes;
@@ -38,8 +37,8 @@ namespace BrainSimulator.Modules
             {
                 labelProperties.Content = "Image: " + parent.imageArray.GetLength(0) + "x" + parent.imageArray.GetLength(1) +
                 //    "\r\nBit Depth: " + parent.bitmap.Format.BitsPerPixel +
-                    "\r\nSegments: " + parent.segments.Count +
-                    "\r\nCorners: " + parent.corners.Count;
+                    "\r\nSegments: " + parent.segments?.Count +
+                    "\r\nCorners: " + parent.corners?.Count;
             }
             catch { return false; }
 
@@ -49,20 +48,6 @@ namespace BrainSimulator.Modules
             int pixelSize = scale - 2;
             if (pixelSize < 2) pixelSize = 2;
 
-            //draw the image
-            if (cbShowImage.IsChecked == true && parent.bitmap != null)
-            {
-                //TODO: images with bit depth < 32 display at slightly wrong scale
-                Image i = new Image
-                {
-                    Height = parent.bitmap.Height * scale,
-                    Width = parent.bitmap.Width * scale,
-                    Source = (ImageSource)parent.bitmap,
-                };
-                Canvas.SetLeft(i, 0);
-                Canvas.SetTop(i, 0);
-                theCanvas.Children.Add(i);
-            }
 
             //draw the pixels
             if (cbShowPixels.IsChecked == true && parent.imageArray != null)
@@ -104,8 +89,8 @@ namespace BrainSimulator.Modules
                     {
                         Height = pixelSize / 2,
                         Width = pixelSize / 2,
-                        Stroke = Brushes.Blue,
-                        Fill = Brushes.Blue,
+                        Stroke = Brushes.DarkGreen,
+                        Fill = Brushes.DarkGreen,
                         //                                ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y})" },
                     };
                     Canvas.SetLeft(e, pt.X * scale - pixelSize / 4);
@@ -131,27 +116,6 @@ namespace BrainSimulator.Modules
                     theCanvas.Children.Add(e);
                 }
             }
-            //if (cbShowBoundaries.IsChecked == true && parent.boundaryArray != null)
-            //{
-            //    for (int x = 0; x < parent.boundaryArray.GetLength(0); x++)
-            //        for (int y = 0; y < parent.boundaryArray.GetLength(1); y++)
-            //        {
-            //            if (parent.boundaryArray[x, y] != 0)
-            //            {
-            //                Ellipse e = new Ellipse()
-            //                {
-            //                    Height = pixelSize,
-            //                    Width = pixelSize,
-            //                    Stroke = Brushes.Black,
-            //                    Fill = Brushes.Black,
-            //                    ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y})" },
-            //                };
-            //                Canvas.SetLeft(e, x * scale - pixelSize / 2);
-            //                Canvas.SetTop(e, y * scale - pixelSize / 2);
-            //                theCanvas.Children.Add(e);
-            //            }
-            //        }
-            //}
 
             //draw the hough transform
             if (cbShowHough.IsChecked == true)
@@ -233,7 +197,7 @@ namespace BrainSimulator.Modules
                         Width = size,
                         Stroke = b,
                         Fill = b,
-                        ToolTip = new System.Windows.Controls.ToolTip{ HorizontalOffset=100,  Content = $"{i}", },
+                        ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"{i}", },
                     };
                     Canvas.SetTop(e, corner.pt.Y * scale - size / 2);
                     Canvas.SetLeft(e, corner.pt.X * scale - size / 2);
@@ -241,7 +205,7 @@ namespace BrainSimulator.Modules
 
                     //test out drawing little lines to represent the angle (then an elliptical arc, soon)
                     int i1 = 5;
-                    PointPlus delta = corner.prevPt  - corner.pt;
+                    PointPlus delta = corner.prevPt - corner.pt;
                     delta.R = i1;
                     PointPlus pt1 = corner.pt + delta;
 
@@ -425,7 +389,7 @@ namespace BrainSimulator.Modules
             {
                 defaultDirectory = System.IO.Path.GetDirectoryName(MainWindow.currentFileName);
             }
-            OpenFileDialog openFileDialog1 = new OpenFileDialog
+            System.Windows.Forms.OpenFileDialog openFileDialog1 = new System.Windows.Forms.OpenFileDialog
             {
                 Filter = "Image Files| *.png;*.jpg",
                 Title = "Select an image file",
@@ -434,7 +398,7 @@ namespace BrainSimulator.Modules
             };
             // Show the Dialog.  
             // If the user clicked OK in the dialog  
-            DialogResult result = openFileDialog1.ShowDialog();
+            System.Windows.Forms.DialogResult result = openFileDialog1.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 defaultDirectory = System.IO.Path.GetDirectoryName(openFileDialog1.FileName);
@@ -474,6 +438,19 @@ namespace BrainSimulator.Modules
 
         private void cb_Checked(object sender, RoutedEventArgs e)
         {
+            if (sender is CheckBox cb)
+            {
+                ModuleVision parent = (ModuleVision)base.ParentModule;
+                if (parent == null) return;
+                bool cbState = cb.IsChecked == true;
+                switch (cb.Content)
+                {
+                    case "Horiz": parent.horizScan = cbState; parent.previousFilePath = ""; break;
+                    case "Vert": parent.vertScan = cbState; parent.previousFilePath = ""; break;
+                    case "45": parent.fortyFiveScan = cbState; parent.previousFilePath = ""; break;
+                    case "-45": parent.minusFortyFiveScan = cbState; parent.previousFilePath = ""; break;
+                }
+            }
             Draw(false);
         }
 
