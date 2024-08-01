@@ -90,7 +90,7 @@ namespace BrainSimulator.Modules
 
             FindCorners(ref segments);
 
-            FindOrphanSegmentEnds();
+            //FindOrphanSegmentEnds();
 
             //FindOutlines();
 
@@ -100,46 +100,47 @@ namespace BrainSimulator.Modules
 
         }
 
-        private void LoadImageFileToPixelArray(string filePath)
+        public float scale = 1;
+        public int offsetX = 0;
+        public int offsetY = 0;
+
+        public void LoadImageFileToPixelArray(string filePath)
         {
             using (System.Drawing.Bitmap bitmap2 = new(currentFilePath))
             {
                 System.Drawing.Bitmap theBitmap = bitmap2;
-                if (bitmap2.Width > 50)
+
+                int bitmapSize = 50;
+                if (bitmapSize > theBitmap.Width) bitmapSize = theBitmap.Width;
+                //do not expand an image if it is smaller than the bitmap...it can introduce problems
+                if (theBitmap.Width < bitmapSize) scale = (float)theBitmap.Width / bitmapSize;
+                if (scale > theBitmap.Width / bitmapSize) scale = theBitmap.Width / bitmapSize;
+                //limit the x&y offsets so the picture will be displayed
+                float maxOffset = bitmapSize * scale - bitmapSize;
+                if (offsetX > 0) offsetX = 0;
+                if (offsetX < -maxOffset) offsetX = -(int)maxOffset;
+                if (offsetY > 0) offsetY = 0;
+                if (offsetY < -maxOffset) offsetY = -(int)maxOffset;
+                System.Drawing.Bitmap resizedImage = new(bitmapSize, bitmapSize);
+                using (System.Drawing.Graphics graphics = System.Drawing.Graphics.FromImage(resizedImage))
                 {
-                    System.Drawing.Bitmap resizedImage = new(50, 50);
-                    using (System.Drawing.Graphics graphics = System.Drawing.Graphics.FromImage(resizedImage))
-                    {
-                        graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                        graphics.DrawImage(bitmap2, 0, 0, 50, 50);
-                    }
-                    theBitmap = resizedImage;
+                    graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    //graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+
+                    graphics.DrawImage(bitmap2, offsetX, offsetY, bitmapSize * scale, bitmapSize * scale);
                 }
 
-                imageArray = new Color[theBitmap.Width, theBitmap.Height];
+                imageArray = new Color[resizedImage.Width, resizedImage.Height];
 
-                for (int i = 0; i < theBitmap.Width; i++)
-                    for (int j = 0; j < theBitmap.Height; j++)
+                for (int i = 0; i < resizedImage.Width; i++)
+                    for (int j = 0; j < resizedImage.Height; j++)
                     {
-                        var c = theBitmap.GetPixel(i, j);
+                        var c = resizedImage.GetPixel(i, j);
                         imageArray[i, j] = new Color() { A = 0xff, R = c.R, G = c.G, B = c.B };
                     }
             }
-
-
-            //using (System.Drawing.Bitmap bitmap2 = new(filePath))
-            //{
-            //    imageArray = new Color[bitmap2.Width, bitmap2.Height];
-
-            //    for (int i = 0; i < bitmap2.Width; i++)
-            //        for (int j = 0; j < bitmap2.Height; j++)
-            //        {
-            //            var c = bitmap2.GetPixel(i, j);
-            //            imageArray[i, j] = new Color() { A = 0xff, R = c.R, G = c.G, B = c.B };
-            //        }
-            //}
+            dlg.Draw(false);
         }
-
         private void WriteBitmapToMentalModel()
         {
             Thing mentalModel = theUKS.GetOrAddThing("MentalModel", "Thing");
@@ -253,27 +254,30 @@ namespace BrainSimulator.Modules
         }
         private void FindCorners(ref List<Segment> segmentsIn)
         {
-            //first lengthen the segments
             List<Segment> segments = new List<Segment>();
             foreach (Segment s in segmentsIn)
                 segments.Add(new Segment(s.P1, s.P2) { debugIndex = s.debugIndex, });
 
-            segmentsIn = segments;
             //Now, find the corners
             corners = new List<Corner>();
             segments = segments.OrderByDescending(x => x.Length).ToList();
 
             corners = new();
+            //for (int maxExt = -1;maxExt <0;maxExt++)
             for (int i = 0; i < segments.Count - 1; i++)
             {
-                Segment s1 = new(segments[i]);
                 for (int j = i + 1; j < segments.Count; j++)
                 {
+                    if (i == 5 && j == 7)
+                    { }
+                    Segment s1 = new(segments[i]);
                     Segment s2 = new(segments[j]);
                     bool segmentsIntersect = Utils.FindIntersection(s1, s2, out PointPlus intersection, out Angle angle);
                     float dist = (Utils.DistanceBetweenTwoSegments(s1, s2));
-                    int maxExt = 4;
-                    while (dist < 4 && !segmentsIntersect && maxExt-- >= 0)
+
+                    //if there is no intersection, extend the segments a few pixels because they may miss by a bit because of the boundary/segment algorithm
+                    int maxExt = 2;
+                    while (dist < 3 && !segmentsIntersect && maxExt-- >= 0)
                     {
                         s2 = Utils.ExtendSegment(s2, 1); //one pixel extension
                         s1 = Utils.ExtendSegment(s1, 1); //one pixel extension
@@ -282,7 +286,16 @@ namespace BrainSimulator.Modules
                     }
                     if (segmentsIntersect)
                     {
-                        //TODO: this is moved to OUTLINE
+                        //if the intersection is not at the end of a segment, ignore it
+                        //float limit = 1.5f;
+                        //if (((intersection - s1.P1).R > limit &&
+                        //    (intersection - s1.P2).R > limit) ||
+                        //    ((intersection - s2.P1).R > limit &&
+                        //    (intersection - s2.P2).R > limit))
+                        //{
+                        //    continue;
+                        //}
+
                         PointPlus A, B, C;
                         B = intersection;
                         if ((s1.P1 - intersection).R > (s1.P2 - intersection).R)
@@ -293,9 +306,6 @@ namespace BrainSimulator.Modules
                             C = s2.P1;
                         else
                             C = s2.P2;
-                        Segment sA = new() { P1 = A, P2 = B };
-                        Segment sB = new() { P1 = C, P2 = B };
-
                         AddCornerToList(intersection, A, C);
                     }
                 }
@@ -304,9 +314,14 @@ namespace BrainSimulator.Modules
 
         private void AddCornerToList(PointPlus intersection, PointPlus prevPt, PointPlus nextPt)
         {
-            Corner alreadyInList = corners.FindFirst(x => (x.pt - intersection).R < 1.5); //allow things to be offset by a few pixels
+            //allow things to be offset by a few pixels
+            Corner alreadyInList = corners.FindFirst(x =>
+                (x.pt - intersection).R < 2 &&
+                (((x.prevPt - prevPt).R < 2 && (x.nextPt - nextPt).R < 2) ||
+                ((x.prevPt - nextPt).R < 2 && (x.nextPt - prevPt).R < 2)));
             if (alreadyInList == null)
                 corners.Add(new Corner { pt = intersection, prevPt = prevPt, nextPt = nextPt });
+            else { }
         }
 
         void FindOrphanSegmentEnds()

@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
-        Title="Vision" Height="500" Width="530" Background="Gray" ShowInTaskbar="False" SizeChanged="ModuleBaseDlg_SizeChanged" PreviewKeyDown="ModuleBaseDlg_PreviewKeyDown">
+        Title="Vision" Height="500" Width="530" Background="Gray" ShowInTaskbar="False" 
+                     SizeChanged="ModuleBaseDlg_SizeChanged" PreviewKeyDown="ModuleBaseDlg_PreviewKeyDown"
+                     MouseWheel="ModuleBaseDlg_MouseWheel" MouseMove="ModuleBaseDlg_MouseMove" >
     <Grid Name="theGrid" Margin="0,0,0,-6" >
         <Button x:Name="BtnBrowseFile"   IsDefault="True" Content="Open Image File" Click="Button_Browse_Click" FontSize="16" Margin="78,0,0,82" HorizontalAlignment="Left" Width="159" VerticalAlignment="Bottom"/>
         <Label  x:Name="errorText"            Content=""   HorizontalContentAlignment="Center"   FontSize="16" Margin="10,405,10,46" Background="Gray" Foreground="#FFF80902" VerticalAlignment="Bottom"/>

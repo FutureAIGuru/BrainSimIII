@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows.Shapes;
 using static System.Math;
+using System.Windows.Threading;
 
 
 namespace BrainSimulator.Modules
@@ -109,7 +110,11 @@ namespace BrainSimulator.Modules
                         Width = pixelSize / 2,
                         Stroke = Brushes.Blue,
                         Fill = Brushes.Blue,
-                        //                                ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y})" },
+                        ToolTip = new System.Windows.Controls.ToolTip
+                        {
+                            HorizontalOffset = 70,
+                            Content = $"({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")})"
+                        },
                     };
                     Canvas.SetLeft(e, pt.X * scale - pixelSize / 4);
                     Canvas.SetTop(e, pt.Y * scale - pixelSize / 4);
@@ -204,7 +209,7 @@ namespace BrainSimulator.Modules
                     theCanvas.Children.Add(e);
 
                     //test out drawing little lines to represent the angle (then an elliptical arc, soon)
-                    int i1 = 5;
+                    int i1 = 3;
                     PointPlus delta = corner.prevPt - corner.pt;
                     delta.R = i1;
                     PointPlus pt1 = corner.pt + delta;
@@ -470,5 +475,62 @@ namespace BrainSimulator.Modules
             if (e.Key == Key.R || e.Key == Key.F5)
                 Button_Click(null, null);
         }
+
+        private void ModuleBaseDlg_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            //TODO, make bitmapsize a variable here
+            //TODO, at max scale, do not change offsetX,Y
+            ModuleVision parent = (ModuleVision)base.ParentModule;
+            parent.scale *= 1 + e.Delta / 1000f;
+
+            parent.offsetX = +25 + (int)((parent.offsetX - 25) * (1 + e.Delta / 1000f));
+            parent.offsetY = +25 + (int)((parent.offsetY - 25) * (1 + e.Delta / 1000f));
+            if (parent.scale < 1) parent.scale = 1;
+            parent.LoadImageFileToPixelArray(parent.currentFilePath);
+            
+            ResetTimer();
+        }
+
+        private Point prevPoint;
+        private void ModuleBaseDlg_MouseMove(object sender, MouseEventArgs e)
+        {
+            Point pos = e.GetPosition(this);
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (prevPoint == null)
+                    prevPoint = new();
+                else
+                {
+                    Point diff = pos - (Vector)prevPoint;
+                    ModuleVision parent = (ModuleVision)base.ParentModule;
+                    parent.offsetX += (int)diff.X / 5;
+                    parent.offsetY += (int)diff.Y / 5;
+
+                    parent.LoadImageFileToPixelArray(parent.currentFilePath);
+                    ResetTimer();
+                }
+            }
+            prevPoint = pos;
+        }
+
+        private DispatcherTimer refreshTimer = null;
+        private void ResetTimer()
+        {
+            if (refreshTimer == null)
+            {
+                refreshTimer = new DispatcherTimer();
+                refreshTimer.Tick += RefreshTimer_Tick;
+                refreshTimer.Interval = TimeSpan.FromMilliseconds(500);
+            }
+            refreshTimer.Stop();
+            refreshTimer.Start();
+        }
+        private void RefreshTimer_Tick(object sender, EventArgs e)
+        {
+            refreshTimer.Stop();
+            ModuleVision parent = (ModuleVision)base.ParentModule;
+            parent.previousFilePath = "";
+        }
+
     }
 }

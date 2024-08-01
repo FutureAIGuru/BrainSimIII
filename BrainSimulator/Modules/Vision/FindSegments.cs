@@ -4,6 +4,8 @@ using System.Windows;
 using System.Linq;
 using static System.Math;
 using System.Diagnostics;
+using System.Net.Http.Headers;
+using System.CodeDom;
 
 namespace BrainSimulator.Modules.Vision
 {
@@ -19,6 +21,7 @@ namespace BrainSimulator.Modules.Vision
         //private float[,] boundaries;
         private List<PointPlus> boundaryPoints;
         int minLength = 4;
+        int minVotes = 15;
 
         // Constructor
         public HoughTransform(int width, int height)
@@ -52,7 +55,164 @@ namespace BrainSimulator.Modules.Vision
                     accumulator[rhoIndex, thetaIndex].Add(pt);
                 }
         }
+
         public List<Segment> FindSegments()
+        {
+            List<Segment> segments = new List<Segment>();
+
+            List<PointPlus> availablePointList = new List<PointPlus>();
+            //copy the list of boundarypoints to a temp list
+            foreach (var pt in boundaryPoints)
+                availablePointList.Add(pt);
+
+            //pick a boundary point from the temp list.
+            while (availablePointList.Count > 0)
+            {
+                //find the best segment through/near that point
+                Segment s1 = BestSegmentThroughPoint(availablePointList[0], availablePointList);
+                //if there is none at least 3 pixels long, remove the point from the temp list, continue
+                if (s1 == null || segments.Contains(s1))
+                {
+                    availablePointList.RemoveAt(0);
+                    continue;
+                }
+
+                //find all the points near the segment
+                List<Point> linePoints = new();
+                foreach (var pt in boundaryPoints)
+                {
+                    float dist = Utils.DistancePointToSegment(s1, pt);
+                    if (Abs(dist) < .5)
+                    {
+                        linePoints.Add((pt));
+                    }
+                }
+                OrderPointsAlongSegment(ref linePoints);
+                //move this to "best" below
+                int start = 0; int last = linePoints.Count - 1;
+                OptimizeSegment2(linePoints, ref start, ref last);
+                s1.P1 = linePoints[start];
+                s1.P2 = linePoints[last];
+                ExtendSegment(s1);
+
+                //add segment to segment list
+                if (!AddSegmentToList(segments, s1))
+                {
+                    //if it is already there, hack to get out of loop
+                    availablePointList.RemoveAt(0);
+                    continue;
+                }
+
+                //what points are actually on the segment
+                linePoints = new();
+                foreach (var pt in availablePointList)
+                {
+                    float dist = Utils.DistancePointToSegment(s1, pt);
+                    if (Abs(dist) < .5)
+                    {
+                        linePoints.Add((pt));
+                    }
+                }
+
+                //delete all but the first and the last 2 pts
+                //(there may be 2 very close points at one end and we should check out both
+                for (int i = 2; i <= linePoints.Count-2; i++)
+                {
+                    Point pt = linePoints[i];
+                    availablePointList.Remove(pt);
+                }
+                //loop until the temp list is empty
+            }
+
+
+            return segments;
+        }
+
+        private Segment BestSegmentThroughPoint(PointPlus pt, List<PointPlus> availablePoints)
+        {
+            //Find the longest segment through the given point
+
+            //start from the given point
+            //Get all the points within 2 pixels 
+            List<PointPlus> candidatePts = GetNearbyPoints(pt, 2.5f, availablePoints);
+            List<Segment> candidateSegs = new();
+            //get a list of all segments at least 3 pixels long
+            foreach (var pt1 in candidatePts)
+                foreach (var pt2 in candidatePts)
+                {
+                    if (pt1 == pt2) continue;
+                    Segment s = new Segment(pt1, pt2);
+                    if (s.Length < 2) continue;
+                    float weight = GetSegmentWeight3(s);
+                    if (weight >= 2.5f)
+                        AddSegmentToList(candidateSegs, s);
+                }
+            //extend each of these segments
+            float weightToBeat = 3.0f;
+            foreach (var seg in candidateSegs)
+            {
+                weightToBeat = GetSegmentWeight3(seg);
+                bool improved = true;
+                while (improved)
+                {
+                    improved = false;
+                    candidatePts = GetNearbyPoints(seg.P1, 1.7f, availablePoints);
+                    candidatePts.AddRange(GetNearbyPoints(seg.P2, 1.7f, availablePoints));
+                    foreach (var pt1 in candidatePts)
+                        foreach (var pt2 in candidatePts)
+                        {
+                            if (pt1 == pt2) continue;
+                            Segment s = new Segment(pt1, pt2);
+                            float weight = GetSegmentWeight3(s);
+                            if (weight > weightToBeat)
+                            {
+                                seg.P1 = s.P1;
+                                seg.P2 = s.P2;
+                                weightToBeat = weight;
+                                improved = true;
+                            }
+                        }
+                }
+            }
+            //choose the longest
+            weightToBeat = 3; //minpoints? minlength?
+            Segment bestSegment = null;
+            foreach (var seg in candidateSegs)
+            {
+                float weight = GetSegmentWeight3(seg);
+                if (weight > weightToBeat && seg.Length >= 3)
+                {
+                    bestSegment = seg;
+                    weightToBeat = weight;
+                }
+            }
+            return bestSegment;
+        }
+        private bool AddSegmentToList(List<Segment> segs, Segment seg)
+        {
+            if (segs.FindFirst(x => (x.P1.Near(seg.P1, 1) && x.P2.Near(seg.P2, 1)) || (x.P1.Near(seg.P2, 1) && x.P2.Near(seg.P1, 1))) == null)
+            {
+                seg.debugIndex = segs.Count;
+                segs.Add(seg);
+                return true;
+            }
+            else
+                return false;
+        }
+        private List<PointPlus> GetNearbyPoints(PointPlus pt, float dist, List<PointPlus> availablePoints)
+        {
+            //this is exhaustive and can be replaced with a QuadTree for performance
+            List<PointPlus> points = new();
+            foreach (PointPlus point in availablePoints)
+            {
+                float d1 = (point - pt).R;
+                if (d1 <= dist)
+                    points.Add(point);
+            }
+            return points;
+        }
+
+        public List<Segment> FindSegments2()
         {
             int maxRho = accumulator.GetLength(0);
             int maxTheta = accumulator.GetLength(1);
@@ -62,7 +222,7 @@ namespace BrainSimulator.Modules.Vision
             {
                 for (int thetaIndex = 0; thetaIndex < maxTheta; thetaIndex++)
                 {
-                    if (accumulator[rhoIndex, thetaIndex].Count < minLength) continue;
+                    if (accumulator[rhoIndex, thetaIndex].Count < minVotes) continue;
                     //if (rhoIndex != 99) continue;
                     //if (thetaIndex > 92 || thetaIndex < 88) continue;
 
@@ -117,7 +277,7 @@ namespace BrainSimulator.Modules.Vision
 
                             if (last - start > minLength)
                             {
-                                float confidence = 
+                                float confidence =
                                     GetConfidence(linePoints, start, last);
                                 if (confidence > minLength)
                                     AddTheSegment(testSegments, linePoints, confidence, linePoints[start].pt, linePoints[last].pt);
@@ -136,7 +296,7 @@ namespace BrainSimulator.Modules.Vision
                             float confidence = GetConfidence(linePoints, start, last);
                             float err = GetAverageError(linePoints, start, last);
                             if (err < 0.5 && confidence > minLength)
-                            AddTheSegment(testSegments, linePoints, confidence, linePoints[start].pt, linePoints[last].pt);
+                                AddTheSegment(testSegments, linePoints, confidence, linePoints[start].pt, linePoints[last].pt);
                         }
                     }
                 }
@@ -181,7 +341,7 @@ namespace BrainSimulator.Modules.Vision
                 weight = weight1;
                 weight1 = GetSegmentWeight3(s2);
             }
-            s2 = new Segment(s.P1,Utils.ExtendSegment(s.P1, s.P2, 1, false));
+            s2 = new Segment(s.P1, Utils.ExtendSegment(s.P1, s.P2, 1, false));
             weight1 = GetSegmentWeight3(s2);
             while (weight1 > weight + 0.25f)
             {
@@ -199,7 +359,7 @@ namespace BrainSimulator.Modules.Vision
             if (startPt.Y > lastPt.Y)
                 s2 = new Segment(lastPt, startPt);
             s2.debugIndex = testSegments.Count;
-            
+
 
             //only add the segment if it's not already there
             if (testSegments.FindFirst(x => x.s.P1 == startPt && x.s.P2 == lastPt) == default)
@@ -210,6 +370,31 @@ namespace BrainSimulator.Modules.Vision
             }
         }
 
+        private static void OptimizeSegment2(List<Point> linePoints, ref int start, ref int last)
+        {
+            //try contracting the segment by a few pts on each end to see if it matches better
+            float currWeight = GetAverageError2(linePoints, start, last);
+            if (currWeight < 0.1) return;
+
+            int bestStart = start;
+            int bestLast = last;
+            float bestWeight = currWeight;
+            for (int i = 0; i < 5; i++)
+                for (int j = 0; j < 5; j++)
+                {
+                    if ((last - j) - (start + i) < 3) //don't let the segment get smaller than 3
+                        continue;
+                    float testWeight = GetAverageError2(linePoints, start + i, last - j);
+                    if (testWeight < bestWeight)
+                    {
+                        bestWeight = testWeight;
+                        bestLast = last - j;
+                        bestStart = start + i;
+                    }
+                }
+            start = bestStart;
+            last = bestLast;
+        }
         private static void OptimizeSegment(List<(float dist, Point pt)> linePoints, ref int start, ref int last)
         {
             //try contracting the segment by a few pts on each end to see if it matches better
@@ -229,7 +414,7 @@ namespace BrainSimulator.Modules.Vision
                     last -= 1;
                     currWeight = testWeight;
                 }
-                testWeight = GetAverageError(linePoints, start+1, last - 1);
+                testWeight = GetAverageError(linePoints, start + 1, last - 1);
                 if (testWeight < currWeight)
                 {
                     last -= 1;
@@ -238,6 +423,19 @@ namespace BrainSimulator.Modules.Vision
             }
         }
 
+        private static float GetAverageError2(List<Point> linePoints, int start, int last)
+        {
+            float aveError = 0;
+            Segment s = new Segment(linePoints[start], linePoints[last]);
+            for (int j = start; j <= last; j++)
+            {
+                float dist = Utils.DistancePointToSegment(s, linePoints[j]);
+                //if (dist > 0.5) dist = 1;
+                aveError += dist;
+            }
+            aveError /= (last - start + 1);
+            return aveError;
+        }
         private static float GetAverageError(List<(float dist, Point pt)> linePoints, int start, int last)
         {
             float aveError = 0;
@@ -266,7 +464,7 @@ namespace BrainSimulator.Modules.Vision
             foreach (var pt in boundaryPoints)
             {
                 float dist = Utils.DistancePointToSegment(s, pt);
-                if (dist < .95)
+                if (dist < .5)
                 {
                     retVal += 1 - dist;
                 }
@@ -297,7 +495,7 @@ namespace BrainSimulator.Modules.Vision
 
             if (angleDiff > angleLimit && angleDiff < 180 - angleLimit || angleDiff > 180 + angleLimit && angleDiff < 360 - angleLimit) return false;
             //are the segments near each other?
-            float d1 = Utils.DistanceBetweenTwoSegments(s1.s,s2.s);
+            float d1 = Utils.DistanceBetweenTwoSegments(s1.s, s2.s);
             if (d1 > 5) return false;
 
             d1 = Utils.DistancePointToSegment(s1.s, s2.s.P1);
@@ -306,12 +504,12 @@ namespace BrainSimulator.Modules.Vision
             float d4 = Utils.DistancePointToSegment(s2.s, s1.s.P2);
 
             //do the segments overlap?
-            if  (d1 < 2 || d2 < 2 || d3 < 2 || d4 < 2)
+            if (d1 < 2 || d2 < 2 || d3 < 2 || d4 < 2)
             {
                 if (s1.s.debugIndex == 152)
-                    { }
+                { }
                 if (s2.s.debugIndex == 152)
-                    { }
+                { }
                 float v1 = GetSegmentWeight3(s1.s);
                 float v2 = GetSegmentWeight3(s2.s);
                 //do the segments extend one another?
@@ -323,7 +521,7 @@ namespace BrainSimulator.Modules.Vision
                     for (int j = i + 1; j < 4; j++)
                     {
                         if (endPts[i] == endPts[j]) continue;
-                        float dist = GetSegmentWeight3(new Segment(endPts[i],endPts[j]));
+                        float dist = GetSegmentWeight3(new Segment(endPts[i], endPts[j]));
                         if (dist > maxDist)
                         {
                             sNew.s.P1 = endPts[i];

@@ -623,7 +623,7 @@ namespace BrainSimulator
                 dy = pt.Y - closest.Y;
             }
 
-            return Math.Sqrt(dx * dx + dy * dy);
+            return Sqrt(dx * dx + dy * dy);
         }
         public static bool SegmentsIntersect(Point p1, Point p2, Point p3, Point p4)
         {

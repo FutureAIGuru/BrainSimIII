@@ -266,7 +266,6 @@ namespace BrainSimulator.Modules
             return result;
         }
 
-        [XmlIgnore]
         public Point3D P
         {
             get { if (xyzDirty) UpdateXYZ(); return p; }
@@ -451,7 +450,7 @@ namespace BrainSimulator.Modules
         }
         public override string ToString()
         {
-            string retVal = $"Length: {(int)Length} ({P1.X},{P1.Y}) : ({P2.X},{P2.Y}) A: {Angle}";
+            string retVal = $"L: {(int)Length} ({P1.X.ToString("0.0")},{P1.Y.ToString("0.0")}) : ({P2.X.ToString("0.0")},{P2.Y.ToString("0.0")}) A: {Angle.Degrees.ToString("0.0")}°";
             return retVal;
         }
 
