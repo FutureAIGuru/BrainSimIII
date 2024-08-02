@@ -18,5 +18,6 @@
         <Label Content="GPT Request. Follow by [Enter] for Info. &#10;Follow by [Up-arrow] for parents only." HorizontalAlignment="Left" Height="44" Margin="58,20,0,0" VerticalAlignment="Top" Width="309"/>
         <Button Content="Solve Ambiguity" HorizontalAlignment="Right" Margin="0,78,79,0" Height="27" Width="148" Click="Button_Click" FontSize="16" VerticalAlignment="Top" RenderTransformOrigin="0.449,-0.51" />
         <Button Content="Ambiguity File" HorizontalAlignment="Right" Margin="0,110,79,0" Height="27" Width="148" Click="LoadAmbiguity_Click" FontSize="16" VerticalAlignment="Top" RenderTransformOrigin="0.449,-0.51" />
+        <Button Content="Remove Duplicates" HorizontalAlignment="Right" Margin="0,110,239,0" Height="27" Width="148" Click="Button_Click" FontSize="16" VerticalAlignment="Top" RenderTransformOrigin="0.449,-0.51" />
     </Grid>
 </local:ModuleBaseDlg>

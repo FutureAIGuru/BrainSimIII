@@ -323,6 +323,15 @@ namespace BrainSimulator.Modules
             SetOutputText($"\n\rTotal disambiguity success count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
         }
 
+        private async void SolveDuplicatesAsync()
+        {
+            SetOutputText("Working...");
+            await ModuleGPTInfo.SolveDuplicates();
+            SetOutputText($"\n\rDone! Duplicates resolved: {relationshipCount}.");
+        }
+
+        
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button b)
@@ -346,6 +355,10 @@ namespace BrainSimulator.Modules
                 else if (b.Content.ToString().StartsWith("Solve Ambiguity"))
                 {
                     SolveAmbiguityGPTAsync();
+                }
+                else if (b.Content.ToString().StartsWith("Remove Duplicates"))
+                {
+                    SolveDuplicatesAsync();
                 }
                 else //process unknowns
                 {

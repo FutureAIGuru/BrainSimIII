@@ -629,5 +629,50 @@ is-part-of-speech, ";
                 }
             }
         }
+
+        public static async Task SolveDuplicates()
+        {
+            // Get the UKS.
+            UKS.UKS theUKS = MainWindow.theUKS;
+            List<Thing> thingsToRemove = new List<Thing>();
+            // Get all the children of Word and remove duplicates.
+            foreach (Thing word in theUKS.GetOrAddThing("Word").Children)
+            {
+                // Find unique parents to remove duplicates
+                List<Thing> uniqueParents = new List<Thing>();
+                foreach (Relationship meaning in word.Relationships)
+                {
+                    // Find the parents of each target in the realtionship.
+                    foreach (Thing parent in meaning.target.Parents)
+                    {
+                        // Continue if the parent is the word itself, (.rock and rock), instead of an actual abstract parent.
+                        if ("." + parent.Label == meaning.source.Label)
+                        {
+                            continue;
+                        }
+                        // If the parent already exists, remove it.
+                        if (uniqueParents.Contains(parent))
+                        {
+                            thingsToRemove.Add(meaning.target);
+                        }
+                        // Else if the parent does not exist, add it.
+                        else
+                        {
+                            uniqueParents.Add(parent);
+                        }
+                    }
+                }
+
+            }
+
+            // Remove the duplicate things at the end.
+            foreach (Thing t in thingsToRemove)
+            {
+                theUKS.DeleteThing(t);
+                ModuleGPTInfoDlg.relationshipCount++;
+            }
+
+        }
+
     }
 }
