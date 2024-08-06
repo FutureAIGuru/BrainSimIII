@@ -4,11 +4,9 @@ using System.Windows.Media;
 using System.Windows;
 using static System.Math;
 using System.Linq;
-using static BrainSimulator.Modules.ModuleOnlineInfo;
-using static BrainSimulator.Modules.ModuleVision;
+
 
 namespace BrainSimulator.Modules;
-
 public partial class ModuleVision
 {
     Color backgroundColor = Colors.Black;

@@ -167,7 +167,7 @@ namespace BrainSimulator.Modules
                 }
             }
             //draw the segments
-            if (cbShowSegments.IsChecked == true && parent.segments != null & parent.segments.Count > 0)
+            if (cbShowSegments.IsChecked == true && parent.segments is not null & parent.segments?.Count > 0)
             {
                 for (int i = 0; i < parent.segments.Count; i++)
                 {
@@ -179,8 +179,11 @@ namespace BrainSimulator.Modules
                         Y1 = segment.P1.Y * scale,
                         Y2 = segment.P2.Y * scale,
                         Stroke = Brushes.Red,
-                        StrokeThickness = 4,
-                        ToolTip = new System.Windows.Controls.ToolTip { Content = $"{segment.debugIndex}:({segment.P1.X},{segment.P1.Y}) - -({segment.P2.X},{segment.P2.Y})" },
+                        StrokeThickness = 8,
+                        Opacity = .5,
+                        ToolTip = new System.Windows.Controls.ToolTip { 
+                            Content = $"{segment.debugIndex}:({segment.P1.X.ToString("0.0")},{segment.P1.Y.ToString("0.0")}) - " +
+                            $"-({segment.P2.X.ToString("0.0")},{segment.P2.Y.ToString("0,0")})" },
                     };
                     theCanvas.Children.Add(l);
                 }
