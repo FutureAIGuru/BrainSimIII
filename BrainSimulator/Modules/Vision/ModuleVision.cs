@@ -9,14 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media.Imaging;
-using System.Xml.Serialization;
-using System.Diagnostics;
-using static System.Math;
 using UKS;
 using System.Windows.Media;
 using System.Windows;
-using System.Windows.Media.Media3D;
-using System.Security.Cryptography.Xml;
 
 namespace BrainSimulator.Modules
 {
