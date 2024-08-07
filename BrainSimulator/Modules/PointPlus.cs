@@ -458,7 +458,8 @@ namespace BrainSimulator.Modules
 
         public static  bool operator == (Segment s1, Segment s2)
         {
-            if (s1 is null || s2 is  null) return false ;
+            if (s1 is null && s2 is null) return true;
+            if (s1 is null || s2 is null) return false;
             float toler = 0.1f;
             if ((s1.P1.Near(s2.P1, toler) && s1.P2.Near(s2.P2, toler)) || (s1.P1.Near(s2.P2, toler) && s1.P2.Near(s2.P1, toler))) return true;
             return false;

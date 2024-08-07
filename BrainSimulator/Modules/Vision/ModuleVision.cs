@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using UKS;
 using System.Windows.Media;
 using System.Windows;
+using System.Runtime.InteropServices;
 
 namespace BrainSimulator.Modules
 {
@@ -87,9 +88,9 @@ namespace BrainSimulator.Modules
 
             //FindOrphanSegmentEnds();
 
-            //FindOutlines();
+            FindOutlines();
 
-            //WriteBitmapToMentalModel();
+            WriteBitmapToMentalModel();
 
             UpdateDialog();
 
@@ -247,66 +248,113 @@ namespace BrainSimulator.Modules
             retVal += c1.B - c2.B;
             return retVal;
         }
+
+        private class taggedSegment { public Segment s; public bool pt1Used; public bool pt2Used; }
         private void FindCorners(ref List<Segment> segmentsIn)
         {
-            List<Segment> segments = new List<Segment>();
+            List<taggedSegment> taggedSegments = new();
             foreach (Segment s in segmentsIn)
-                segments.Add(new Segment(s.P1, s.P2) { debugIndex = s.debugIndex, });
+                taggedSegments.Add(new taggedSegment() { s = s, pt1Used = false, pt2Used = false });
 
             //Now, find the corners
             corners = new List<Corner>();
-            segments = segments.OrderByDescending(x => x.Length).ToList();
-
+            taggedSegments = taggedSegments.OrderByDescending(x => x.s.Length).ToList();
             corners = new();
-            //for (int maxExt = -1;maxExt <0;maxExt++)
-            for (int i = 0; i < segments.Count - 1; i++)
-            {
-                for (int j = i + 1; j < segments.Count; j++)
-                {
-                    if (i == 5 && j == 7)
-                    { }
-                    Segment s1 = new(segments[i]);
-                    Segment s2 = new(segments[j]);
-                    bool segmentsIntersect = Utils.FindIntersection(s1, s2, out PointPlus intersection, out Angle angle);
-                    float dist = (Utils.DistanceBetweenTwoSegments(s1, s2));
 
-                    //if there is no intersection, extend the segments a few pixels because they may miss by a bit because of the boundary/segment algorithm
-                    int maxExt = 2;
-                    while (dist < 3 && !segmentsIntersect && maxExt-- >= 0)
-                    {
-                        s2 = Utils.ExtendSegment(s2, 1); //one pixel extension
-                        s1 = Utils.ExtendSegment(s1, 1); //one pixel extension
-                        dist = (Utils.DistanceBetweenTwoSegments(s1, s2));
-                        segmentsIntersect = Utils.FindIntersection(s1, s2, out intersection, out angle);
-                    }
+            //build a table of distances between each point and each other
+            List<(int i, int j, float p1p1, float p1p2, float p2p1, float p2p2, float closest)> distances = new();
+            for (int i = 0; i < taggedSegments.Count - 1; i++)
+            {
+                var s1 = taggedSegments[i];
+                for (int j = i + 1; j < taggedSegments.Count; j++)
+                {
+                    if (i == j) continue;
+                    var s2 = taggedSegments[j];
+                    float p1p1 = (s1.s.P1 - s2.s.P1).R;
+                    float p1p2 = (s1.s.P1 - s2.s.P2).R;
+                    float p2p1 = (s1.s.P2 - s2.s.P1).R;
+                    float p2p2 = (s1.s.P2 - s2.s.P2).R;
+                    float closest = (float)new List<float> { p1p1, p1p2, p2p1, p2p2 }.Min();
+                    distances.Add((i, j, p1p1, p1p2, p2p1, p2p2, closest));
+                }
+            }
+            distances = distances.OrderBy(x => x.closest).ToList();
+
+            foreach (var distance in distances)
+            {
+                if (distance.closest > 10) break; //give up when the distance is large
+                var s1 = taggedSegments[distance.i];
+                var s2 = taggedSegments[distance.j];
+                if (distance.closest == distance.p1p1 && !s1.pt1Used && !s2.pt1Used)
+                {
+                    bool segmentsIntersect = Utils.LinesIntersect(s1.s, s2.s, out PointPlus intersection);
                     if (segmentsIntersect)
                     {
-                        //if the intersection is not at the end of a segment, ignore it
-                        //float limit = 1.5f;
-                        //if (((intersection - s1.P1).R > limit &&
-                        //    (intersection - s1.P2).R > limit) ||
-                        //    ((intersection - s2.P1).R > limit &&
-                        //    (intersection - s2.P2).R > limit))
-                        //{
-                        //    continue;
-                        //}
-
-                        PointPlus A, B, C;
-                        B = intersection;
-                        if ((s1.P1 - intersection).R > (s1.P2 - intersection).R)
-                            A = s1.P1;
-                        else
-                            A = s1.P2;
-                        if ((s2.P1 - intersection).R > (s2.P2 - intersection).R)
-                            C = s2.P1;
-                        else
-                            C = s2.P2;
-                        AddCornerToList(intersection, A, C);
+                        AddCornerToList(intersection, s1.s.P2, s2.s.P2);
+                        UpdateCornerPoint(s1.s.P1, intersection);
+                        UpdateCornerPoint(s2.s.P1, intersection);
+                        s1.pt1Used = true;
+                        s2.pt1Used = true;
+                    }
+                }
+                if (distance.closest == distance.p1p2 && !s1.pt1Used && !s2.pt2Used)
+                {
+                    bool segmentsIntersect = Utils.LinesIntersect(s1.s, s2.s, out PointPlus intersection);
+                    if (segmentsIntersect)
+                    {
+                        AddCornerToList(intersection, s1.s.P2, s2.s.P1);
+                        UpdateCornerPoint(s1.s.P1, intersection);
+                        UpdateCornerPoint(s2.s.P2, intersection);
+                        s1.pt1Used = true;
+                        s2.pt2Used = true;
+                    }
+                }
+                if (distance.closest == distance.p2p1 && !s1.pt2Used && !s2.pt1Used)
+                {
+                    bool segmentsIntersect = Utils.LinesIntersect(s1.s, s2.s, out PointPlus intersection);
+                    if (segmentsIntersect)
+                    {
+                        UpdateCornerPoint(s1.s.P2, intersection);
+                        UpdateCornerPoint(s2.s.P1, intersection);
+                        AddCornerToList(intersection, s1.s.P1, s2.s.P2);
+                        s1.pt2Used = true;
+                        s2.pt1Used = true;
+                    }
+                }
+                if (distance.closest == distance.p2p2 && !s1.pt2Used && !s2.pt2Used)
+                {
+                    bool segmentsIntersect = Utils.LinesIntersect(s1.s, s2.s, out PointPlus intersection);
+                    if (segmentsIntersect)
+                    {
+                        AddCornerToList(intersection, s1.s.P1, s2.s.P1);
+                        UpdateCornerPoint(s1.s.P2, intersection);
+                        UpdateCornerPoint(s2.s.P2, intersection);
+                        s1.pt2Used = true;
+                        s2.pt2Used = true;
                     }
                 }
             }
+            //find any orphans
+            foreach (var segment in taggedSegments)
+            {
+                if (!segment.pt2Used)
+                    AddCornerToList(segment.s.P1, segment.s.P2, segment.s.P2);
+                if (!segment.pt1Used)
+                    AddCornerToList(segment.s.P2, segment.s.P1, segment.s.P2);
+            }
+
+            return;
         }
 
+        private void UpdateCornerPoint(PointPlus oldValue, PointPlus newValue)
+        {
+            for (int i = 0; i < corners.Count; i++)
+            {
+                //if (corners[i].pt == oldValue) corners[i].pt = newValue; 
+                if (corners[i].nextPt == oldValue) corners[i].nextPt = newValue;
+                if (corners[i].prevPt == oldValue) corners[i].prevPt = newValue;
+            }
+        }
         private void AddCornerToList(PointPlus intersection, PointPlus prevPt, PointPlus nextPt)
         {
             //allow things to be offset by a few pixels
@@ -319,70 +367,6 @@ namespace BrainSimulator.Modules
             else { }
         }
 
-        void FindOrphanSegmentEnds()
-        {
-            foreach (Segment s in segments)
-            {
-                bool p1isOrphanEnd = true;
-                bool p2isOrphanEnd = true;
-                //is either endpoint of the segment near an existing corner?
-                //This is because segments may intersect (corner) at their middles
-                foreach (Corner c in corners)
-                {
-                    if ((s.P1 - c.pt).R < 5)
-                        p1isOrphanEnd = false;
-                    if ((s.P2 - c.pt).R < 5)
-                        p2isOrphanEnd = false;
-                }
-                //is either endpoint near annother segment?
-                foreach (Segment s1 in segments)
-                {
-                    if (s1 == s) continue;
-                    if (s1.Length > 3)
-                    {
-                        float d1 = Utils.DistancePointToSegment(s1, s.P1);
-                        float d2 = Utils.DistancePointToSegment(s1, s.P2);
-                        if (d1 < 4)
-                        {
-                            if (!IsEndPoint((int)s.P1.X, (int)s.P1.Y))
-                                p1isOrphanEnd = false;
-                        }
-                        if (d2 < 4)
-                        {
-                            if (!IsEndPoint((int)s.P2.X, (int)s.P2.Y))
-                                p2isOrphanEnd = false;
-                        }
-                    }
-                    if (!IsEndPoint((int)s.P1.X, (int)s.P1.Y))
-                        p1isOrphanEnd = false;
-                    if (!IsEndPoint((int)s.P2.X, (int)s.P2.Y))
-                        p2isOrphanEnd = false;
-                }
-                if (p1isOrphanEnd)
-                    corners.Add(new Corner { pt = s.P1, prevPt = s.P2, nextPt = s.P2 });
-                if (p2isOrphanEnd)
-                    corners.Add(new Corner { pt = s.P2, prevPt = s.P1, nextPt = s.P1 });
-            }
-        }
-
-        //this checks the boundary array to see if a point is an orphan
-        bool IsEndPoint(int sx, int sy)
-        {
-            int distanceToCheck = 1;
-            int count = 0;
-            for (int dx = -distanceToCheck; dx <= distanceToCheck; dx++)
-                for (int dy = -distanceToCheck; dy <= distanceToCheck; dy++)
-                {
-                    if (dx == 0 && dy == 0) continue;
-                    int x = sx + dx;
-                    int y = sy + dy;
-                    if (x < 0 || y < 0) return false;
-                    //if (x >= boundaryArray.GetLength(0) || y >= boundaryArray.GetLength(1)) return false;
-                    //if (boundaryArray[x, y] > 0) count++;
-                    if (count > 1) return false;
-                }
-            return true;
-        }
 
         //trace around the outlines to get the order of corners and relative distances
         private void FindOutlines()
@@ -417,11 +401,13 @@ namespace BrainSimulator.Modules
                 cornerAvailable.Remove(curr);
                 while (!outlineClosed)
                 {
-                    for (int i = 0; i < corners.Count; i++)
+                    for (int i = 0; i < cornerAvailable.Count; i++)
                     {
-                        Corner next = corners[i];
-                        if (outline.Contains(next)) continue;
-                        if (curr.pt.Near(next.prevPt, 5) || curr.pt.Near(next.nextPt, 5))
+                        Corner next = cornerAvailable[i];
+                        if (next.angle == 0) continue;
+                        if (outline.Contains(next))
+                            continue; //should never happen
+                        if (curr.nextPt.Near(next.pt, 2) || curr.prevPt.Near(next.pt, 2))
                         {
                             outline.Add(next);
                             cornerAvailable.Remove(next);
@@ -445,6 +431,7 @@ namespace BrainSimulator.Modules
                 }
                 if (sum > 0)
                     outline.Reverse();
+
                 //find the color at the center of the polygon
                 List<Point> thePoints = new();
                 foreach (Corner c in outline)
@@ -462,16 +449,18 @@ namespace BrainSimulator.Modules
                     currOutline.SetAttribute(theColor);
                 }
                 catch (Exception e) { }
+
                 //we now have an ordered, right-handed outline
+                //add it to UKS
                 for (int i = 1; i < outline.Count + 1; i++)
                 {
                     Corner c = outline[i % outline.Count];
 
                     //let's update the angle
-                    PointPlus prev = outline[(i - 1) % outline.Count].pt;
-                    PointPlus next = outline[(i + 1) % outline.Count].pt;
-                    c.nextPt = next;
-                    c.prevPt = prev;
+                    //PointPlus prev = outline[(i - 1) % outline.Count].pt;
+                    //PointPlus next = outline[(i + 1) % outline.Count].pt;
+                    //                   c.nextPt = next;
+                    //                   c.prevPt = prev;
 
 
                     //TODO: modify to reuse existing (shared) points

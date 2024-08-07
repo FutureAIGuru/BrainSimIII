@@ -116,10 +116,10 @@ namespace BrainSimulator.Modules
                 string[] info = infoString.Split('+', 'x');
                 if (info.Length == 4)
                 {
-                    dlgSize.X = int.Parse(info[0]);
-                    dlgSize.Y = int.Parse(info[1]);
-                    dlgPos.X = int.Parse(info[2]);
-                    dlgPos.Y = int.Parse(info[3]);
+                    dlgSize.X = float.Parse(info[0]);
+                    dlgSize.Y = float.Parse(info[1]);
+                    dlgPos.X = float.Parse(info[2]);
+                    dlgPos.Y = float.Parse(info[3]);
                 }
             }
 

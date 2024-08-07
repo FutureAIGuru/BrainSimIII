@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Linq;
 using static System.Math;
-using Python.Runtime;
-using System.Security.Cryptography.Xml;
 
 namespace BrainSimulator.Modules.Vision;
 
@@ -19,39 +17,6 @@ public class HoughTransform
     private List<PointPlus> boundaryPoints;
     int minLength = 4;
     int minVotes = 15;
-
-    //// Constructor
-    //public HoughTransform(int width, int height)
-    //{
-    //    // Calculate maximum distance from the origin to the image corner
-    //    maxDistance = (int)Math.Sqrt(width * width + height * height);
-
-    //    // Calculate angle step size
-    //    angleStep = PI / numAngles;
-
-    //    // Initialize accumulator array
-    //    accumulator = new List<Point>[maxDistance * 2, numAngles]; // Double the size for negative rho values
-    //    for (int rIndex = 0; rIndex < accumulator.GetLength(0); rIndex++)
-    //        for (int thetaIndex = 0; thetaIndex < accumulator.GetLength(1); thetaIndex++)
-    //            accumulator[rIndex, thetaIndex] = new List<Point>();
-    //}
-
-    ////same as above but works with a list of boundary points instead of an array
-    //public void Transform2(List<PointPlus> boundaries)
-    //{
-    //    boundaryPoints = boundaries;
-    //    foreach (var pt in boundaryPoints)
-    //        // Loop over all possible lines passing through the edge pixel
-    //        for (int thetaIndex = 0; thetaIndex < numAngles; thetaIndex++)
-    //        {
-    //            double theta = thetaIndex * angleStep;
-    //            Angle a = theta;
-    //            double rho = pt.X * Cos(theta) + pt.Y * Sin(theta);
-    //            int rhoIndex = (int)Round(rho / rhoStep + maxDistance);
-
-    //            accumulator[rhoIndex, thetaIndex].Add(pt);
-    //        }
-    //}
 
     public List<Segment> FindSegments(List<PointPlus> boundaries)
     {
@@ -72,7 +37,7 @@ public class HoughTransform
         {
             //find the best segment through/near that point
             PointPlus ptToTest = availablePointList[0];
-            anglesAlreadyFound = new();
+            //anglesAlreadyFound = new();
             Segment s1 = BestSegmentThroughPoint(ptToTest, availablePointList, anglesAlreadyFound);
 
             //if there is no segment at least 3 pixels long, remove the test point from the temp list, continue
@@ -82,9 +47,6 @@ public class HoughTransform
                 anglesAlreadyFound = new();
                 continue;
             }
-            if (segments.Count == 12)
-            { }
-
 
             //a segment has been added
 
@@ -113,8 +75,6 @@ public class HoughTransform
     Angle angleStep = Angle.FromDegrees(5);
     private Segment BestSegmentThroughPoint(PointPlus pt, List<PointPlus> availablePoints, List<Angle> alreadyFound)
     {
-        if (pt.Y < 10)
-        { }
         angleStep = Angle.FromDegrees(1);
         Segment bestSegment = new(pt, pt);
         Angle bestAngle = -1;
@@ -122,8 +82,6 @@ public class HoughTransform
         //find the amgle which results in the longed segment through the given point 
         for (Angle a = Angle.FromDegrees(-90); a < Angle.FromDegrees(90); a += angleStep)
         {
-            if (a == 0)
-            { }
             //don't search the same angle at the same point over and over
             if (alreadyFound.FindFirst(x => Abs(x - a) < Angle.FromDegrees(0.9f)) != null)
                 continue;
@@ -134,7 +92,7 @@ public class HoughTransform
 
             //lengthen the first endpoint (if possible)
             float maxDist = Abs(step.X) + Abs(step.Y) + .1f;
-            maxDist = .7f;
+            maxDist = .8f;
             float dist = -1;
             do
             {
@@ -172,17 +130,13 @@ public class HoughTransform
         //Here we have a ressonable segment hypothesis. The endpoints might not be exactly on boundary points
         //try out all combinations of nearby endpoints to see if there is an improvement
         //if you don't find any segment with actual endpoints
-        bool endpointsFound = false;
+
         bool improved = true;
-        //float bestAverageError = GetAverageError3(bestSegment);
-        float bestError = 20;
         Segment best = null;
         var candidatePts = GetNearbyPoints(bestSegment.P1, 3f, boundaryPoints);
         var candidatePts1 = GetNearbyPoints(bestSegment.P2, 3f, boundaryPoints);
-        if (bestSegment.P1.Near(new PointPlus(30.4f, 17.0f), 0.5f))
-        { }
-        if (bestSegment.P2.Near(new PointPlus(26.7f, 21f), 0.5f))
-        { }
+
+        //best is the best within the loop below, not to be confused with bestSegment from the loop above
         bestSegment = null;
         while (improved)// && bestSegment?.Length > 2)
         {
@@ -193,6 +147,7 @@ public class HoughTransform
                 candidatePts1 = GetNearbyPoints(best.P2, 2f, boundaryPoints);
             }
 
+            //build a table of all possible candidate segments and their hit-rates
             var tempValues = new List<(int i, int j,float length, float error)>();
             for (int i = 0; i < candidatePts.Count; i++)
             {
@@ -204,14 +159,13 @@ public class HoughTransform
                     Segment testSeg = new Segment(pt1, pt2);
                     float e1 = GetAverageError3(testSeg);
                     tempValues.Add((i,j,testSeg.Length, e1));
-                    //if (e1 < bestError - 0.08f || best is null ||  (e1 < -bestError + 0.08 && testSeg.Length > best.Length))
-                    //{
-                    //    best = testSeg;
-                    //    bestError = e1;
-                    //}
                 }
             }
+
             tempValues = tempValues.OrderBy(x => x.error).ToList();
+
+            if (tempValues[0].error > .2f) return null;
+
             float maxValue = .1f;
             var limitValues = tempValues.FindAll(x => x.error < maxValue).ToList();
             while (limitValues.Count == 0)
@@ -227,74 +181,15 @@ public class HoughTransform
                 bestSegment = best;
                 improved = true;
             }
-
-            /*            foreach (var pt1 in candidatePts)
-                            foreach (var pt2 in candidatePts1)
-                            {
-                                if (pt1 == pt2) continue;
-                                Segment s = new Segment(pt1, pt2);
-                                if (s.Length < 3) continue;
-
-                                Segment betterSegment = SegmentScore(bestSegment, s);
-                                if (betterSegment != bestSegment)
-                                {
-                                    improved = true;
-                                    bestSegment.P1 = betterSegment.P1;
-                                    bestSegment.P2 = betterSegment.P2;
-                                    endpointsFound |= true;
-                                }
-
-                                /*
-                                 * var pts = GetBoundaryPointsOnSegment(s);
-
-                                                    float weight = GetSegmentWeight3(s);
-                                                    float ave = GetAverageError3(s);
-                                                    if (ave < 0.08f && s != bestSegment)
-                                                    {
-                                                        if (s.Length > bestSegment.Length || bestAverageError > .1f)
-                                                        {
-                                                            if (s.Length > bestSegment.Length)
-                                                                improved = true;
-                                                            bestSegment.P1 = pt1;
-                                                            bestSegment.P2 = pt2;
-                                                            bestAverageError = ave;
-                                                            weightToBeat = weight;
-                                                            endpointsFound |= true;
-                                                        }
-                                                    }
-                                                    else if (weight > weightToBeat && s != bestSegment)
-                                                    {
-                                                        if (s.Length > bestSegment.Length)
-                                                            improved = true;
-                                                        bestSegment.P1 = pt1;
-                                                        bestSegment.P2 = pt2;
-                                                        bestAverageError = ave;
-                                                        weightToBeat = weight;
-                                                        endpointsFound |= true;
-                                                    }
-                            }
-                                  */
         }
-        // if (!endpointsFound) return null;
+
+        //has the algorithm strayed too far from the original point?
+        if (bestSegment is not null && Utils.DistancePointToSegment(bestSegment, pt) > 1.5f)
+            return null;
+
         return bestSegment;
     }
 
-    private Segment SegmentScore(Segment s1, Segment s2)
-    {
-        var pts1 = GetBoundaryPointsOnSegment(s1);
-        var pts2 = GetBoundaryPointsOnSegment(s2);
-        float error1 = GetAverageError3(s1);
-        float error2 = GetAverageError3(s2);
-        Segment sShorter1 = new Segment(pts1[1], pts1[pts1.Count - 2]);
-        float errorShorter1 = GetAverageError3(sShorter1);
-        Segment sShorter2 = new Segment(pts2[1], pts2[pts2.Count - 2]);
-        float errorShorter2 = GetAverageError3(sShorter2);
-        if (error1 > error2 && s2.Length > s1.Length) return s2;
-        if (error2 > error1 && s1.Length > s2.Length) return s1;
-        if (pts1.Count > pts2.Count) return s1;
-        if (pts2.Count > pts1.Count) return s2;
-        return s1;
-    }
 
     //add a new segment to the segment list IF it isn't within 1 of another segment
     private bool AddSegmentToList(List<Segment> segs, Segment seg)
@@ -302,6 +197,8 @@ public class HoughTransform
         if (segs.FindFirst(x => (x.P1.Near(seg.P1, 1) && x.P2.Near(seg.P2, 1)) || (x.P1.Near(seg.P2, 1) && x.P2.Near(seg.P1, 1))) is null)
         {
             seg.debugIndex = segs.Count;
+            if (segs.Count == 10)
+            { }
             segs.Add(seg);
             return true;
         }
@@ -390,15 +287,12 @@ public class HoughTransform
             currPt += step;
         }
 
-        if (misses != 0)
-        { }
-  
-
-        //sum += misses - count;
          if (s.Length > count)
          //if (s.Length <  10)
             sum += (s.Length - count) / 2; //dock 0.5 point for each missing point on segment
         float average = sum / count;
+        if (misses > 1)
+            average = 3;
         if (average < 0f)
         { }
         return average;
