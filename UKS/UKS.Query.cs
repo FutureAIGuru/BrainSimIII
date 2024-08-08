@@ -191,8 +191,8 @@ public partial class UKS
                     //this creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
                     Relationship r1 = new Relationship(r);
-                    //Thing newCountType = GetOrAddThing((GetCount(r.reltype) * haveCount).ToString(), "number");
-                    Thing newCountType = GetOrAddThing((haveCount).ToString(), "number");
+                    Thing newCountType = GetOrAddThing((GetCount(r.reltype) * haveCount).ToString(), "number");
+                    //Thing newCountType = GetOrAddThing((haveCount).ToString(), "number");
 
                     //hack for numeric labels
                     Thing rootThing = r1.reltype;

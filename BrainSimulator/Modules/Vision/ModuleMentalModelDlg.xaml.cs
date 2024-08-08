@@ -80,10 +80,14 @@ namespace BrainSimulator.Modules
                     }
                     else if (r.target.HasAncestor("Distance"))
                     {
-                        float dist = float.Parse(r.target.Label[8..]) * scale * 2.5f;
-                        PointPlus offset = new PointPlus(dist * sizeVal, currDir);
-                        curPos += offset;
-                        poly.Points.Add(curPos);
+                        try
+                        {
+                            float dist = float.Parse(r.target.Label[8..]) * scale * 2.5f;
+                            PointPlus offset = new PointPlus(dist * sizeVal, currDir);
+                            curPos += offset;
+                            poly.Points.Add(curPos);
+                        }
+                        catch { }
                     }
                 }
                 if (poly.Points.Count < 2) //there is no recenetly-refreshed data, use the stored shape
