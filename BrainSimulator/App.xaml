@@ -5,6 +5,9 @@
              StartupUri="MainWindow.xaml"
              >
     <Application.Resources>
-         
+        <Style TargetType="MenuItem"> <!--This suppresses a benign error in the MainWindow menu, System.Windows.Data Error: 4-->
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
     </Application.Resources>
 </Application>

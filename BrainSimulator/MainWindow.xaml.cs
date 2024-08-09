@@ -135,6 +135,18 @@ namespace BrainSimulator
                 }
             }
         }
+        public void SetupBeforeSave()
+        {
+            for (int i = 0; i < activeModules.Count; i++)
+            {
+                ModuleBase mod = activeModules[i];
+                if (mod != null)
+                {
+                    mod.SetUpBeforeSave();
+                }
+            }
+        }
+
 
         public void ShowAllModuleDialogs()
         {
@@ -167,30 +179,31 @@ namespace BrainSimulator
             theUKS.GetOrAddThing("BrainSim", null);
             theUKS.GetOrAddThing("AvailableModule", "BrainSim");
             theUKS.GetOrAddThing("ActiveModule", "BrainSim");
-            var listInUKS = theUKS.Labeled("AvailableModule").Children;
+            var availableListInUKS = theUKS.Labeled("AvailableModule").Children;
+
             //add any missing modules
             var CSharpModules = Utils.GetListOfExistingCSharpModuleTypes();
             foreach (var module in CSharpModules)
             {
                 string name = module.Name;
-                name = name.Replace("Module", "");
-                Thing availableModule = listInUKS.FindFirst(x => x.Label == name);
+                //name = name.Replace("Module", "");
+                Thing availableModule = availableListInUKS.FindFirst(x => x.Label == name);
                 if (availableModule == null)
                     theUKS.GetOrAddThing(name, "AvailableModule");
             }
             var PythonModules = moduleHandler.GetListOfExistingPythonModuleTypes();
             foreach (var name in PythonModules)
             {
-                Thing availableModule = listInUKS.FindFirst(x => x.Label == name);
+                Thing availableModule = availableListInUKS.FindFirst(x => x.Label == name);
                 if (availableModule == null)
                     theUKS.GetOrAddThing(name, "AvailableModule");
             }
             //delete any non-existant modules
-            listInUKS = theUKS.Labeled("AvailableModule").Children;
-            foreach (Thing t in listInUKS)
+            availableListInUKS = theUKS.Labeled("AvailableModule").Children;
+            foreach (Thing t in availableListInUKS)
             {
                 string name = t.Label;
-                if (CSharpModules.FindFirst(x=>x.Name == "Module"+name) != null) continue;
+                if (CSharpModules.FindFirst(x=>x.Name == name) != null) continue;
                 if (PythonModules.FindFirst(x => x == name) != null) continue;
                 theUKS.DeleteAllChildren(t);
                 theUKS.DeleteThing(t);
@@ -200,7 +213,7 @@ namespace BrainSimulator
             var activeListInUKS = theUKS.Labeled("ActiveModule").Children;
             foreach(Thing t in activeListInUKS)
             {
-                Thing parent = listInUKS.FindFirst(x => x.Label == t.Label.Substring(0, t.Label.Length - 1));
+                Thing parent = availableListInUKS.FindFirst(x => x.Label == t.Label.Substring(0, t.Label.Length - 1));
                 if (parent != null)
                     t.AddParent(parent);
                 else
@@ -212,8 +225,8 @@ namespace BrainSimulator
         {
 
             Debug.WriteLine("InsertMandatoryModules entered");
-            ActivateModule("UKS");
-            ActivateModule("UKSStatement");
+            ActivateModule("ModuleUKS");
+            ActivateModule("ModuleUKSStatement");
         }
 
         public string ActivateModule(string moduleType)
@@ -225,6 +238,7 @@ namespace BrainSimulator
             if (!moduleType.Contains(".py"))
             {
                 ModuleBase newModule = CreateNewModule(moduleType);
+                if (newModule == null) return "";
                 newModule.Label = t.Label;
                 activeModules.Add(newModule);
             }
@@ -286,13 +300,12 @@ namespace BrainSimulator
 
         private void Dt_Tick(object? sender, EventArgs e)
         {
-
             Thing activeModuleParent = theUKS.Labeled("ActiveModule");
             if (activeModuleParent == null) return;
             foreach (Thing module in activeModuleParent.Children)
             {
                 ModuleBase mb = activeModules.FindFirst(x => x.Label == module.Label);
-                if (mb != null && mb.dlgIsOpen)
+                if (mb != null)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
                     {
@@ -313,7 +326,6 @@ namespace BrainSimulator
             foreach (var moduleType in moduleTypes)
             {
                 string moduleName = moduleType.Name;
-                moduleName = moduleName.Replace("Module", "");
                 theUKS.GetOrAddThing(moduleName, "AvailableModule");
             }
 

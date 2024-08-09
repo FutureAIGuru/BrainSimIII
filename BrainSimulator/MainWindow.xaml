@@ -32,14 +32,6 @@
                         <Image Source="resources/icons/saveAs_16x.png"></Image>
                     </MenuItem.Icon>
                 </MenuItem>
-                <!--<MenuItem x:Name="Reload_network" Header="Reload _Network" Click="buttonReloadNetwork_click" IsEnabled="False">
-                </MenuItem>-->
-                <Separator />
-                <!--<MenuItem Header="_Properties">
-                    <MenuItem.Icon>
-                        <TextBlock FontSize="16" FontFamily="Segoe MDL2 Assets" Foreground="#FF00539C"  >&#xE71D;</TextBlock>
-                    </MenuItem.Icon>
-                </MenuItem>-->
                 <Separator />
                 <MenuItem Header="Recent" x:Name="MRUListMenu">
                 </MenuItem>
@@ -50,70 +42,6 @@
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
-            <!--<MenuItem Header="Edit">
-                <MenuItem Header="Insert Module" x:Name="InsertModuleMenu"></MenuItem>
-            </MenuItem>
-            <MenuItem Header="View">
-                <MenuItem Header="Start Pan">
-                    <MenuItem.Icon>
-                        <Image Source="/resources/icons/hand.png" Height="20"></Image>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Zoom In">
-                    <MenuItem.Icon>
-                        <Image Source="/resources/icons/ZoomIn_16x.png" Height="20"></Image>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Zoom Out">
-                    <MenuItem.Icon>
-                        <Image Source="/resources/icons/ZoomOut_16x.png" Height="20"></Image>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Show all">
-                    <MenuItem.Icon>
-                        <Image Source="/resources/icons/ZoomoriginalSize_16x.png" Height="20"></Image>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Origin">
-                    <MenuItem.Icon>
-                        <Image Source="/resources/icons/ZoomoriginalSize_16x.png" Height="20"></Image>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Show Synapses" Name="ShowSynapses" IsCheckable="true"></MenuItem>
-            </MenuItem>
-            <MenuItem Header=" Help">
-                <MenuItem InputGestureText="F1">
-                    <MenuItem.Header>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" >
-                            <Label Width="100" VerticalAlignment="Center" Padding="0,0,5,0">Getting Started</Label>
-                            <CheckBox x:Name="cbShowHelpAtStartup" VerticalAlignment="Center" Padding="5,0,5,0">Show at startup</CheckBox>
-                        </StackPanel>
-                    </MenuItem.Header>
-                </MenuItem>
-                <MenuItem Header="Register">
-                    <MenuItem.Icon>
-                        <Image Source="/resources/mailing-list-icon-17.jpg"></Image>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Help Contents">
-                    <MenuItem.Icon>
-                        <TextBlock FontSize="16" FontFamily="Segoe MDL2 Assets" Foreground="#FF00539C" >&#xE897;</TextBlock>
-                        
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Report bugs, request features">
-                    <MenuItem.Icon>
-                        <Image Source="/resources/github-9-24.ico"></Image>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Watch the YouTubeChannel">
-                    <MenuItem.Icon>
-                        <Image Source="resources/youtube-24.ico"></Image>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="Check for available updates"></MenuItem>
-                <MenuItem Header="About"/>
-            </MenuItem>-->
         </Menu>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -139,16 +67,13 @@
                 <Button x:Name="SaveAsButton" Click="buttonSaveAs_Click" VerticalAlignment="Top" ToolTip="Save File As"  >
                     <Image Source="/resources/icons/SaveAs_16x.png" Height="20"></Image>
                 </Button>
-                <!--<Button x:Name="ReloadNetwork" Click="buttonReloadNetwork_click" VerticalAlignment="Top" ToolTip="Reload Current Network" IsEnabled="False" >
-                    <Image Source="/resources/icons/Refresh_16x.png" Height="20" ></Image>
-                </Button>-->
                 <Label Visibility="Hidden" Width="30"></Label>
                 <Label Visibility="Hidden" Width="5"></Label>
                 <Label Visibility="Hidden" Width="30"></Label>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                     <Label Content="Add Module:" Foreground="White"/>
-                    <ComboBox x:Name="ModuleListComboBox"  SelectionChanged="ModuleList_SelectionChanged" VerticalContentAlignment="Center" Width="271" Height="26" IsEditable="True">
+                    <ComboBox x:Name="ModuleListComboBox"  SelectionChanged="ModuleList_SelectionChanged" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Width="271" Height="26" IsEditable="True">
                     </ComboBox>
                 </StackPanel>
             </DockPanel>

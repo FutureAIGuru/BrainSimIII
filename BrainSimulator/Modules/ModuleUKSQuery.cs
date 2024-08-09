@@ -88,10 +88,11 @@ Follow has ONLY if called out in type
 
             List<Thing> sourceList = ModuleUKSStatement.ThingListFromString(source);
             //if (sourceList.Count == 0) return;
+            List<Thing> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
             List<Thing> targetList = ModuleUKSStatement.ThingListFromString(target);
 
+
             //Handle is-a queries as a special case
-            if (sourceList.Count == 0) return;
             if (relType.Contains("is-a") && reverse ||
                 relType.Contains("has-child") && !reverse)
             {
@@ -105,6 +106,23 @@ Follow has ONLY if called out in type
                 return;
             }
 
+            //check for target sequence
+            if (sourceList.Count > 1)
+            {
+                float confidence = 0.0f;
+                Thing target1 = new Thing() { Label = "searchPattern" };
+                foreach (Thing t in sourceList)
+                    target1.AddRelationship(t, (relTypeList.Count > 0) ? relTypeList[0] : null);
+                Thing result = theUKS.SearchForClosestMatch(target1, "Thing", ref confidence);
+                if (result != null)
+                {
+                    float confidence1 = theUKS.HasSequence(target1, result, out int offset);
+                    if (confidence1 > 0.0f)
+                        thingResult.Add(result);
+                }
+                theUKS.DeleteThing(target1);
+            }
+
             relationships = theUKS.GetAllRelationships(sourceList, reverse);
 
             //unreverse the source and target
@@ -115,8 +133,7 @@ Follow has ONLY if called out in type
             }
 
             //handle compound relationship types
-            List<Thing> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
-            if (relTypeList.Count > 0) 
+            if (relTypeList.Count > 0)
                 relType = relTypeList[0].Label;
 
             //filter the relationships

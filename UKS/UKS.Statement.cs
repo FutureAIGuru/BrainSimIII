@@ -30,9 +30,7 @@ public partial class UKS
         object oTargetProperties = null
                     )
     {
-        Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
-//        try  //let any exceptions be trapped above
-        {
+        //Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
             Thing source = ThingFromObject(oSource);
             Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
             Thing target = ThingFromObject(oTarget);
@@ -41,13 +39,9 @@ public partial class UKS
             List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "Action");
             List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
 
-            Relationship theRelationship = AddStatement(source, relationshipType, target, sourceModifiers, relationshipTypeModifiers, targetModifiers);
+            Relationship theRelationship = AddStatement(source, relationshipType, target, 
+                sourceModifiers, relationshipTypeModifiers, targetModifiers);
             return theRelationship;
-        }
-//        catch (Exception ex)
-//        {
-//            return null;
-//        }
     }
 
     private Relationship AddStatement(
@@ -125,7 +119,7 @@ public partial class UKS
         }
 
         //CREATE new subclasses if needed
-        Thing bestMatch = new Thing();
+        Thing bestMatch = null;
         List<Thing> missingAttributes = new();
 
         Thing source1 = SubclassExists(source, sourceProperties,ref bestMatch,ref missingAttributes);
@@ -147,6 +141,7 @@ public partial class UKS
         {
             relType1 = CreateSubclass(bestMatch, missingAttributes);
         }
+ 
         relType = relType1;
 
         Relationship r = new Relationship()
@@ -211,7 +206,7 @@ public partial class UKS
             t.RemoveParent(ThingLabels.GetThing("unknownObject"));
         //if this disconnects the Thing from the tree, reconnect it as a Unknown
         //this may happen in the case of a circular reference.
-        if (reconnectNeeded && !t.HasAncestor(ThingLabels.GetThing("Thing")))
+        if (reconnectNeeded && !t.HasAncestor("Thing"))
             t.AddParent(ThingLabels.GetThing("unknownObject"));
     }
 
@@ -320,12 +315,12 @@ public partial class UKS
         if (relationshipType == null) return null;
         Relationship inverse = relationshipType.Relationships.FindFirst(x => x.reltype.Label == "inverseOf");
         if (inverse != null) return inverse.target;
-        //use the bwlow if inverses are 2-way.  Without this, there is a one-way translation
+        //use the below if inverses are 2-way.  Without this, there is a one-way translation
         //inverse = relationshipType.RelationshipsBy.FindFirst(x => x.reltype.Label == "inverseOf");
         //if (inverse != null) return inverse.source;
         return null;
     }
-    public static List<Thing> FindCommonParents(Thing t, Thing t1)
+    private static List<Thing> FindCommonParents(Thing t, Thing t1)
     {
         List<Thing> commonParents = new List<Thing>();
         foreach (Thing p in t.Parents)

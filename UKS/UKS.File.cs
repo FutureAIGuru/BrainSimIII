@@ -7,12 +7,15 @@ public partial class UKS
 {
     static string fileName = "";
 
-    public string FileName { get => fileName;}
+    public string FileName { get => fileName; }
 
     public void CreateInitialStructure()
     {
         if (Labeled("Thing") == null)
             AddThing("Thing", null);
+        Thing hasChild = AddThing("has-child", null);
+        Thing relType = GetOrAddThing("RelationshipType", "Thing");
+        hasChild.AddParent(relType);
         GetOrAddThing("Object", "Thing");
         GetOrAddThing("Action", "Thing");
         GetOrAddThing("RelationshipType", "Thing");
@@ -22,21 +25,15 @@ public partial class UKS
         GetOrAddThing("hasProperty", "RelationshipType");
         GetOrAddThing("is", "RelationshipType");
 
-        //This hack is here because at startup some Things don't get put into the UKS List.
-        foreach (Thing t in ThingLabels.AllThingsInLabelList())
-            if (!UKSList.Contains(t))
-                UKSList.Add(t);
-
-
         AddStatement("is-a", "inverseOf", "has-child");
         AddStatement("isExclusive", "is-a", "RelationshipType");
         AddStatement("isTransitive", "is-a", "RelationshipType");
         AddStatement("has", "is-a", "RelationshipType");
-//        AddStatement("is-part-of", "is-a", "RelationshipType");
-//        AddStatement("has", "inverseOf", "is-part-of");
+        //        AddStatement("is-part-of", "is-a", "RelationshipType");
+        //        AddStatement("has", "inverseOf", "is-part-of");
 
         AddStatement("ClauseType", "is-a", "RelationshipType");
-//        AddStatement("is-part-of", "hasProperty", "isTransitive");
+        //        AddStatement("is-part-of", "hasProperty", "isTransitive");
         AddStatement("has-child", "hasProperty", "isTransitive");
 
         AddBrainSimConfigSectionIfNeeded();
@@ -76,14 +73,14 @@ public partial class UKS
 
 
         //demo to add PI to the structure
-        //AddStatement("pi", "is-a", "number");
-        //AddStatement("pi", "hasDigit*", "3");
-        //AddStatement("pi", "hasDigit*", ".");
-        //AddStatement("pi", "hasDigit*", "1");
-        //AddStatement("pi", "hasDigit*", "4");
-        //AddStatement("pi", "hasDigit*", "1");
-        //AddStatement("pi", "hasDigit*", "5");
-        //AddStatement("pi", "hasDigit*", "9");
+        AddStatement("pi", "is-a", "number");
+        AddStatement("pi", "hasDigit*", "3");
+        AddStatement("pi", "hasDigit*", ".");
+        AddStatement("pi", "hasDigit*", "1");
+        AddStatement("pi", "hasDigit*", "4");
+        AddStatement("pi", "hasDigit*", "1");
+        AddStatement("pi", "hasDigit*", "5");
+        AddStatement("pi", "hasDigit*", "9");
     }
 
     void AddBrainSimConfigSectionIfNeeded()
@@ -326,14 +323,18 @@ public partial class UKS
             Debug.WriteLine("Could not save file because: " + message);
             return false;
         }
+
+        string tempFilePath = Path.GetTempFileName();
         FormatContentForSaving();
         List<Type> extraTypes = GetTypesInUKS();
-        Stream file = File.Create(fullPath);
+        Stream file = File.Create(tempFilePath);
         file.Position = 0;
         try
         {
             XmlSerializer writer = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());
             writer.Serialize(file, UKSTemp);
+            file.Close();
+            File.Replace(tempFilePath, fullPath,null);
         }
         catch (Exception e)
         {
@@ -341,11 +342,13 @@ public partial class UKS
                 Debug.WriteLine("Xml file write failed because: " + e.InnerException.Message);
             else
                 Debug.WriteLine("Xml file write failed because: " + e.Message);
-            file.Close();
             return false;
         }
-        file.Close();
-        UKSTemp = new();
+        finally
+        {
+            file.Close();
+            UKSTemp = new();
+        }
         return true;
     }
 
@@ -358,15 +361,8 @@ public partial class UKS
             if (t.V != null)
             {
                 var theType = t.V.GetType();
-                if (theType.IsSerializable)
-                {
-                    if (!extraTypes.Contains(theType))
-                        extraTypes.Add(theType);
-                }
-                else
-                {
-                    Debug.Write("Type " + theType.FullName + " is not serializable");
-                }
+                if (!extraTypes.Contains(theType))
+                    extraTypes.Add(theType);
             }
         }
         /*
@@ -431,7 +427,7 @@ public partial class UKS
             return false;
         }
 
-        List<Type> extraTypes = GetTypesInUKS();
+        List<Type> extraTypes = new();
         XmlSerializer reader1 = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());
         try
         {
@@ -456,6 +452,21 @@ public partial class UKS
             MergeStringListIntoUKS(contentToRestore);
         }
 
+        // prepend "Module" to any module names which don't have it
+        // this is needed for the UKS content change from module names starting with the word "module" to avoid naming collisions
+        var activeModules = Labeled("ActiveModule").Children;
+        var avaialableModules = Labeled("AvailableModule").Children;
+
+        foreach (Thing t in avaialableModules)
+        {
+            if (!t.Label.ToLower().StartsWith("module"))
+                t.Label = "Module" + t.Label;
+        }
+        foreach (Thing t in activeModules)
+        {
+            if (!t.Label.ToLower().StartsWith("module"))
+                t.Label = "Module" + t.Label;
+        }
         return true;
     }
 }

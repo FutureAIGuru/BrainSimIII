@@ -5,6 +5,7 @@
 // 
 
 using System;
+using System.CodeDom;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
@@ -54,7 +55,7 @@ namespace BrainSimulator.Modules
         }
         public PointPlus(Point pp)
         {
-            X = (float)pp.X; 
+            X = (float)pp.X;
             Y = (float)pp.Y;
             Conf = 0;
         }
@@ -82,8 +83,8 @@ namespace BrainSimulator.Modules
             {//keep theta within the range +/- PI
                 if (polarDirty) UpdatePolar();
                 theta = value;
-                if (theta > PI) theta -= 2 * (float)PI;
-                if (theta < -PI) theta += 2 * (float)PI;
+                //if (theta > PI) theta -= 2 * (float)PI;
+                //if (theta < -PI) theta += 2 * (float)PI;
                 xyDirty = true;
             }
         }
@@ -106,12 +107,14 @@ namespace BrainSimulator.Modules
         }
         public bool Near(PointPlus PP, float toler)
         {
-            if ((this - PP).R < toler) return true;
+            float dist = (this - PP).R;
+            if (dist < toler) return true;
             return false;
         }
         public override string ToString()
         {
-            string s = "R: " + R.ToString("F3") + ", Theta: " + Degrees.ToString("F3") + "° (" + X.ToString("F2") + "," + Y.ToString("F2") + ") Conf:" + Conf.ToString("F3");
+            //            string s = "R: " + R.ToString("F3") + ", Theta: " + Degrees.ToString("F3") + "° (" + X.ToString("F2") + "," + Y.ToString("F2") + ") Conf:" + Conf.ToString("F3");
+            string s = $"({X.ToString("0.0")}.{Y.ToString("0.0")})";
             return s;
         }
 
@@ -142,6 +145,14 @@ namespace BrainSimulator.Modules
             PointPlus retVal = new PointPlus
             {
                 P = new Point(a.P.X - b.P.X, a.P.Y - b.P.Y)
+            };
+            return retVal;
+        }
+        public static PointPlus operator *(PointPlus a, double b)
+        {
+            PointPlus retVal = new PointPlus
+            {
+                P = new Point(a.P.X*b, a.P.Y * b)
             };
             return retVal;
         }
@@ -257,7 +268,6 @@ namespace BrainSimulator.Modules
             return result;
         }
 
-        [XmlIgnore]
         public Point3D P
         {
             get { if (xyzDirty) UpdateXYZ(); return p; }
@@ -376,9 +386,9 @@ namespace BrainSimulator.Modules
             };
             return retVal;
         }
-        public static Point3DPlus operator *(Point3DPlus a ,float scale)
+        public static Point3DPlus operator *(Point3DPlus a, float scale)
         {
-            Point3DPlus p = new Point3DPlus((float)a.P.X *scale, a.P.Y *scale, a.P.Z * scale);
+            Point3DPlus p = new Point3DPlus((float)a.P.X * scale, a.P.Y * scale, a.P.Z * scale);
             return p;
         }
         public static Point3DPlus operator -(Point3DPlus a, Point3DPlus b)
@@ -432,27 +442,44 @@ namespace BrainSimulator.Modules
     {
         public PointPlus P1;
         public PointPlus P2;
-        public PointPlus Motion;
-        public ColorInt theColor;
+        public int debugIndex;
 
         public Segment() { }
+        public Segment(Segment s)
+        {
+            P1 = s.P1;
+            P2 = s.P2;
+        }
         public override string ToString()
         {
-            string retVal = $"Length: {(int)Length} ({(int)P1.X},{(int)P1.Y}) : ({(int)P2.X},{(int)P2.Y}) A: {Angle}";
+            string retVal = $"L: {(int)Length} ({P1.X.ToString("0.0")},{P1.Y.ToString("0.0")}) : ({P2.X.ToString("0.0")},{P2.Y.ToString("0.0")}) A: {Angle.Degrees.ToString("0.0")}°";
             return retVal;
+        }
+
+        public static  bool operator == (Segment s1, Segment s2)
+        {
+            if (s1 is null && s2 is null) return true;
+            if (s1 is null || s2 is null) return false;
+            float toler = 0.1f;
+            if ((s1.P1.Near(s2.P1, toler) && s1.P2.Near(s2.P2, toler)) || (s1.P1.Near(s2.P2, toler) && s1.P2.Near(s2.P1, toler))) return true;
+            return false;
+        }
+        public static bool operator !=(Segment s1, Segment s2)
+        {
+            return !(s1 == s2);
         }
 
         public Segment(PointPlus P1i, PointPlus P2i)
         {
             P1 = P1i;
             P2 = P2i;
-            theColor = 0xffffff;
+            debugIndex = -1;
         }
         public Segment(PointPlus P1i, PointPlus P2i, ColorInt theColori)
         {
             P1 = P1i;
             P2 = P2i;
-            theColor = theColori;
+            debugIndex = theColori;
         }
         public PointPlus MidPoint
         {
@@ -495,10 +522,8 @@ namespace BrainSimulator.Modules
             {
                 P1 = this.P1.Clone(),
                 P2 = this.P2.Clone(),
-                theColor = this.theColor
+                debugIndex = this.debugIndex
             };
-            if (this.Motion != null)
-                Motion = this.Motion.Clone();
             return s;
         }
     }
@@ -510,13 +535,13 @@ namespace BrainSimulator.Modules
         private float theAngle = 0;
         public Angle() { this.theAngle = 0; }  // Don't remove, needed to save Angles to XML!
         public Angle(float angle) { this.theAngle = angle; }
-        public static implicit operator float(Angle a) => (a != null)?a.theAngle:0;
+        public static implicit operator float(Angle a) => (a != null) ? a.theAngle : 0;
         public static implicit operator Angle(float a) => new Angle(a);
         public static implicit operator Angle(double a) => new Angle((float)a);
         public static Angle operator -(Angle a, Angle b)
         {
             Angle c = (float)a - (float)b;
-            c = ((float)c + PI) % (2 * PI) - PI;
+            //c = ((float)c + PI) % (2 * PI) - PI;
             return c;
         }
         public static Angle operator +(Angle a, Angle b)
@@ -527,7 +552,7 @@ namespace BrainSimulator.Modules
         public override string ToString()
         {
             float degrees = theAngle * 180 / (float)PI;
-            string s = theAngle.ToString("F3") + " " + degrees.ToString("F3") + "°";
+            string s = theAngle.ToString("0.00") + " " + degrees.ToString("0.0") + "°";
             return s;
         }
         public int CompareTo(Angle a)

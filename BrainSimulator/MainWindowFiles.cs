@@ -202,6 +202,7 @@ namespace BrainSimulator
 
         private bool Save()
         {
+            SetupBeforeSave();
             return theUKS.SaveUKStoXMLFile(currentFileName);
         }
         private bool SaveAs()

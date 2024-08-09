@@ -122,17 +122,6 @@ public partial class UKS
         if (t2.AncestorList().Contains(t1)) return true;
         return false;
     }
-    bool ThingInTree(Thing t1, string label)
-    {
-        if (label == "") return false;
-        if (t1 == null) return false;
-        if (t1.Label == label) return true;
-        if (t1.AncestorList().FindFirst(x => x.Label == label) != null) return true;
-        if (t1.DescendentsList().FindFirst(x => x.Label == label) != null) return true;
-        if (t1.HasRelationshipWithAncestorLabeled(label) != null) return true;
-        return false;
-
-    }
     List<Thing> GetTransitiveTargetChain(Thing t, Thing relType, List<Thing> results = null)
     {
         if (results == null) results = new();
@@ -201,6 +190,7 @@ public partial class UKS
         //  several other cases
 
         if (r1.target != r2.target && (r1.target == null || r2.target == null)) return false;
+        //if (r1.target == r2.target && r1.source != r2.source) return false;
 
         //return false;
         if (r1.source == r2.source ||

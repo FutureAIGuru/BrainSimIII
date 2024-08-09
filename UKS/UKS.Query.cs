@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace UKS;
 public partial class UKS
@@ -100,7 +101,7 @@ public partial class UKS
                         bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
                             thingsToExamine[i].reachedWith != null;
                         if (corner)
-                        { } //corners are the reasons in a logic progression
+                        { } //TODO: corners are the reasons in a logic progression
                         thingsToExamine[i].corner |= corner;
                         ThingWithQueryParams thingToAdd = new ThingWithQueryParams
                         {
@@ -185,12 +186,13 @@ public partial class UKS
                 Relationship existing = result.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));
                 if (existing != null) continue;
 
-                if (haveCount > 1 && r.relType?.HasAncestorLabeled("has")!= null)
+                if (haveCount > 1 && r.relType?.HasAncestorLabeled("has") != null)
                 {
                     //this creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
                     Relationship r1 = new Relationship(r);
                     Thing newCountType = GetOrAddThing((GetCount(r.reltype) * haveCount).ToString(), "number");
+                    //Thing newCountType = GetOrAddThing((haveCount).ToString(), "number");
 
                     //hack for numeric labels
                     Thing rootThing = r1.reltype;
@@ -284,55 +286,59 @@ public partial class UKS
         return retVal;
     }
 
-    //find all the things containing the sequence of attributes
-    private bool HasSequence(IList<Relationship> relationships, List<Thing> targetAttributes)
-    {
-        //TODO modify to find closest match, return the matching score instead of bool
-        //TODO this requires that all entries in a sequence must be adjascent without any intervening extraneous relationships
-        //TODO some sequences (spatial) are circular and the search must loop back to the beginning (not for anything temporal)
-        IList<Relationship> sortedReferences = relationships.OrderBy(x => x.relType.Label).ToList();
-
-        //TODO the for loop below allows for matching a partial which does not start at the beginning of the stored sequence
-        int i = 0;
-        //for (int i = 0; i < sortedReferences.Count - targetAttributes.Count + 1; i++)
-        {
-            for (int j = 0; j < targetAttributes.Count; j++)
-            {
-                if (sortedReferences[i + j].target != targetAttributes[j]) goto misMatch;
-            }
-            return true;
-        misMatch:;
-        }
-        return false;
-    }
-
+    //TODO add concept of "near" Things
+    //TODO add option to require first and/or last entries to match
     /// <summary>
-    /// Returns a list of Things which have all the target attributes as Relationships
+    /// This determines how well two Things match in terms of the order of their ordered attributes.
     /// </summary>
-    /// <param name="targetAttributes">An ordered list of Things which must occur as attributes in the search target</param>
-    /// <returns>All the Things which match the criteria</returns>
-    public List<Thing> HasSequence(List<Thing> targetAttributes)
+    /// <param name="pattern">This is the pattern we are searching for</param>
+    /// <param name="candidate">This is the item suggested as a possible sequence match< (the stored pattern)</param>
+    /// <param name="bestOffset">Return value of offset into the candidate where the pattern match begins.</param>
+    /// <param name="relType">If specified, specifees the relationship type to follow, otherwise all sequential relTypes are matched</param>
+    /// <param name="circularSearch">If true, circularizes the search of the candidate (for visuals)</param>
+    /// <returns>Confidence that the pattern exists in the candidate</returns>
+    public float HasSequence(Thing pattern, Thing candidate, out int bestOffset, bool circularSearch = false, Thing relType = null)
     {
-        //get a list of all things with the given attributes
-        List<Thing> retVal = new();
-        foreach (Thing t in targetAttributes)
-            foreach (Relationship r in t.RelationshipsFrom)
-                if (r.reltype == null) continue;
-                else if (r.relType.HasAncestorLabeled("has"))
-                    if (!retVal.Contains(r.source))
-                        retVal.Add(r.source);
+        bestOffset = -1;
+        if (candidate == null) return -1;
+        if (pattern == null) return -1;
+        if (candidate.Relationships.Count == 0) return -1;
+        if (pattern.Relationships.Count == 0) return -1;
 
-        //remove the onew without the sequence
-        for (int i = 0; i < retVal.Count; i++)
+        //get the needed relationships and put them in the order specified by the relationshipType digits
+        float bestScore = -1;
+        List<Relationship> patternRelationships = new(pattern.Relationships);
+        patternRelationships = patternRelationships.FindAll(
+            x => x.relType == null || Regex.IsMatch(x.reltype.Label, @"\d+") && (relType == null || x.relType.Parents.Contains(relType)));
+        patternRelationships = patternRelationships.OrderBy(s => (s.relType == null) ? 0 : int.Parse(Regex.Match(s.reltype.Label, @"\d+").Value)).ToList();
+        List<Relationship> candidateRelationships = new(candidate.Relationships);
+        candidateRelationships = candidateRelationships.FindAll(
+            x => x.relType == null || Regex.IsMatch(x.reltype.Label, @"\d+") && (relType == null || x.relType.Parents.Contains(relType)));
+        candidateRelationships = candidateRelationships.OrderBy(s => (s.relType == null) ? 0 : int.Parse(Regex.Match(s.reltype.Label, @"\d+").Value)).ToList();
+
+        //offset is the number of rels to skip at the beginning of the stored pattern
+        for (int offset = 0; offset < candidateRelationships.Count; offset++)
         {
-            if (!HasSequence(retVal[i].Relationships, targetAttributes))
+            float score = 0;
+            for (int i = 0; i < patternRelationships.Count; i++)
             {
-                retVal.RemoveAt(i);
-                if (i != 0)
-                    i--;
+                //if circular search is requested and the offset is off the end of the candidate, loop back
+                if (!circularSearch && offset + i >= candidateRelationships.Count) break;
+                int index = (offset + i) % candidateRelationships.Count;
+                if (patternRelationships[i].target == candidateRelationships[index].target)
+                {
+                    score += candidateRelationships[index].Weight;
+                }
+            }
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestOffset = offset;
             }
         }
-        return retVal;
+
+        bestScore /= pattern.Relationships.Count;
+        return bestScore;
     }
 
     //TODO add parameter to allow some number of misses
@@ -414,5 +420,171 @@ public partial class UKS
     public List<Relationship> Why()
     {
         return succeededConditions;
+    }
+
+    Dictionary<Thing, float> searchCandidates;
+    /// <summary>
+    /// Given that you have performed a search with SearchForClosestMatch, this returns the next-best result
+    /// given the previous best.
+    /// </summary>
+    /// <param name="confidence">value representin the quality of the match</param>
+    /// <returns></returns>
+    public Thing GetNextClosestMatch(ref float confidence)
+    {
+        Thing bestThing = null;
+        confidence = -1;
+        if (searchCandidates == null) return bestThing;
+
+        //find the best match with a value LESS THAN the previous best
+        foreach (var key in searchCandidates)
+            if (key.Value > confidence)
+            {
+                confidence = key.Value;
+                bestThing = key.Key;
+            }
+
+        //remove the item from the dictionary
+        if (bestThing != null)
+            searchCandidates.Remove(bestThing);
+        return bestThing;
+    }
+
+    //This is cloned from BuildSearchList
+    private List<ThingWithQueryParams> BuildListOfSimilarThings(Thing q)
+    {
+        List<ThingWithQueryParams> thingsToExamine = new();
+        int maxHops = 8;
+        int hopCount = 0;
+        //foreach (Thing t in q)
+        thingsToExamine.Add(new ThingWithQueryParams
+        {
+            thing = q,
+            hopCount = hopCount,
+            weight = 1,
+            reachedWith = null
+        });
+        hopCount++;
+        int currentEnd = thingsToExamine.Count;
+        for (int i = 0; i < thingsToExamine.Count; i++)
+        {
+            Thing t = thingsToExamine[i].thing;
+            float curWeight = thingsToExamine[i].weight;
+            int curCount = thingsToExamine[i].haveCount;
+            Thing reachedWith = thingsToExamine[i].reachedWith;
+
+            foreach (Relationship r in t.Relationships)  //has-child et al
+            {
+                if (r.relType.Label != "isSimilarTo") continue;
+                //if there are several relationship, ignore the is-a, it is likely wrong
+                //var existingRelationships = GetRelationshipsBetween(r.source, r.target);
+                //if (existingRelationships.Count > 1) continue;
+
+                if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twgp)
+                    twgp.hitCount++;//thing is in the list, increment its count
+                else
+                {//thing is not in the list, add it
+                    //bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
+                    //    thingsToExamine[i].reachedWith != null;
+                    //if (corner)
+                    //{ } //TODO: corners are the reasons in a logic progression
+                    //thingsToExamine[i].corner |= corner;
+                    ThingWithQueryParams thingToAdd = new ThingWithQueryParams
+                    {
+                        thing = r.target,
+                        hopCount = hopCount,
+                        weight = curWeight * r.Weight,
+                        reachedWith = r.relType,
+                    };
+                    thingsToExamine.Add(thingToAdd);
+                    //if things have counts, they are multiplied
+                    int val = GetCount(r.reltype);
+                    thingToAdd.haveCount = curCount * val;
+                }
+            }
+            if (i == currentEnd - 1)
+            {
+                hopCount++;
+                currentEnd = thingsToExamine.Count;
+                if (hopCount > maxHops) break;
+            }
+        }
+        return thingsToExamine;
+    }
+
+    /// <summary>
+    /// Search for the Thing which most closely resembles the target Thing based on the attributes of the target
+    /// </summary>
+    /// <param name="target">The Relationships of this Thing are the attributes to search on</param>
+    /// <param name="root">All searching is done within the descendents of this Thing</param>
+    /// <param name="confidence">value representing the quality of the match. </param>
+    /// <returns></returns>
+    public Thing SearchForClosestMatch(Thing target, Thing root, ref float confidence)
+    {
+        searchCandidates = new();
+
+        //perform the search
+        foreach (Relationship r in target.Relationships)
+        {
+            //debug hack
+            //if (!r.reltype.Label.StartsWith("go")) continue;
+            List<Thing> targetList = new(); //this prevents a single relationship from creating multiple votes
+            foreach (Relationship r1 in r.target.RelationshipsFrom)
+            {
+                //TODO: make this handle order-independency (go0,go1) vs relType params (has.2, has.4)
+                //note: order-descriptors DO NOT have attributes while params DO
+                if (targetList.Contains(r1.source)) continue;
+                if (r1.reltype.Label == "has-child") continue;
+                if (r1.source.HasAncestor(root))
+                {
+                    if (!searchCandidates.ContainsKey(r1.source))
+                        searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
+                    searchCandidates[r1.source] += r1.Weight;
+                    targetList.Add(r1.source);
+                }
+            }
+            //add any similar attributes
+            var similarValues = BuildListOfSimilarThings(r.target);
+            for (int i = 1; i < similarValues.Count; i++)
+            {
+                ThingWithQueryParams? item = similarValues[i];
+                if (item.weight < 0.4f) continue;
+                if (targetList.Contains(item.thing)) continue;
+                foreach (Relationship r1 in item.thing.RelationshipsFrom)
+                {
+                    if (r1.source.HasAncestor(root))
+                    {
+                        if (!searchCandidates.ContainsKey(r1.source))
+                            searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
+                        searchCandidates[r1.source] += item.weight;
+                        targetList.Add(r1.source);
+                    }
+                }
+            }
+        }
+        Thing bestThing = null;
+        confidence = -1;
+
+        //normalize the confidences
+        foreach (var key in searchCandidates)
+            searchCandidates[key.Key] /= target.Relationships.Count;
+
+        ////handle inheritance
+        ////TODO: check if this messes up on multiple inheritance and/or problems with the order of processing
+        foreach (Thing t in searchCandidates.Keys)
+            foreach (Thing t1 in t.Descendents)
+                if (t1 != t && searchCandidates.ContainsKey(t1))
+                    searchCandidates[t1] += searchCandidates[t];
+
+        //find the best value
+        foreach (var key in searchCandidates)
+            if (key.Value > confidence)
+            {
+                confidence = key.Value;
+                bestThing = key.Key;
+            }
+        //remove the item from the dictionary
+        if (bestThing != null)
+            searchCandidates.Remove(bestThing);
+        return bestThing;
     }
 }
