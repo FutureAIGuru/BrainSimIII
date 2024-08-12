@@ -217,12 +217,14 @@ namespace BrainSimulator.Modules
             return true;
         }
 
+        //actually a circular arc for now
         public class EllipticalCornerArc
         {
             public PointPlus Corner { get; }
             public PointPlus tangencyPoint1 { get; set; }
             public PointPlus tangencyPoint2 { get; set; }
             public double Distance1 { get; }
+
             public double Distance2 { get; }
 
             public EllipticalCornerArc(PointPlus corner, PointPlus tangencyPoint1, PointPlus tangencyPoint2)
@@ -261,8 +263,7 @@ namespace BrainSimulator.Modules
                     Stroke = Brushes.Black,
                     StrokeThickness = 1,
                 };
-                //poly.Points.Add(center);
-
+ 
                 PointPlus ptCurr = tangencyPoint1 - center;
                 PointPlus ptLast = tangencyPoint2 - center;
                 if (ptCurr.Theta - ptLast.Theta > Angle.FromDegrees(180))

@@ -334,7 +334,7 @@ public partial class UKS
             XmlSerializer writer = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());
             writer.Serialize(file, UKSTemp);
             file.Close();
-            File.Replace(tempFilePath, fullPath,null);
+            File.Copy(tempFilePath, fullPath,overwrite: true);
         }
         catch (Exception e)
         {

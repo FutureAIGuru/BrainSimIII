@@ -245,7 +245,7 @@ public partial class UKS
                     }
             }
             //if source and target are the same and one contains a number, assume that the other contains "1"
-            // fido has a leg -> fido has 1 leg
+            // fido has leg -> fido has 1 leg
             bool hasNumber1 = (r1RelProps.FindFirst(x => x.HasAncestorLabeled("number")) != null);
             bool hasNumber2 = (r2RelProps.FindFirst(x => x.HasAncestorLabeled("number")) != null);
             if (r1.target == r2.target &&
@@ -263,6 +263,7 @@ public partial class UKS
         }
         else
         {
+            //this appears to duplicate code at line 226
             List<Thing> commonParents = FindCommonParents(r1.target, r2.target);
             foreach (Thing t3 in commonParents)
             {
@@ -276,7 +277,7 @@ public partial class UKS
         return false;
     }
 
-    private IList<Thing> GetAttributes(Thing t)
+    public IList<Thing> GetAttributes(Thing t)
     {
         List<Thing> retVal = new();
         if (t == null) return retVal;
@@ -317,10 +318,11 @@ public partial class UKS
         return false;
     }
 
-    public Relationship GetRelationship(string source, string relType, string target)
+    public Relationship GetRelationship(Thing source, Thing relType, Thing target)
     {
+        if (source == null) return null;
         //create a temporary relationship
-        Relationship r = new() { source = Labeled(source), relType = Labeled(relType), target = Labeled(target) };
+        Relationship r = new() { source = source, relType = relType, target = target };
         //see if it already exists
         return GetRelationship(r);
     }
