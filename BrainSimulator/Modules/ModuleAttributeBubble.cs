@@ -138,7 +138,7 @@ public class ModuleAttributeBubble : ModuleBase
                     }
                 }
                 float noInfoCount = totalCount - (positiveCount + negativeCount);
-                positiveWeight += currentWeight + noInfoCount * 0.51f
+                positiveWeight += currentWeight + noInfoCount * 0.51f;
                 if (noInfoCount < 0) noInfoCount = 0;
 
                 if (negativeCount >= positiveCount)

@@ -29,7 +29,7 @@ public partial class Thing
         Thing t = ThingLabels.GetThing(label);
         if (t == null)
         { }
-//            throw new ArgumentNullException($"No Thing found with label: {label}");
+        //            throw new ArgumentNullException($"No Thing found with label: {label}");
         return t;
     }
     public static Thing HasChild { get => ThingLabels.GetThing("has-child"); }

@@ -4,22 +4,33 @@
 // © 2022 FutureAI, Inc., all rights reserved
 //
 
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using UKS;
 
 namespace BrainSimulator.Modules
 {
     public partial class ModuleUKSQueryDlg : ModuleBaseDlg
     {
-        // Constructor of the ModuleUKSStatement dialog
-        //lists of nouns from https://www.momswhothink.com/list-of-nouns/
+        DispatcherTimer requeryTimer = new DispatcherTimer();
+        
         public ModuleUKSQueryDlg()
         {
             InitializeComponent();
+            requeryTimer.Interval = TimeSpan.FromSeconds(3);
+            requeryTimer.Tick += RequeryTimer_Tick;
 
         }
+
+        private void RequeryTimer_Tick(object sender, EventArgs e)
+        {
+            DoTheQuery();
+        }
+
         List<Relationship> result = new();
 
 
@@ -52,24 +63,30 @@ namespace BrainSimulator.Modules
                 }
                 if (b.Content.ToString() == "Query")
                 {
-                    string source = sourceText.Text;
-                    string type = typeText.Text;
-                    string target = targetText.Text;
-                    string filter = filterText.Text;
-
-                    List<Thing> things;
-                    List<Relationship> relationships;
-                    ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-                    UKSQuery.QueryUKS(source, type, target, filter, out things, out relationships);
-
-                    if (things.Count > 0)
-                        OutputResults(things);
-                    else
-                        OutputResults(relationships, target == "", source == "");
-
+                    DoTheQuery();
                 }
             }
         }
+
+        private void DoTheQuery()
+        {
+            string source = sourceText.Text;
+            string type = typeText.Text;
+            string target = targetText.Text;
+            string filter = filterText.Text;
+
+            requeryTimer.Start();
+            List<Thing> things;
+            List<Relationship> relationships;
+            ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
+            UKSQuery.QueryUKS(source, type, target, filter, out things, out relationships);
+
+            if (things.Count > 0)
+                OutputResults(things);
+            else
+                OutputResults(relationships, target == "", source == "");
+        }
+
         private void QueryAttribs()
         {
             ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
@@ -130,11 +147,11 @@ namespace BrainSimulator.Modules
                     if (r1 is Relationship r2)
                     {
                         if (noSource && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
-                            resultString += r2.relType?.ToString() + " " + r2.target.ToString() + "  ("+r2.Weight.ToString("0.0")+ ")\n";
+                            resultString += $"{r2.relType?.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                         else if (noTarget && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
-                            resultString += r2.source.ToString() + " " + r2.relType.ToString() + "  (" + r2.Weight.ToString("0.0") + ")\n";
+                            resultString += $"{r2.source.ToString()} {r2.relType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                         else
-                            resultString += r2.source.ToString() + " " + r2.relType.ToString() + " " + r2.target.ToString() + "  (" + r2.Weight.ToString("0.0") + ")\n";
+                            resultString += $"{r2.source.ToString()} {r2.relType.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                         //                            resultString += r2.ToString() + "\n";
                     }
                     else
