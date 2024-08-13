@@ -36,6 +36,7 @@ public partial class UKS
             RemoveConflictingResults(result2);
         RemoveFalseConditionals(result2);
         AlphabetizeRelationships(ref result2);
+        IncreaseResultWeights(result2);
         return result2;
     }
 
@@ -213,6 +214,16 @@ public partial class UKS
         return result;
     }
 
+    private void IncreaseResultWeights(List<Relationship> result)
+    {
+        foreach(Relationship r in result)
+        {
+            r.Weight += .2f;
+            if (r.Weight > 0.9)
+                r.Weight = 0.98f;
+        }
+    }
+
     private void RemoveConflictingResults(List<Relationship> result)
     {
         for (int i = 0; i < result.Count; i++)
@@ -221,6 +232,13 @@ public partial class UKS
             for (int j = i + 1; j < result.Count; j++)
             {
                 Relationship r2 = result[j];
+                //are the results the same?
+                if (r1.reltype == r2.reltype && r1.target == r2.target)
+                {
+                    result.RemoveAt(j);
+                    j--;
+                }
+
                 if (RelationshipsAreExclusive(r1, r2))
                 {
                     result.RemoveAt(j);

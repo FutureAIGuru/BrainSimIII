@@ -145,7 +145,7 @@ public class Relationship
         {
             weight = value;
             //if this is a commutative relationship, also set the weight on the reverse
-            if (relType.HasPropertyLabeled("IsCommutative"))
+            if (relType.HasProperty("IsCommutative"))
             {
                 Relationship rReverse = target.Relationships.FindFirst(x => x.reltype == relType && x.target == source);
                 if (rReverse != null)

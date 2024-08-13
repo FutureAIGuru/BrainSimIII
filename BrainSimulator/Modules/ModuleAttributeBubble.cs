@@ -51,6 +51,7 @@ public class ModuleAttributeBubble : ModuleBase
     }
     private void SameThreadCallback(object state)
     {
+        if (!isEnabled) return;
         new Thread(() =>
         {
             DoTheWork();
@@ -62,6 +63,14 @@ public class ModuleAttributeBubble : ModuleBase
         public Thing relType;
         public Thing target;
         public List<Relationship> relationships = new();
+        public RelDest()
+        { }
+        public RelDest(Relationship r)
+        {
+            relType = r.relType;
+            target = r.target;
+            relationships.Add(r);
+        }
         public override string ToString()
         {
             return $"{relType.Label} -> {target.Label}  :  {relationships.Count}";
@@ -104,34 +113,61 @@ public class ModuleAttributeBubble : ModuleBase
             {
                 RelDest rr = sortedItems[i];
                 if (excludeTypes.Contains(rr.relType.Label, comparer: StringComparer.OrdinalIgnoreCase)) continue;
-                //if (rr.relationships.Count < t.Children.Count / 2) break;
 
                 //find an existing relationship
                 Relationship r = theUKS.GetRelationship(t, rr.relType, rr.target);
                 float currentWeight = (r != null) ? r.Weight : 0;
 
-                int positiveCount = rr.relationships.FindAll(x => x.Weight > .5f).Count;
-                int negativeCount = 0;
+
+
+
+                //We need 1) count for this Relationship, 2) count for any conflicting, 3) count without a reference
+                float totalCount = t.Children.Count;
+                float positiveCount = rr.relationships.FindAll(x => x.Weight > .5f).Count;
+                float positiveWeight = rr.relationships.Sum(x => x.Weight);
+                float negativeCount = 0;
+                float negativeWeight = 0;
                 //are there any conflicting relationships
                 for (int j = 0; j < sortedItems.Count; j++)
                 {
                     if (j == i) continue;
                     if (RelationshipsConflict(rr, sortedItems[j]))
-                        negativeCount += sortedItems[j].relationships.Count;
+                    {
+                        negativeCount += sortedItems[j].relationships.Count; //?  why not += 1
+                        negativeWeight += sortedItems[j].relationships.Sum(x => x.Weight);
+                    }
                 }
-                int noInfoCount = t.Children.Count - (positiveCount + negativeCount); //not currently used 
+                float noInfoCount = totalCount - (positiveCount + negativeCount);
+                positiveWeight += currentWeight + noInfoCount * 0.51f
+                if (noInfoCount < 0) noInfoCount = 0;
+
                 if (negativeCount >= positiveCount)
                 {
                     if (r != null)
                     {
                         t.RemoveRelationship(r);
-                        debugString += $"Removed {r.ToString()} \n";
+                        debugString += $"Removed {r} \n";
                     }
                     continue;
                 }
 
-                //calculate what the new/added weight should be
-                float newWeight = rr.relationships.Average(x => x.Weight);
+
+                //calculate the new weight
+                //If there is an existing weight, it is increased/decreased by a small amound and removed if it drops below .5
+                //If there is no existing weight, it is assumed to start at 0.5.
+                //TODO, replace this hardcoded "lookup table" with a formula
+                float targetWeight = 0;
+                float deltaWeight = positiveWeight - negativeWeight;
+                if (deltaWeight < .8) targetWeight = -.1f;
+                else if (deltaWeight < 1.7) targetWeight = .01f;
+                else if (deltaWeight < 2.7) targetWeight = .2f;
+                else deltaWeight = .3f;
+                if (currentWeight == 0) currentWeight = 0.5f;
+                float newWeight = currentWeight + targetWeight;
+                if (newWeight > 0.99f) newWeight = 0.99f;
+
+
+
                 if (newWeight != currentWeight)
                 {
                     if (newWeight < .5)
@@ -148,6 +184,16 @@ public class ModuleAttributeBubble : ModuleBase
                         r = t.AddRelationship(rr.target, rr.relType);
                         r.Weight = newWeight;
                         r.Fire();
+                        //if there is a conflicting relationship, delete it
+                        for (int j = 0; j < t.Relationships.Count; j++)
+                        {
+                            if (RelationshipsConflict(new RelDest(r), new RelDest(t.Relationships[j])))
+                            {
+                                t.RemoveRelationship(t.Relationships[j]);
+                                j--;
+                            }
+                        }
+
                         debugString += $"{r.ToString()}   {r.Weight.ToString(".0")} \n";
                     }
                 }
@@ -157,7 +203,6 @@ public class ModuleAttributeBubble : ModuleBase
         UpdateDialog();
     }
 
-    //We need 1) count for this Relationship, 2) count for any conflicting, 3) count without a reference
     //If some relationships are exceptions, we can still bubble the 
     //Relationships are exceptions if they conflict AND numbers are one are small relative to the other.
     //a conflicting Relationship is:
@@ -171,17 +216,17 @@ public class ModuleAttributeBubble : ModuleBase
         {
             var parents = FindCommonParents(r1.target, r2.target);
             foreach (var parent in parents)
-                if (parent.HasPropertyLabeled("isExclusive")) return true;
+                if (parent.HasProperty("isExclusive") || parent.HasProperty("allowMultiple")) return true;
         }
         if (r1.target == r2.target)
         {
             var parents = FindCommonParents(r1.target, r2.target);
             foreach (var parent in parents)
-                if (parent.HasPropertyLabeled("isExclusive")) return true;
+                if (parent.HasProperty("isExclusive")) return true;
 
             //get the attributes of the relationships
-            IList<Thing> r1RelAttribs = theUKS.GetAttributes(r1.relType);
-            IList<Thing> r2RelAttribs = theUKS.GetAttributes(r2.relType);
+            IList<Thing> r1RelAttribs = r1.relType.GetAttributes();
+            IList<Thing> r2RelAttribs = r2.relType.GetAttributes();
 
             Thing r1Not = r1RelAttribs.FindFirst(x => x.Label == "not" || x.Label == "no");
             Thing r2Not = r2RelAttribs.FindFirst(x => x.Label == "not" || x.Label == "no");
@@ -196,7 +241,7 @@ public class ModuleAttributeBubble : ModuleBase
                     List<Thing> commonParents = FindCommonParents(t1, t2);
                     foreach (Thing t3 in commonParents)
                     {
-                        if (t3.HasPropertyLabeled("isexclusive") || t3.HasPropertyLabeled("allowMultiple"))
+                        if (t3.HasProperty("isexclusive") || t3.HasProperty("allowMultiple"))
                             return true;
                     }
                 }

@@ -130,11 +130,11 @@ namespace BrainSimulator.Modules
                     if (r1 is Relationship r2)
                     {
                         if (noSource && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
-                            resultString += r2.relType?.ToString() + " " + r2.target.ToString() + "\n";
+                            resultString += r2.relType?.ToString() + " " + r2.target.ToString() + "  ("+r2.Weight.ToString("0.0")+ ")\n";
                         else if (noTarget && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
-                            resultString += r2.source.ToString() + " " + r2.relType.ToString() + "\n";
+                            resultString += r2.source.ToString() + " " + r2.relType.ToString() + "  (" + r2.Weight.ToString("0.0") + ")\n";
                         else
-                            resultString += r2.source.ToString() + " " + r2.relType.ToString() + " " + r2.target.ToString() + "\n";
+                            resultString += r2.source.ToString() + " " + r2.relType.ToString() + " " + r2.target.ToString() + "  (" + r2.Weight.ToString("0.0") + ")\n";
                         //                            resultString += r2.ToString() + "\n";
                     }
                     else

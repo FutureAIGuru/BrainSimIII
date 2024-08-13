@@ -81,16 +81,16 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void LoadContentToTreeView()
     {
         ModuleUKS parent = (ModuleUKS)ParentModule;
-        expandAll = parent.GetAttribute("ExpandAll");
-        string root = parent.GetAttribute("Root");
-        string sizeString = parent.GetAttribute("fontSize");
+        expandAll = parent.GetSavedDlgAttribute("ExpandAll");
+        string root = parent.GetSavedDlgAttribute("Root");
+        string sizeString = parent.GetSavedDlgAttribute("fontSize");
         int.TryParse(sizeString, out int fontSize);
         if (fontSize != 0)
             theTreeView.FontSize = fontSize;
         if (root == null)
         {
             root = "Thing";
-            parent.SetAttribute("Root", root);
+            parent.SetSavedDlgAttribute("Root", root);
         }
         Thing thing = parent.theUKS.Labeled(root);
         if (thing is not null)
@@ -502,7 +502,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     expandAll = t.Label;
                     expandedItems.Clear();
                     expandedItems.Add("|Thing|Object");
-                    parent.SetAttribute("ExpandAll", expandAll);
+                    parent.SetSavedDlgAttribute("ExpandAll", expandAll);
                     updateFailed = true; //this forces the expanded items list not to rebuild
                     break;
                 case "Collapse All":
@@ -510,7 +510,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     expandedItems.Clear();
                     expandedItems.Add("|Thing|Object");
                     updateFailed = true;
-                    parent.SetAttribute("ExpandAll", expandAll);
+                    parent.SetSavedDlgAttribute("ExpandAll", expandAll);
                     break;
                 case "Fetch GPT Info":
                     //the following is an async call so an immediate refresh is not useful
@@ -674,7 +674,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         }
         ModuleUKS parent = (ModuleUKS)ParentModule;
         if (parent == null) return;
-        parent.SetAttribute("Root", textBoxRoot.Text);
+        parent.SetSavedDlgAttribute("Root", textBoxRoot.Text);
         RefreshButton_Click(null, null);
 
     }
@@ -694,7 +694,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 theTreeView.FontSize += 1;
             }
             ModuleUKS parent = (ModuleUKS)ParentModule;
-            parent.SetAttribute("fontSize", theTreeView.FontSize.ToString());
+            parent.SetSavedDlgAttribute("fontSize", theTreeView.FontSize.ToString());
 
         }
     }
@@ -793,9 +793,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         parent.Initialize();
 
         CollapseAll();
-        expandAll = parent.GetAttribute("ExpandAll");
+        expandAll = parent.GetSavedDlgAttribute("ExpandAll");
         if (expandAll == null) expandAll = "";
-        string root = parent.GetAttribute("root");
+        string root = parent.GetSavedDlgAttribute("root");
         if (string.IsNullOrEmpty(root)) root = "Thing";
         textBoxRoot.Text = root;
         RefreshButton_Click(null, null);
@@ -824,6 +824,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void Dlg_Loaded(object sender, RoutedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)ParentModule;
-        textBoxRoot.Text = parent.GetAttribute("Root");
+        textBoxRoot.Text = parent.GetSavedDlgAttribute("Root");
     }
 }

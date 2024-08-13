@@ -176,8 +176,6 @@ public partial class UKS
         return results;
     }
 
-
-
     private  bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
     {
         //are two relationships mutually exclusive?
@@ -192,23 +190,22 @@ public partial class UKS
         if (r1.target != r2.target && (r1.target == null || r2.target == null)) return false;
         //if (r1.target == r2.target && r1.source != r2.source) return false;
 
-        //return false;
         if (r1.source == r2.source ||
             r1.source.AncestorList().Contains(r2.source) ||
             r2.source.AncestorList().Contains(r1.source) ||
             FindCommonParents(r1.source, r1.source).Count() > 0)
         {
 
-            IList<Thing> r1RelProps = GetAttributes(r1.reltype);
-            IList<Thing> r2RelProps = GetAttributes(r2.reltype);
+            IList<Thing> r1RelProps = r1.reltype.GetAttributes();
+            IList<Thing> r2RelProps = r2.reltype.GetAttributes();
             //handle case with properties of the target
             if (r1.target != null && r1.target == r2.target &&
                 (r1.target.AncestorList().Contains(r2.target) ||
                 r2.target.AncestorList().Contains(r1.target) ||
                 FindCommonParents(r1.target, r1.target).Count() > 0))
             {
-                IList<Thing> r1TargetProps = GetAttributes(r1.target);
-                IList<Thing> r2TargetProps = GetAttributes(r2.target);
+                IList<Thing> r1TargetProps = r1.target.GetAttributes();
+                IList<Thing> r2TargetProps = r2.target.GetAttributes();
                 foreach (Thing t1 in r1TargetProps)
                     foreach (Thing t2 in r2TargetProps)
                     {
@@ -277,17 +274,17 @@ public partial class UKS
         return false;
     }
 
-    public IList<Thing> GetAttributes(Thing t)
-    {
-        List<Thing> retVal = new();
-        if (t == null) return retVal;
-        foreach (Relationship r in t.Relationships)
-        {
-            if (r.reltype != null && r.reltype.Label == "is")
-                retVal.Add(r.target);
-        }
-        return retVal;
-    }
+    //public IList<Thing> GetAttributes(Thing t)
+    //{
+    //    List<Thing> retVal = new();
+    //    if (t == null) return retVal;
+    //    foreach (Relationship r in t.Relationships)
+    //    {
+    //        if (r.reltype != null && r.reltype.Label == "is")
+    //            retVal.Add(r.target);
+    //    }
+    //    return retVal;
+    //}
 
     private bool HasAttribute(Thing t, string name)
     {

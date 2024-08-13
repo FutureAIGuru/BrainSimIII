@@ -91,7 +91,7 @@ namespace BrainSimulator.Modules
         }
         public void OpenDlg()
         {
-            SetAttribute("Open", "True");
+            SetSavedDlgAttribute("Open", "True");
             ShowDialog();
         }
         public void CloseDlg()
@@ -103,12 +103,12 @@ namespace BrainSimulator.Modules
                     dlg.Close();
                 });
             }
-            SetAttribute("Open", "");
+            SetSavedDlgAttribute("Open", "");
         }
 
         public virtual void ShowDialog()
         {
-            if (GetAttribute("Open") != "True") return;
+            if (GetSavedDlgAttribute("Open") != "True") return;
             string infoString = GetDlgWindow();
             if ( infoString != null)
             {
@@ -188,7 +188,7 @@ namespace BrainSimulator.Modules
 #endif
         }
 
-        public  string GetAttribute(string attribName)
+        public  string GetSavedDlgAttribute(string attribName)
         {
             Thing thisDlg = theUKS.Labeled(Label);
             if (thisDlg == null) return null;   
@@ -202,7 +202,7 @@ namespace BrainSimulator.Modules
             }
             return null;
         }
-        public void SetAttribute(string attribName, string attribValue)
+        public void SetSavedDlgAttribute(string attribName, string attribValue)
         {
             if (string.IsNullOrEmpty(attribName)) { return; }
             Thing thisDlg = theUKS.Labeled(Label);
@@ -230,14 +230,14 @@ namespace BrainSimulator.Modules
         }
         string GetDlgWindow()
         {
-            return GetAttribute("DlgWindow");
+            return GetSavedDlgAttribute("DlgWindow");
         }
         void SetDlgWindow()
         {
             string infoString = "";
             if (dlg != null)
                 infoString = dlg.Width + "x" + dlg.Height + "+" + dlg.Left + "+" + dlg.Top;
-            SetAttribute("DlgWindow", infoString);
+            SetSavedDlgAttribute("DlgWindow", infoString);
 
         }
         private void Dlg_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -258,7 +258,7 @@ namespace BrainSimulator.Modules
         {
             if (dlg == null)
                 dlgIsOpen = false;
-            SetAttribute("Open", "True");
+            SetSavedDlgAttribute("Open", "True");
         }
 
         private void Dlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
