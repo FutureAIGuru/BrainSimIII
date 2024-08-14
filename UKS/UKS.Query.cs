@@ -36,7 +36,7 @@ public partial class UKS
             RemoveConflictingResults(result2);
         RemoveFalseConditionals(result2);
         AlphabetizeRelationships(ref result2);
-        IncreaseResultWeights(result2);
+        //IncreaseResultWeights(result2);
         return result2;
     }
 
@@ -216,10 +216,10 @@ public partial class UKS
 
     private void IncreaseResultWeights(List<Relationship> result)
     {
-        foreach(Relationship r in result)
+        foreach (Relationship r in result)
         {
-            r.Weight += .2f;
-            if (r.Weight > 0.9)
+            r.Weight += .01f;
+            if (r.Weight > 0.98)
                 r.Weight = 0.98f;
         }
     }
@@ -238,13 +238,22 @@ public partial class UKS
                     result.RemoveAt(j);
                     j--;
                 }
-
-                if (RelationshipsAreExclusive(r1, r2))
-                {
-                    result.RemoveAt(j);
-                    j--;
-                }
-
+                if (r1.reltype.Label.Contains(".") && r2.reltype.Label.Contains("."))
+                    if (RelationshipsAreExclusive(r1, r2))
+                    {
+                        //if two relationships are in conflict, use the one with higher weight
+                        if (r1.Weight > r2.Weight)
+                        {
+                            result.RemoveAt(j);
+                            j--;
+                        }
+                        else
+                        {
+                            result.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
             }
         }
     }

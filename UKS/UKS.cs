@@ -242,7 +242,7 @@ public partial class UKS
                     }
             }
             //if source and target are the same and one contains a number, assume that the other contains "1"
-            // fido has leg -> fido has 1 leg
+            // fido has leg -> fido has 1 leg  
             bool hasNumber1 = (r1RelProps.FindFirst(x => x.HasAncestorLabeled("number")) != null);
             bool hasNumber2 = (r2RelProps.FindFirst(x => x.HasAncestorLabeled("number")) != null);
             if (r1.target == r2.target &&
@@ -274,17 +274,6 @@ public partial class UKS
         return false;
     }
 
-    //public IList<Thing> GetAttributes(Thing t)
-    //{
-    //    List<Thing> retVal = new();
-    //    if (t == null) return retVal;
-    //    foreach (Relationship r in t.Relationships)
-    //    {
-    //        if (r.reltype != null && r.reltype.Label == "is")
-    //            retVal.Add(r.target);
-    //    }
-    //    return retVal;
-    //}
 
     private bool HasAttribute(Thing t, string name)
     {

@@ -58,7 +58,7 @@ public class ModuleAttributeBubble : ModuleBase
         }).Start();
     }
 
-    private class RelDest
+    public class RelDest
     {
         public Thing relType;
         public Thing target;

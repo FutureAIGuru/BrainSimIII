@@ -53,17 +53,15 @@ public class ModuleAddCounts : ModuleBase
         debugString = "Agent Started\n";
         for (int i = 0; i < theUKS.UKSList.Count; i++)
         {
-            AddCountRelationships(i);
+            Thing t = theUKS.UKSList[i];
+            AddCountRelationships(t);
         }
         debugString += "Agent  Finished\n";
         UpdateDialog();
     }
 
-    private void AddCountRelationships(int i)
+    private void AddCountRelationships(Thing t)
     {
-        Thing t = theUKS.UKSList[i];
-        if (t == (Thing)"flag")
-        { }
         for (int j = 0; j < t.Relationships.Count; j++)
         {
             Relationship r = t.Relationships[j];
@@ -77,7 +75,10 @@ public class ModuleAddCounts : ModuleBase
             {
                 Relationship existingRelationship = theUKS.GetRelationship(r.source, useRelType.ToString() + "." + match.bestCount.ToString(), match.tMatch);
                 if (existingRelationship == null)
-                    theUKS.AddStatement(r.source, useRelType, match.tMatch, null, match.bestCount.ToString());
+                {
+                    Relationship rAdded = theUKS.AddStatement(r.source, useRelType, match.tMatch, null, match.bestCount.ToString());
+                    debugString += $"Added: {rAdded}\n";
+                }
             }
         }
     }
