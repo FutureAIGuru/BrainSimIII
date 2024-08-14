@@ -82,126 +82,132 @@ public class ModuleAttributeBubble : ModuleBase
         debugString = "Bubbler Started\n";
         foreach (Thing t in theUKS.UKSList)
         {
-            if (t.Children.Count == 0) continue;
-            if (!t.HasAncestor("Object")) continue;
-            if (t.Label == "unknownObject") continue;
-
-            //build a List of all the Relationships which this thing's children have
-            List<RelDest> itemCounts = new();
-            foreach (Thing t1 in t.Children)
-            {
-                foreach (Relationship r in t1.Relationships)
-                {
-                    if (r.reltype == Thing.HasChild) continue;
-                    Thing useRelType = GetInstanceType(r.reltype);
-
-                    RelDest foundItem = itemCounts.FindFirst(x => x.relType == useRelType && x.target == r.target);
-                    if (foundItem == null)
-                    {
-                        foundItem = new RelDest { relType = useRelType, target = r.target };
-                        itemCounts.Add(foundItem);
-                    }
-                    foundItem.relationships.Add(r);
-                }
-            }
-            if (itemCounts.Count == 0) continue;
-            var sortedItems = itemCounts.OrderByDescending(x => x.relationships.Count).ToList();
-
-            List<string> excludeTypes = new List<string>() { "hasProperty", "isTransitive", "isCommutative", "inverseOf", "hasAttribute", "hasDigit" };
-            //bubble the relationships
-            for (int i = 0; i < sortedItems.Count; i++)
-            {
-                RelDest rr = sortedItems[i];
-                if (excludeTypes.Contains(rr.relType.Label, comparer: StringComparer.OrdinalIgnoreCase)) continue;
-
-                //find an existing relationship
-                Relationship r = theUKS.GetRelationship(t, rr.relType, rr.target);
-                float currentWeight = (r != null) ? r.Weight : 0;
-
-
-
-
-                //We need 1) count for this Relationship, 2) count for any conflicting, 3) count without a reference
-                float totalCount = t.Children.Count;
-                float positiveCount = rr.relationships.FindAll(x => x.Weight > .5f).Count;
-                float positiveWeight = rr.relationships.Sum(x => x.Weight);
-                float negativeCount = 0;
-                float negativeWeight = 0;
-                //are there any conflicting relationships
-                for (int j = 0; j < sortedItems.Count; j++)
-                {
-                    if (j == i) continue;
-                    if (RelationshipsConflict(rr, sortedItems[j]))
-                    {
-                        negativeCount += sortedItems[j].relationships.Count; //?  why not += 1
-                        negativeWeight += sortedItems[j].relationships.Sum(x => x.Weight);
-                    }
-                }
-                float noInfoCount = totalCount - (positiveCount + negativeCount);
-                positiveWeight += currentWeight + noInfoCount * 0.51f;
-                if (noInfoCount < 0) noInfoCount = 0;
-
-                if (negativeCount >= positiveCount)
-                {
-                    if (r != null)
-                    {
-                        t.RemoveRelationship(r);
-                        debugString += $"Removed {r} \n";
-                    }
-                    continue;
-                }
-
-
-                //calculate the new weight
-                //If there is an existing weight, it is increased/decreased by a small amound and removed if it drops below .5
-                //If there is no existing weight, it is assumed to start at 0.5.
-                //TODO, replace this hardcoded "lookup table" with a formula
-                float targetWeight = 0;
-                float deltaWeight = positiveWeight - negativeWeight;
-                if (deltaWeight < .8) targetWeight = -.1f;
-                else if (deltaWeight < 1.7) targetWeight = .01f;
-                else if (deltaWeight < 2.7) targetWeight = .2f;
-                else deltaWeight = .3f;
-                if (currentWeight == 0) currentWeight = 0.5f;
-                float newWeight = currentWeight + targetWeight;
-                if (newWeight > 0.99f) newWeight = 0.99f;
-
-
-
-                if (newWeight != currentWeight)
-                {
-                    if (newWeight < .5)
-                    {
-                        if (r != null)
-                        {
-                            t.RemoveRelationship(r);
-                            debugString += $"Removed {r.ToString()} \n";
-                        }
-                    }
-                    else
-                    {
-                        //bubble the property
-                        r = t.AddRelationship(rr.target, rr.relType);
-                        r.Weight = newWeight;
-                        r.Fire();
-                        //if there is a conflicting relationship, delete it
-                        for (int j = 0; j < t.Relationships.Count; j++)
-                        {
-                            if (RelationshipsConflict(new RelDest(r), new RelDest(t.Relationships[j])))
-                            {
-                                t.RemoveRelationship(t.Relationships[j]);
-                                j--;
-                            }
-                        }
-
-                        debugString += $"{r.ToString()}   {r.Weight.ToString(".0")} \n";
-                    }
-                }
-            }
+            BubbleChildAttributes(t);
         }
         debugString += "Bubbler Finished\n";
         UpdateDialog();
     }
+    void BubbleChildAttributes(Thing t)
+    {
+        if (t.Children.Count == 0) return;
+        if (!t.HasAncestor("Object")) return;
+        if (t.Label == "unknownObject") return;
+
+        //build a List of all the Relationships which this thing's children have
+        List<RelDest> itemCounts = new();
+        foreach (Thing t1 in t.Children)
+        {
+            foreach (Relationship r in t1.Relationships)
+            {
+                if (r.reltype == Thing.HasChild) continue;
+                Thing useRelType = GetInstanceType(r.reltype);
+
+                RelDest foundItem = itemCounts.FindFirst(x => x.relType == useRelType && x.target == r.target);
+                if (foundItem == null)
+                {
+                    foundItem = new RelDest { relType = useRelType, target = r.target };
+                    itemCounts.Add(foundItem);
+                }
+                foundItem.relationships.Add(r);
+            }
+        }
+        if (itemCounts.Count == 0) return;
+        var sortedItems = itemCounts.OrderByDescending(x => x.relationships.Count).ToList();
+
+        List<string> excludeTypes = new List<string>() { "hasProperty", "isTransitive", "isCommutative", "inverseOf", "hasAttribute", "hasDigit" };
+        //bubble the relationships
+        for (int i = 0; i < sortedItems.Count; i++)
+        {
+            RelDest rr = sortedItems[i];
+            if (excludeTypes.Contains(rr.relType.Label, comparer: StringComparer.OrdinalIgnoreCase)) continue;
+
+            //find an existing relationship
+            Relationship r = theUKS.GetRelationship(t, rr.relType, rr.target);
+            float currentWeight = (r != null) ? r.Weight : 0;
+
+
+
+
+            //We need 1) count for this Relationship, 2) count for any conflicting, 3) count without a reference
+            float totalCount = t.Children.Count;
+            float positiveCount = rr.relationships.FindAll(x => x.Weight > .5f).Count;
+            float positiveWeight = rr.relationships.Sum(x => x.Weight);
+            float negativeCount = 0;
+            float negativeWeight = 0;
+            //are there any conflicting relationships
+            for (int j = 0; j < sortedItems.Count; j++)
+            {
+                if (j == i) continue;
+                if (RelationshipsConflict(rr, sortedItems[j]))
+                {
+                    negativeCount += sortedItems[j].relationships.Count; //?  why not += 1
+                    negativeWeight += sortedItems[j].relationships.Sum(x => x.Weight);
+                }
+            }
+            float noInfoCount = totalCount - (positiveCount + negativeCount);
+            positiveWeight += currentWeight + noInfoCount * 0.51f;
+            if (noInfoCount < 0) noInfoCount = 0;
+
+            if (negativeCount >= positiveCount)
+            {
+                if (r != null)
+                {
+                    t.RemoveRelationship(r);
+                    debugString += $"Removed {r} \n";
+                }
+                continue;
+            }
+
+
+            //calculate the new weight
+            //If there is an existing weight, it is increased/decreased by a small amound and removed if it drops below .5
+            //If there is no existing weight, it is assumed to start at 0.5.
+            //TODO, replace this hardcoded "lookup table" with a formula
+            float targetWeight = 0;
+            float deltaWeight = positiveWeight - negativeWeight;
+            if (deltaWeight < .8) targetWeight = -.1f;
+            else if (deltaWeight < 1.7) targetWeight = .01f;
+            else if (deltaWeight < 2.7) targetWeight = .2f;
+            else deltaWeight = .3f;
+            if (currentWeight == 0) currentWeight = 0.5f;
+            float newWeight = currentWeight + targetWeight;
+            if (newWeight > 0.99f) newWeight = 0.99f;
+
+
+
+            if (newWeight != currentWeight)
+            {
+                if (newWeight < .5)
+                {
+                    if (r != null)
+                    {
+                        t.RemoveRelationship(r);
+                        debugString += $"Removed {r.ToString()} \n";
+                    }
+                }
+                else
+                {
+                    //bubble the property
+                    r = t.AddRelationship(rr.target, rr.relType);
+                    r.Weight = newWeight;
+                    r.Fire();
+                    //if there is a conflicting relationship, delete it
+                    for (int j = 0; j < t.Relationships.Count; j++)
+                    {
+                        if (RelationshipsConflict(new RelDest(r), new RelDest(t.Relationships[j])))
+                        {
+                            t.RemoveRelationship(t.Relationships[j]);
+                            j--;
+                        }
+                    }
+
+                    debugString += $"{r.ToString()}   {r.Weight.ToString(".0")} \n";
+                }
+            }
+        }
+
+    }
+
 
     //If some relationships are exceptions, we can still bubble the 
     //Relationships are exceptions if they conflict AND numbers are one are small relative to the other.
@@ -276,19 +282,19 @@ public class ModuleAttributeBubble : ModuleBase
 
 
     //if the given thing is an instance of its parent, get the parent
-    private static Thing GetInstanceType(Thing t)
+    public  static Thing GetInstanceType(Thing t)
     {
+        bool EndsInInteger(string input)
+        {
+            // Regular expression to check if the string ends with a sequence of digits
+            return Regex.IsMatch(input, @"\d+$");
+        }
         Thing useRelType = t;
         while (useRelType.Parents.Count > 0 && EndsInInteger(useRelType.Label) && !t.Label.Contains(".") && useRelType.Label.StartsWith(useRelType.Parents[0].Label))
             useRelType = useRelType.Parents[0];
         return useRelType;
     }
 
-    public static bool EndsInInteger(string input)
-    {
-        // Regular expression to check if the string ends with a sequence of digits
-        return Regex.IsMatch(input, @"\d+$");
-    }
     // Fill this method in with code which will execute once
     // when the module is added, when "initialize" is selected from the context menu,
     // or when the engine restart button is pressed

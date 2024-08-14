@@ -50,29 +50,34 @@ public class ModuleRemoveRedundancy : ModuleBase
         debugString = "Agent Started\n";
         foreach (Thing t in theUKS.UKSList)
         {
-            foreach (Thing parent in t.Parents) //usually only a single parent
-            {
-                List<Relationship> relationshipsWithInheritance = theUKS.GetAllRelationships(new List<Thing> { parent }, false);
-                for (int i = 0; i < t.Relationships.Count; i++)
-                {
-                    Relationship r = t.Relationships[i];
-                    Relationship rMatch = relationshipsWithInheritance.FindFirst(x => x.source != r.source && x.reltype == r.reltype && x.target == r.target);
-                    if (rMatch != null)
-                    {
-                        r.Weight -= 0.1f;
-                        if (r.Weight < 0.5f)
-                        {
-                            t.RemoveRelationship(r);
-                            i--;
-                            debugString += "Removed: ";
-                        }
-                        debugString += $"{r}   ({r.Weight:0.00})\n";
-                    }
-                }
-            }
+            RemoveRedundantAttributes(t);
         }
         debugString += "Agent  Finished\n";
         UpdateDialog();
+    }
+
+    private void RemoveRedundantAttributes(Thing t)
+    {
+        foreach (Thing parent in t.Parents) //usually only a single parent
+        {
+            List<Relationship> relationshipsWithInheritance = theUKS.GetAllRelationships(new List<Thing> { parent }, false);
+            for (int i = 0; i < t.Relationships.Count; i++)
+            {
+                Relationship r = t.Relationships[i];
+                Relationship rMatch = relationshipsWithInheritance.FindFirst(x => x.source != r.source && x.reltype == r.reltype && x.target == r.target);
+                if (rMatch != null)
+                {
+                    r.Weight -= 0.1f;
+                    if (r.Weight < 0.5f)
+                    {
+                        t.RemoveRelationship(r);
+                        i--;
+                        debugString += "Removed: ";
+                    }
+                    debugString += $"{r}   ({r.Weight:0.00})\n";
+                }
+            }
+        }
     }
 
     // Fill this method in with code which will execute once
