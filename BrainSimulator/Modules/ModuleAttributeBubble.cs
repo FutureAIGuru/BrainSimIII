@@ -82,7 +82,8 @@ public class ModuleAttributeBubble : ModuleBase
         debugString = "Bubbler Started\n";
         foreach (Thing t in theUKS.UKSList)
         {
-            BubbleChildAttributes(t);
+            if (t.HasAncestor("Object"))
+                BubbleChildAttributes(t);
         }
         debugString += "Bubbler Finished\n";
         UpdateDialog();
@@ -90,12 +91,11 @@ public class ModuleAttributeBubble : ModuleBase
     void BubbleChildAttributes(Thing t)
     {
         if (t.Children.Count == 0) return;
-        if (!t.HasAncestor("Object")) return;
         if (t.Label == "unknownObject") return;
 
         //build a List of all the Relationships which this thing's children have
         List<RelDest> itemCounts = new();
-        foreach (Thing t1 in t.Children)
+        foreach (Thing t1 in t.ChildrenWithSubclasses)
         {
             foreach (Relationship r in t1.Relationships)
             {
@@ -123,7 +123,7 @@ public class ModuleAttributeBubble : ModuleBase
 
             //find an existing relationship
             Relationship r = theUKS.GetRelationship(t, rr.relType, rr.target);
-            float currentWeight = (r != null) ? r.Weight : 0;
+            float currentWeight = (r != null) ? r.Weight : 0f;
 
 
 
@@ -168,14 +168,14 @@ public class ModuleAttributeBubble : ModuleBase
             if (deltaWeight < .8) targetWeight = -.1f;
             else if (deltaWeight < 1.7) targetWeight = .01f;
             else if (deltaWeight < 2.7) targetWeight = .2f;
-            else deltaWeight = .3f;
+            else targetWeight = .3f;
             if (currentWeight == 0) currentWeight = 0.5f;
             float newWeight = currentWeight + targetWeight;
             if (newWeight > 0.99f) newWeight = 0.99f;
 
 
 
-            if (newWeight != currentWeight)
+            if (newWeight != currentWeight || r is null)
             {
                 if (newWeight < .5)
                 {

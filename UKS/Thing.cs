@@ -156,6 +156,24 @@ public partial class Thing
     /// "Safe" list of direct descendants
     /// </summary>
     public IList<Thing> Children { get => RelationshipsOfType(HasChild, false); }
+    public IList<Thing> ChildrenWithSubclasses
+    {
+        get
+        {
+            List<Thing> retVal = (List<Thing>)RelationshipsOfType(HasChild, false);
+            for (int i = 0; i < retVal.Count; i++)
+            {
+                Thing t = retVal[i];
+                if (t.Label.StartsWith(this.label))
+                {
+                    retVal.AddRange(t.Children);
+                    retVal.RemoveAt(i);
+                    i--;
+                }
+            }
+            return retVal;
+        }
+    }
 
     /// <summary>
     /// Full "Safe" list or relationships
@@ -432,7 +450,7 @@ public partial class Thing
             if (L.target != null)
             {
                 Thing t = L.target.AncestorList().FindFirst(x => x.Label.ToLower() == s.ToLower());
-                if (t != null) 
+                if (t != null)
                     return L.target;
             }
         }

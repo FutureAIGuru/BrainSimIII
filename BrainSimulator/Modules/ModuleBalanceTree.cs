@@ -14,7 +14,7 @@ using static BrainSimulator.Modules.ModuleAttributeBubble;
 
 namespace BrainSimulator.Modules;
 
-public class ModuleClassCreate : ModuleBase
+public class ModuleBalanceTree : ModuleBase
 {
     // Fill this method in with code which will execute
     // once for each cycle of the engine
@@ -61,51 +61,27 @@ public class ModuleClassCreate : ModuleBase
             Thing t = theUKS.UKSList[i];
             if (t.HasAncestor("Object") && !t.Label.Contains("."))
             {
-                HandleClassWithCommonAttributes(t);
+                HandleExcessiveChildren(t);
             }
         }
         debugString += "Agent  Finished\n";
         UpdateDialog();
     }
-
-    void HandleClassWithCommonAttributes(Thing t)
+    void HandleExcessiveChildren(Thing t)
     {
-        //build a List of counts of the attributes
-        //build a List of all the Relationships which this thing's children have
-        List<RelDest> attributes = new();
-        foreach (Thing t1 in t.ChildrenWithSubclasses)
+        while (t.Children.Count > MaxChildren)
         {
-            foreach (Relationship r in t1.Relationships)
+            Thing newParent = theUKS.AddThing(t.Label, t);
+            debugString += $"Created new class:  {newParent.Label} \n";
+            while (newParent.Children.Count < MaxChildren)
             {
-                if (r.reltype == Thing.HasChild) continue;
-                Thing useRelType = GetInstanceType(r.reltype);
-
-                RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.target);
-                if (foundItem == null)
-                {
-                    foundItem = new RelDest { relType = useRelType, target = r.target };
-                    attributes.Add(foundItem);
-                }
-                foundItem.relationships.Add(r);
-            }
-        }
-        //create intermediate parent Things
-        foreach (var key in attributes)
-        {
-            if (key.relationships.Count >= minCommonAttributes)
-            {
-                Thing newParent = theUKS.GetOrAddThing(t.Label + "." + key.relType + "." + key.target, t);
-                newParent.AddRelationship(key.target, key.relType);
-                debugString += "Created new subclass " + newParent;
-                foreach (Relationship r in key.relationships)
-                {
-                    Thing tChild = (Thing)r.source;
-                    tChild.AddParent(newParent);
-                    tChild.RemoveParent(t);
-                }
+                Thing theChild = t.Children[0];
+                theChild.RemoveParent(t);
+                theChild.AddParent(newParent);
             }
         }
     }
+
 
     // Fill this method in with code which will execute once
     // when the module is added, when "initialize" is selected from the context menu,
