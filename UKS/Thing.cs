@@ -29,7 +29,7 @@ public partial class Thing
         Thing t = ThingLabels.GetThing(label);
         if (t == null)
         { }
-//            throw new ArgumentNullException($"No Thing found with label: {label}");
+        //            throw new ArgumentNullException($"No Thing found with label: {label}");
         return t;
     }
     public static Thing HasChild { get => ThingLabels.GetThing("has-child"); }
@@ -145,14 +145,6 @@ public partial class Thing
         return retVal;
     }
 
-    //TODO: same as hasAncestor...
-    private bool IsKindOf(Thing thingType)
-    {
-        if (this == thingType) return true;
-        foreach (Thing t in this.Parents)
-            if (t.IsKindOf(thingType)) return true;
-        return false;
-    }
 
 
     /// <summary>
@@ -164,6 +156,24 @@ public partial class Thing
     /// "Safe" list of direct descendants
     /// </summary>
     public IList<Thing> Children { get => RelationshipsOfType(HasChild, false); }
+    public IList<Thing> ChildrenWithSubclasses
+    {
+        get
+        {
+            List<Thing> retVal = (List<Thing>)RelationshipsOfType(HasChild, false);
+            for (int i = 0; i < retVal.Count; i++)
+            {
+                Thing t = retVal[i];
+                if (t.Label.StartsWith(this.label))
+                {
+                    retVal.AddRange(t.Children);
+                    retVal.RemoveAt(i);
+                    i--;
+                }
+            }
+            return retVal;
+        }
+    }
 
     /// <summary>
     /// Full "Safe" list or relationships
@@ -440,7 +450,7 @@ public partial class Thing
             if (L.target != null)
             {
                 Thing t = L.target.AncestorList().FindFirst(x => x.Label.ToLower() == s.ToLower());
-                if (t != null) 
+                if (t != null)
                     return L.target;
             }
         }
@@ -529,25 +539,35 @@ public partial class Thing
     {
         foreach (Relationship r in relationships)
         {
-            if (r.relType.Label != "hasAttribute") continue;
+            if (r.relType.Label != "hasAttribute" && r.relType.Label != "is") continue;
             if (r.target.HasAncestor(t))
                 return r.target;
         }
         return null;
+    }
+    public List<Thing> GetAttributes()
+    {
+        List<Thing> retVal = new();
+        foreach (Relationship r in relationships)
+        {
+            if (r.relType.Label != "hasAttribute" && r.relType.Label != "is") continue;
+            retVal.Add(r.target);
+        }
+        return retVal;
     }
     public Relationship SetAttribute(Thing attributeValue)
     {
         return AddRelationship(attributeValue, "hasAttribute");
     }
 
-    public bool HasPropertyLabeled(string label)
+    public bool HasProperty(Thing t)
     {
         foreach (Relationship r in relationships)
-            if (r.reltype.Label.ToLower() == "hasproperty" && r.target.Label.ToLower() == label.ToLower())
+            if (r.reltype.Label.ToLower() == "hasproperty" && r.target == t)
                 return true;
-        foreach (Thing t in Parents)
+        foreach (Thing t1 in Parents)
         {
-            return t.HasPropertyLabeled(label);
+            return t1.HasProperty(t);
         }
         return false;
     }
