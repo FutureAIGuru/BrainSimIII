@@ -5,17 +5,35 @@
 //
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace UKS;
 
 /// <summary>
 /// In the lexicon of graphs, a Thing is a "node".  A Thing can represent anything, physical object, attribute, word, action, etc.
 /// </summary>
+/// Things often have labels which are any string. Like comments, these are typically used for programmer convenience and are not usually used for functionality.
+/// Labels are case-insensitive although the initial case is preserved within the UKS.
+/// Methods which return a Thing may return null in the event no Thing matches the result of the method. Methods which return lists of Things will
+/// return a list of zero elements if no Things match the result of the method.
+/// A Thing may be referenced by its Label. You can write AddParent("color") [where a Thing is a required parameter.] The system sill automatically retreive a Thing
+/// with the given label or throw an exception if none exists.
+
 public partial class Thing
 {
+    /// <summary>
+    /// This is the magic which allows for strings to be put in place of Things for any method Paramter
+    /// </summary>
+    /// <param name="label"></param>
+    /// Throse 
+    public static implicit operator Thing(string label)
+    {
+        Thing t = ThingLabels.GetThing(label);
+        if (t == null)
+        { }
+        //            throw new ArgumentNullException($"No Thing found with label: {label}");
+        return t;
+    }
+    public static Thing HasChild { get => ThingLabels.GetThing("has-child"); }
+
     private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
     private List<Relationship> relationshipsFrom = new List<Relationship>(); //synapses from
     private List<Relationship> relationshipsAsType = new List<Relationship>(); //nodes which use this as a relationshipType
@@ -54,18 +72,13 @@ public partial class Thing
         get => value;
         set
         {
-            //Object x = value;
-            //var v = x.GetType();
-            //if (value is not null && !value.GetType().IsSerializable)
-            //    throw new ArgumentException("Cannot set nonserializable value");
             this.value = value;
         }
     }
 
-
     /// <summary>
-    /// Returns a Thing's label
-    /// don't delete this ToString because the debugger uses it when mousing over a Thing
+    /// Returns a Thing's label.
+    /// Even though it shows zero references, don't delete this ToString() because the debugger uses it when mousing over a Thing
     /// </summary>
     /// <returns>the Thing's label</returns>
     public override string ToString()
@@ -131,13 +144,7 @@ public partial class Thing
         }
         return retVal;
     }
-    private bool IsKindOf(Thing thingType)
-    {
-        if (this == thingType) return true;
-        foreach (Thing t in this.Parents)
-            if (t.IsKindOf(thingType)) return true;
-        return false;
-    }
+
 
 
     /// <summary>
@@ -149,6 +156,24 @@ public partial class Thing
     /// "Safe" list of direct descendants
     /// </summary>
     public IList<Thing> Children { get => RelationshipsOfType(HasChild, false); }
+    public IList<Thing> ChildrenWithSubclasses
+    {
+        get
+        {
+            List<Thing> retVal = (List<Thing>)RelationshipsOfType(HasChild, false);
+            for (int i = 0; i < retVal.Count; i++)
+            {
+                Thing t = retVal[i];
+                if (t.Label.StartsWith(this.label))
+                {
+                    retVal.AddRange(t.Children);
+                    retVal.RemoveAt(i);
+                    i--;
+                }
+            }
+            return retVal;
+        }
+    }
 
     /// <summary>
     /// Full "Safe" list or relationships
@@ -198,7 +223,7 @@ public partial class Thing
     {
         Thing t = ThingLabels.GetThing(label);
         if (t == null) return false;
-        return HasAncestor(t);
+        return HasAncestor(label);
     }
     /// <summary>
     /// Determines whether a Thing has a specific ancestor
@@ -275,23 +300,15 @@ public partial class Thing
     /// <summary>
     /// Updates the last-fired time on a Thing
     /// </summary>
-    /// <param name="t">optional: may select a different Thing</param>
-    public void SetFired(Thing t = null)
+    public void SetFired()
     {
-        if (t != null)
-        {
-            t.lastFiredTime = DateTime.Now;
-            t.useCount++;
-        }
-        else
-        {
-            lastFiredTime = DateTime.Now;
-            useCount++;
-        }
+        lastFiredTime = DateTime.Now;
+        useCount++;
     }
 
 
     //RELATIONSHIPS
+    //TODO reverse the parameters so it's type,target
     /// <summary>
     /// Adds a relationship to a Thing if it does not already exist.  The Thing is the source of the relationship.
     /// </summary>
@@ -300,8 +317,10 @@ public partial class Thing
     /// <returns>the new or existing Relationship</returns>
     public Relationship AddRelationship(Thing target, Thing relationshipType)
     {
-        if (relationshipType == null)
+        if (relationshipType == null)  //NULL relationship types could be allowed in search Thingys Parameter?
+        {
             return null;
+        }
 
         //does the relationship already exist?
         Relationship r = HasRelationship(target, relationshipType);
@@ -316,7 +335,7 @@ public partial class Thing
             source = this,
             target = target,
         };
-        if (target != null)
+        if (target != null && relationshipType != null)
         {
             lock (relationships)
                 lock (target.relationshipsFrom)
@@ -328,7 +347,14 @@ public partial class Thing
                             relationshipType.RelationshipsAsTypeWriteable.Add(r);
                     }
         }
-        else
+        else if (relationshipType == null)
+        {
+            lock (relationships)
+            {
+                RelationshipsWriteable.Add(r);
+            }
+        }
+        else if (relationshipType != null)
         {
             lock (relationships)
                 lock (relationshipType.relationshipsAsType)
@@ -340,6 +366,8 @@ public partial class Thing
         }
         return r;
     }
+
+    //TODO reverse the parameters so it's type,target
     private Relationship HasRelationship(Thing target, Thing relationshipType)
     {
         foreach (Relationship r in relationships)
@@ -398,10 +426,13 @@ public partial class Thing
             RemoveRelationship(c.clause);
     }
 
-    public Relationship HasRelationship(Thing t)
+    public Relationship HasRelationship(Thing source, Thing relType, Thing targett)
     {
+        if (source == null && relType == null && targett == null) return null;
         foreach (Relationship r in Relationships)
-            if (r.target == t) return r;
+            if ((source == null || r.source == source) &&
+                (relType == null || r.relType == relType) &&
+                (targett == null || r.target == targett)) return r;
         return null;
     }
 
@@ -418,8 +449,9 @@ public partial class Thing
         {
             if (L.target != null)
             {
-                Thing t = L.target.AncestorList().FindFirst(x => x.Label == s);
-                if (t != null) return L.target;
+                Thing t = L.target.AncestorList().FindFirst(x => x.Label.ToLower() == s.ToLower());
+                if (t != null)
+                    return L.target;
             }
         }
         return null;
@@ -495,14 +527,47 @@ public partial class Thing
         RemoveRelationship(r);
     }
 
-    public bool HasPropertyLabeled(string label)
+    public Thing AttributeOfType(string label)
     {
         foreach (Relationship r in relationships)
-            if (r.reltype.Label.ToLower() == "hasproperty" && r.target.Label.ToLower() == label.ToLower())
-                return true;
-        foreach (Thing t in Parents)
+            if (r.reltype.HasAncestorLabeled(label))
+                return r.target;
+        return null;
+    }
+
+    public Thing GetAttribute(Thing t)
+    {
+        foreach (Relationship r in relationships)
         {
-            return t.HasPropertyLabeled(label);
+            if (r.relType.Label != "hasAttribute" && r.relType.Label != "is") continue;
+            if (r.target.HasAncestor(t))
+                return r.target;
+        }
+        return null;
+    }
+    public List<Thing> GetAttributes()
+    {
+        List<Thing> retVal = new();
+        foreach (Relationship r in relationships)
+        {
+            if (r.relType.Label != "hasAttribute" && r.relType.Label != "is") continue;
+            retVal.Add(r.target);
+        }
+        return retVal;
+    }
+    public Relationship SetAttribute(Thing attributeValue)
+    {
+        return AddRelationship(attributeValue, "hasAttribute");
+    }
+
+    public bool HasProperty(Thing t)
+    {
+        foreach (Relationship r in relationships)
+            if (r.reltype.Label.ToLower() == "hasproperty" && r.target == t)
+                return true;
+        foreach (Thing t1 in Parents)
+        {
+            return t1.HasProperty(t);
         }
         return false;
     }

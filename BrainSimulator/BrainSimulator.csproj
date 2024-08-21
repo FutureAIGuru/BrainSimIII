@@ -45,6 +45,8 @@
     <Compile Remove="Modules\UnknownArea.cs" />
     <Compile Remove="Modules\WaveMemoryStream.cs" />
     <Compile Remove="Sallie.cs" />
+    <Compile Remove="Tools\Module.cs" />
+    <Compile Remove="Tools\ModuleDlg.xaml.cs" />
     <Compile Remove="XmlFile.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +195,7 @@
     <Page Remove="Modules\Module2DSimDlg.xaml" />
     <Page Remove="Modules\ModuleObjectDlg.xaml" />
     <Page Remove="Modules\ModulePremiseDlg.xaml" />
+    <Page Remove="Tools\ModuleDlg.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="BrainSim3SplashScreen.jpg" />
@@ -404,7 +407,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
     <PackageReference Include="pythonnet" Version="3.0.3" />
-    <PackageReference Include="System.Text.Json" Version="8.0.3" />
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UKS\UKS.csproj" />

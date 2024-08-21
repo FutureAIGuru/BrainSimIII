@@ -20,7 +20,7 @@
         <CheckBox x:Name="checkBoxAuto" IsChecked="False" Content="Auto-Refresh" HorizontalAlignment="Left" Margin="122,0,0,8" Width="120" Height="19" VerticalAlignment="Bottom" Checked="CheckBoxAuto_Checked" Unchecked="CheckBoxAuto_Unchecked" FontSize="16"/>
         <CheckBox x:Name="reverseCB" IsChecked="False" Content="Show Rev. Rlshp." HorizontalAlignment="Left" Margin="247,0,0,37" Width="161" Height="19" VerticalAlignment="Bottom" Checked="CheckBoxAuto_Checked" Unchecked="CheckBoxAuto_Unchecked" FontSize="16" RenderTransformOrigin="1.073,-0.658"/>
         <Label Content="Root:" HorizontalAlignment="Left" Margin="415,0,0,27" Width="90" Height="35" VerticalAlignment="Bottom" FontSize="16"/>
-        <TextBox x:Name="textBoxRoot" HorizontalAlignment="Left" Margin="458,0,0,33" TextWrapping="Wrap" Text="Thing" Width="250" Height="25" VerticalAlignment="Bottom" TextChanged="textBoxRoot_TextChanged" PreviewKeyDown="TextBoxRoot_PreviewKeyDown" FontSize="16"/>
+        <TextBox x:Name="textBoxRoot" HorizontalAlignment="Left" Margin="458,0,0,33" TextWrapping="Wrap" Text="Thing" Width="250" Height="25" VerticalAlignment="Bottom" TextChanged="textBoxRoot_TextChanged" PreviewKeyDown="TextBoxRoot_KeyDown" FontSize="16"/>
         <Label Content="" x:Name="statusLabel"  HorizontalAlignment="Left" Margin="415,0,0,-2" Width="300" Height="35" VerticalAlignment="Bottom" FontSize="16"/>
         <Button x:Name="InitializeButton" Content="Initialize" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="InitializeButton_Click" Margin="0,20,22,0" FontSize="16"   />
     </Grid>

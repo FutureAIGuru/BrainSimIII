@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Windows;
 
 namespace UKS;
@@ -134,7 +135,26 @@ public class Relationship
     public List<Relationship> clausesFrom = new();
 
     private float weight = 1;
-    public float Weight { get => weight; set => weight = value; }
+    public float Weight
+    {
+        get
+        {
+            return weight;
+        }
+        set
+        {
+            weight = value;
+            //if this is a commutative relationship, also set the weight on the reverse
+            if (relType.HasProperty("IsCommutative"))
+            {
+                Relationship rReverse = target.Relationships.FindFirst(x => x.reltype == relType && x.target == source);
+                if (rReverse != null)
+                {
+                    rReverse.weight = weight;
+                }
+            }
+        }
+    }
 
     private int hits = 0;
     private int misses = 0;
@@ -191,9 +211,9 @@ public class Relationship
         Misses = r.Misses;
         relType = r.relType;
         source = r.source;
-        Weight = r.Weight;
         Hits = r.Hits++;
         targ = r.targ;
+        Weight = r.Weight;
         if (r.Clauses == null) Clauses = new();
         else Clauses = new(r.Clauses);
         if (r.clausesFrom == null) clausesFrom = new();
@@ -251,7 +271,7 @@ public class Relationship
         //handle Clauses
         //TODO prevent general circular reference stack overflow
         foreach (Clause c in Clauses)
-                allModifierString += c.clauseType.Label + " " + c.clause.ToString(stack)+" ";
+            allModifierString += c.clauseType.Label + " " + c.clause.ToString(stack) + " ";
 
         if (allModifierString != "")
             retVal += " " + allModifierString;
@@ -337,7 +357,7 @@ public class Relationship
 
     private void AddToTransientList()
     {
-        if (!UKS.transientRelationships.Contains(this)) 
+        if (!UKS.transientRelationships.Contains(this))
             UKS.transientRelationships.Add(this);
     }
 

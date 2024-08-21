@@ -92,7 +92,7 @@ namespace BrainSimulator.Modules
         }
         public void OpenDlg()
         {
-            SetAttribute("Open", "True");
+            SetSavedDlgAttribute("Open", "True");
             ShowDialog();
         }
         public void CloseDlg()
@@ -104,12 +104,12 @@ namespace BrainSimulator.Modules
                     dlg.Close();
                 });
             }
-            SetAttribute("Open", "");
+            SetSavedDlgAttribute("Open", "");
         }
 
         public virtual void ShowDialog()
         {
-            if (GetAttribute("Open") != "True") return;
+            if (GetSavedDlgAttribute("Open") != "True") return;
             string infoString = GetDlgWindow();
             if ( infoString != null)
             {
@@ -121,10 +121,10 @@ namespace BrainSimulator.Modules
                 }
                 if (info.Length == 4)
                 {
-                    dlgSize.X = int.Parse(info[0]);
-                    dlgSize.Y = int.Parse(info[1]);
-                    dlgPos.X = int.Parse(info[2]);
-                    dlgPos.Y = int.Parse(info[3]);
+                    dlgSize.X = float.Parse(info[0]);
+                    dlgSize.Y = float.Parse(info[1]);
+                    dlgPos.X = float.Parse(info[2]);
+                    dlgPos.Y = float.Parse(info[3]);
                 }
             }
 
@@ -193,7 +193,7 @@ namespace BrainSimulator.Modules
 #endif
         }
 
-        public  string GetAttribute(string attribName)
+        public  string GetSavedDlgAttribute(string attribName)
         {
             Thing thisDlg = theUKS.Labeled(Label);
             if (thisDlg == null) return null;   
@@ -207,7 +207,7 @@ namespace BrainSimulator.Modules
             }
             return null;
         }
-        public void SetAttribute(string attribName, string attribValue)
+        public void SetSavedDlgAttribute(string attribName, string attribValue)
         {
             if (string.IsNullOrEmpty(attribName)) { return; }
             Thing thisDlg = theUKS.Labeled(Label);
@@ -235,14 +235,14 @@ namespace BrainSimulator.Modules
         }
         string GetDlgWindow()
         {
-            return GetAttribute("DlgWindow");
+            return GetSavedDlgAttribute("DlgWindow");
         }
         void SetDlgWindow()
         {
             string infoString = "";
             if (dlg != null)
                 infoString = dlg.Width + "x" + dlg.Height + "+" + dlg.Left + "+" + dlg.Top;
-            SetAttribute("DlgWindow", infoString);
+            SetSavedDlgAttribute("DlgWindow", infoString);
 
         }
         private void Dlg_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -263,7 +263,7 @@ namespace BrainSimulator.Modules
         {
             if (dlg == null)
                 dlgIsOpen = false;
-            SetAttribute("Open", "True");
+            SetSavedDlgAttribute("Open", "True");
         }
 
         private void Dlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -305,7 +305,7 @@ namespace BrainSimulator.Modules
             timer.Stop();
             if (Application.Current == null) return;
             if (dlg != null)
-                dlg.Draw(false);
+                dlg.Draw(true);
         }
 
         //this is called to allow for any data massaging needed before saving the file

@@ -1,0 +1,15 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleShapeDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="ModuleShapeDlg Module Dialog" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
+    <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged" >
+        <Button Content="No" HorizontalAlignment="Left" Height="30" Margin="167,290,0,0" VerticalAlignment="Top" Width="100" Click="Button_Click"/>
+        <TextBox x:Name="tbFound" FontSize="16" Margin="160,35,90,180"/>
+        <Label Content="Detected Shapes" HorizontalAlignment="Left" Height="36" Margin="31,35,0,0" VerticalAlignment="Top" Width="124"/>
+        <Button Content="Next" x:Name="btnNext" HorizontalAlignment="Left" Height="30" Margin="361,290,0,0" VerticalAlignment="Top" Width="100" Click="btnNext_Click"/>
+    </Grid>
+</local:ModuleBaseDlg>

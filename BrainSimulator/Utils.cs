@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media.Media3D;
 using System.IO;
+using System.Reflection.Metadata;
 
 namespace BrainSimulator
 {
@@ -127,6 +128,7 @@ namespace BrainSimulator
         }
         public HSLColor(HSLColor c)
         {
+            if (c == null) return;
             hue = c.hue;
             saturation = c.saturation;
             luminance = c.luminance;
@@ -190,6 +192,7 @@ namespace BrainSimulator
             if (180 <= hue && hue < 240) c = Color.FromArgb(255, (byte)((0 + m) * 255), (byte)((X + m) * 255), (byte)((C + m) * 255));
             if (240 <= hue && hue < 300) c = Color.FromArgb(255, (byte)((X + m) * 255), (byte)((0 + m) * 255), (byte)((C + m) * 255));
             if (300 <= hue && hue < 345) c = Color.FromArgb(255, (byte)((C + m) * 255), (byte)((0 + m) * 255), (byte)((C + m) * 255));
+            if (hue > 345) c = Color.FromArgb(255, (byte)((C + m) * 255), (byte)((X + m) * 255), (byte)((0 + m) * 255));
 
             return c;
         }
@@ -558,19 +561,19 @@ namespace BrainSimulator
             }
         }
 
-        public static float DistanceBetweenTwoSegments(Point p1, Point p2, Point p3, Point p4)
+        public static float DistanceBetweenTwoSegments(Segment s1, Segment s2)
         {
             float retVal = float.MaxValue;
-            double d1 = FindDistanceToSegment(p1, p3, p4, out Point closest);
+            double d1 = DistancePointToSegment(s1,s2.P1);
             if (d1 < retVal)
                 retVal = (float)d1;
-            d1 = FindDistanceToSegment(p2, p3, p4, out closest);
+            d1 = DistancePointToSegment(s1, s2.P2);
             if (d1 < retVal)
                 retVal = (float)d1;
-            d1 = FindDistanceToSegment(p3, p1, p2, out closest);
+            d1 = DistancePointToSegment(s2, s1.P1);
             if (d1 < retVal)
                 retVal = (float)d1;
-            d1 = FindDistanceToSegment(p4, p1, p2, out closest);
+            d1 = DistancePointToSegment(s2, s1.P1);
             if (d1 < retVal)
                 retVal = (float)d1;
             return retVal;
@@ -621,7 +624,7 @@ namespace BrainSimulator
                 dy = pt.Y - closest.Y;
             }
 
-            return Math.Sqrt(dx * dx + dy * dy);
+            return Sqrt(dx * dx + dy * dy);
         }
         public static bool SegmentsIntersect(Point p1, Point p2, Point p3, Point p4)
         {
@@ -653,6 +656,17 @@ namespace BrainSimulator
             out angle);
             return segments_intersect;
         }
+        public static bool LinesIntersect(Segment s1, Segment s2, out PointPlus intersection)
+        {
+            FindIntersection(s1.P1, s1.P2, s2.P1, s2.P2,
+            out bool lines_intersect, out bool segments_intersect,
+            out Point intersection1,
+            out Point close_p1, out Point close_p2,
+            out Angle angle);
+            intersection = intersection1;
+            return lines_intersect;
+        }
+
         public static void FindIntersection(Point p1, Point p2,
                                             Point p3, Point p4,
                                             out bool lines_intersect,
@@ -677,7 +691,7 @@ namespace BrainSimulator
 
             double t1 = ((p1.X - p3.X) * dy34 + (p3.Y - p1.Y) * dx34) / denominator;
 
-            if (double.IsInfinity(t1))
+            if (double.IsNaN(t1))
             {
                 // The lines are parallel (or close enough to it).
                 lines_intersect = false;
@@ -727,6 +741,12 @@ namespace BrainSimulator
         public static float DistancePointToLine(Point P, Point P1, Point P2)
         {
             double distance = Abs((P2.X - P1.X) * (P1.Y - P.Y) - (P1.X - P.X) * (P2.Y - P1.Y)) /
+                    Sqrt(Pow(P2.X - P1.X, 2) + Math.Pow(P2.Y - P1.Y, 2));
+            return (float)distance;
+        }
+        public static float DistancePointToLine2(Point P, Point P1, Point P2)
+        {
+            double distance = ((P2.X - P1.X) * (P1.Y - P.Y) - (P1.X - P.X) * (P2.Y - P1.Y)) /
                     Sqrt(Pow(P2.X - P1.X, 2) + Math.Pow(P2.Y - P1.Y, 2));
             return (float)distance;
         }
