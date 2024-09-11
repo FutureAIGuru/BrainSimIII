@@ -591,6 +591,9 @@ public partial class UKS
         Thing bestThing = null;
         confidence = -1;
 
+        if (searchCandidates.Count == 0)
+            return null;
+
         //normalize the confidences
         foreach (var key in searchCandidates)
             searchCandidates[key.Key] /= target.Relationships.Count;
@@ -602,6 +605,12 @@ public partial class UKS
                 if (t1 != t && searchCandidates.ContainsKey(t1))
                     searchCandidates[t1] += searchCandidates[t];
 
+        //normalize the confidences
+        float max = searchCandidates.Max(x => x.Value);
+        foreach (var v in searchCandidates)
+        {
+            searchCandidates[v.Key] /= max;
+        }
         //find the best value
         foreach (var key in searchCandidates)
             if (key.Value > confidence)

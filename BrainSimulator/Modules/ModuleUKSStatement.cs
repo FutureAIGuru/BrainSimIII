@@ -77,12 +77,14 @@ namespace BrainSimulator.Modules
 
             string[] tempStringArray = source.Split(' ');
             List<string> sourceModifiers = new();
-            source = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
+            if (source.Length > 0 && !char.IsUpper(source[0]))
+                source = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
             for (int i = 0; i < tempStringArray.Length - 1; i++) sourceModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
             tempStringArray = target.Split(' ');
             List<string> targetModifiers = new();
-            target = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
+            if (target.Length > 0 && !char.IsUpper(target[0]))
+                target = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
             for (int i = 0; i < tempStringArray.Length - 1; i++) targetModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
             tempStringArray = relationshipType.Split(' ');

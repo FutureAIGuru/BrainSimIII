@@ -99,7 +99,7 @@ namespace BrainSimulator.Modules
             string[] rels = queryText1.Text.Split('\n');
             foreach (string s in rels)
             {
-                string[] relParams = s.Split(' ');
+                string[] relParams = s.Split(' ',StringSplitOptions.RemoveEmptyEntries);
                 if (relParams.Length == 2)
                 {
                     Thing relType = UKSQuery.theUKS.Labeled(relParams[0]);
@@ -126,12 +126,12 @@ namespace BrainSimulator.Modules
                 resultText1.Text = "<No Results>";
                 return;
             }
-            resultText1.Text = result.Label + "   " + confidence;
+            resultText1.Text = result.Label + "   " + confidence.ToString("0.00");
             while (result != null)
             {
                 result = UKSQuery.theUKS.GetNextClosestMatch(ref confidence);
                 if (result != null)
-                    resultText1.Text += "\n" + result.Label + "   " + confidence;
+                    resultText1.Text += "\n" + result.Label + "   " + confidence.ToString("0.00");
 
             }
         }

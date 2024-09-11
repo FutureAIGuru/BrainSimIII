@@ -68,13 +68,14 @@ namespace BrainSimulator.Modules
                             {
                                 //pixel.luminance /= 2;
                                 SolidColorBrush b = new SolidColorBrush(pixel);
+                                float lum = new HSLColor(pixel).luminance;
                                 Rectangle e = new()
                                 {
                                     Height = pixelSize,
                                     Width = pixelSize,
                                     Stroke = b,
                                     Fill = b,
-                                    ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 50, Content = $"({(int)x},{(int)y}) {pixel}" },
+                                    ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 50, Content = $"({(int)x},{(int)y}) {lum.ToString("0.00")}" },
                                 };
                                 Canvas.SetLeft(e, x * scale - pixelSize / 2);
                                 Canvas.SetTop(e, y * scale - pixelSize / 2);

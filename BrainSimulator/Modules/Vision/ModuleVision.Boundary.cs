@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Windows;
 using static System.Math;
 using System.Linq;
+using System;
 
 
 namespace BrainSimulator.Modules;
@@ -78,7 +79,8 @@ public partial class ModuleVision
             RemoveOrphanPoints(ptsInThisScan);
             strokePoints.AddRange(ptsInThisScan);
         }
-        if (fortyFiveScan)
+        MergeNearbyPoints(strokePoints);
+/*        if (fortyFiveScan)
         {
             dx = 1;
             dy = 1;
@@ -122,6 +124,34 @@ public partial class ModuleVision
             RemoveOrphanPoints(ptsInThisScan);
             strokePoints.AddRange(ptsInThisScan);
         }
+  */
+    }
+
+    private void MergeNearbyPoints (List<PointPlus>pts)
+    {
+        List<(int p1, int p2, float val)> distances = new();
+        for (int i = 0; i < pts.Count; i++)
+        {
+            for (int j = i+1; j < pts.Count; j++)
+            {
+                if (i == j) continue;
+                distances.Add(new (i,j,(pts[i] - pts[j]).R));
+            }
+        }
+        distances = distances.OrderBy(v=>v.val).ToList();
+        List<int> ptsToDelete = new();
+        for (int i = 0;i < distances.Count; i++)
+        {
+            if (distances[i].val >= 1) break;
+            pts[distances[i].p1].X = (pts[distances[i].p1].X + pts[distances[i].p2].X) / 2;
+            pts[distances[i].p1].Y = (pts[distances[i].p1].Y + pts[distances[i].p2].Y) / 2;
+            ptsToDelete.Add(distances[i].p2);
+        }
+        ptsToDelete = ptsToDelete.OrderByDescending(x=>x).Distinct().ToList();
+        foreach (int i in ptsToDelete)
+        {
+            pts.RemoveAt(i);
+        }
     }
 
     private void RemoveOrphanPoints(List<PointPlus> points)
@@ -146,58 +176,48 @@ public partial class ModuleVision
     }
     private List<PointPlus> FindStrokePtsInRay(float sx, float sy, float dx, float dy, List<Color> rayThruImage)
     {
-        //find stroke centers in Ray
-        if (sy == 8)
+        List<float> luminance = new List<float>();
+        foreach (var color in rayThruImage)
+            luminance.Add(new HSLColor(color).luminance);
+        if (sy == 10)
         { }
         List<PointPlus> ptsInThisScan = new();
-        int startStroke = 0;
-        int endStroke = 0;
-        for (int i = 1; i < rayThruImage.Count - 1; i++)
+        (List<(int index, float value)> maxima, List<(int index, float value)> minima) v = FindLocalExtrema(luminance, 0.06f);
+        for (int i = 0; i < v.Item1.Count; i++)
         {
-            Color colorVal = rayThruImage[i];
-            if (rayThruImage[i] == backgroundColor) continue;
-            //here is the start of a (possible) stroke
-            startStroke = i;
-            //now find the end of the stroke
-            while (i < rayThruImage.Count && (rayThruImage[i] != backgroundColor))
-            {
-                endStroke = i;
-                i++;
-            }
+            (int index, float value) item = v.maxima[i];
+            float minBrightness = 0.3f;  //max brightnesee for a "black" pixel
+            float minBrightness1 = 0.5f;  //min brightness for white pixel
+            int maxStrokeWidth = 5;
 
-            //possible bifurcations...two strokes without an intervening background
-            //for (int j = startStroke; j <= endStroke - 2; j++)
-            //{
-            //    byte colorVal0 = rayThruImage[j].B;
-            //    byte colorVal1 = rayThruImage[j + 1].B;
-            //    byte colorVal2 = rayThruImage[j + 2].B;
-            //    if (colorVal0 > colorVal1 && colorVal2 > colorVal1)
-            //    {
-            //        endStroke = j;
-            //        i = j + 1;
-            //    }
-            //}
+            if (item.Item2 < minBrightness1) continue;
+            //find start and end of stroke
+            int startStroke = item.Item1;
+            int minPos = 0;
+            if (i > 0)
+                minPos = v.Item2[i - 1].Item1;
+            while (startStroke > minPos && luminance[startStroke] > minBrightness)
+                startStroke--;
+            int endStroke = item.Item1;
+            int maxPos = luminance.Count - 1;
+            if (i < v.Item2.Count)
+                maxPos = v.Item2[i].Item1;
+            while (endStroke < maxPos && luminance[endStroke] > minBrightness)
+                endStroke++;
 
-            //find the brightest point in the stroke
-            float brightest = 0;
-            for (int j = startStroke; j <= endStroke; j++)
-            {
-                float colorVal3 =  new HSLColor( rayThruImage[j]).luminance;
-                if (colorVal3 > brightest) { brightest = colorVal3; }
-            }
+            if (endStroke - startStroke > maxStrokeWidth)
+                continue; //stroke is too wide to be a stroke
 
-            //find the stroke position by calculating the weighted average of the brightnesses in the range
-            float boundaryPos = (startStroke + endStroke) / 2f;
+            //find the position based on weighted average
+            float boundaryPos = (startStroke + endStroke) / 2f; //for debug
             float numerator = 0;
             float denominator = 0;
             for (int j = startStroke; j <= endStroke; j++)
             {
-                float colorVal3 = new HSLColor( rayThruImage[j]).luminance;
+                float colorVal3 = new HSLColor(rayThruImage[j]).luminance;
                 numerator += j * colorVal3;
                 denominator += colorVal3;
             }
-            if (endStroke - startStroke > 5) continue; //stroke is too wide to be a stroke
-            if (brightest < 0.1f) continue; //stroke is too dim to be a stroke
 
             boundaryPos = numerator / denominator;
             boundaryPos = (float)Round(boundaryPos, 1);
@@ -212,9 +232,47 @@ public partial class ModuleVision
         }
 
         return ptsInThisScan;
-
-
     }
+
+    public static (List<(int index, float value)>, List<(int index, float value)>) FindLocalExtrema(List<float> data, float minDifference)
+    {
+        List<(int index, float value)> maxima = new();
+        List<(int index, float value)> minima = new();
+
+        bool? increasing = null; // Null indicates no trend established yet
+        float highestValue = 0;
+        float lowestValue = 0;
+        for (int i = 1; i < data.Count - 1; i++)
+        {
+            if (data[i] > data[i - 1])
+            {
+                highestValue = data[i];
+                if (Math.Abs(data[i - 1] - data[i]) > minDifference)
+                {
+                    if (increasing == false)
+                    {
+                        minima.Add(new(i - 1, lowestValue));
+                    }
+                    increasing = true;
+                }
+            }
+            else if (data[i] < data[i - 1])
+            {
+                lowestValue = data[i];
+                if (Math.Abs(highestValue - data[i]) > minDifference)
+                {
+                    if (increasing == true)
+                    {
+                        maxima.Add(new(i - 1, highestValue));
+                        increasing = false;
+                    }
+                }
+            }
+        }
+
+        return (maxima, minima);
+    }
+
 
     private void FindBoundaryPtsInRay(float sx, float sy, float dx, float dy, List<Color> rayThruImage)
     {
@@ -267,7 +325,7 @@ public partial class ModuleVision
                 }
                 direction = -1;
             }
-            else 
+            else
                 direction = 0;
             previous = arr[i];
         }
@@ -292,7 +350,7 @@ public partial class ModuleVision
             }
             //no boundary found 
             if (boundaryPos < 0 || boundaryPos >= rayThruImage.Count) continue;
-            boundaryPos = (float) Round(boundaryPos,1);
+            boundaryPos = (float)Round(boundaryPos, 1);
 
             if (dx == 1 && dy == 0)
                 ptsInThisScan.Add(new Point(boundaryPos, sy));
@@ -304,38 +362,38 @@ public partial class ModuleVision
                 ptsInThisScan.Add(new Point(sx - boundaryPos, boundaryPos + sy));
         }
 
-/*        //merge nearby boundaries
-        for (int i = 0; i < ptsInThisScan.Count-1; i++)
-        {
-            PointPlus pt = ptsInThisScan[i];
-            PointPlus pt1 = ptsInThisScan[i+1];
-            if ((pt-pt1).R <= 2)
-            {
-                int x1 = (int)Round(pt.X);
-                int y1 = (int)Round(pt.Y);
-                if (dx == 1 && x1 > 0 && x1 < imageArray.GetLength(0) - 3)
+        /*        //merge nearby boundaries
+                for (int i = 0; i < ptsInThisScan.Count-1; i++)
                 {
-                    if (imageArray[x1 - 1, y1] == backgroundColor && imageArray[x1 + 2, y1] == backgroundColor)
+                    PointPlus pt = ptsInThisScan[i];
+                    PointPlus pt1 = ptsInThisScan[i+1];
+                    if ((pt-pt1).R <= 2)
                     {
-                        pt.X = (pt.X + pt1.X) / 2;
-                        pt.Y = (pt.Y + pt1.Y) / 2;
-                        ptsInThisScan.RemoveAt(i + 1);
-                        i--;
+                        int x1 = (int)Round(pt.X);
+                        int y1 = (int)Round(pt.Y);
+                        if (dx == 1 && x1 > 0 && x1 < imageArray.GetLength(0) - 3)
+                        {
+                            if (imageArray[x1 - 1, y1] == backgroundColor && imageArray[x1 + 2, y1] == backgroundColor)
+                            {
+                                pt.X = (pt.X + pt1.X) / 2;
+                                pt.Y = (pt.Y + pt1.Y) / 2;
+                                ptsInThisScan.RemoveAt(i + 1);
+                                i--;
+                            }
+                        }
+                        if (dy == 1 && y1 > 0 && y1 < imageArray.GetLength(0) - 3)
+                        {
+                            if (imageArray[x1, y1-1] == backgroundColor && imageArray[x1, y1+2] == backgroundColor)
+                            {
+                                pt.X = (pt.X + pt1.X) / 2;
+                                pt.Y = (pt.Y + pt1.Y) / 2;
+                                ptsInThisScan.RemoveAt(i + 1);
+                                i--;
+                            }
+                        }
                     }
                 }
-                if (dy == 1 && y1 > 0 && y1 < imageArray.GetLength(0) - 3)
-                {
-                    if (imageArray[x1, y1-1] == backgroundColor && imageArray[x1, y1+2] == backgroundColor)
-                    {
-                        pt.X = (pt.X + pt1.X) / 2;
-                        pt.Y = (pt.Y + pt1.Y) / 2;
-                        ptsInThisScan.RemoveAt(i + 1);
-                        i--;
-                    }
-                }
-            }
-        }
-*/
+        */
         foreach (var pt in ptsInThisScan)
             boundaryPoints.Add(pt);
     }

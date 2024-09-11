@@ -75,10 +75,11 @@ namespace BrainSimulator.Modules
             FindBoundaries(imageArray);
 
             segmentFinder = new();
-            
+
             //FindArcs();
 
-            segments = segmentFinder.FindSegments(boundaryPoints);
+            //segments = segmentFinder.FindSegments(boundaryPoints);
+            segments = segmentFinder.FindSegments(strokePoints);
 
             FindCorners(ref segments);
 

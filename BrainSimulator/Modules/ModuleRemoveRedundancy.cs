@@ -65,7 +65,7 @@ public class ModuleRemoveRedundancy : ModuleBase
             {
                 Relationship r = t.Relationships[i];
                 Relationship rMatch = relationshipsWithInheritance.FindFirst(x => x.source != r.source && x.reltype == r.reltype && x.target == r.target);
-                if (rMatch != null)
+                if (rMatch != null && rMatch.Weight > 0.8f)
                 {
                     r.Weight -= 0.1f;
                     if (r.Weight < 0.5f)
