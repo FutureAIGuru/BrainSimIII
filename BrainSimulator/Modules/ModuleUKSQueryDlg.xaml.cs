@@ -29,6 +29,7 @@ namespace BrainSimulator.Modules
         private void RequeryTimer_Tick(object sender, EventArgs e)
         {
             DoTheQuery();
+            QueryAttribs();
         }
 
         List<Relationship> result = new();

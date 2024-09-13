@@ -101,24 +101,27 @@ namespace BrainSimulator.Modules
             {
                 System.Drawing.Bitmap theBitmap = bitmap2;
 
-                int bitmapSize = 50;
-                if (bitmapSize > theBitmap.Width) bitmapSize = theBitmap.Width;
+                int bitmapSizeX = 50;
+                int bitmapSizeY = 50;
+                //if (bitmapSizeX > theBitmap.Width) 
+                    bitmapSizeX = theBitmap.Width;
+                if (bitmapSizeY > theBitmap.Height) bitmapSizeY = theBitmap.Height;
                 //do not expand an image if it is smaller than the bitmap...it can introduce problems
-                if (theBitmap.Width < bitmapSize) scale = (float)theBitmap.Width / bitmapSize;
-                if (scale > theBitmap.Width / bitmapSize) scale = theBitmap.Width / bitmapSize;
+                if (theBitmap.Width < bitmapSizeX) scale = (float)theBitmap.Width / bitmapSizeX;
+                if (scale > theBitmap.Width / bitmapSizeX) scale = theBitmap.Width / bitmapSizeX;
                 //limit the x&y offsets so the picture will be displayed
-                float maxOffset = bitmapSize * scale - bitmapSize;
+                float maxOffset = bitmapSizeX * scale - bitmapSizeX;
                 if (offsetX > 0) offsetX = 0;
                 if (offsetX < -maxOffset) offsetX = -(int)maxOffset;
                 if (offsetY > 0) offsetY = 0;
                 if (offsetY < -maxOffset) offsetY = -(int)maxOffset;
-                System.Drawing.Bitmap resizedImage = new(bitmapSize, bitmapSize);
+                System.Drawing.Bitmap resizedImage = new(bitmapSizeX, bitmapSizeY);
                 using (System.Drawing.Graphics graphics = System.Drawing.Graphics.FromImage(resizedImage))
                 {
                     graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                     //graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 
-                    graphics.DrawImage(bitmap2, offsetX, offsetY, bitmapSize * scale, bitmapSize * scale);
+                    graphics.DrawImage(bitmap2, offsetX, offsetY, bitmapSizeX * scale, bitmapSizeY * scale);
                 }
 
                 imageArray = new Color[resizedImage.Width, resizedImage.Height];
@@ -247,13 +250,15 @@ namespace BrainSimulator.Modules
         private class taggedSegment { public Segment s; public bool pt1Used; public bool pt2Used; }
         private void FindCorners(ref List<Segment> segmentsIn)
         {
+            HoughTransform.MergeSegments(segmentsIn);
+
             List<taggedSegment> taggedSegments = new();
             foreach (Segment s in segmentsIn)
                 taggedSegments.Add(new taggedSegment() { s = s, pt1Used = false, pt2Used = false });
 
             //Now, find the corners
             corners = new List<Corner>();
-            taggedSegments = taggedSegments.OrderByDescending(x => x.s.Length).ToList();
+            //taggedSegments = taggedSegments.OrderByDescending(x => x.s.Length).ToList();
             corners = new();
 
             //build a table of distances between each point and each other
@@ -277,7 +282,7 @@ namespace BrainSimulator.Modules
 
             foreach (var distance in distances)
             {
-                if (distance.closest > 10) break; //give up when the distance is large
+                if (distance.closest > 7) break; //give up when the distance is large
                 var s1 = taggedSegments[distance.i];
                 var s2 = taggedSegments[distance.j];
                 if (distance.closest == distance.p1p1 && !s1.pt1Used && !s2.pt1Used)
@@ -309,9 +314,9 @@ namespace BrainSimulator.Modules
                     bool segmentsIntersect = Utils.LinesIntersect(s1.s, s2.s, out PointPlus intersection);
                     if (segmentsIntersect)
                     {
+                        AddCornerToList(intersection, s1.s.P1, s2.s.P2);
                         UpdateCornerPoint(s1.s.P2, intersection);
                         UpdateCornerPoint(s2.s.P1, intersection);
-                        AddCornerToList(intersection, s1.s.P1, s2.s.P2);
                         s1.pt2Used = true;
                         s2.pt1Used = true;
                     }
@@ -333,9 +338,9 @@ namespace BrainSimulator.Modules
             foreach (var segment in taggedSegments)
             {
                 if (!segment.pt2Used)
-                    AddCornerToList(segment.s.P1, segment.s.P2, segment.s.P2);
+                    AddCornerToList(segment.s.P2, segment.s.P1, segment.s.P1);
                 if (!segment.pt1Used)
-                    AddCornerToList(segment.s.P2, segment.s.P1, segment.s.P2);
+                    AddCornerToList(segment.s.P1, segment.s.P2, segment.s.P2);
             }
 
             return;

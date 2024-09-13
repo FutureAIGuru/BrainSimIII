@@ -95,7 +95,8 @@ namespace BrainSimulator.Modules
                             Width = pixelSize / 2,
                             Stroke = Brushes.DarkGreen,
                             Fill = Brushes.DarkGreen,
-                            //                                ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y})" },
+                            ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, 
+                                Content = $"({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")})" },
                         };
                         Canvas.SetLeft(e, pt.X * scale - pixelSize / 4);
                         Canvas.SetTop(e, pt.Y * scale - pixelSize / 4);
@@ -159,7 +160,8 @@ namespace BrainSimulator.Modules
                         ModuleVision.Corner corner = parent.corners[i];
                         float size = 15;
                         Brush b = Brushes.White;
-                        if (corner.angle.Degrees == 180 || corner.angle.Degrees == -180)
+                        if (Abs(corner.angle.Degrees-180) < .1 || 
+                            Abs(corner.angle.Degrees- -180) < .1)
                             b = Brushes.Pink;
                         Ellipse e = new Ellipse()
                         {

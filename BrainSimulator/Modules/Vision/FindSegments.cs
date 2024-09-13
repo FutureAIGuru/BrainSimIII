@@ -41,7 +41,7 @@ public class HoughTransform
             Segment s1 = BestSegmentThroughPoint(ptToTest, availablePointList, anglesAlreadyFound);
 
             //if there is no segment at least 3 pixels long, remove the test point from the temp list, continue
-            if (s1 is null || s1.Length < 3 || !AddSegmentToList(segments, s1))
+            if (s1 is null || s1.Length < 2 || !AddSegmentToList(segments, s1))
             {
                 availablePointList.RemoveAt(0);
                 anglesAlreadyFound = new();
@@ -90,9 +90,10 @@ public class HoughTransform
             PointPlus step = new((float)Cos(a), (float)Sin(a));
             PointPlus p1 = new(pt);
 
-            //lengthen the first endpoint (if possible)
             float maxDist = Abs(step.X) + Abs(step.Y) + .1f;
-            maxDist = .8f;
+            //maxDist = .8f;
+            maxDist = .7f;
+            //lengthen the first endpoint (if possible)
             float dist = -1;
             do
             {
@@ -122,10 +123,11 @@ public class HoughTransform
             }
         }
 
-        if (bestSegment.Length > 2)
+        if (bestSegment.Length >= 2)
             alreadyFound.Add(bestAngle);
-        if (bestSegment.Length < 3)
-            return bestSegment;
+//        if (bestSegment.Length < 3)
+            if (bestSegment.Length < 2)
+                return bestSegment;
 
         //Here we have a ressonable segment hypothesis. The endpoints might not be exactly on boundary points
         //try out all combinations of nearby endpoints to see if there is an improvement
@@ -164,7 +166,7 @@ public class HoughTransform
 
             tempValues = tempValues.OrderBy(x => x.error).ToList();
 
-            if (tempValues[0].error > .2f) return null;
+            if (tempValues.Count == 0 || tempValues[0].error > .2f) return null;
 
             float maxValue = .1f;
             var limitValues = tempValues.FindAll(x => x.error < maxValue).ToList();
@@ -590,61 +592,67 @@ public class HoughTransform
     }
 
     
+    */
+
+    public static void MergeSegments (List<Segment> segments)
+    {
+        for (int i = 0; i < segments.Count-1; i++)
+            for (int j = i+1; j < segments.Count; j++)
+            {
+                if (Merge2Segments(segments[i], segments[j],out Segment sNew ))
+                {
+                    segments[i] = sNew;
+                    segments.RemoveAt(j);
+                }
+            }
+    }
 
     //returns true if one of the segments is unnecessary and the first should be replaced by sNew
-    bool MergeSegments((float weight, Segment s) s1, (float weight, Segment s) s2, out (float weight, Segment s) sNew)
+    static bool Merge2Segments(Segment s1, Segment s2, out Segment sNew)
     {
         sNew = s1;
-        if (s1.weight < s2.weight)
-            sNew = s2;
-        if ((s1.s.debugIndex == 1005 && s2.s.debugIndex == 1013) ||
-            (s2.s.debugIndex == 1005 && s1.s.debugIndex == 1013))
-        { }
 
-        if (Utils.FindIntersection(s1.s, s2.s, out PointPlus intersection, out Angle a))
+        if (Utils.FindIntersection(s1, s2, out PointPlus intersection, out Angle a))
         {
 
         }
 
         //are the segments nearly the same angle?
-        float angleDiff = Abs((s1.s.Angle - s2.s.Angle).Degrees);
-        float minLength = (float)Min(s2.s.Length, s1.s.Length);
-        float angleLimit = ((Angle)Asin(4 / minLength)).Degrees; //must be within 4 pixels of parallel
+        float angleDiff = Abs((s1.Angle - s2.Angle).Degrees);
+        float minLength = (float)Min(s2.Length, s1.Length);
+        float angleLimit = 10;
+        if (minLength < 4) angleLimit = 20;
 
-        if (angleDiff > angleLimit && angleDiff < 180 - angleLimit || angleDiff > 180 + angleLimit && angleDiff < 360 - angleLimit) return false;
+        if (angleDiff > angleLimit && 
+            angleDiff < 180 - angleLimit || 
+            angleDiff > 180 + angleLimit && 
+            angleDiff < 360 - angleLimit) return false;
         //are the segments near each other?
-        float d1 = Utils.DistanceBetweenTwoSegments(s1.s, s2.s);
+        float d1 = Utils.DistanceBetweenTwoSegments(s1, s2);
         if (d1 > 5) return false;
 
-        d1 = Utils.DistancePointToSegment(s1.s, s2.s.P1);
-        float d2 = Utils.DistancePointToSegment(s1.s, s2.s.P2);
-        float d3 = Utils.DistancePointToSegment(s2.s, s1.s.P1);
-        float d4 = Utils.DistancePointToSegment(s2.s, s1.s.P2);
+        d1 = Utils.DistancePointToSegment(s1, s2.P1);
+        float d2 = Utils.DistancePointToSegment(s1, s2.P2);
+        float d3 = Utils.DistancePointToSegment(s2, s1.P1);
+        float d4 = Utils.DistancePointToSegment(s2, s1.P2);
 
         //do the segments overlap?
         if (d1 < 2 || d2 < 2 || d3 < 2 || d4 < 2)
         {
-            if (s1.s.debugIndex == 152)
-            { }
-            if (s2.s.debugIndex == 152)
-            { }
-            float v1 = GetSegmentWeight3(s1.s);
-            float v2 = GetSegmentWeight3(s2.s);
             //do the segments extend one another?
             //mix and match endpoints go get segment with highest Weight
-            PointPlus[] endPts = { new(s1.s.P1), new(s1.s.P2), new(s2.s.P1), new(s2.s.P2) };
+            PointPlus[] endPts = { new(s1.P1), new(s1.P2), new(s2.P1), new(s2.P2) };
             float maxDist = 0;
             for (int i = 0; i < 3; i++)
             {
                 for (int j = i + 1; j < 4; j++)
                 {
                     if (endPts[i] == endPts[j]) continue;
-                    float dist = GetSegmentWeight3(new Segment(endPts[i], endPts[j]));
+                    float dist = (new Segment(endPts[i], endPts[j])).Length;
                     if (dist > maxDist)
                     {
-                        sNew.s.P1 = endPts[i];
-                        sNew.s.P2 = endPts[j];
-                        sNew.weight = dist;
+                        sNew.P1 = endPts[i];
+                        sNew.P2 = endPts[j];
                         maxDist = dist;
                     }
                 }
@@ -653,7 +661,6 @@ public class HoughTransform
         }
         return false;
     }
-    */
 
     void OrderPointsAlongSegment2(ref List<(float dist, Point pt)> points)
     {
