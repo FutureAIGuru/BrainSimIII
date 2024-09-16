@@ -95,8 +95,15 @@ namespace BrainSimulator.Modules
             times = 1;
             progress = 1;
 
+            DateTime startDate = new DateTime(2024, 1, 1);
+            DateTime endDate = DateTime.Now;
+            TimeSpan difference = endDate - startDate;
+            int totalSeconds = (int)difference.TotalSeconds;
+
+            Debug.WriteLine($"Seconds since 2024/1/1: {totalSeconds}.");
+
             // Start the recursive hierarchy building
-            BuildHierarchy("unknownObject", 0, levels, maxChildren, count);
+            BuildHierarchy("unknownObject", 0, levels, maxChildren, count, totalSeconds.ToString());
 
             /*
             // Alternate way to do this (with items in a hierarchy).
@@ -128,7 +135,7 @@ namespace BrainSimulator.Modules
         }
 
 
-        static void BuildHierarchy(string prefix, int currentLevel, int maxLevel, int maxChildren, int count)
+        static void BuildHierarchy(string prefix, int currentLevel, int maxLevel, int maxChildren, int count, String totalSeconds)
         {
             // Base case: stop if the desired count is reached
             if (times >= count || currentLevel >= maxLevel)
@@ -152,13 +159,13 @@ namespace BrainSimulator.Modules
                     progress++;
                 }
 
-                string nodeName = prefix + i.ToString() + "_" + currentLevel.ToString();
+                string nodeName = prefix + i.ToString() + "_" + currentLevel.ToString() + "_" + totalSeconds;
 
                 Thing toAdd = MainWindow.theUKS.GetOrAddThing(nodeName, prefix);
                 times++;
 
                 // Recurse to the next level
-                BuildHierarchy(nodeName, currentLevel + 1, maxLevel, maxChildren, count);
+                BuildHierarchy(nodeName, currentLevel + 1, maxLevel, maxChildren, count, totalSeconds);
             }
         }
 
