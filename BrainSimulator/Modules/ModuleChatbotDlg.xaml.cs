@@ -49,6 +49,8 @@ namespace BrainSimulator.Modules
                 {
                     StatusLabel.Content = "";
                     textPrevious.Text += "\n\nUser: " + input;
+                    String output = ModuleChatbot.ParseInput(input);
+                    textPrevious.Text += "\n\nBrain Sim III: " + output;
                     textInput.Text = "";
                 }
                 else

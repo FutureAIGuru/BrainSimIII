@@ -8,14 +8,14 @@
         Title="(Work in Progress) Dialogue Chatbot" Height="450" Width="800" Background="Gray" ShowInTaskbar="False">
     <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="9*"/>
-            <ColumnDefinition Width="91*"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="0*"/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="textInput" FontSize="14" TextWrapping="Wrap" Text="" Margin="28,286,109,34" TextChanged="txtOutput_TextChanged" Grid.ColumnSpan="2"/>
-        <Button Content="Send" HorizontalAlignment="Right" Margin="0,311,10,0" Height="59" Width="69" Click="Button_Click" FontSize="16" VerticalAlignment="Top" Grid.Column="1" />
-        <Label x:Name="StatusLabel" Content="" Margin="28,0,330,0" Height="29" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
-        <ScrollViewer Margin="28,65,109,153" VerticalScrollBarVisibility="Auto" Grid.ColumnSpan="2" >
-            <TextBlock Text="Chatbot: (Module is WIP) Welcome, do you have any questions for me?" x:Name="textPrevious" TextWrapping="Wrap"/>
+        <TextBox x:Name="textInput" FontSize="14" TextWrapping="Wrap" Text="" Margin="28,286,72,34" TextChanged="txtOutput_TextChanged"/>
+        <Button Content="Send" HorizontalAlignment="Right" Margin="0,311,0,0" Height="59" Width="69" Click="Button_Click" FontSize="16" VerticalAlignment="Top" />
+        <Label x:Name="StatusLabel" Content="" Margin="28,0,215,0" Height="29" VerticalAlignment="Bottom"/>
+        <ScrollViewer Margin="28,65,72,153" VerticalScrollBarVisibility="Auto" >
+            <TextBlock Text="Brian Sim III: (Module is WIP) Welcome, do you have any statements for me? (Example -> car is a vehicle)" x:Name="textPrevious" TextWrapping="Wrap"/>
         </ScrollViewer>
     </Grid>
 </local:ModuleBaseDlg>
