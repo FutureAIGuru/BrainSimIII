@@ -159,9 +159,9 @@ namespace BrainSimulator.Modules
                     {
                         ModuleVision.Corner corner = parent.corners[i];
                         float size = 15;
-                        Brush b = Brushes.White;
-                        if (Abs(corner.angle.Degrees-180) < .1 || 
-                            Abs(corner.angle.Degrees- -180) < .1)
+                        Brush b = Brushes.LightBlue;
+                        if (Abs(corner.angle.Degrees - 180) < .1 ||
+                            Abs(corner.angle.Degrees - -180) < .1)
                             b = Brushes.Pink;
                         Ellipse e = new Ellipse()
                         {
@@ -185,8 +185,8 @@ namespace BrainSimulator.Modules
                         {
                             X1 = corner.pt.X * scale,
                             Y1 = corner.pt.Y * scale,
-                            X2 = pt1.X * scale,
-                            Y2 = pt1.Y * scale,
+                            X2 = corner.prevPt.X * scale,
+                            Y2 = corner.prevPt.Y * scale,
                             Stroke = Brushes.DarkGray,
                             StrokeThickness = 2,
                         };
@@ -200,18 +200,20 @@ namespace BrainSimulator.Modules
                         {
                             X1 = corner.pt.X * scale,
                             Y1 = corner.pt.Y * scale,
-                            X2 = pt2.X * scale,
-                            Y2 = pt2.Y * scale,
+                            X2 = corner.nextPt.X * scale,
+                            Y2 = corner.nextPt.Y * scale,
                             Stroke = Brushes.DarkGray,
                             StrokeThickness = 2,
                         };
                         theCanvas.Children.Add(l);
-
-                        var arc = new EllipticalCornerArc(corner.pt * scale, pt1 * scale, pt2 * scale);
-                        ////var arc = new EllipticalCornerArc(corner.location, s1.P2, s2.P2);
-                        var path = arc.GetEllipticalArcPath();
-                        if (path != null)
-                            theCanvas.Children.Add(path);
+                        if (corner.curve)
+                        {
+                            var arc = new EllipticalCornerArc(corner.pt * scale, corner.nextPt * scale, corner.prevPt * scale);
+                            ////var arc = new EllipticalCornerArc(corner.location, s1.P2, s2.P2);
+                            var path = arc.GetEllipticalArcPath();
+                            if (path != null)
+                                theCanvas.Children.Add(path);
+                        }
                     }
 
                 }
@@ -301,7 +303,7 @@ namespace BrainSimulator.Modules
         }
 
 
-
+        /*
 
         Line tempLine;
         private void E_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
@@ -355,6 +357,7 @@ namespace BrainSimulator.Modules
                 theCanvas.Children.Add(tempLine);
             }
         }
+        */
 
         string defaultDirectory = "";
         private void Button_Browse_Click(object sender, RoutedEventArgs e)
@@ -391,7 +394,7 @@ namespace BrainSimulator.Modules
                     fileList = GetFileList(openFileDialog1.FileName);
                     curPath = openFileDialog1.FileName;
                 }
-                parent.previousFilePath = "";
+                //parent.previousFilePath = "";
                 parent.currentFilePath = curPath;
                 //parent.SetParameters(fileList, curPath, (bool)cbAutoCycle.IsChecked, (bool)cbNameIsDescription.IsChecked);
             }

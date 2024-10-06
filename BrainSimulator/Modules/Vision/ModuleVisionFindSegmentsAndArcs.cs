@@ -1,22 +1,252 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Linq;
 using static System.Math;
 
-namespace BrainSimulator.Modules.Vision;
 
-public class HoughTransform
+namespace BrainSimulator.Modules;
+
+//public class HoughTransform
+public partial class ModuleVision
 {
-    // Hough Transform parameters
-    public int numAngles = 180; // Number of angles to consider (e.g., 180 degrees)
-    //private double angleStep; // Angle step size
-    private double rhoStep = 1; // Rho step size (can be adjusted based on image resolution)
-    public int maxDistance; // Maximum possible distance from the origin to the image corner
-    public List<Point>[,] accumulator; // Accumulator array
-    private List<PointPlus> boundaryPoints;
-    int minLength = 4;
-    int minVotes = 15;
+    //This is currently used for STROKES while BOUNDARIES are handled by FindSegments (below)
+    public void FindArcsAndSegments(List<PointPlus> strokePts)
+    {
+        corners = new();
+        segments = new List<Segment>();
+        List<PointPlus> availablePts = [.. strokePts];
+
+        //find all the contiguous sets of points in the boundary array
+        List<List<PointPlus>> curves = new();
+        while (availablePts.Count > 0)
+        {
+            List<PointPlus> contigPts = new();
+            contigPts.Add(availablePts[0]);
+            availablePts.RemoveAt(0);
+            //find the contiguout points
+            for (int curPt = 0; curPt < contigPts.Count; curPt++)
+            {
+                PointPlus testPt = contigPts[curPt];
+                var nearbyPts = GetNearbyPointsSorted(testPt, 2.5f, availablePts);
+                foreach (var ptInSeq in nearbyPts)
+                {
+                    if (contigPts.Contains(ptInSeq.pt)) continue;
+                    contigPts.Add(ptInSeq.pt);
+                    availablePts.Remove(ptInSeq.pt);
+                }
+            }
+            //order the continuous points
+            List<PointPlus> orderedPts = new();
+            PointPlus currentPoint = contigPts.First();
+            orderedPts.Add(currentPoint);
+            contigPts.Remove(currentPoint);
+            while (contigPts.Count > 0)
+            {
+                var nearest = contigPts.OrderBy(x => (currentPoint - x).R).First();
+                float dist = (nearest - currentPoint).R;
+                if (dist > 3)
+                {
+                    curves.Add(orderedPts);
+                    orderedPts = new();
+                }
+                orderedPts.Add(nearest);
+                currentPoint = nearest;
+                contigPts.Remove(nearest);
+            }
+            curves.Add(orderedPts);
+        }
+
+
+        //find arc  and straight segments in the curves
+        while (curves.Count > 0)
+        {
+            MergeCurvePointLists(curves);
+            List<PointPlus> theCurve = curves[0];
+            if (theCurve.Count < 4) //give up on short segments
+            {
+                curves.RemoveAt(0);
+                continue;
+            }
+
+            //use sliding window to find straight or curved segments
+            //start with the largest window and make it smaller until you find a recognizeable subset
+            //length has to be at least 4 to know if it's a curve..the two innter angles must be the same sign
+            for (int length = theCurve.Count; length > 3; length--)
+            {
+                //now slide the window through the curve
+                for (int start = 0; start <= theCurve.Count - length; start++)
+                {
+                    List<PointPlus> windowPoints = theCurve.GetRange(start, length);
+                    //is this is not a contigouous set of points, continue
+                    bool contiguous = true;
+                    for (int i = 0; i < windowPoints.Count - 1; i++)
+                        if ((windowPoints[i] - windowPoints[i + 1]).R > 3.5)
+                        { contiguous = false; break; }
+                    if (!contiguous)
+                        continue;
+
+                    //is the set of points a defineable curve or straight line
+                    bool isCurve = false;
+                    bool isStraight = false;
+
+                    List<Angle> theAngles = new List<Angle>();
+                    List<Angle> theDeltas = new List<Angle>();
+                    for (int i = 0; i < windowPoints.Count - 1; i++)
+                    {
+                        Angle dTheta = (windowPoints[i] - windowPoints[i + 1]).Theta;
+                        //if (dTheta < 0) dTheta += Angle.FromDegrees(360);
+                        theAngles.Add(dTheta);
+                        if (theAngles.Count > 1)
+                        {
+                            Angle ddTheta = theAngles.Last() - theAngles[theAngles.Count - 2];
+                            if (ddTheta > Angle.FromDegrees(180))
+                                ddTheta = Angle.FromDegrees(360) - ddTheta;
+                            if (ddTheta < Angle.FromDegrees(-180))
+                                ddTheta = Angle.FromDegrees(-360) - ddTheta;
+                            theDeltas.Add(ddTheta);
+                            if (Abs(ddTheta) > Angle.FromDegrees(180))
+                            { }
+                        }
+                    }
+
+                    isCurve = IsCurved(theDeltas, Angle.FromDegrees(35));
+
+                    if (!isCurve)
+                        isStraight = IsLine(windowPoints, 0.5f);
+
+                    if (isStraight || isCurve)
+                    {
+                        if (isCurve)
+                        {
+                            //add the arc to the segment list
+                            //put the corner of the arc at the midpoint of the arc
+                            //which is either the center pt if the count is odd
+                            //OR the midpoint pf the two center points if the count is even
+                            PointPlus p1;
+                            if ((length % 2) != 0)
+                                p1 = new PointPlus(windowPoints[length / 2]);
+                            else
+                                p1 = new PointPlus(new Segment(windowPoints[length / 2 - 1], windowPoints[length / 2]).MidPoint);
+                            Corner newCorner = new Corner()
+                            {
+                                curve = true,
+                                pt = p1,
+                                prevPt = theCurve[start],
+                                nextPt = theCurve[start + length - 1]
+                            };
+                            corners.Add(newCorner);
+                        }
+                        else if (isStraight)
+                        {
+                            //add the segment to the segment list
+                            PointPlus p1 = theCurve[start];
+                            PointPlus p2 = theCurve[start + length - 1];
+                            segments.Add(new Segment(p1, p2));
+                        }
+                        //remove the segment/arc from the curve
+                        //duplicate the last point so it can be included in the next arc/segment
+                        List<PointPlus> newCurve = theCurve.GetRange(start + length - 1, theCurve.Count - (start + length - 1));
+                        curves[0] = curves[0].GetRange(0, start + 1);
+                        curves.Add(newCurve);
+                        goto startAgain;
+                    }
+                }
+            }
+            //no curve or straight segments found
+            curves.RemoveAt(0);
+        startAgain: continue;
+        }
+        return;
+    }
+
+    private void MergeCurvePointLists(List<List<PointPlus>> curves)
+    {
+        float threshold = 2.5f;
+        for (int i = 0; i < curves.Count - 1; i++)
+        {
+            if (curves[i].Count == 0) continue;
+            for (int j = i + 1; j < curves.Count; j++)
+            {
+                if (curves[j].Count == 0) continue;
+                PointPlus s1 = curves[i].First();
+                PointPlus e1 = curves[i].Last();
+                PointPlus s2 = curves[j].First();
+                PointPlus e2 = curves[j].Last();
+                if ((e1 - s2).R < threshold)
+                {
+                    curves[i].InsertRange(curves[i].Count, curves[j]);
+                    curves.RemoveAt(j);
+                    j--;
+                }
+                else if ((s1 - e2).R < threshold)
+                {
+                    curves[i].InsertRange(0, curves[j]);
+                    curves.RemoveAt(j);
+                    j--;
+                }
+                else if ((s1 - s2).R < threshold)
+                {
+                    curves[i].Reverse();
+                    curves[i].InsertRange(curves[i].Count, curves[j]);
+                    curves.RemoveAt(j);
+                    j--;
+                }
+                else if ((e1 - e2).R < threshold)
+                {
+                    curves[j].Reverse();
+                    curves[i].InsertRange(curves[i].Count, curves[j]);
+                    curves.RemoveAt(j);
+                    j--;
+                }
+            }
+        }
+    }
+
+    private static bool IsCurved(List<Angle> dAngles, Angle threshold)
+    {
+        bool mayBeCurveLeft = true;
+        bool mayBeCurveRight = true;
+        for (int i = 0; i < dAngles.Count; i++)
+        {
+            Angle a = dAngles[i];
+            if (!mayBeCurveLeft && !mayBeCurveRight) break;
+            if (mayBeCurveRight && (a < Angle.FromDegrees(1) || a > threshold))
+                mayBeCurveRight = false;
+            if (mayBeCurveLeft && (a > Angle.FromDegrees(-1) || a < -threshold))
+                mayBeCurveLeft = false;
+        }
+        return mayBeCurveLeft || mayBeCurveRight;
+    }
+    static bool IsLine(List<PointPlus> points, double threshold)
+    {
+        float threshold1 = (points.First() - points.Last()).R / 3f;
+        PointPlus pFirst = points[0];
+        PointPlus pLast = points.Last();
+        int count0 = 0;
+        int count1 = 0;
+        int count2 = 0;
+        for (int i = 1; i < points.Count - 1; i++)
+        {
+            PointPlus curPt = points[i];
+            float dist = Utils.DistancePointToLine(curPt, pFirst, pLast);
+            if (dist > threshold)
+                return false;
+
+            //which side of the line is this point on?
+            float d = (pLast.X - pFirst.X) * (curPt.Y - pFirst.Y) - (pLast.Y - pFirst.Y) * (curPt.X - pFirst.X);
+            if (d > threshold1)
+                count0++;
+            else if (d < -threshold1)
+                count1++;
+            else
+                count2++;
+        }
+        if (count0 == 0 ^ count1 == 0) //XOR operator, are all the points on one side? then more likely a curve
+            return false;
+        return true;
+    }
+
+
 
     public List<Segment> FindSegments(List<PointPlus> boundaries)
     {
@@ -75,6 +305,7 @@ public class HoughTransform
     Angle angleStep = Angle.FromDegrees(5);
     private Segment BestSegmentThroughPoint(PointPlus pt, List<PointPlus> availablePoints, List<Angle> alreadyFound)
     {
+
         angleStep = Angle.FromDegrees(1);
         Segment bestSegment = new(pt, pt);
         Angle bestAngle = -1;
@@ -125,9 +356,9 @@ public class HoughTransform
 
         if (bestSegment.Length >= 2)
             alreadyFound.Add(bestAngle);
-//        if (bestSegment.Length < 3)
-            if (bestSegment.Length < 2)
-                return bestSegment;
+        //        if (bestSegment.Length < 3)
+        if (bestSegment.Length < 2)
+            return bestSegment;
 
         //Here we have a ressonable segment hypothesis. The endpoints might not be exactly on boundary points
         //try out all combinations of nearby endpoints to see if there is an improvement
@@ -150,17 +381,17 @@ public class HoughTransform
             }
 
             //build a table of all possible candidate segments and their hit-rates
-            var tempValues = new List<(int i, int j,float length, float error)>();
+            var tempValues = new List<(int i, int j, float length, float error)>();
             for (int i = 0; i < candidatePts.Count; i++)
             {
                 PointPlus pt1 = candidatePts[i];
                 for (int j = 0; j < candidatePts1.Count; j++)
                 {
                     PointPlus pt2 = candidatePts1[j];
-                    if (pt1.Near(pt2,2f)) continue;
+                    if (pt1.Near(pt2, 2f)) continue;
                     Segment testSeg = new Segment(pt1, pt2);
                     float e1 = GetAverageError3(testSeg);
-                    tempValues.Add((i,j,testSeg.Length, e1));
+                    tempValues.Add((i, j, testSeg.Length, e1));
                 }
             }
 
@@ -175,10 +406,10 @@ public class HoughTransform
                 maxValue += .1f;
                 limitValues = tempValues.FindAll(x => x.error < maxValue).ToList();
             }
-            var t = limitValues.FindFirst(x=>x.length == limitValues.Max(x=>x.length));
+            var t = limitValues.FindFirst(x => x.length == limitValues.Max(x => x.length));
             best = new Segment(candidatePts[t.i], candidatePts1[t.j]);
 
-            if (best != bestSegment && Abs(best.Angle-bestAngle) < Angle.FromDegrees(15))
+            if (best != bestSegment && Abs(best.Angle - bestAngle) < Angle.FromDegrees(15))
             {
                 bestSegment = best;
                 improved = true;
@@ -187,7 +418,10 @@ public class HoughTransform
 
         //has the algorithm strayed too far from the original point?
         if (bestSegment is not null && Utils.DistancePointToSegment(bestSegment, pt) > 1.5f)
-            return null;
+        {
+            //likely a curve
+            //return null;
+        }
 
         return bestSegment;
     }
@@ -281,7 +515,7 @@ public class HoughTransform
         PointPlus step = new(dx, dy);
         PointPlus currPt = s.P2;
         int misses = 0;
-        for (int i = 0; i < stepCount;i++)
+        for (int i = 0; i < stepCount; i++)
         {
             float dist = (GetNearestPointInList(currPt, linePoints) - currPt).R;
             if (dist > .5f)
@@ -289,8 +523,8 @@ public class HoughTransform
             currPt += step;
         }
 
-         if (s.Length > count)
-         //if (s.Length <  10)
+        if (s.Length > count)
+            //if (s.Length <  10)
             sum += (s.Length - count) / 2; //dock 0.5 point for each missing point on segment
         float average = sum / count;
         if (misses > 1)
@@ -342,6 +576,22 @@ public class HoughTransform
             if (d1 <= dist)
                 points.Add(point);
         }
+        return points;
+    }
+    private List<(PointPlus pt, float dist, Angle theta)> GetNearbyPointsSorted(PointPlus pt, float dist, List<PointPlus> availablePoints)
+    {
+        //this is exhaustive and can be replaced with a QuadTree for performance
+        List<(PointPlus pt, float dist, Angle theta)> points = new();
+        foreach (PointPlus point in availablePoints)
+        {
+            PointPlus p1 = point - pt;
+
+            float d1 = p1.R;
+            Angle a = p1.Theta;
+            if (d1 <= dist)
+                points.Add(new(point, d1, a));
+        }
+        points = points.OrderBy(x => x.theta * 1000 + x.dist).ToList();
         return points;
     }
     /*
@@ -594,12 +844,12 @@ public class HoughTransform
     
     */
 
-    public static void MergeSegments (List<Segment> segments)
+    public static void MergeSegments(List<Segment> segments)
     {
-        for (int i = 0; i < segments.Count-1; i++)
-            for (int j = i+1; j < segments.Count; j++)
+        for (int i = 0; i < segments.Count - 1; i++)
+            for (int j = i + 1; j < segments.Count; j++)
             {
-                if (Merge2Segments(segments[i], segments[j],out Segment sNew ))
+                if (Merge2Segments(segments[i], segments[j], out Segment sNew))
                 {
                     segments[i] = sNew;
                     segments.RemoveAt(j);
@@ -623,9 +873,9 @@ public class HoughTransform
         float angleLimit = 10;
         if (minLength < 4) angleLimit = 20;
 
-        if (angleDiff > angleLimit && 
-            angleDiff < 180 - angleLimit || 
-            angleDiff > 180 + angleLimit && 
+        if (angleDiff > angleLimit &&
+            angleDiff < 180 - angleLimit ||
+            angleDiff > 180 + angleLimit &&
             angleDiff < 360 - angleLimit) return false;
         //are the segments near each other?
         float d1 = Utils.DistanceBetweenTwoSegments(s1, s2);

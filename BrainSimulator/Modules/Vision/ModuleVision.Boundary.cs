@@ -174,21 +174,57 @@ public partial class ModuleVision
         neighborFound: continue;
         }
     }
+
+    List<PointPlus> FindStrokeeCentersFromBoundaryPoints(List<PointPlus> points)
+    {
+        List<PointPlus> strokeCenters = new List<PointPlus>();
+        foreach (PointPlus pt in points)
+        {
+            List<PointPlus> nearbyPts = GetNearbyPoints(pt, 5f, points);
+            foreach (PointPlus pt2 in nearbyPts)
+            {
+                if ((pt - pt2).R < 2f) continue;
+                PointPlus possibleStrokeCenter = (new Segment(pt2, pt).MidPoint);
+                List<PointPlus> nearbyPts2 = GetNearbyPoints(possibleStrokeCenter, 1f, points);
+                if (nearbyPts2.Count == 0 && GetLuminanceAtPoint(possibleStrokeCenter) > .8)
+                {
+                    List<PointPlus> nearbyPts3 = GetNearbyPoints(possibleStrokeCenter, .7f, strokeCenters);
+                    if (nearbyPts3.Count == 0)
+                        strokeCenters.Add(possibleStrokeCenter);
+                    else
+                    {
+                        //PointPlus averagePt = new PointPlus(nearbyPts3.Average(x=>x.X),nearbyPts3.Average(x=>x.Y) );
+                    }
+
+                }
+            }
+        }
+        return strokeCenters;
+    }
+    float GetLuminanceAtPoint(PointPlus pt)
+    {
+        var c = imageArray[(int)Round(pt.X), (int)Round(pt.Y)];
+        HSLColor c1 = new(c);
+        return c1.luminance;
+    }
     private List<PointPlus> FindStrokePtsInRay(float sx, float sy, float dx, float dy, List<Color> rayThruImage)
     {
-        List<float> luminance = new List<float>();
-        foreach (var color in rayThruImage)
-            luminance.Add(new HSLColor(color).luminance);
         if (sy == 10)
         { }
+        List<float> luminance = new List<float>();
+        foreach (var color in rayThruImage)
+        {
+            float lum = new HSLColor(color).luminance;
+            luminance.Add(lum );
+        }
         List<PointPlus> ptsInThisScan = new();
         (List<(int index, float value)> maxima, List<(int index, float value)> minima) v = FindLocalExtrema(luminance, 0.06f);
         for (int i = 0; i < v.Item1.Count; i++)
         {
             (int index, float value) item = v.maxima[i];
-            float minBrightness = 0.3f;  //max brightnesee for a "black" pixel
-            float minBrightness1 = 0.5f;  //min brightness for white pixel
-            int maxStrokeWidth = 5;
+            float minBrightness = 0.35f;  //max brightnesee for a "black" pixel
+            float minBrightness1 = 0.7f;  //min brightness for white pixel
+            int maxStrokeWidth = 6;
 
             if (item.Item2 < minBrightness1) continue;
             //find start and end of stroke
@@ -212,15 +248,14 @@ public partial class ModuleVision
             float boundaryPos = (startStroke + endStroke) / 2f; //for debug
             float numerator = 0;
             float denominator = 0;
-            for (int j = startStroke; j <= endStroke; j++)
+            for (int j = startStroke+1; j < endStroke; j++)
             {
-                float colorVal3 = new HSLColor(rayThruImage[j]).luminance;
-                numerator += j * colorVal3;
-                denominator += colorVal3;
+                numerator += j * luminance[j];
+                denominator += luminance[j];
             }
 
             boundaryPos = numerator / denominator;
-            boundaryPos = (float)Round(boundaryPos, 1);
+            //boundaryPos = (float)Round(boundaryPos, 1);
             if (dx == 1 && dy == 0)
                 ptsInThisScan.Add(new Point(boundaryPos, sy));
             else if (dx == 0 && dy == 1)
@@ -276,17 +311,19 @@ public partial class ModuleVision
 
     private void FindBoundaryPtsInRay(float sx, float sy, float dx, float dy, List<Color> rayThruImage)
     {
+        if (sy == 6)
+        { }
         List<PointPlus> ptsInThisScan = new();
 
-        List<float> arr = new();
+        List<float> luminances = new();
         foreach (var v in rayThruImage)
-            arr.Add(new HSLColor(v).luminance);
+            luminances.Add(new HSLColor(v).luminance);
 
         List<int> minima = new();
         List<int> maxima = new();
 
         int direction = 0; //-1 for decreasing, 1 for increasing, 0 for flat
-        float previous = arr[0];
+        float previous = luminances[0];
         if (previous > 0.5)
         {
             direction = -1;
@@ -298,27 +335,27 @@ public partial class ModuleVision
             minima.Add(0);
         }
 
-        for (int i = 1; i < arr.Count - 1; i++)
+        for (int i = 1; i < luminances.Count - 1; i++)
         {
-            float delta = arr[i] - previous;
+            float delta = luminances[i] - previous;
             if (Abs(delta) < .1f) continue;
 
-            if (arr[i] > previous)
+            if (luminances[i] > previous)
             {
-                if (direction == -1) // local minima
+                if (direction == -1 && previous < 0.5f) // local minima
                 {
-                    if (i > 1 && arr[i - 2] < arr[i - 1])
+                    if (i > 1 && luminances[i - 2] < luminances[i - 1])
                         minima.Add(i - 2);
                     else
                         minima.Add(i - 1);
                 }
                 direction = 1;
             }
-            else if (arr[i] < previous)
+            else if (luminances[i] < previous)
             {
-                if (direction == 1) // local maxima
+                if (direction == 1 && previous > 0.5f) // local maxima
                 {
-                    if (i > 1 && arr[i - 2] > arr[i - 1])
+                    if (i > 1 && luminances[i - 2] > luminances[i - 1])
                         maxima.Add(i - 2);
                     else
                         maxima.Add(i - 1);
@@ -327,11 +364,11 @@ public partial class ModuleVision
             }
             else
                 direction = 0;
-            previous = arr[i];
+            previous = luminances[i];
         }
 
-        if (direction == 1) maxima.Add(arr.Count - 1);
-        if (direction == -1) minima.Add(arr.Count - 1);
+        if (direction == 1) maxima.Add(luminances.Count - 1);
+        if (direction == -1) minima.Add(luminances.Count - 1);
 
         int curMin = 0;
         int curMax = 0;
@@ -340,12 +377,12 @@ public partial class ModuleVision
             float boundaryPos = -1;
             if (minima[curMin] < maxima[curMax])
             {
-                boundaryPos = FindMidValuePt(arr, minima[curMin], maxima[curMax]);
+                boundaryPos = FindMidValuePt(luminances, minima[curMin], maxima[curMax]);
                 curMin++;
             }
             else
             {
-                boundaryPos = FindMidValuePt(arr, maxima[curMax], minima[curMin]);
+                boundaryPos = FindMidValuePt(luminances, maxima[curMax], minima[curMin]);
                 curMax++;
             }
             //no boundary found 
@@ -361,39 +398,6 @@ public partial class ModuleVision
             else
                 ptsInThisScan.Add(new Point(sx - boundaryPos, boundaryPos + sy));
         }
-
-        /*        //merge nearby boundaries
-                for (int i = 0; i < ptsInThisScan.Count-1; i++)
-                {
-                    PointPlus pt = ptsInThisScan[i];
-                    PointPlus pt1 = ptsInThisScan[i+1];
-                    if ((pt-pt1).R <= 2)
-                    {
-                        int x1 = (int)Round(pt.X);
-                        int y1 = (int)Round(pt.Y);
-                        if (dx == 1 && x1 > 0 && x1 < imageArray.GetLength(0) - 3)
-                        {
-                            if (imageArray[x1 - 1, y1] == backgroundColor && imageArray[x1 + 2, y1] == backgroundColor)
-                            {
-                                pt.X = (pt.X + pt1.X) / 2;
-                                pt.Y = (pt.Y + pt1.Y) / 2;
-                                ptsInThisScan.RemoveAt(i + 1);
-                                i--;
-                            }
-                        }
-                        if (dy == 1 && y1 > 0 && y1 < imageArray.GetLength(0) - 3)
-                        {
-                            if (imageArray[x1, y1-1] == backgroundColor && imageArray[x1, y1+2] == backgroundColor)
-                            {
-                                pt.X = (pt.X + pt1.X) / 2;
-                                pt.Y = (pt.Y + pt1.Y) / 2;
-                                ptsInThisScan.RemoveAt(i + 1);
-                                i--;
-                            }
-                        }
-                    }
-                }
-        */
         foreach (var pt in ptsInThisScan)
             boundaryPoints.Add(pt);
     }
