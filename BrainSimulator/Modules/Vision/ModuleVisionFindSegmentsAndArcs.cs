@@ -156,9 +156,57 @@ public partial class ModuleVision
             curves.RemoveAt(0);
         startAgain: continue;
         }
+        JoinUpArcsAndSegments();
         return;
     }
 
+    private void JoinUpArcsAndSegments()
+    {
+        return;
+        //some arcs are discovered as short segments and some are broken into multiple arcs
+        //this method intents 
+        float threshold = 2;
+        for (int i = 0; i < corners.Count - 1; i++)
+        {
+            for (int j = i + 1; j < corners.Count; j++)
+            {
+                //do they have the same curvature?
+                PointPlus s1 = corners[i].prevPt;
+                PointPlus e1 = corners[i].nextPt;
+                PointPlus s2 = corners[j].prevPt;
+                PointPlus e2 = corners[j].nextPt;
+                if ((e1 - s2).R < threshold)
+                {
+                    Angle totAngle = corners[i].angle + corners[j].angle;
+                    //find the center defined by the two corners
+                    Angle a1 = (corners[i].pt - corners[i].prevPt).Theta;
+                    Angle a2 = (corners[i].pt - corners[i].nextPt).Theta;
+                    PointPlus avePoint = corners[i].pt + new PointPlus(1,(a1+a2)/2);
+                    Segment seg1 = new Segment(corners[i].pt, avePoint);
+                    a1 = (corners[j].pt - corners[j].prevPt).Theta;
+                    a2 = (corners[j].pt - corners[j].nextPt).Theta;
+                    avePoint = corners[j].pt + new PointPlus(1, (a1 + a2) / 2);
+                    Segment seg2 = new Segment(corners[j].pt, avePoint);
+                    Utils.FindIntersection(seg1, seg2, out PointPlus center,out Angle a);
+                    strokePoints.Add(center);
+                    float aveRadius = ((center - corners[i].pt).R + (center - corners[j].pt).R) / 2;
+                    Angle a3 = ((center - corners[i].prevPt).Theta + (center - corners[j].nextPt).Theta) / 2;
+                    //if (totAngle > 0 && totAngle < Angle.FromDegrees(180))
+                        a3 += Angle.FromDegrees(180);
+                    Corner newCorner = new Corner()
+                    {
+                        prevPt = s1,
+                        nextPt = e2,
+                        pt = center + new PointPlus(aveRadius,a3),
+                        curve = true,
+                    };
+                    corners[i] = newCorner;
+                    corners.RemoveAt(j);
+                    j--;
+                }
+            }
+        }
+    }
     private void MergeCurvePointLists(List<List<PointPlus>> curves)
     {
         float threshold = 2.5f;
@@ -841,7 +889,7 @@ public partial class ModuleVision
         return aveWeight;
     }
 
-    
+
     */
 
     public static void MergeSegments(List<Segment> segments)
