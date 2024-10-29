@@ -343,8 +343,9 @@ public partial class Thing
                     {
                         RelationshipsWriteable.Add(r);
                         target.RelationshipsFromWriteable.Add(r);
-                        if (!relationshipType.RelationshipsAsTypeWriteable.Contains(r))
-                            relationshipType.RelationshipsAsTypeWriteable.Add(r);
+                        if (relationshipType != HasChild)
+                            if (!relationshipType.RelationshipsAsTypeWriteable.Contains(r))
+                                relationshipType.RelationshipsAsTypeWriteable.Add(r);
                     }
         }
         else if (relationshipType == null)

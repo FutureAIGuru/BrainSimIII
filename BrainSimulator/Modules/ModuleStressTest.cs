@@ -65,28 +65,6 @@ namespace BrainSimulator.Modules
 
             int maxChildren = 12;
 
-            // Old Way
-            // Add each item to the UKS.
-            /*
-            for (int i = 0; i < items.Count; i++)
-            {
-                MainWindow.theUKS.GetOrAddThing(items[i]);
-                if (i % (items.Count / 10) == 0)
-                {
-                    Debug.WriteLine($"{times * 10}% complete.");
-                    times++;
-                }
-
-                if (i % 12 == 0)
-                {
-                    //Debug.WriteLine($"WORKING! {i}");
-                    //BalanceTree(MainWindow.theUKS.GetOrAddThing("unknownObject").Children[0]);
-                }
-
-            }
-            */
-
-
             // Calculate the number of levels based on the logarithm.
             int levels = (int)Math.Ceiling(Math.Log(count) / Math.Log(maxChildren));
 
@@ -159,13 +137,13 @@ namespace BrainSimulator.Modules
                     progress++;
                 }
 
-                string nodeName = prefix + i.ToString() + "_" + currentLevel.ToString() + "_" + totalSeconds;
+                string nodeName = prefix + "_i_" + i.ToString() + "_" + currentLevel.ToString();
 
                 Thing toAdd = MainWindow.theUKS.GetOrAddThing(nodeName, prefix);
                 times++;
 
                 // Recurse to the next level
-                BuildHierarchy(nodeName, currentLevel + 1, maxLevel, maxChildren, count, totalSeconds);
+                BuildHierarchy(nodeName, currentLevel + 1, maxLevel, maxChildren, count, "");
             }
         }
 
