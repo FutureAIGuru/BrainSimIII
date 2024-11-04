@@ -237,11 +237,6 @@ namespace BrainSimulator
             return fileTime;
         }
 
-        public static void Noop()
-        {
-
-        }
-
         public static float RoundToSignificantDigits(this float d, int digits)
         {
             if (d == 0)
@@ -279,7 +274,6 @@ namespace BrainSimulator
         {
             return (float)(degrees * Math.PI / 180);
         }
-
 
         public static System.Drawing.Color IntToDrawingColor(int theColor)
         {

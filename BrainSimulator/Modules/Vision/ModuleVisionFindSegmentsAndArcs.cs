@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Linq;
 using static System.Math;
+using System.Threading;
 
 
 namespace BrainSimulator.Modules;
@@ -127,7 +128,7 @@ public partial class ModuleVision
                                 p1 = new PointPlus(windowPoints[length / 2]);
                             else
                                 p1 = new PointPlus(new Segment(windowPoints[length / 2 - 1], windowPoints[length / 2]).MidPoint);
-                            Corner newCorner = new Corner()
+                            Arc newCorner = new()
                             {
                                 curve = true,
                                 pt = p1,
@@ -162,43 +163,137 @@ public partial class ModuleVision
 
     private void JoinUpArcsAndSegments()
     {
-        return;
         //some arcs are discovered as short segments and some are broken into multiple arcs
-        //this method intents 
+        //this method intends to merge these
+        //return;
         float threshold = 2;
+        //do pairs of segments form a (possibly) curved angle
+        for (int i = 0; i < segments.Count; i++)
+        {
+            //pick a segment
+            Segment sg1 = segments[i];
+            if (sg1.Length > 6) continue;
+            //does this segment abut a curve?
+            for (int j = 0; j < corners.Count; j++)
+            {
+                if (corners[j] is Arc a)
+                {
+                    if ((sg1.P1 - a.prevPt).R < threshold &&
+                        Abs(sg1.Angle - (a.prevPt - a.pt).Theta) < Angle.FromDegrees(40))
+                    {
+                        corners.Add(new Arc { pt = sg1.P1, prevPt = sg1.P2, nextPt = a.nextPt, });
+                        corners.RemoveAt(j);
+                        goto segmentMergedToArc;
+                    }
+                    else if ((sg1.P1 - a.nextPt).R < threshold &&
+                        Abs(sg1.Angle - (a.nextPt - a.pt).Theta) < Angle.FromDegrees(40))
+                    {
+                        corners.Add(new Arc { pt = sg1.P1, prevPt = sg1.P2, nextPt = a.prevPt, });
+                        corners.RemoveAt(j);
+                        goto segmentMergedToArc;
+                    }
+                    else if ((sg1.P2 - a.prevPt).R < threshold &&
+                        Abs(sg1.Angle - (a.prevPt - a.pt).Theta) < Angle.FromDegrees(40))
+                    {
+                        corners.Add(new Arc { pt = sg1.P2, prevPt = sg1.P1, nextPt = a.nextPt, });
+                        corners.RemoveAt(j);
+                        goto segmentMergedToArc;
+                    }
+                    else if ((sg1.P2 - a.nextPt).R < threshold &&
+                        Abs(sg1.Angle - (a.nextPt - a.pt).Theta) < Angle.FromDegrees(40))
+                    {
+                        corners.Add(new Arc { pt = sg1.P2, prevPt = sg1.P1, nextPt = a.prevPt, });
+                        corners.RemoveAt(j);
+                        goto segmentMergedToArc;
+                    }
+                }
+            }
+            //does this abut another segment forming a curve?
+            for (int j = i + 1; j < segments.Count; j++)
+            {
+                Segment sg2 = segments[j];
+                if (sg2.Length > 6) continue;
+                if (Abs(sg1.Angle - sg2.Angle) > Angle.FromDegrees(60))
+                    continue;
+                //do they nearly meet up?
+                if ((sg1.P2 - sg2.P1).R < threshold)
+                {
+                    corners.Add(new Arc
+                    {
+                        pt = sg1.P2,
+                        prevPt = sg1.P1,
+                        nextPt = sg2.P2,
+                    });
+                    goto twoSegmentsFormArc;
+                }
+                if ((sg1.P1 - sg2.P1).R < threshold)
+                {
+                    corners.Add(new Arc
+                    {
+                        pt = sg1.P1,
+                        prevPt = sg1.P2,
+                        nextPt = sg2.P2,
+                    });
+                    goto twoSegmentsFormArc;
+                }
+                if ((sg1.P1 - sg2.P2).R < threshold)
+                {
+                    corners.Add(new Arc
+                    {
+                        pt = sg1.P1,
+                        prevPt = sg1.P2,
+                        nextPt = sg2.P1,
+                    });
+                    goto twoSegmentsFormArc;
+                }
+                if ((sg1.P2 - sg2.P2).R < threshold)
+                {
+                    corners.Add(new Arc
+                    {
+                        pt = sg1.P2,
+                        prevPt = sg1.P1,
+                        nextPt = sg2.P1,
+                    });
+                    goto twoSegmentsFormArc;
+                }
+                continue;
+            twoSegmentsFormArc:
+                segments.RemoveAt(j);
+                segments.RemoveAt(i);
+                j--;
+                if (i > 0)
+                    i--;
+            }
+            continue;
+        segmentMergedToArc:
+            segments.RemoveAt(i);
+            if (i > 0)
+                i--;
+        }
+
         for (int i = 0; i < corners.Count - 1; i++)
         {
             for (int j = i + 1; j < corners.Count; j++)
             {
                 //do they have the same curvature?
-                PointPlus s1 = corners[i].prevPt;
-                PointPlus e1 = corners[i].nextPt;
-                PointPlus s2 = corners[j].prevPt;
-                PointPlus e2 = corners[j].nextPt;
+                Arc arc1 = (Arc)corners[i];
+                Arc arc2 = (Arc)corners[j];
+                var cir1 = arc1.GetCircleFromThreePoints(arc1.pt, arc1.nextPt, arc1.prevPt);
+                var cir2 = arc2.GetCircleFromThreePoints(arc2.pt, arc2.nextPt, arc2.prevPt);
+                if ((cir1.center - cir2.center).R > 3) continue;
+                if (Abs(cir1.radius - cir2.radius) > 3) continue;
+                //do they nearly meet up?
+                PointPlus s1 = arc1.prevPt;
+                PointPlus e1 = arc1.nextPt;
+                PointPlus s2 = arc2.prevPt;
+                PointPlus e2 = arc2.nextPt;
                 if ((e1 - s2).R < threshold)
                 {
-                    Angle totAngle = corners[i].angle + corners[j].angle;
-                    //find the center defined by the two corners
-                    Angle a1 = (corners[i].pt - corners[i].prevPt).Theta;
-                    Angle a2 = (corners[i].pt - corners[i].nextPt).Theta;
-                    PointPlus avePoint = corners[i].pt + new PointPlus(1,(a1+a2)/2);
-                    Segment seg1 = new Segment(corners[i].pt, avePoint);
-                    a1 = (corners[j].pt - corners[j].prevPt).Theta;
-                    a2 = (corners[j].pt - corners[j].nextPt).Theta;
-                    avePoint = corners[j].pt + new PointPlus(1, (a1 + a2) / 2);
-                    Segment seg2 = new Segment(corners[j].pt, avePoint);
-                    Utils.FindIntersection(seg1, seg2, out PointPlus center,out Angle a);
-                    strokePoints.Add(center);
-                    float aveRadius = ((center - corners[i].pt).R + (center - corners[j].pt).R) / 2;
-                    Angle a3 = ((center - corners[i].prevPt).Theta + (center - corners[j].nextPt).Theta) / 2;
-                    //if (totAngle > 0 && totAngle < Angle.FromDegrees(180))
-                        a3 += Angle.FromDegrees(180);
-                    Corner newCorner = new Corner()
+                    Arc newCorner = new Arc()
                     {
                         prevPt = s1,
                         nextPt = e2,
-                        pt = center + new PointPlus(aveRadius,a3),
-                        curve = true,
+                        pt = e1,
                     };
                     corners[i] = newCorner;
                     corners.RemoveAt(j);
@@ -918,7 +1013,7 @@ public partial class ModuleVision
         //are the segments nearly the same angle?
         float angleDiff = Abs((s1.Angle - s2.Angle).Degrees);
         float minLength = (float)Min(s2.Length, s1.Length);
-        float angleLimit = 10;
+        float angleLimit = 15;
         if (minLength < 4) angleLimit = 20;
 
         if (angleDiff > angleLimit &&

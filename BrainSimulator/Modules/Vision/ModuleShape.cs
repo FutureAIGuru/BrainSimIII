@@ -6,17 +6,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Forms;
-using System.Xml.Serialization;
 using static System.Math;
 using UKS;
-using static BrainSimulator.Modules.ModuleOnlineInfo;
-using static BrainSimulator.Modules.ModuleVision;
-using System.Drawing;
 
 namespace BrainSimulator.Modules
 {
@@ -25,7 +16,7 @@ namespace BrainSimulator.Modules
 
         //timer only processes recently-changed items.
         DateTime lastScan = new DateTime();
-
+        public Thing newStoredShape = null;
         public override void Fire()
         {
             Init();
@@ -62,8 +53,8 @@ namespace BrainSimulator.Modules
                     int bestOffset = -1;
                     while (nextBest != null)
                     {
-                        float score = theUKS.HasSequence(nextBest, shape, out int offset,true);
-                        if (score > bestSeqsScore )
+                        float score = theUKS.HasSequence(nextBest, shape, out int offset, true);
+                        if (score > bestSeqsScore)
                         {
                             for (int i = 0; i < offset && i < nextBest.Relationships.Count; i++)
                             {
@@ -78,11 +69,26 @@ namespace BrainSimulator.Modules
                         }
                         nextBest = theUKS.GetNextClosestMatch(ref bestValue);
                     }
-                    Relationship r = shape.SetAttribute(foundShape);
-                    r.Weight = bestSeqsScore;
-                    Thing offsetThing = theUKS.GetOrAddThing("mmOffset:" + bestOffset, "offset");
-                    shape.SetAttribute(offsetThing);
-                    foundShape.SetFired();
+                    if (bestSeqsScore > 0.5)
+                    {
+                        Relationship r = shape.SetAttribute(foundShape);
+                        r.Weight = bestSeqsScore;
+                        Thing offsetThing = theUKS.GetOrAddThing("mmOffset:" + bestOffset, "offset");
+                        shape.SetAttribute(offsetThing);
+                        foundShape.SetFired();
+                        newStoredShape = null;
+                    }
+                    else
+                    {
+                        newStoredShape = AddShapeToLibrary();
+                        //set a time-to-live on this new image
+                        newStoredShape.RelationshipsFrom.FindFirst(x => x.reltype.Label == "has-child").TimeToLive = TimeSpan.FromSeconds(15);
+                        Relationship r = shape.SetAttribute(newStoredShape);
+                        r.Weight = 1;
+                        Thing offsetThing = theUKS.GetOrAddThing("mmOffset:" + 0, "offset");
+                        shape.SetAttribute(offsetThing);
+                        newStoredShape.SetFired();
+                    }
                 }
             }
 

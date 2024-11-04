@@ -311,7 +311,7 @@ public partial class ModuleVision
 
     private void FindBoundaryPtsInRay(float sx, float sy, float dx, float dy, List<Color> rayThruImage)
     {
-        if (sy == 6)
+        if (sx == 20)
         { }
         List<PointPlus> ptsInThisScan = new();
 
@@ -342,7 +342,7 @@ public partial class ModuleVision
 
             if (luminances[i] > previous)
             {
-                if (direction == -1 && previous < 0.5f) // local minima
+                if (direction == -1 && previous < 0.6f) // local minima
                 {
                     if (i > 1 && luminances[i - 2] < luminances[i - 1])
                         minima.Add(i - 2);
@@ -353,7 +353,7 @@ public partial class ModuleVision
             }
             else if (luminances[i] < previous)
             {
-                if (direction == 1 && previous > 0.5f) // local maxima
+                if (direction == 1 && previous > 0.6f) // local maxima
                 {
                     if (i > 1 && luminances[i - 2] > luminances[i - 1])
                         maxima.Add(i - 2);

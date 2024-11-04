@@ -13,7 +13,8 @@ using System.Windows.Input;
 using System.Windows.Shapes;
 using static System.Math;
 using System.Windows.Threading;
-using static BrainSimulator.Modules.ModuleOnlineInfo;
+using Microsoft.VisualBasic;
+using static BrainSimulator.Modules.ModuleVision;
 
 
 namespace BrainSimulator.Modules
@@ -161,7 +162,7 @@ namespace BrainSimulator.Modules
                 {
                     for (int i = 0; i < parent.corners.Count; i++)
                     {
-                        ModuleVision.Corner corner = parent.corners[i];
+                        var corner = parent.corners[i];
                         float size = 15;
                         Brush b = Brushes.LightBlue;
                         if (Abs(corner.angle.Degrees - 180) < .1 ||
@@ -213,32 +214,65 @@ namespace BrainSimulator.Modules
                             };
                             theCanvas.Children.Add(l);
                         }
-                        if (corner.curve)
+                        if (corner is ModuleVision.Arc a)
                         {
-                            var arc1 = new EllipticalCornerArc(corner.pt * scale, corner.nextPt * scale, corner.prevPt * scale);
-                            ////var arc = new EllipticalCornerArc(corner.location, s1.P2, s2.P2);
-                            var path = arc1.GetEllipticalArcPath();
-                            var cir = GetCircleFromThreePoints(corner.pt * scale, corner.nextPt * scale, corner.prevPt * scale);
-                            Angle startAngle = (corner.prevPt * scale - cir.center).Theta;
-                            Angle midAngle = (corner.pt * scale - cir.center).Theta;
-                            Angle endAngle = (corner.nextPt * scale - cir.center).Theta;
-                            //if (Abs(startAngle-endAngle) > Angle.FromDegrees(180))
-                            //{ }
-                            if ((startAngle < midAngle && midAngle > endAngle) ||
-                                (startAngle > midAngle && midAngle < endAngle))
+                            Corner alreadyInList = parent.corners.FindFirst(x =>
+                                x != corner && x.curve && 
+                                ((x.nextPt - corner.nextPt).R < 3.5 ||
+                                 (x.prevPt - corner.nextPt).R < 3.5));
+                            if (alreadyInList == null)
                             {
-                                (endAngle, startAngle) = (startAngle, endAngle);
-                                if (startAngle < 0) startAngle += 2 * PI;
-                                if (endAngle < 0) endAngle += 2 * PI;
+                                e = new Ellipse()
+                                {
+                                    Height = size,
+                                    Width = size,
+                                    Stroke = b,
+                                    Fill = Brushes.Pink,
+                                };
+                                Canvas.SetTop(e, corner.nextPt.Y * scale - size / 2);
+                                Canvas.SetLeft(e, corner.nextPt.X * scale - size / 2);
+                                theCanvas.Children.Add(e);
                             }
-                            //if (endAngle < startAngle)
-                            //{ (startAngle, endAngle) = (endAngle, startAngle); }
+                            alreadyInList = parent.corners.FindFirst(x =>
+                                x != corner && x.curve &&
+                                ((x.nextPt - corner.prevPt).R < 3.5 ||
+                                 (x.prevPt - corner.prevPt).R < 3.5));
+                            if (alreadyInList == null)
+                            {
+                                e = new Ellipse()
+                                {
+                                    Height = size,
+                                    Width = size,
+                                    Stroke = b,
+                                    Fill = Brushes.Pink,
+                                    ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"{i}", },
+                                };
+                                Canvas.SetTop(e, corner.prevPt.Y * scale - size / 2);
+                                Canvas.SetLeft(e, corner.prevPt.X * scale - size / 2);
+                                theCanvas.Children.Add(e);
+                            }
+
+                            var cir = a.GetCircleFromThreePoints(corner.pt * scale, corner.nextPt * scale, corner.prevPt * scale);
+                            Angle startAngle = (corner.prevPt * scale - cir.center).Theta.Normalize();
+                            Angle midAngle = (corner.pt * scale - cir.center).Theta.Normalize();
+                            Angle endAngle = (corner.nextPt * scale - cir.center).Theta.Normalize();
+                            if ((startAngle < midAngle && endAngle < midAngle) ||
+                                (startAngle > midAngle && endAngle > midAngle))
+                            {
+                                if (endAngle < startAngle)
+                                    endAngle += 2 * PI;
+                                else
+                                    (endAngle, startAngle) = (startAngle, endAngle);
+                            }
+                            else if (endAngle < startAngle)
+                            {
+                                (startAngle, endAngle) = (endAngle, startAngle);
+                            }
                             var path1 = DrawArc(cir.center, cir.radius, startAngle, endAngle);
                             if (path1 != null)
                                 theCanvas.Children.Add(path1);
                         }
                     }
-
                 }
             }
             catch { }
@@ -254,128 +288,16 @@ namespace BrainSimulator.Modules
                 Stroke = Brushes.Blue,
                 StrokeThickness = 3,
             };
-            if (startAngle < endAngle)
+            if (endAngle < startAngle)
             {
-                for (Angle a = startAngle; a <= endAngle; a += angleStep)
-                {
-                    PointPlus pp = new(radius, a);
-                    poly.Points.Add(center + pp);
-                }
+                endAngle += 2 * PI;
             }
-            else
+            for (Angle a = startAngle; a <= endAngle; a += angleStep)
             {
-                for (Angle a = startAngle; a >= endAngle; a -= angleStep)
-                {
-                    PointPlus pp = new(radius, a);
-                    poly.Points.Add(center + pp);
-                }
-
+                PointPlus pp = new(radius, a);
+                poly.Points.Add(center + pp);
             }
             return poly;
-        }
-        //actually a circular arc for now
-        public class EllipticalCornerArc
-        {
-            public PointPlus Corner { get; }
-            public PointPlus tangencyPoint1 { get; set; }
-            public PointPlus tangencyPoint2 { get; set; }
-            public double Distance1 { get; }
-
-            public double Distance2 { get; }
-
-            public EllipticalCornerArc(PointPlus corner, PointPlus tangencyPoint1, PointPlus tangencyPoint2)
-            {
-                Corner = corner;
-                this.tangencyPoint1 = tangencyPoint1;
-                this.tangencyPoint2 = tangencyPoint2;
-                Distance1 = (corner - tangencyPoint1).R;
-                Distance2 = (corner - tangencyPoint2).R;
-            }
-
-            public Polyline GetEllipticalArcPath()
-            {
-                //get the center of rotation
-                PointPlus pt1 = tangencyPoint1 - Corner;
-                pt1.Theta += Angle.FromDegrees(90);
-                pt1 += tangencyPoint1;
-                PointPlus pt2 = tangencyPoint2 - Corner;
-                pt2.Theta += Angle.FromDegrees(90);
-                pt2 += tangencyPoint2;
-
-                Utils.FindIntersection(tangencyPoint1, pt1, tangencyPoint2, pt2, out Point c1, out Angle a);
-                PointPlus center = new(c1);
-
-                //get the lengths of the major and minor axes
-                float r1 = (center - tangencyPoint1).R;
-                float r2 = (center - tangencyPoint2).R;
-
-                //get the angle of the major axis
-
-                //draw the arc from the major to the minor axis
-
-                //circular arc
-                Polyline poly = new Polyline()
-                {
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 1,
-                };
-
-                PointPlus ptCurr = tangencyPoint1 - center;
-                PointPlus ptLast = tangencyPoint2 - center;
-                if (ptCurr.Theta - ptLast.Theta > Angle.FromDegrees(180))
-                { ptLast.Theta += Angle.FromDegrees(360); }
-                if (ptLast.Theta - ptCurr.Theta > Angle.FromDegrees(180))
-                { ptCurr.Theta += Angle.FromDegrees(360); }
-                float steps = (ptLast.Theta - ptCurr.Theta) / Angle.FromDegrees(5);
-                if (steps > 0)
-                {
-                    for (int i = 0; i < steps; i++)
-                    {
-                        Angle theta = i * Angle.FromDegrees(5);
-                        //heres the formula for a function defining an ellipse in terms of r(theta)
-                        //TODO: this only really works on circular arcs
-                        float r = r1 * r2 / (float)Math.Sqrt((r2 * r2 * Cos(theta) * Cos(theta)) + (r1 * r1 * Sin(theta) * Sin(theta)));
-                        PointPlus pp = new(r, theta + ptCurr.Theta);
-                        poly.Points.Add(center + pp);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < Abs(steps); i++)
-                    {
-                        Angle theta = i * Angle.FromDegrees(5);
-                        float r = r1 * r2 / (float)Math.Sqrt((r2 * r2 * Math.Cos(theta) * Math.Cos(theta)) + (r1 * r1 * Math.Sin(theta) * Math.Sin(theta)));
-                        PointPlus pp = new(r, theta + ptLast.Theta);
-                        poly.Points.Add(center + pp);
-                    }
-                }
-                return poly;
-            }
-        }
-
-
-
-        // Function to calculate the center and radius of the circle through three points
-        private (PointPlus center, float radius) GetCircleFromThreePoints(PointPlus p1, PointPlus p2, PointPlus p3)
-        {
-            float x1 = p1.X, y1 = p1.Y;
-            float x2 = p2.X, y2 = p2.Y;
-            float x3 = p3.X, y3 = p3.Y;
-
-            // Calculate the perpendicular bisectors of two segments
-            float ma = (y2 - y1) / (x2 - x1);
-            float mb = (y3 - y2) / (x3 - x2);
-
-            // Calculate the center of the circle (intersection of the bisectors)
-            float cx = (ma * mb * (y1 - y3) + mb * (x1 + x2) - ma * (x2 + x3)) / (2 * (mb - ma));
-            float cy = -1 * (cx - (x1 + x2) / 2) / ma + (y1 + y2) / 2;
-
-            PointPlus center = new PointPlus(cx, cy);
-
-            // Calculate the radius of the circle
-            float radius = (center - p1).R;
-
-            return (center, radius);
         }
 
         string defaultDirectory = "";

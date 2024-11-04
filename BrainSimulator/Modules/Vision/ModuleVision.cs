@@ -11,6 +11,7 @@ using System.Windows.Media.Imaging;
 using UKS;
 using System.Windows.Media;
 using System.Windows;
+using static System.Math;
 
 namespace BrainSimulator.Modules
 {
@@ -29,7 +30,7 @@ namespace BrainSimulator.Modules
         public class Corner
         {
             public PointPlus pt;
-            public Angle angle
+            public virtual Angle angle
             {
                 get
                 {
@@ -53,7 +54,57 @@ namespace BrainSimulator.Modules
                     $"nextPt:[({nextPt.X.ToString("0.0")},{nextPt.Y.ToString("0.0")})]";
             }
         }
+        public class Arc : Corner
+        {
+            //an arc is defined by three (non-collinear) points
+            //prevPt and nextPt are the endpoints of the arc and pt is any thirde point somewhere on the arc
+            public Arc()
+            {
+                curve = true;
+            }
+            public override Angle angle
+            {
+                get
+                {
+                    var cir = GetCircleFromThreePoints(pt, nextPt, prevPt);
+                    Angle startAngle = (prevPt  - cir.center).Theta.Normalize();
+                    Angle midAngle = (pt  - cir.center).Theta.Normalize();
+                    Angle endAngle = (nextPt - cir.center).Theta.Normalize();
 
+                    Angle a = Abs(startAngle - endAngle);
+                    //if the midAngle is not between start and end angles, go the other way areound the arc
+                    //TODO: handle other cases
+                    if (midAngle > startAngle && midAngle > endAngle)
+                        a = 2 * PI - a;
+                                                              
+                    return a;
+                }
+            }
+            // Function to calculate the center and radius of the circle through three points
+            public (PointPlus center, float radius) GetCircleFromThreePoints(PointPlus p1, PointPlus p2, PointPlus p3)
+            {
+                float x1 = p1.X, y1 = p1.Y;
+                float x2 = p2.X, y2 = p2.Y;
+                float x3 = p3.X, y3 = p3.Y;
+
+                // Calculate the perpendicular bisectors of two segments
+                float ma = (y2 - y1) / (x2 - x1);
+                float mb = (y3 - y2) / (x3 - x2);
+
+                // Calculate the center of the circle (intersection of the bisectors)
+                float cx = (ma * mb * (y1 - y3) + mb * (x1 + x2) - ma * (x2 + x3)) / (2 * (mb - ma));
+                float cy = -1 * (cx - (x1 + x2) / 2) / ma + (y1 + y2) / 2;
+
+                PointPlus center = new PointPlus(cx, cy);
+
+                // Calculate the radius of the circle
+                float radius = (center - p1).R;
+
+                return (center, radius);
+            }
+
+
+        }
         public ModuleVision()
         {
         }
@@ -77,19 +128,61 @@ namespace BrainSimulator.Modules
 
             segments = new();
             corners = new();
-            if (strokePoints.Count > boundaryPoints.Count/4)
+            if (strokePoints.Count > boundaryPoints.Count / 4)
+            {
                 FindArcsAndSegments(strokePoints);
+                FindCorners(ref segments);
+                SaveSymbolToUKS();
+            }
             else
+            {
                 segments = FindSegments(boundaryPoints);
-
-            FindCorners(ref segments);
-
-            //FindOutlines();
+                FindCorners(ref segments);
+                FindOutlines();
+            }
 
             WriteBitmapToMentalModel();
 
             UpdateDialog();
+        }
 
+        private void SaveSymbolToUKS()
+        {
+            int maxExtent = (int)strokePoints.Max(x => Math.Max(x.X, x.Y));
+            Thing shapesParent = theUKS.GetOrAddThing("CurrentSymbol", "Visual");
+            theUKS.DeleteAllChildren(shapesParent);
+            Thing shapeParent = theUKS.GetOrAddThing("Symbol*", shapesParent);
+            theUKS.GetOrAddThing("arc", "Visual");
+            theUKS.GetOrAddThing("corner", "Visual");
+            theUKS.GetOrAddThing("segment", "Visual");
+            foreach (var corner in corners)
+            {
+                Thing item = theUKS.AddThing("Item*", shapeParent);
+                if (corner is Arc a)
+                {
+                    item.AddRelationship("arc", "is");
+                    int degrees = (int)a.angle.Degrees;
+                    degrees = ((degrees + 5 * Math.Sign(degrees)) / 10) * 10;
+                    item.AddRelationship(theUKS.GetOrAddThing("angle" + degrees,"Rotation"), "is");
+
+                }
+                else
+                {
+                    item.AddRelationship("corner", "is");
+                    Segment s1 = new Segment(corner.prevPt, corner.pt);
+                    Segment s2 = new Segment(corner.pt, corner.nextPt);
+                    Thing item1 = theUKS.AddThing("Item*", shapeParent);
+                    item1.AddRelationship("segment", "is");
+                    //int degrees = (int)s1.Angle.Degrees;
+                    //degrees = ((degrees + 5 * Math.Sign(degrees)) / 10) * 10;
+                    //item1.AddRelationship("angle" + degrees, "is");
+                    int length = (int)(s1.Length * 10 + 5) / maxExtent;
+                    item1.AddRelationship("distance." + length, "is");
+
+                    //Thing item2 = theUKS.AddThing("Item*", shapeParent);
+                    //item2.AddRelationship("segment", "is");
+                }
+            }
         }
 
         public float scale = 1;
@@ -262,7 +355,7 @@ namespace BrainSimulator.Modules
             foreach (Segment s in segmentsIn)
                 taggedSegments.Add(new taggedSegment() { s = s, pt1Used = false, pt2Used = false });
 
-            
+
             //build a table of distances between each point and each other
             List<(int i, int j, float p1p1, float p1p2, float p2p1, float p2p2, float closest)> distances = new();
             for (int i = 0; i < taggedSegments.Count - 1; i++)
@@ -344,7 +437,6 @@ namespace BrainSimulator.Modules
                 if (!segment.pt1Used)
                     AddCornerToList(segment.s.P1, segment.s.P2, segment.s.P2);
             }
-
             return;
         }
 
@@ -360,10 +452,19 @@ namespace BrainSimulator.Modules
         private void AddCornerToList(PointPlus intersection, PointPlus prevPt, PointPlus nextPt)
         {
             //allow things to be offset by a few pixels
+            //Is this corner already in the list?
             Corner alreadyInList = corners.FindFirst(x =>
                 (x.pt - intersection).R < 2 &&
                 (((x.prevPt - prevPt).R < 2 && (x.nextPt - nextPt).R < 2) ||
                 ((x.prevPt - nextPt).R < 2 && (x.nextPt - prevPt).R < 2)));
+            if (alreadyInList == null && prevPt == nextPt)
+            {
+                //is it an endpoint of a curve?
+                alreadyInList = corners.FindFirst(x =>
+                    x.curve &&
+                    ((x.nextPt - intersection).R < 2 ||
+                    (x.prevPt - intersection).R < 2));
+            }
             if (alreadyInList == null)
                 corners.Add(new Corner { pt = intersection, prevPt = prevPt, nextPt = nextPt });
             else { }
@@ -476,7 +577,8 @@ namespace BrainSimulator.Modules
 
         Thing GetOrAddColor(Color color)
         {
-            foreach (Thing t in theUKS.Labeled("Color").Children)
+            Thing colorParent = theUKS.GetOrAddThing("Color", "Attribute");
+            foreach (Thing t in colorParent.Children)
             {
                 if (t.V is Color c && c.Equals(color))
                     return t;

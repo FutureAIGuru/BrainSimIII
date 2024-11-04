@@ -7,6 +7,7 @@
 using System;
 using System.CodeDom;
 using System.Diagnostics;
+using System.IO.IsolatedStorage;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
@@ -568,6 +569,13 @@ namespace BrainSimulator.Modules
         public static Angle FromDegrees(float degrees)
         {
             return (float)(degrees * PI / 180.0);
+        }
+        public Angle Normalize()
+        {
+            Angle a = theAngle;
+            a = (float)a % (2 * PI);
+            if (a < 0) a += 2 * PI;
+            return a;
         }
     }
 
