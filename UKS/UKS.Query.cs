@@ -241,13 +241,17 @@ public partial class UKS
                 if (r1.reltype.Label.Contains(".") && r2.reltype.Label.Contains("."))
                     if (RelationshipsAreExclusive(r1, r2))
                     {
+                        //if two relationships are in conflict, use the encountered second
+                        result.RemoveAt(j);
+                        break;
                         //if two relationships are in conflict, use the one with higher weight
+                        //????
                         if (r1.Weight > r2.Weight)
                         {
                             result.RemoveAt(j);
                             j--;
                         }
-                        else
+                        else if (r1.Weight > r2.Weight)
                         {
                             result.RemoveAt(i);
                             i--;

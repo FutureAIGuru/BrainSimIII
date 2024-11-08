@@ -621,6 +621,15 @@ namespace BrainSimulator.Modules
             {
                 if (t.V is System.Xml.XmlNode[] nodes)
                 {
+                    if (nodes[0].Value == "Color")
+                    {
+                        byte A = byte.Parse(nodes[1].InnerText);
+                        byte R = byte.Parse(nodes[2].InnerText);
+                        byte G = byte.Parse(nodes[3].InnerText);
+                        byte B = byte.Parse(nodes[4].InnerText);
+                        Color theColor = new() {A=A,R=R,G=G,B=B, };
+                        t.V = theColor;
+                    }
                     if (nodes[0].Value == "HSLColor")
                     {
                         float hue = float.Parse(nodes[1].InnerText);

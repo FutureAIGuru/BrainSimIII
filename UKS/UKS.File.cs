@@ -56,6 +56,7 @@ public partial class UKS
 
 
         //put in digits
+        GetOrAddThing("-", "digit");
         GetOrAddThing(".", "digit");
         GetOrAddThing("0", "digit");
         GetOrAddThing("2", "digit");
