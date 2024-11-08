@@ -13,6 +13,8 @@ using System.Windows.Input;
 using System.Windows.Shapes;
 using static System.Math;
 using System.Windows.Threading;
+using Microsoft.VisualBasic;
+using static BrainSimulator.Modules.ModuleVision;
 
 
 namespace BrainSimulator.Modules
@@ -39,7 +41,7 @@ namespace BrainSimulator.Modules
                 labelProperties.Content = "Image: " + parent.imageArray.GetLength(0) + "x" + parent.imageArray.GetLength(1) +
                 //    "\r\nBit Depth: " + parent.bitmap.Format.BitsPerPixel +
                     "\r\nSegments: " + parent.segments?.Count +
-                    "\r\nCorners: " + parent.corners?.Count+
+                    "\r\nCorners: " + parent.corners?.Count +
                     "\r\nOutlines: " + parent.theUKS.Labeled("Outline")?.Children.Count;
             }
             catch { return false; }
@@ -68,13 +70,14 @@ namespace BrainSimulator.Modules
                             {
                                 //pixel.luminance /= 2;
                                 SolidColorBrush b = new SolidColorBrush(pixel);
+                                float lum = new HSLColor(pixel).luminance;
                                 Rectangle e = new()
                                 {
                                     Height = pixelSize,
                                     Width = pixelSize,
                                     Stroke = b,
                                     Fill = b,
-                                    ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 50, Content = $"({(int)x},{(int)y}) {pixel}" },
+                                    ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 50, Content = $"({(int)x},{(int)y}) {lum.ToString("0.00")}" },
                                 };
                                 Canvas.SetLeft(e, x * scale - pixelSize / 2);
                                 Canvas.SetTop(e, y * scale - pixelSize / 2);
@@ -94,7 +97,11 @@ namespace BrainSimulator.Modules
                             Width = pixelSize / 2,
                             Stroke = Brushes.DarkGreen,
                             Fill = Brushes.DarkGreen,
-                            //                                ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"({(int)x},{(int)y})" },
+                            ToolTip = new System.Windows.Controls.ToolTip
+                            {
+                                HorizontalOffset = 100,
+                                Content = $"({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")})"
+                            },
                         };
                         Canvas.SetLeft(e, pt.X * scale - pixelSize / 4);
                         Canvas.SetTop(e, pt.Y * scale - pixelSize / 4);
@@ -155,10 +162,11 @@ namespace BrainSimulator.Modules
                 {
                     for (int i = 0; i < parent.corners.Count; i++)
                     {
-                        ModuleVision.Corner corner = parent.corners[i];
+                        var corner = parent.corners[i];
                         float size = 15;
-                        Brush b = Brushes.White;
-                        if (corner.angle.Degrees == 180 || corner.angle.Degrees == -180)
+                        Brush b = Brushes.LightBlue;
+                        if (Abs(corner.angle.Degrees - 180) < .1 ||
+                            Abs(corner.angle.Degrees - -180) < .1)
                             b = Brushes.Pink;
                         Ellipse e = new Ellipse()
                         {
@@ -178,179 +186,118 @@ namespace BrainSimulator.Modules
                         delta.R = i1;
                         PointPlus pt1 = corner.pt + delta;
 
-                        Line l = new Line()
+                        if (!corner.curve)
                         {
-                            X1 = corner.pt.X * scale,
-                            Y1 = corner.pt.Y * scale,
-                            X2 = pt1.X * scale,
-                            Y2 = pt1.Y * scale,
-                            Stroke = Brushes.DarkGray,
-                            StrokeThickness = 2,
-                        };
-                        theCanvas.Children.Add(l);
+                            Line l = new Line()
+                            {
+                                X1 = corner.pt.X * scale,
+                                Y1 = corner.pt.Y * scale,
+                                X2 = corner.prevPt.X * scale,
+                                Y2 = corner.prevPt.Y * scale,
+                                Stroke = Brushes.DarkGray,
+                                StrokeThickness = 2,
+                            };
+                            theCanvas.Children.Add(l);
 
-                        delta = corner.nextPt - corner.pt;
-                        delta.R = i1;
-                        PointPlus pt2 = corner.pt + delta;
+                            delta = corner.nextPt - corner.pt;
+                            delta.R = i1;
+                            PointPlus pt2 = corner.pt + delta;
 
-                        l = new Line()
+                            l = new Line()
+                            {
+                                X1 = corner.pt.X * scale,
+                                Y1 = corner.pt.Y * scale,
+                                X2 = corner.nextPt.X * scale,
+                                Y2 = corner.nextPt.Y * scale,
+                                Stroke = Brushes.DarkGray,
+                                StrokeThickness = 2,
+                            };
+                            theCanvas.Children.Add(l);
+                        }
+                        if (corner is ModuleVision.Arc a)
                         {
-                            X1 = corner.pt.X * scale,
-                            Y1 = corner.pt.Y * scale,
-                            X2 = pt2.X * scale,
-                            Y2 = pt2.Y * scale,
-                            Stroke = Brushes.DarkGray,
-                            StrokeThickness = 2,
-                        };
-                        theCanvas.Children.Add(l);
+                            Corner alreadyInList = parent.corners.FindFirst(x =>
+                                x != corner && x.curve && 
+                                ((x.nextPt - corner.nextPt).R < 3.5 ||
+                                 (x.prevPt - corner.nextPt).R < 3.5));
+                            if (alreadyInList == null)
+                            {
+                                e = new Ellipse()
+                                {
+                                    Height = size,
+                                    Width = size,
+                                    Stroke = b,
+                                    Fill = Brushes.Pink,
+                                };
+                                Canvas.SetTop(e, corner.nextPt.Y * scale - size / 2);
+                                Canvas.SetLeft(e, corner.nextPt.X * scale - size / 2);
+                                theCanvas.Children.Add(e);
+                            }
+                            alreadyInList = parent.corners.FindFirst(x =>
+                                x != corner && x.curve &&
+                                ((x.nextPt - corner.prevPt).R < 3.5 ||
+                                 (x.prevPt - corner.prevPt).R < 3.5));
+                            if (alreadyInList == null)
+                            {
+                                e = new Ellipse()
+                                {
+                                    Height = size,
+                                    Width = size,
+                                    Stroke = b,
+                                    Fill = Brushes.Pink,
+                                    ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"{i}", },
+                                };
+                                Canvas.SetTop(e, corner.prevPt.Y * scale - size / 2);
+                                Canvas.SetLeft(e, corner.prevPt.X * scale - size / 2);
+                                theCanvas.Children.Add(e);
+                            }
 
-                        var arc = new EllipticalCornerArc(corner.pt * scale, pt1 * scale, pt2 * scale);
-                        ////var arc = new EllipticalCornerArc(corner.location, s1.P2, s2.P2);
-                        var path = arc.GetEllipticalArcPath();
-                        if (path != null)
-                            theCanvas.Children.Add(path);
+                            var cir = a.GetCircleFromThreePoints(corner.pt * scale, corner.nextPt * scale, corner.prevPt * scale);
+                            Angle startAngle = (corner.prevPt * scale - cir.center).Theta.Normalize();
+                            Angle midAngle = (corner.pt * scale - cir.center).Theta.Normalize();
+                            Angle endAngle = (corner.nextPt * scale - cir.center).Theta.Normalize();
+                            if ((startAngle < midAngle && endAngle < midAngle) ||
+                                (startAngle > midAngle && endAngle > midAngle))
+                            {
+                                if (endAngle < startAngle)
+                                    endAngle += 2 * PI;
+                                else
+                                    (endAngle, startAngle) = (startAngle, endAngle);
+                            }
+                            else if (endAngle < startAngle)
+                            {
+                                (startAngle, endAngle) = (endAngle, startAngle);
+                            }
+                            var path1 = DrawArc(cir.center, cir.radius, startAngle, endAngle);
+                            if (path1 != null)
+                                theCanvas.Children.Add(path1);
+                        }
                     }
-
                 }
             }
             catch { }
             return true;
         }
 
-        //actually a circular arc for now
-        public class EllipticalCornerArc
+
+        public Polyline DrawArc(PointPlus center, float radius, Angle startAngle, Angle endAngle)
         {
-            public PointPlus Corner { get; }
-            public PointPlus tangencyPoint1 { get; set; }
-            public PointPlus tangencyPoint2 { get; set; }
-            public double Distance1 { get; }
-
-            public double Distance2 { get; }
-
-            public EllipticalCornerArc(PointPlus corner, PointPlus tangencyPoint1, PointPlus tangencyPoint2)
+            Angle angleStep = Angle.FromDegrees(1);
+            Polyline poly = new Polyline()
             {
-                Corner = corner;
-                this.tangencyPoint1 = tangencyPoint1;
-                this.tangencyPoint2 = tangencyPoint2;
-                Distance1 = (corner - tangencyPoint1).R;
-                Distance2 = (corner - tangencyPoint2).R;
-            }
-
-            public Polyline GetEllipticalArcPath()
+                Stroke = Brushes.Blue,
+                StrokeThickness = 3,
+            };
+            if (endAngle < startAngle)
             {
-                //get the center of rotation
-                PointPlus pt1 = tangencyPoint1 - Corner;
-                pt1.Theta += Angle.FromDegrees(90);
-                pt1 += tangencyPoint1;
-                PointPlus pt2 = tangencyPoint2 - Corner;
-                pt2.Theta += Angle.FromDegrees(90);
-                pt2 += tangencyPoint2;
-
-                Utils.FindIntersection(tangencyPoint1, pt1, tangencyPoint2, pt2, out Point c1, out Angle a);
-                PointPlus center = new(c1);
-
-                //get the lengths of the major and minor axes
-                float r1 = (center - tangencyPoint1).R;
-                float r2 = (center - tangencyPoint2).R;
-
-                //get the angle of the major axis
-
-                //draw the arc from the major to the minor axis
-
-                //circular arc
-                Polyline poly = new Polyline()
-                {
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 1,
-                };
- 
-                PointPlus ptCurr = tangencyPoint1 - center;
-                PointPlus ptLast = tangencyPoint2 - center;
-                if (ptCurr.Theta - ptLast.Theta > Angle.FromDegrees(180))
-                { ptLast.Theta += Angle.FromDegrees(360); }
-                if (ptLast.Theta - ptCurr.Theta > Angle.FromDegrees(180))
-                { ptCurr.Theta += Angle.FromDegrees(360); }
-                float steps = (ptLast.Theta - ptCurr.Theta) / Angle.FromDegrees(5);
-                if (steps > 0)
-                {
-                    for (int i = 0; i < steps; i++)
-                    {
-                        Angle theta = i * Angle.FromDegrees(5);
-                        //heres the formula for a function defining an ellipse in terms of r(theta)
-                        //TODO: this only really works on circular arcs
-                        float r = r1 * r2 / (float)Math.Sqrt((r2 * r2 * Cos(theta) * Cos(theta)) + (r1 * r1 * Sin(theta) * Sin(theta)));
-                        PointPlus pp = new(r, theta + ptCurr.Theta);
-                        poly.Points.Add(center + pp);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < Abs(steps); i++)
-                    {
-                        Angle theta = i * Angle.FromDegrees(5);
-                        float r = r1 * r2 / (float)Math.Sqrt((r2 * r2 * Math.Cos(theta) * Math.Cos(theta)) + (r1 * r1 * Math.Sin(theta) * Math.Sin(theta)));
-                        PointPlus pp = new(r, theta + ptLast.Theta);
-                        poly.Points.Add(center + pp);
-                    }
-                }
-                return poly;
+                endAngle += 2 * PI;
             }
-        }
-
-
-
-
-        Line tempLine;
-        private void E_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            if (sender is Rectangle e1)
+            for (Angle a = startAngle; a <= endAngle; a += angleStep)
             {
-                if (tempLine != null)
-                    theCanvas.Children.Remove(tempLine);
-
-                var xx = e1.ToolTip.ToString();
-                xx = xx[xx.IndexOf("(")..];
-                xx = xx.Replace("(", "");
-                xx = xx.Replace(")", "");
-                string[] coords = xx.Split(",");
-                int.TryParse(coords[0], out int rho);
-                int.TryParse(coords[1], out int theta);
-                ModuleVision parent = (ModuleVision)base.ParentModule;
-                errorText.Content = $"{(int)rho},{(int)theta} : {parent.segmentFinder.accumulator[rho, theta].Count} votes";
-                errorText.Foreground = new SolidColorBrush(Colors.White);
-                rho = rho - parent.segmentFinder.maxDistance;
-
-                if (theta == 0 || theta == 180)
-                {
-                    tempLine = new Line()
-                    {
-                        X1 = rho * scale,
-                        X2 = rho * scale,
-                        Y1 = 0 * scale,
-                        Y2 = theCanvas.ActualHeight * scale,
-                        Stroke = new SolidColorBrush(Colors.Blue),
-                        StrokeThickness = 4,
-                    };
-                }
-                else
-                {
-
-                    //calculate (m,b) for y=mx+b
-                    double fTheta = theta * Math.PI / parent.segmentFinder.numAngles;
-                    double b = rho / Math.Sin(fTheta);
-                    double m = -Math.Cos(fTheta) / Math.Sin(fTheta);
-                    tempLine = new Line()
-                    {
-                        X1 = 0,
-                        X2 = 1000 * scale,
-                        Y1 = b * scale,
-                        Y2 = (b + m * 1000) * scale,
-                        Stroke = new SolidColorBrush(Colors.Blue),
-                        StrokeThickness = 4,
-                    };
-                }
-                theCanvas.Children.Add(tempLine);
+                PointPlus pp = new(radius, a);
+                poly.Points.Add(center + pp);
             }
+            return poly;
         }
 
         string defaultDirectory = "";
@@ -388,7 +335,7 @@ namespace BrainSimulator.Modules
                     fileList = GetFileList(openFileDialog1.FileName);
                     curPath = openFileDialog1.FileName;
                 }
-                parent.previousFilePath = "";
+                //parent.previousFilePath = "";
                 parent.currentFilePath = curPath;
                 //parent.SetParameters(fileList, curPath, (bool)cbAutoCycle.IsChecked, (bool)cbNameIsDescription.IsChecked);
             }
@@ -453,7 +400,7 @@ namespace BrainSimulator.Modules
             parent.offsetY = +25 + (int)((parent.offsetY - 25) * (1 + e.Delta / 1000f));
             if (parent.scale < 1) parent.scale = 1;
             parent.LoadImageFileToPixelArray(parent.currentFilePath);
-            
+
             ResetTimer();
         }
 

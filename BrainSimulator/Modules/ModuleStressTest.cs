@@ -63,20 +63,20 @@ namespace BrainSimulator.Modules
 
             // Add each item to the UKS.
 
-            for (int i = 0; i < items.Count; i++)
-            {
-                MainWindow.theUKS.GetOrAddThing(items[i]);
-                if (i % (items.Count / 10) == 0)
-                {
-                    Debug.WriteLine($"{times * 10}% complete.");
-                    times++;
-                }
-            }
+            //for (int i = 0; i < items.Count; i++)
+            //{
+            //    MainWindow.theUKS.GetOrAddThing(items[i]);
+            //    if (i % (items.Count / 10) == 0)
+            //    {
+            //        Debug.WriteLine($"{times * 10}% complete.");
+            //        times++;
+            //    }
+            //}
 
-            /*
+
             // Alternate way to do this (with items in a hierarchy).
             // This way is also faster so it will probably be used in the future.
-            int maxOuter = 200;
+            int maxOuter = 100;
 
             for (int i = 0; i < maxOuter; i++)
             {
@@ -91,10 +91,10 @@ namespace BrainSimulator.Modules
 
                 }
 
-                Debug.WriteLine($"{i+1}/{maxOuter} done.");
+                Debug.WriteLine($"{i + 1}/{maxOuter} done.");
 
             }
-            */
+
 
             Debug.WriteLine("Done!");
 

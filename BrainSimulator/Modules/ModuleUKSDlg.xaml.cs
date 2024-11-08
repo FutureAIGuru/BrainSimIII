@@ -429,6 +429,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (e.Key == Key.Enter)
             {
                 t.Label = tb.Text;
+                //clear any time-to-live on this new image
+                t.RelationshipsFrom.FindFirst(x => x.reltype.Label == "has-child").TimeToLive = TimeSpan.MaxValue;
                 cm.IsOpen = false;
             }
             if (e.Key == Key.Escape)

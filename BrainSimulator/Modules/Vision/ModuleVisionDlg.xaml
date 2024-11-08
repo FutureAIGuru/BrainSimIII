@@ -8,8 +8,8 @@
         Title="Vision" Height="500" Width="530" Background="Gray" ShowInTaskbar="False" 
                      SizeChanged="ModuleBaseDlg_SizeChanged" PreviewKeyDown="ModuleBaseDlg_PreviewKeyDown"
                      MouseWheel="ModuleBaseDlg_MouseWheel" MouseMove="ModuleBaseDlg_MouseMove" >
-    <Grid Name="theGrid" Margin="0,0,0,-6" >
-        <Button x:Name="BtnBrowseFile"   IsDefault="True" Content="Open Image File" Click="Button_Browse_Click" FontSize="16" Margin="78,0,0,82" HorizontalAlignment="Left" Width="159" VerticalAlignment="Bottom"/>
+    <Grid Name="theGrid" Margin="0,0,0,0" > 
+        <Button x:Name="BtnBrowseFile"   IsDefault="True" Content="Select Image File" Click="Button_Browse_Click" FontSize="16" Margin="78,0,0,82" HorizontalAlignment="Left" Width="159" VerticalAlignment="Bottom"/>
         <Label  x:Name="errorText"            Content=""   HorizontalContentAlignment="Center"   FontSize="16" Margin="10,405,10,46" Background="Gray" Foreground="#FFF80902" VerticalAlignment="Bottom"/>
         <Label Content="Path"        HorizontalAlignment="Left"   Margin="10,320,0,131"   FontSize="16"  Width="68" VerticalAlignment="Bottom"/>
         <TextBox  x:Name="textBoxPath"               TabIndex="7"   FontSize="16"   Margin="78,320,120,131"  VerticalAlignment="Bottom" />
@@ -20,10 +20,9 @@
         <CheckBox x:Name="cbShowSrokes" Content="Strokes" HorizontalAlignment="Left" Margin="180,250,0,214" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom" />
         <CheckBox x:Name="cbShowSegments" Content="Segments" HorizontalAlignment="Left" Margin="74,270,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <CheckBox x:Name="cbShowCorners" Content="Corners" HorizontalAlignment="Left" Margin="74,290,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
-        <CheckBox x:Name="cbShowHough" Content="Hough Array" HorizontalAlignment="Left" Margin="180,290,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <Button Content="Refresh" HorizontalAlignment="Left" Margin="254,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
         <CheckBox Content="Horiz" IsChecked="true" HorizontalAlignment="Left" Margin="297,0,0,234" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <CheckBox Content="Vert" IsChecked="true" HorizontalAlignment="Left" Margin="297,255,0,214" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
-        <CheckBox Content="45" IsChecked="true" HorizontalAlignment="Left" Margin="297,276,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
-        <CheckBox Content="-45" IsChecked="true" HorizontalAlignment="Left" Margin="297,296,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <!--<CheckBox Content="45" IsChecked="true" HorizontalAlignment="Left" Margin="297,276,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <CheckBox Content="-45" IsChecked="true" HorizontalAlignment="Left" Margin="297,296,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>-->
     </Grid></local:ModuleBaseDlg>

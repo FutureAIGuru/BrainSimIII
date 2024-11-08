@@ -96,13 +96,15 @@ Follow has ONLY if called out in type
             if (relType.Contains("is-a") && reverse ||
                 relType.Contains("has-child") && !reverse)
             {
-                thingResult = sourceList[0].Children.ToList();
+                if (sourceList.Count > 0)
+                    thingResult = sourceList[0].Children.ToList();
                 return;
             }
             if (relType.Contains("is-a") && !reverse ||
                 relType.Contains("has-child") && reverse)
             {
-                thingResult = sourceList[0].Ancestors.ToList();
+                if (sourceList.Count > 0)
+                    thingResult = sourceList[0].Ancestors.ToList();
                 return;
             }
 
