@@ -319,6 +319,11 @@ namespace BrainSimulator
             }
         }
 
+        public ModuleBase GetModule(string label)
+        {
+            return activeModules.FindFirst(x => x.Label == label);
+        }
+
         private void LoadModuleTypeMenu()
         {
             var moduleTypes = Utils.GetListOfExistingCSharpModuleTypes();

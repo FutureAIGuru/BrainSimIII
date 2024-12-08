@@ -38,8 +38,8 @@ public partial class ModuleVision
 
     public bool horizScan = true;
     public bool vertScan = true;
-    public bool fortyFiveScan = true;
-    public bool minusFortyFiveScan = true;
+    public bool fortyFiveScan = false;
+    public bool minusFortyFiveScan = false;
     private void FindBoundaries(Color[,] imageArray)
     {
         strokePoints.Clear();
@@ -80,7 +80,7 @@ public partial class ModuleVision
             strokePoints.AddRange(ptsInThisScan);
         }
         MergeNearbyPoints(strokePoints);
-/*        if (fortyFiveScan)
+        if (fortyFiveScan)
         {
             dx = 1;
             dy = 1;
@@ -124,7 +124,6 @@ public partial class ModuleVision
             RemoveOrphanPoints(ptsInThisScan);
             strokePoints.AddRange(ptsInThisScan);
         }
-  */
     }
 
     private void MergeNearbyPoints (List<PointPlus>pts)
@@ -518,6 +517,15 @@ public partial class ModuleVision
             x += dx;
             y += dy;
         }
+        return retVal;
+    }
+
+    float PixelDifference(Color c1, Color c2)
+    {
+        float retVal = 0;
+        retVal += c1.R - c2.R;
+        retVal += c1.G - c2.G;
+        retVal += c1.B - c2.B;
         return retVal;
     }
 

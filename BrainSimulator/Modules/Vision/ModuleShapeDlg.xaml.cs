@@ -46,7 +46,11 @@ namespace BrainSimulator.Modules
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             ModuleShape parent = (ModuleShape)ParentModule;
-            parent.newStoredShape = parent.AddShapeToLibrary();
+            Thing currentShapeParent = parent.theUKS.Labeled("currentShape");
+            foreach (Thing currentShape in currentShapeParent.Children)
+            {
+                parent.newStoredShape = parent.AddShapeToLibrary(currentShape);
+            }
             tbNewName.IsEnabled = true;
         }
 

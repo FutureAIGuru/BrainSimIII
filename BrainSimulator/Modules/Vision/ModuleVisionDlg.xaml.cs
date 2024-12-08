@@ -39,7 +39,6 @@ namespace BrainSimulator.Modules
             try
             {
                 labelProperties.Content = "Image: " + parent.imageArray.GetLength(0) + "x" + parent.imageArray.GetLength(1) +
-                //    "\r\nBit Depth: " + parent.bitmap.Format.BitsPerPixel +
                     "\r\nSegments: " + parent.segments?.Count +
                     "\r\nCorners: " + parent.corners?.Count +
                     "\r\nOutlines: " + parent.theUKS.Labeled("Outline")?.Children.Count;
@@ -336,7 +335,7 @@ namespace BrainSimulator.Modules
                     curPath = openFileDialog1.FileName;
                 }
                 //parent.previousFilePath = "";
-                parent.currentFilePath = curPath;
+                parent.CurrentFilePath = curPath;
                 //parent.SetParameters(fileList, curPath, (bool)cbAutoCycle.IsChecked, (bool)cbNameIsDescription.IsChecked);
             }
         }
@@ -399,7 +398,7 @@ namespace BrainSimulator.Modules
             parent.offsetX = +25 + (int)((parent.offsetX - 25) * (1 + e.Delta / 1000f));
             parent.offsetY = +25 + (int)((parent.offsetY - 25) * (1 + e.Delta / 1000f));
             if (parent.scale < 1) parent.scale = 1;
-            parent.LoadImageFileToPixelArray(parent.currentFilePath);
+            parent.LoadImageFileToPixelArray(parent.CurrentFilePath);
 
             ResetTimer();
         }
@@ -419,7 +418,7 @@ namespace BrainSimulator.Modules
                     parent.offsetX += (int)diff.X / 5;
                     parent.offsetY += (int)diff.Y / 5;
 
-                    parent.LoadImageFileToPixelArray(parent.currentFilePath);
+                    parent.LoadImageFileToPixelArray(parent.CurrentFilePath);
                     ResetTimer();
                 }
             }

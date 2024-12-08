@@ -6,18 +6,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UKS;
-using System.Windows.Media;
-using System.Windows;
 using static System.Math;
 
 namespace BrainSimulator.Modules
 {
     public partial class ModuleVision : ModuleBase
     {
-        public string currentFilePath = "";
+        private string currentFilePath = "";
         public string previousFilePath = "";
         public BitmapImage bitmap = null;
         public List<Corner> corners;
@@ -26,6 +27,7 @@ namespace BrainSimulator.Modules
         //public HoughTransform segmentFinder;
         public List<PointPlus> strokePoints = new();
         public List<PointPlus> boundaryPoints = new();
+        bool isSingleDigit = false;
 
         public class Corner
         {
@@ -49,7 +51,12 @@ namespace BrainSimulator.Modules
             public PointPlus nextPt;
             public override string ToString()
             {
-                return $"[x,y:({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")}) " +//A: {angle}] " +
+                if (curve)
+                    return $"[mid:({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")}) " +//A: {angle}] " +
+                    $"start:[({prevPt.X.ToString("0.0")},{prevPt.Y.ToString("0.0")})] " +
+                    $"end:[({nextPt.X.ToString("0.0")},{nextPt.Y.ToString("0.0")})]";
+                else
+                    return $"[x,y:({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")}) " +//A: {angle}] " +
                     $"prevPt:[({prevPt.X.ToString("0.0")},{prevPt.Y.ToString("0.0")})] " +
                     $"nextPt:[({nextPt.X.ToString("0.0")},{nextPt.Y.ToString("0.0")})]";
             }
@@ -62,25 +69,90 @@ namespace BrainSimulator.Modules
             {
                 curve = true;
             }
+            public Angle StartAngle
+            {
+                get
+                {
+                    var circle = GetCircleFromThreePoints(pt, nextPt, prevPt);
+                    return (prevPt - circle.center).Theta;
+                }
+            }
+            public Angle EndAngle
+            {
+                get
+                {
+                    var circle = GetCircleFromThreePoints(pt, nextPt, prevPt);
+                    return (nextPt - circle.center).Theta;
+                }
+            }
+            public Angle SweepAngle
+            {
+                get => EndAngle - StartAngle;
+            }
+            public Angle MidAngle
+            {
+                get
+                {
+                    var circle = GetCircleFromThreePoints(pt, nextPt, prevPt);
+                    Angle midAngle = (pt - circle.center).Theta;
+
+                    //given the three points, calculate the midpoint of the arc
+                    //if the midAngle is not between start and end angles, go the other way areound the arc
+                    if (midAngle > StartAngle && midAngle > EndAngle)
+                    {
+                        midAngle = (StartAngle + EndAngle) / 2;
+                        midAngle += PI;
+                    }
+                    else if (midAngle < StartAngle && midAngle < EndAngle)
+                    {
+                        midAngle = (StartAngle + EndAngle) / 2;
+                        midAngle += PI;
+                    }
+                    else
+                    {
+                        midAngle = (StartAngle + EndAngle) / 2;
+                    }
+                    pt = circle.center + new PointPlus(circle.radius, midAngle);
+                    //pt = cir.center + new PointPlus(cir.radius, midAngle);
+                    return midAngle;
+                }
+            }
+
             public override Angle angle
             {
                 get
                 {
-                    var cir = GetCircleFromThreePoints(pt, nextPt, prevPt);
-                    Angle startAngle = (prevPt  - cir.center).Theta.Normalize();
-                    Angle midAngle = (pt  - cir.center).Theta.Normalize();
-                    Angle endAngle = (nextPt - cir.center).Theta.Normalize();
+                    var circle = GetCircleFromThreePoints(pt, nextPt, prevPt);
+                    Angle startAngle = (prevPt - circle.center).Theta;
+                    Angle midAngle = (pt - circle.center).Theta;
+                    Angle endAngle = (nextPt - circle.center).Theta;
 
-                    Angle a = Abs(startAngle - endAngle);
+                    //given the three points, calculate the midpoint of the arc
                     //if the midAngle is not between start and end angles, go the other way areound the arc
-                    //TODO: handle other cases
                     if (midAngle > startAngle && midAngle > endAngle)
-                        a = 2 * PI - a;
-                                                              
-                    return a;
+                    {
+                        midAngle = (startAngle + endAngle) / 2;
+                        midAngle += PI;
+                    }
+                    else if (midAngle < startAngle && midAngle < endAngle)
+                    {
+                        midAngle = (startAngle + endAngle) / 2;
+                        midAngle += PI;
+                    }
+                    else
+                    {
+                        midAngle = (startAngle + endAngle) / 2;
+                    }
+                    pt = circle.center + new PointPlus(circle.radius, midAngle);
+                    //pt = cir.center + new PointPlus(cir.radius, midAngle);
+                    return midAngle;
                 }
             }
             // Function to calculate the center and radius of the circle through three points
+            public (PointPlus center, float radius) GetCircleFromArc()
+            {
+                return GetCircleFromThreePoints(pt, prevPt, nextPt);
+            }
             public (PointPlus center, float radius) GetCircleFromThreePoints(PointPlus p1, PointPlus p2, PointPlus p3)
             {
                 float x1 = p1.X, y1 = p1.Y;
@@ -115,30 +187,43 @@ namespace BrainSimulator.Modules
         {
             Init();  //be sure to leave this here
 
-            if (currentFilePath == previousFilePath) return;
-            previousFilePath = currentFilePath;
+            if (CurrentFilePath == previousFilePath) return;
+            previousFilePath = CurrentFilePath;
 
-            LoadImageFileToPixelArray(currentFilePath);
+            LoadImageFileToPixelArray(CurrentFilePath);
 
             FindBackgroundColor();
 
             FindBoundaries(imageArray);
 
             //strokePoints = FindStrokeeCentersFromBoundaryPoints(boundaryPoints);
+            isSingleDigit = false;
+            int theDigit = -1;
+            if (!int.TryParse(System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(CurrentFilePath)), out theDigit))
+                if (!int.TryParse(System.IO.Path.GetFileName(System.IO.Path.GetFileNameWithoutExtension(CurrentFilePath)), out theDigit))
+                    theDigit = -1;
+            if (theDigit >= 0)
+            {
+                isSingleDigit = true;
+                ModuleShape ms = (ModuleShape)MainWindow.theWindow.GetModule("ModuleShape0");
+                if (ms != null)
+                    ms.MNISTDigit = "MNIST" + theDigit;
+            }
+
 
             segments = new();
             corners = new();
-            if (strokePoints.Count > boundaryPoints.Count / 4)
+            if (isSingleDigit)
             {
                 FindArcsAndSegments(strokePoints);
                 FindCorners(ref segments);
-                SaveSymbolToUKS();
+                SaveOutlinesToUKS();
             }
             else
             {
                 segments = FindSegments(boundaryPoints);
                 FindCorners(ref segments);
-                FindOutlines();
+                SaveOutlinesToUKS();
             }
 
             WriteBitmapToMentalModel();
@@ -146,52 +231,20 @@ namespace BrainSimulator.Modules
             UpdateDialog();
         }
 
-        private void SaveSymbolToUKS()
-        {
-            int maxExtent = (int)strokePoints.Max(x => Math.Max(x.X, x.Y));
-            Thing shapesParent = theUKS.GetOrAddThing("CurrentSymbol", "Visual");
-            theUKS.DeleteAllChildren(shapesParent);
-            Thing shapeParent = theUKS.GetOrAddThing("Symbol*", shapesParent);
-            theUKS.GetOrAddThing("arc", "Visual");
-            theUKS.GetOrAddThing("corner", "Visual");
-            theUKS.GetOrAddThing("segment", "Visual");
-            foreach (var corner in corners)
-            {
-                Thing item = theUKS.AddThing("Item*", shapeParent);
-                if (corner is Arc a)
-                {
-                    item.AddRelationship("arc", "is");
-                    int degrees = (int)a.angle.Degrees;
-                    degrees = ((degrees + 5 * Math.Sign(degrees)) / 10) * 10;
-                    item.AddRelationship(theUKS.GetOrAddThing("angle" + degrees,"Rotation"), "is");
-
-                }
-                else
-                {
-                    item.AddRelationship("corner", "is");
-                    Segment s1 = new Segment(corner.prevPt, corner.pt);
-                    Segment s2 = new Segment(corner.pt, corner.nextPt);
-                    Thing item1 = theUKS.AddThing("Item*", shapeParent);
-                    item1.AddRelationship("segment", "is");
-                    //int degrees = (int)s1.Angle.Degrees;
-                    //degrees = ((degrees + 5 * Math.Sign(degrees)) / 10) * 10;
-                    //item1.AddRelationship("angle" + degrees, "is");
-                    int length = (int)(s1.Length * 10 + 5) / maxExtent;
-                    item1.AddRelationship("distance." + length, "is");
-
-                    //Thing item2 = theUKS.AddThing("Item*", shapeParent);
-                    //item2.AddRelationship("segment", "is");
-                }
-            }
-        }
+        //This is different from FindOutlines in several ways
+        // 1. It assumes the entire visual field is a single symbol
+        // 2. It does not assume the symbole is a closed figure
+        // 3. It supports arcs
 
         public float scale = 1;
         public int offsetX = 0;
         public int offsetY = 0;
 
+        public string CurrentFilePath { get => currentFilePath; set => currentFilePath = value; }
+
         public void LoadImageFileToPixelArray(string filePath)
         {
-            using (System.Drawing.Bitmap bitmap2 = new(currentFilePath))
+            using (System.Drawing.Bitmap bitmap2 = new(CurrentFilePath))
             {
                 System.Drawing.Bitmap theBitmap = bitmap2;
 
@@ -337,105 +390,292 @@ namespace BrainSimulator.Modules
         }
 
 
-        float PixelDifference(Color c1, Color c2)
+        void ExtendSegments()
         {
-            float retVal = 0;
-            retVal += c1.R - c2.R;
-            retVal += c1.G - c2.G;
-            retVal += c1.B - c2.B;
-            return retVal;
+            foreach (var segment in segments)
+            {
+                //extend the segment as far as possible as long as there are white pixels
+                Angle a = segment.Angle;
+                //at this angle, extend the segment in either direction until you run out of nearby boundary points
+                PointPlus step = new((float)Cos(a), (float)Sin(a));
+
+                const int maxExtend = 3;
+
+                //lengthen the first endpoint to another boundary point unless it is already attached to another corner or arc
+
+                int count = 0;
+                PointPlus betterP1 = new(segment.P1);
+                PointPlus betterP2 = new(segment.P2);
+
+
+                PointPlus p1 = new(segment.P1);
+                bool p1Attached = false;
+                PointPlus p2 = new(segment.P2);
+                bool p2Attached = false;
+                //is the point already attached to another?
+                AreEndpointsAttached(segment, ref p1Attached, ref p2Attached);
+
+                if (!p1Attached)
+                {
+                    do
+                    {
+                        p1 += step;
+                        //make sure we're still on the white part of the image
+                        try //this try-catchy is just to trap running off the edge of the array
+                        {
+                            int x = (int)Round(p1.X);
+                            int y = (int)Round(p1.Y);
+                            HSLColor pixel = new HSLColor(imageArray[x, y]);
+                            if (pixel.luminance < .9)
+                                break;
+                        }
+                        catch
+                        {
+                            break;
+                        }
+                        List<PointPlus> nearby = GetNearbyPoints(p1, 2f, strokePoints);
+                        //find the point which is close to the extended segment but furthest from the other end
+                        //and use that as the endpoint
+                        foreach (var vv in nearby)
+                        {
+                            var p = Utils.DistancePointToLine(vv.P, betterP1.P, betterP2.P);
+                        }
+                        nearby = nearby.FindAll(x => Utils.DistancePointToLine(x, betterP1, betterP2) < 1f).ToList();
+                        if (nearby.Count > 0) //the current point PLUS one other
+                        {
+                            betterP1 = nearby.OrderByDescending(x => (x - betterP2).R).First();
+                            count = 0;
+                        }
+
+                    } while (count++ < maxExtend);
+                }
+
+                //now the second endpoint
+                if (!p2Attached)
+                {
+                    count = 0;
+                    do
+                    {
+                        p2 -= step;
+                        //make sure we're still on the white part of the image
+                        try
+                        {
+                            int x = (int)Round(p2.X);
+                            int y = (int)Round(p2.Y);
+                            HSLColor pixel = new HSLColor(imageArray[x, y]);
+                            if (pixel.luminance < .9)
+                                break;
+                        }
+                        catch
+                        {
+                            break;
+                        }
+
+                        List<PointPlus> nearby = GetNearbyPoints(p2, 2f, strokePoints);
+                        //find the point which is close to the extended segment but furthest from the other end
+                        //and use that as the endpoint
+                        nearby = nearby.FindAll(x => Utils.DistancePointToLine(x, betterP1, betterP2) < 1f).ToList();
+                        if (nearby.Count > 0)
+                        {
+                            betterP2 = nearby.OrderByDescending(x => (x - betterP1).R).First();
+                            count = 0;
+                        }
+
+                    } while (count++ < maxExtend);
+                }
+                segment.P1 = betterP1;
+                segment.P2 = betterP2;
+            }
         }
 
-        private class taggedSegment { public Segment s; public bool pt1Used; public bool pt2Used; }
+        private void AreEndpointsAttached(Segment segment, ref bool p1Attached, ref bool p2Attached)
+        {
+            foreach (Segment segTemp in segments)
+            {
+                if (segTemp == segment) continue;
+                if (segment.P1.Near(segTemp.P1, 1) || segment.P1.Near(segTemp.P2, 1))
+                {
+                    p1Attached = true; ;
+                }
+                if (segment.P2.Near(segTemp.P1, 1) || segment.P2.Near(segTemp.P2, 1))
+                {
+                    p2Attached = true; ;
+                }
+            }
+
+            foreach (Corner c in corners) //repeat for ARC endpoints 
+            {
+                if (c is Arc a1)
+                {
+                    if (segment.P1.Near(a1.prevPt, 1) || segment.P1.Near(a1.nextPt, 1))
+                    {
+                        p1Attached = true;
+                    }
+                    if (segment.P2.Near(a1.prevPt, 1) || segment.P2.Near(a1.nextPt, 1))
+                    {
+                        p2Attached = true;
+                    }
+                }
+            }
+        }
+
+        void ExtendArcs()
+        {
+            const int maxExtend = 1;
+            foreach (Corner c in corners)
+            {
+                Arc a = c as Arc;
+                if (a == null) continue;
+                var circle = a.GetCircleFromArc();
+                Angle startAngle = (a.prevPt - circle.center).Theta;
+                Angle midAngle = (a.pt - circle.center).Theta;
+                Angle endAngle = (a.nextPt - circle.center).Theta;
+
+                Angle angleStep = Angle.FromDegrees(10);
+                if (endAngle < startAngle) angleStep = -angleStep;
+                if ((midAngle > startAngle && midAngle > endAngle) ||
+                    (midAngle < startAngle && midAngle < endAngle))
+                    angleStep = -angleStep;
+
+                int count = 0;
+                Angle a1 = endAngle;
+                PointPlus p1;
+                do
+                {
+                    a1 += angleStep;
+                    p1 = circle.center + new PointPlus(circle.radius, a1);
+                    int x = (int)Round(p1.X);
+                    int y = (int)Round(p1.Y);
+                    try
+                    {
+                        HSLColor pixel = new HSLColor(imageArray[x, y]);
+                        if (pixel.luminance < .9)
+                            break;
+                    }
+                    catch
+                    {
+                        break;
+                    }
+                } while (count++ < maxExtend);
+                a1 -= angleStep;
+                a.nextPt = circle.center + new PointPlus(circle.radius, a1);
+
+                count = 0;
+                a1 = startAngle;
+                do
+                {
+                    a1 -= angleStep;
+                    p1 = circle.center + new PointPlus(circle.radius, a1);
+                    int x = (int)Round(p1.X);
+                    int y = (int)Round(p1.Y);
+                    try
+                    {
+                        HSLColor pixel = new HSLColor(imageArray[x, y]);
+                        if (pixel.luminance < .9)
+                            break;
+                    }
+                    catch
+                    {
+                        break;
+                    }
+                } while (count++ < maxExtend);
+                a1 += angleStep;
+                a.prevPt = circle.center + new PointPlus(circle.radius, a1);
+
+
+
+                //given the three points, calculate the midpoint of the arc
+                //if the midAngle is not between start and end angles, go the other way areound the arc
+                if (midAngle > startAngle && midAngle > endAngle)
+                {
+                    midAngle = (startAngle + endAngle) / 2;
+                    midAngle += PI;
+                }
+                else if (midAngle < startAngle && midAngle < endAngle)
+                {
+                    midAngle = (startAngle + endAngle) / 2;
+                    midAngle += PI;
+                }
+                else
+                {
+                    midAngle = (startAngle + endAngle) / 2;
+                }
+
+            }
+        }
+
+        //given a set of segments, find intersection points
+        //TODO handle intersections of arcs
         private void FindCorners(ref List<Segment> segmentsIn)
         {
-            MergeSegments(segmentsIn);
+            ExtendSegments();
+            //ExtendArcs();
 
-            List<taggedSegment> taggedSegments = new();
-            foreach (Segment s in segmentsIn)
-                taggedSegments.Add(new taggedSegment() { s = s, pt1Used = false, pt2Used = false });
-
-
-            //build a table of distances between each point and each other
-            List<(int i, int j, float p1p1, float p1p2, float p2p1, float p2p2, float closest)> distances = new();
-            for (int i = 0; i < taggedSegments.Count - 1; i++)
+            //merge overlapping/duplicate segmenst
+            for (int i = 0; i < segments.Count - 1; i++)
             {
-                var s1 = taggedSegments[i];
-                for (int j = i + 1; j < taggedSegments.Count; j++)
+                Segment s1 = segments[i];
+                for (int j = i + 1; j < segments.Count; j++)
                 {
-                    if (i == j) continue;
-                    var s2 = taggedSegments[j];
-                    float p1p1 = (s1.s.P1 - s2.s.P1).R;
-                    float p1p2 = (s1.s.P1 - s2.s.P2).R;
-                    float p2p1 = (s1.s.P2 - s2.s.P1).R;
-                    float p2p2 = (s1.s.P2 - s2.s.P2).R;
-                    float closest = (float)new List<float> { p1p1, p1p2, p2p1, p2p2 }.Min();
-                    distances.Add((i, j, p1p1, p1p2, p2p1, p2p2, closest));
-                }
-            }
-            distances = distances.OrderBy(x => x.closest).ToList();
-
-            foreach (var distance in distances)
-            {
-                if (distance.closest > 4.2) break; //give up when the distance is large
-                var s1 = taggedSegments[distance.i];
-                var s2 = taggedSegments[distance.j];
-                if (distance.closest == distance.p1p1 && !s1.pt1Used && !s2.pt1Used)
-                {
-                    bool segmentsIntersect = Utils.LinesIntersect(s1.s, s2.s, out PointPlus intersection);
-                    if (segmentsIntersect)
+                    Segment s2 = segments[j];
+                    if (AreCollinear(s1, s2) && Overlap(s1, s2))
                     {
-                        AddCornerToList(intersection, s1.s.P2, s2.s.P2);
-                        UpdateCornerPoint(s1.s.P1, intersection);
-                        UpdateCornerPoint(s2.s.P1, intersection);
-                        s1.pt1Used = true;
-                        s2.pt1Used = true;
-                    }
-                }
-                if (distance.closest == distance.p1p2 && !s1.pt1Used && !s2.pt2Used)
-                {
-                    bool segmentsIntersect = Utils.LinesIntersect(s1.s, s2.s, out PointPlus intersection);
-                    if (segmentsIntersect)
-                    {
-                        AddCornerToList(intersection, s1.s.P2, s2.s.P1);
-                        UpdateCornerPoint(s1.s.P1, intersection);
-                        UpdateCornerPoint(s2.s.P2, intersection);
-                        s1.pt1Used = true;
-                        s2.pt2Used = true;
-                    }
-                }
-                if (distance.closest == distance.p2p1 && !s1.pt2Used && !s2.pt1Used)
-                {
-                    bool segmentsIntersect = Utils.LinesIntersect(s1.s, s2.s, out PointPlus intersection);
-                    if (segmentsIntersect)
-                    {
-                        AddCornerToList(intersection, s1.s.P1, s2.s.P2);
-                        UpdateCornerPoint(s1.s.P2, intersection);
-                        UpdateCornerPoint(s2.s.P1, intersection);
-                        s1.pt2Used = true;
-                        s2.pt1Used = true;
-                    }
-                }
-                if (distance.closest == distance.p2p2 && !s1.pt2Used && !s2.pt2Used)
-                {
-                    bool segmentsIntersect = Utils.LinesIntersect(s1.s, s2.s, out PointPlus intersection);
-                    if (segmentsIntersect)
-                    {
-                        AddCornerToList(intersection, s1.s.P1, s2.s.P1);
-                        UpdateCornerPoint(s1.s.P2, intersection);
-                        UpdateCornerPoint(s2.s.P2, intersection);
-                        s1.pt2Used = true;
-                        s2.pt2Used = true;
+                        // Merge the segments
+                        if (s1.P1.X > s1.P2.X || s1.P1.X == s1.P2.X && s1.P1.Y > s1.P2.Y)
+                            (s1.P1, s1.P2) = (s1.P2, s1.P1);
+                        if (s2.P1.X > s2.P2.X || s2.P1.X == s2.P2.X && s2.P1.Y > s2.P2.Y)
+                            (s2.P1, s2.P2) = (s2.P2, s2.P1);
+                        Segment mergedSegment = new Segment(
+                            new Point(Math.Min(s1.P1.X, s2.P1.X), Math.Min(s1.P1.Y, s2.P1.Y)),
+                            new Point(Math.Max(s1.P2.X, s2.P2.X), Math.Max(s1.P2.Y, s2.P2.Y))
+                        );
+                        segments[i] = mergedSegment;
+                        segments.RemoveAt(j);
+                        j--;
+                        continue;
                     }
                 }
             }
-            //find any orphans
-            foreach (var segment in taggedSegments)
+            float tolerance = 2.3f;
+            for (int i = 0; i < segments.Count - 1; i++)
             {
-                if (!segment.pt2Used)
-                    AddCornerToList(segment.s.P2, segment.s.P1, segment.s.P1);
-                if (!segment.pt1Used)
-                    AddCornerToList(segment.s.P1, segment.s.P2, segment.s.P2);
+                Segment s1 = segments[i];
+                for (int j = i + 1; j < segments.Count; j++)
+                {
+                    Segment s2 = segments[j];
+                    bool segmentsIntersect = Utils.LinesIntersect(s1, s2, out PointPlus intersection);
+                    if (!segmentsIntersect) continue; //(segments are parallel)
+                    if (intersection.Near(s1.P1, tolerance))
+                    {
+                        if (intersection.Near(s2.P1, tolerance))
+                        {
+                            AddCornerToList(intersection, s1.P2, s2.P2);
+                            UpdateCornerPoint(s1.P1, intersection);
+                            UpdateCornerPoint(s2.P1, intersection);
+                        }
+                        if (intersection.Near(s2.P2, tolerance))
+                        {
+                            AddCornerToList(intersection, s1.P2, s2.P1);
+                            UpdateCornerPoint(s1.P1, intersection);
+                            UpdateCornerPoint(s2.P2, intersection);
+                        }
+                    }
+                    else if (intersection.Near(s1.P2, tolerance))
+                    {
+                        if (intersection.Near(s2.P1, tolerance))
+                        {
+                            AddCornerToList(intersection, s1.P1, s2.P2);
+                            UpdateCornerPoint(s1.P2, intersection);
+                            UpdateCornerPoint(s2.P1, intersection);
+                        }
+                        if (intersection.Near(s2.P2, tolerance))
+                        {
+                            AddCornerToList(intersection, s1.P1, s2.P1);
+                            UpdateCornerPoint(s1.P2, intersection);
+                            UpdateCornerPoint(s2.P2, intersection);
+                        }
+                    }
+                }
             }
             return;
         }
@@ -471,17 +711,229 @@ namespace BrainSimulator.Modules
         }
 
 
+        private List<List<Corner>> FindOutlinesInSegments()
+        {
+            List<List<Corner>> outlines = new();
+
+            //convert the corners list into a segmens list
+            //for this purpose, arcs are just segments
+            List<Segment> segmentsInternal = new();
+            foreach (Segment s in segments)
+                AddSegmentToList(s, segmentsInternal);
+            foreach (Corner corner in corners)
+            {
+                if (corner.curve)
+                {
+                    Segment s1 = new Segment(corner.prevPt, corner.nextPt);
+                    AddSegmentToList(s1, segmentsInternal);
+                }
+                else
+                {
+                    //add both endpoints if this is not an orphan point
+                    if (corner.prevPt != corner.nextPt)
+                    {
+                        Segment s1 = new Segment(corner.prevPt, corner.pt);
+                        AddSegmentToList(s1, segmentsInternal);
+                        s1 = new Segment(corner.pt, corner.nextPt);
+                        AddSegmentToList(s1, segmentsInternal);
+                    }
+                    else //if this is an orphan segment add it
+                    {
+                        Corner nextCorner = corners.FindFirst(x => x.pt.Near(corner.nextPt, 2));
+                        if (nextCorner != null && nextCorner.prevPt == nextCorner.nextPt)
+                        {
+                            Segment s1 = new Segment(corner.pt, corner.nextPt);
+                            AddSegmentToList(s1, segmentsInternal);
+                        }
+                    }
+                }
+            }
+            var groups = GroupLineSegments(segmentsInternal);
+            foreach (var group in groups)
+                OrderSegmentsInGroup(group);
+
+            //convert the list of segments back into a list of corners
+            foreach (var group in groups)
+            {
+                List<Corner> outline = new();
+                outlines.Add(outline);
+                bool outlineIsClosed = group.First().P1.Near(group.Last().P2, 3);
+
+                for (int i = 0; i < group.Count; i++)
+                {
+                    Segment seg = group[i];
+                    Arc a = IsSegmentAnArc(seg);
+                    if (a != null)
+                    {
+                        outline.Add(new Arc()
+                        {
+                            prevPt = seg.P1,
+                            nextPt = seg.P2,
+                            pt = a.pt,
+                            curve = true,
+                        });
+                    }
+                    else if (outlineIsClosed || (i != group.Count - 1))
+                    {
+                        outline.Add(new Corner()
+                        {
+                            prevPt = seg.P1,
+                            pt = seg.P2,
+                            nextPt = group[(i + 1) % group.Count].P1,
+                            curve = false,
+                        });
+                    }
+                    else if (group.Count == 1) //special case for a single segment
+                    {
+                        outline.Add(new Corner()
+                        {
+                            prevPt = seg.P1,
+                            pt = seg.MidPoint,
+                            nextPt = seg.P1,
+                            curve = false,
+                        });
+                    }
+                }
+            }
+            return outlines;
+        }
+
+        Arc IsSegmentAnArc(Segment segment)
+        {
+            Corner c1 = corners.FindFirst(x => (x.prevPt == segment.P1 && x.nextPt == segment.P2) ||
+                                               (x.prevPt == segment.P2 && x.nextPt == segment.P1));
+            if (c1 != null && c1.curve) return (Arc)c1;
+            return null;
+        }
+
+        void OrderSegmentsInGroup(List<Segment> segments)
+        {
+            //find an endpoint
+            Segment currSegment = null;
+            Segment s1 = null;
+            foreach (Segment segment in segments)
+            {
+                s1 = segment;
+                Segment s2 = segments.FindFirst(x => x != segment && (x.P1 == segment.P1 || x.P2 == segment.P1));
+                if (s2 == null)
+                    goto endPointFound;
+                s2 = segments.FindFirst(x => x != segment && (x.P1 == segment.P2 || x.P2 == segment.P2));
+                if (s2 == null)
+                {
+                    //swap the points within the segmene
+                    (s1.P1, s1.P2) = (s1.P2, s1.P1);
+                    goto endPointFound;
+                }
+            }
+            if (currSegment == null) currSegment = segments[0];
+            //There are no endpoints, this is a closed loop
+            endPointFound:
+            if (currSegment == null) currSegment = s1;
+
+            List<Segment> ordered = new();
+            ordered.Add(currSegment);
+            segments.Remove(currSegment);
+            while (segments.Count > 0)
+            {
+                Segment nextSegment = segments.FirstOrDefault(s => s.P1.Near(currSegment.P2, 2) ||
+                    s.P2.Near(currSegment.P2, 2));
+                if (nextSegment != default)
+                {
+                    segments.Remove(nextSegment);
+                    if (currSegment.P2.Near(nextSegment.P2, 2))
+                        (nextSegment.P1, nextSegment.P2) = (nextSegment.P2, nextSegment.P1);
+                    currSegment = nextSegment;
+                    ordered.Add(currSegment);
+                }
+                else
+                    break;
+            }
+            foreach (Segment s in ordered)
+                segments.Add(s);
+        }
+        void AddSegmentToList(Segment newSegment, List<Segment> mergedSegments)
+        {
+            if (newSegment.P1.X > newSegment.P2.X ||
+                newSegment.P1.X == newSegment.P2.X && newSegment.P1.Y > newSegment.P2.Y)
+                (newSegment.P1, newSegment.P2) = (newSegment.P2, newSegment.P1);
+            for (int i = 0; i < mergedSegments.Count; i++)
+            {
+                var existingSegment = mergedSegments[i];
+                if (AreCollinear(existingSegment, newSegment) && Overlap(existingSegment, newSegment))
+                {
+                    // Merge the segments
+                    mergedSegments[i] = new Segment(
+                        new Point(Math.Min(existingSegment.P1.X, newSegment.P1.X), Math.Min(existingSegment.P1.Y, newSegment.P1.Y)),
+                        new Point(Math.Max(existingSegment.P2.X, newSegment.P2.X), Math.Max(existingSegment.P2.Y, newSegment.P2.Y))
+                    );
+                    return; // Stop after merging
+                }
+            }
+            mergedSegments.Add(newSegment);
+            ////is the segment already on the list
+            //var existing = segments.FindFirst(x => x.P1.Near(s.P1, 3) && x.P2.Near(s.P2, 3) ||
+            //    x.P1.Near(s.P2, 3) && x.P2.Near(s.P1, 3));
+            //if (existing != null) return;
+            ////is the segment colinear with any on the list
+            //segments.Add(s);
+        }
+        const float tolerance = 2;
+
+        private bool AreCollinear(Segment seg1, Segment seg2)
+        {
+            //do they have a similar slope?
+            if (seg1.Angle - seg2.Angle > Angle.FromDegrees(5) ||
+                               seg1.Angle - seg2.Angle < Angle.FromDegrees(-5))
+                return false;
+
+            //is the endpoint of one segment near the line-extension of the other segment?
+            float dist = Utils.DistancePointToLine(seg1.P1, seg2.P1, seg2.P2);
+            if (dist > tolerance) return false;
+            return true;
+        }
+
+        private bool Overlap(Segment seg1, Segment seg2)
+        {
+            // Check overlap in the projected line (collinearity ensures they are in the same line)
+            return Math.Max(seg1.P1.X, seg2.P1.X) - tolerance <= Math.Min(seg1.P2.X, seg2.P2.X) + tolerance;
+        }
+        private List<List<Segment>> GroupLineSegments(List<Segment> segments)
+        {
+            List<List<Segment>> groups = new();
+            foreach (Segment segment in segments)
+            {
+                var connectedGroups = groups
+                    .Where(g => g.Any(s => s.P1.Near(segment.P1, 2) ||
+                    s.P1.Near(segment.P2, 2) ||
+                    s.P2.Near(segment.P1, 2) ||
+                    s.P2.Near(segment.P2, 2)))
+                    .ToList();
+                if (connectedGroups.Count == 0)
+                    groups.Add(new List<Segment>() { segment });
+                else
+                {
+                    connectedGroups[0].Add(segment);
+                    for (int i = 1; i < connectedGroups.Count; i++)
+                    {
+                        connectedGroups[0].AddRange(connectedGroups[i]);
+                        groups.Remove(connectedGroups[i]);
+                    }
+                }
+            }
+            return groups;
+        }
+
         //trace around the outlines to get the order of corners and relative distances
-        private void FindOutlines()
+        private void SaveOutlinesToUKS()
         {
             //set up the UKS structure for outlines
             GetUKS();
             if (theUKS == null) return;
             theUKS.GetOrAddThing("Sense", "Thing");
             theUKS.GetOrAddThing("Visual", "Sense");
-            Thing outlines = theUKS.GetOrAddThing("Outline", "Visual");
+            Thing outlineParent = theUKS.GetOrAddThing("Outline", "Visual");
             Thing tCorners = theUKS.GetOrAddThing("Corner", "Visual");
-            theUKS.DeleteAllChildren(outlines);
+            theUKS.DeleteAllChildren(outlineParent);
             theUKS.DeleteAllChildren(tCorners);
 
             if (corners.Count == 0) return;
@@ -489,89 +941,68 @@ namespace BrainSimulator.Modules
             //for convenience in debugging
             corners = corners.OrderBy(x => x.pt.X).OrderBy(x => x.pt.Y).ToList();
 
-            //perhaps there are multiple shapes?
-            List<Corner> cornerAvailable = new List<Corner>();
-            for (int i = 0; i < corners.Count; i++)
-                cornerAvailable.Add(corners[i]);
+            var outlines = FindOutlinesInSegments();
 
-            while (cornerAvailable.Count > 0)
+            foreach (var outline in outlines)
             {
-                Corner curr = cornerAvailable[0];
-                List<Corner> outline = new();
-                bool outlineClosed = false;
-                Corner start = curr;
-                outline.Add(curr);
-                cornerAvailable.Remove(curr);
-                while (!outlineClosed)
+                if (outline.Count < 1) continue;
+                Thing outlineThing = theUKS.GetOrAddThing("Outline*", "Outlines");
+
+                bool outlineIsClosed = outline.First().pt.Near(outline.Last().nextPt, 2);
+
+                outlineThing.SetAttribute(theUKS.GetOrAddThing(outlineIsClosed ? "isSolidArea" : "notSolidArea", "Attribute"));
+
+                if (outlineIsClosed)
                 {
-                    for (int i = 0; i < cornerAvailable.Count; i++)
+                    //make this a right-handed list of points  
+                    MakeClosedOutlineRightHanded(outline);
+
+                    //find the color at the center of the polygon
+
+                    List<Point> thePoints = new();
+                    foreach (Corner c in outline)
+                        thePoints.Add(c.pt);
+                    Point centroid = Utils.GetCentroid(thePoints);
+
+                    //get the color (the centroid might be outside the image)
+                    try
                     {
-                        Corner next = cornerAvailable[i];
-                        if (next.angle == 0) continue;
-                        if (outline.Contains(next))
-                            continue; //should never happen
-                        if (curr.nextPt.Near(next.pt, 2) || curr.prevPt.Near(next.pt, 2))
-                        {
-                            outline.Add(next);
-                            cornerAvailable.Remove(next);
-                            curr = next;
-                            goto pointAdded;
-                        }
+                        //HSLColor theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
+                        Color theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
+                        Thing theColor = GetOrAddColor(theCenterColor);
+                        outlineThing.SetAttribute(theColor);
                     }
-                    outlineClosed = true; //no more points to add 
-                pointAdded: continue;
+                    catch (Exception e) { }
                 }
 
-                //make this a right-handed list of points  
-                double sum = 0;
-                int cnt = outline.Count;
-                for (int i = 0; i < outline.Count; i++)
-                {
-                    Corner p1 = outline[i];
-                    Corner p2 = outline[(i + 1) % cnt];
-                    sum += (p2.pt.X - p1.pt.X) *
-                        (p2.pt.Y + p1.pt.Y);
-                }
-                if (sum > 0)
-                    outline.Reverse();
-
-                //find the color at the center of the polygon
-                List<Point> thePoints = new();
-                foreach (Corner c in outline)
-                    thePoints.Add(c.pt);
-                Point centroid = Utils.GetCentroid(thePoints);
-
-                Thing currOutline = theUKS.GetOrAddThing("Outline*", "Outlines");
-
-                //get the color (the centroid might be outside the image)
-                try
-                {
-                    //HSLColor theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
-                    Color theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
-                    Thing theColor = GetOrAddColor(theCenterColor);
-                    currOutline.SetAttribute(theColor);
-                }
-                catch (Exception e) { }
-
-                //we now have an ordered, right-handed outline
-                //add it to UKS
+                //add each corner/arc to UKS as a "V" (value on a Thing)
                 for (int i = 1; i < outline.Count + 1; i++)
                 {
                     Corner c = outline[i % outline.Count];
-
-                    //let's update the angle
-                    //PointPlus prev = outline[(i - 1) % outline.Count].pt;
-                    //PointPlus next = outline[(i + 1) % outline.Count].pt;
-                    //                   c.nextPt = next;
-                    //                   c.prevPt = prev;
-
-
-                    //TODO: modify to reuse existing (shared) points
                     //let's add it to the UKS
                     Thing corner = theUKS.GetOrAddThing("corner*", tCorners);
                     corner.V = c;
-                    theUKS.AddStatement(currOutline, "has*", corner);
+                    theUKS.AddStatement(outlineThing, "has*", corner);
                 }
+            }
+        }
+
+        private static void MakeClosedOutlineRightHanded(List<Corner> outline)
+        {
+            double sum = 0;
+            int cnt = outline.Count;
+            for (int i = 0; i < outline.Count; i++)
+            {
+                Corner p1 = outline[i];
+                Corner p2 = outline[(i + 1) % cnt];
+                sum += (p2.pt.X - p1.pt.X) *
+                    (p2.pt.Y + p1.pt.Y);
+            }
+            if (sum < 0)
+            {
+                outline.Reverse();
+                foreach (Corner c in outline)
+                    (c.prevPt, c.nextPt) = (c.nextPt, c.prevPt);
             }
         }
 
@@ -627,7 +1058,7 @@ namespace BrainSimulator.Modules
                         byte R = byte.Parse(nodes[2].InnerText);
                         byte G = byte.Parse(nodes[3].InnerText);
                         byte B = byte.Parse(nodes[4].InnerText);
-                        Color theColor = new() {A=A,R=R,G=G,B=B, };
+                        Color theColor = new() { A = A, R = R, G = G, B = B, };
                         t.V = theColor;
                     }
                     if (nodes[0].Value == "HSLColor")
@@ -709,5 +1140,7 @@ namespace BrainSimulator.Modules
             SetUpUKSEntries();
         }
 
+
     }
 }
+

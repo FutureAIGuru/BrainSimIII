@@ -143,6 +143,7 @@ namespace BrainSimulator.Modules
         }
         public static PointPlus operator -(PointPlus a, PointPlus b)
         {
+            if (a is null || b is null) return null;
             PointPlus retVal = new PointPlus
             {
                 P = new Point(a.P.X - b.P.X, a.P.Y - b.P.Y)
