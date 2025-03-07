@@ -32,7 +32,7 @@ public class ModuleBalanceTree : ModuleBase
     private Timer timer;
     //private UKS.UKS theUKS1;
     public string debugString = "Initialized\n";
-    private int maxChildren = 12;
+    private int maxChildren = 6;
     private int minCommonAttributes = 3;
     public int MaxChildren { get => maxChildren; set => maxChildren = value; }
 

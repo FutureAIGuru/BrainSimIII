@@ -58,6 +58,12 @@ public partial class UKS
                     r.target.AddParent(ThingLabels.GetThing("unknownObject"));
                 }
                 transientRelationships.Remove(r);
+                //HACK
+                if (r.reltype.Label == "has-child")
+                {
+                    DeleteAllChildren(r.target);
+                    DeleteThing(r.target);
+                }
             }
         }
     }

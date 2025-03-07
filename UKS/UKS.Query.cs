@@ -241,13 +241,17 @@ public partial class UKS
                 if (r1.reltype.Label.Contains(".") && r2.reltype.Label.Contains("."))
                     if (RelationshipsAreExclusive(r1, r2))
                     {
+                        //if two relationships are in conflict, use the encountered second
+                        result.RemoveAt(j);
+                        break;
                         //if two relationships are in conflict, use the one with higher weight
+                        //????
                         if (r1.Weight > r2.Weight)
                         {
                             result.RemoveAt(j);
                             j--;
                         }
-                        else
+                        else if (r1.Weight > r2.Weight)
                         {
                             result.RemoveAt(i);
                             i--;
@@ -591,6 +595,9 @@ public partial class UKS
         Thing bestThing = null;
         confidence = -1;
 
+        if (searchCandidates.Count == 0)
+            return null;
+
         //normalize the confidences
         foreach (var key in searchCandidates)
             searchCandidates[key.Key] /= target.Relationships.Count;
@@ -602,6 +609,12 @@ public partial class UKS
                 if (t1 != t && searchCandidates.ContainsKey(t1))
                     searchCandidates[t1] += searchCandidates[t];
 
+        //normalize the confidences
+        float max = searchCandidates.Max(x => x.Value);
+        foreach (var v in searchCandidates)
+        {
+            searchCandidates[v.Key] /= max;
+        }
         //find the best value
         foreach (var key in searchCandidates)
             if (key.Value > confidence)

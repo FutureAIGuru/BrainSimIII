@@ -59,7 +59,7 @@ public class ModuleClassCreate : ModuleBase
         for (int i = 0; i < theUKS.UKSList.Count; i++)
         {
             Thing t = theUKS.UKSList[i];
-            if (t.HasAncestor("Object") && !t.Label.Contains("."))
+            if (t.HasAncestor("Object") && !t.Label.Contains(".") && !t.Label.Contains("unknown"))
             {
                 HandleClassWithCommonAttributes(t);
             }
