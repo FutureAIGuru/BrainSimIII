@@ -7,12 +7,12 @@ Agents are independent modules and can be written in C# or Python. The Brain Sim
 
 The Brain Simulator is supported by the non-profit “Future AI Society” which has additional information and holds regular online development meetings.  You can join free at: https://futureaisociety.org Or support continuing development with a paid membership.
 With the UKS, this project is leapfrogging other AI technologies which are unable to represent the information needed for the understanding which underpins Common Sense. The Brain Simulator system can 
-•	Represent multi-sensory information so that sounds, words, and images can be related. 
-•	Represent a real-time mental model of immediate surroundings akin to the mind’s similar ability. 
-•	Handle nebulous and/or conflicting information. 
-•	Store action information so it learns which actions lead to positive outcomes for a current situation. 
-•	Update content in real time to handle real-world robotic applications.
-•	Incorporate agent software Modules  to perform any desired functionality.
+•	Represent multi-sensory information so that sounds, words, and images can be related.  
+•	Represent a real-time mental model of immediate surroundings akin to the mind’s similar ability.  
+•	Handle nebulous and/or conflicting information.  
+•	Store action information so it learns which actions lead to positive outcomes for a current situation.  
+•	Update content in real time to handle real-world robotic applications. 
+•	Incorporate agent software Modules  to perform any desired functionality. 
 
 # About the UKS
 The UKS includes a graph of nodes connected by edges. Within the UKS, nodes are called “Things”. Things can be related by edges called “Relationships” which consist of a source Thing, a target Thing, and a relationship Type (which is also a Thing).  For example: Fido is-a dog would be represented by a single is-a relationship relating Things representing “Fido” and “dog” with the “is-a” Relationship type. 
