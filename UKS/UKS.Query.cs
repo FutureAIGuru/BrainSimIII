@@ -11,7 +11,7 @@ public partial class UKS
     List<Relationship> succeededConditions = new();
 
     /// <summary>
-    /// Gets all relationships to a gropu of Things includeing inherited relationships
+    /// Gets all relationships to a group of Things including inherited relationships
     /// </summary>
     /// <param name="sources"></param>
     /// <param name="reverse">if true, the first parameter is a list of targets rather than sources</param>
@@ -445,7 +445,7 @@ public partial class UKS
         return failedConditions;
     }
     /// <summary>
-    /// Returns a list of Relatioships which were true in the previous query
+    /// Returns a list of Relationships which were true in the previous query
     /// </summary>
     /// <returns></returns>
     public List<Relationship> Why()

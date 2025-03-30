@@ -130,7 +130,7 @@ public class Relationship
     /// </summary>
     public List<Clause> Clauses { get => clauses; set => clauses = value; }
     /// <summary>
-    /// The list of Clauses for which this is the Target Relatiosnmhip
+    /// The list of Clauses for which this is the Target Relationship
     /// </summary>
     public List<Relationship> clausesFrom = new();
 
