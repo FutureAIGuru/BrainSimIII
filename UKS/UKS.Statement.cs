@@ -9,7 +9,7 @@ public partial class UKS
 {
     /// <summary>
     /// Creates a Relationship. <br/>
-    /// Parameters may be Things or strings. If strings, they represent Thing labels and if the Things with those lables
+    /// Parameters may be Things or strings. If strings, they represent Thing labels and if the Things with those labels
     /// do not exist, they will be created. <br/>
     /// If the RelationshipType has an inverse, the inverse will be used and the Relationship will be reversed so that 
     /// Fido IsA Dog become Dog HasChild Fido.<br/>
