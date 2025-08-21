@@ -66,7 +66,7 @@ Follow has ONLY if called out in type
                 string filter, out List<Thing> thingResult, out List<Relationship> relationships)
         {
             thingResult = new();
-            relationships = new();
+           relationships = new();
             GetUKS();
             if (theUKS == null) return;
             string source = sourceIn.Trim();

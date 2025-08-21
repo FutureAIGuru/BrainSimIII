@@ -27,7 +27,7 @@ else
 {
     moduleHandler.PythonPath = pythonPath;
 }
-
+moduleHandler.InitPythonEngine();
 
 if (args.Length > 0)
 {
@@ -52,7 +52,6 @@ if (activeModulesRoot != null)
 }
 //force the MainWindow to always be activated
 moduleHandler.ActivateModule("MainWindow.py");
-
 
 while (true)
 {

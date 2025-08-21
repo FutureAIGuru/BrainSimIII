@@ -116,7 +116,8 @@ namespace BrainSimulator.Modules
             for (int i = 0; i < tempStringArray.Length; i++)
             {
                 if (tempStringArray[i] == "") continue;
-                Thing t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
+                Thing t = ThingLabels.GetThing(tempStringArray[i]);
+                if (t == null) t = ThingLabels.GetThing(pluralizer.Singularize(tempStringArray[i]));
                 if (t == null) return retVal;
                 retVal.Add(t);
             }

@@ -406,7 +406,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
-    <PackageReference Include="pythonnet" Version="3.0.3" />
+    <PackageReference Include="pythonnet" Version="3.0.5" />
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
   <ItemGroup>

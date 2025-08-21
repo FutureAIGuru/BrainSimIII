@@ -565,6 +565,7 @@ public partial class UKS
                 //note: order-descriptors DO NOT have attributes while params DO
                 if (targetList.Contains(r1.source)) continue;
                 if (r1.reltype.Label == "has-child") continue;
+                if (r1.reltype != r.relType) continue;
                 if (r1.source.HasAncestor(root))
                 {
                     if (!searchCandidates.ContainsKey(r1.source))

@@ -81,7 +81,7 @@ namespace BrainSimulator.Modules
             for (int i = 0; i < maxOuter; i++)
             {
                 Thing parent = MainWindow.theUKS.GetOrAddThing("A" + i.ToString());
-                for (int j = 0; j < 100; j++)
+                for (int j = 0; j < 10; j++)
                 {
                     Thing parent0 = MainWindow.theUKS.GetOrAddThing("B" + i.ToString() + j.ToString(), parent);
                     for (int k = 0; k < 10; k++)

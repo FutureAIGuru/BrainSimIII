@@ -1,0 +1,31 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleLoadTxtFileDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="Import UKS .txt" Height="170" Width="560" Background="Gray" ShowInTaskbar="False" >
+    
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="12"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Text file to import:" VerticalAlignment="Center"/>
+        <DockPanel Grid.Row="2" LastChildFill="True">
+            <Button Name="BrowseButton" Content="Browse…" Width="90" Margin="0,0,8,0" Click="BrowseButton_Click"/>
+            <TextBox Name="PathText" VerticalContentAlignment="Center" AllowDrop="True"
+                     ToolTip="Drop a .txt file here or click Browse…" />
+        </DockPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <TextBlock Name="StatusText" VerticalAlignment="Center" Margin="0,0,12,0" Foreground="DarkRed"/>
+            <Button Name="ImportButton" Content="Import" Width="90" IsDefault="True" Click="ImportButton_Click"/>
+            <Button Name="CancelButton" Content="Cancel" Width="90" Margin="8,0,0,0" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</local:ModuleBaseDlg>

@@ -144,7 +144,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             if (totalItemCount > 500) return;
             Thing child = r.target;
-            //int descCount = child.GetDescendentsCount(); //this makes the system too slow
+            if (child.Label == "Alice")
+            { }
             int descCount = 10;
             string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
             string header = child.ToString();
@@ -230,6 +231,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         foreach (Relationship r in sortedReferences)
         {
             if (r.relType?.Label == "has-child") continue;
+            if (r.clausesFrom.Count > 0) continue;  //do not display if target of clause
             if (r.target != null && r.target.HasAncestorLabeled("Value"))
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r) };

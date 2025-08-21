@@ -99,14 +99,30 @@ public class ModuleHandler
         try
         {
             //Runtime.PythonDLL = @"/opt/anaconda3/envs/brainsim/bin/python";  // Yida's MAC
+            string tempPathGuess = @"C:\Users\c_sim\AppData\Local\Programs\Python\Python311\python311.dll";
+            if (tempPathGuess != PythonPath)
+            { }
+            string pythonHome = @"C:\Users\c_sim\AppData\Local\Programs\Python\Python311";
+            string currentBinFolder = @"C:\Users\c_sim\source\repos\BrainSimIII\BrainSimulator\bin\Debug\net8.0-windows";
+            Environment.SetEnvironmentVariable("PYTHONHOME", pythonHome);
+            Environment.SetEnvironmentVariable("PATH", pythonHome + ";" + Environment.GetEnvironmentVariable("PATH"));
+            Environment.SetEnvironmentVariable("PATH", currentBinFolder + ";" + Environment.GetEnvironmentVariable("PATH"));
+            Environment.SetEnvironmentVariable("PYTHONNET_RUNTIME", "coreclr" );
+
             Runtime.PythonDLL = PythonPath;//  @"python310";  // Charles's Windows
             if (!PythonEngine.IsInitialized)
                 PythonEngine.Initialize();
             dynamic sys = Py.Import("sys");
             dynamic os = Py.Import("os");
-            string desiredPath = os.path.join(os.getcwd(), "./bin/Debug/net8.0/");
-            sys.path.append(desiredPath);  // enables finding scriptName module
+            //string desiredPath = os.path.join(os.getcwd(), "./bin/Debug/net8.0/");
+            string desiredPath = os.getcwd();
+            sys.path.append(desiredPath);  // enables finding scriptName module  'C:\Users\c_sim\source\repos\BrainSimIII\BrainSimulator\bin\Debug\net8.0-windows'
             sys.path.append(os.getcwd() + "\\pythonModules");
+            foreach (dynamic p in sys.path)
+            {
+                string x = p.ToString();
+                Debug.WriteLine(x);
+            }
             Console.WriteLine("PythonEngine init succeeded\n");
         }
         catch (Exception ex)
@@ -146,24 +162,9 @@ public class ModuleHandler
         moduleType = moduleType.Replace(".py", "");
 
         //if this is the very first call, initialize the python engine
-        if (Runtime.PythonDLL == null)
+        if (string.IsNullOrEmpty(Runtime.PythonDLL))
         {
-            try
-            {
-                Runtime.PythonDLL = PythonPath;//  @"python310";  // Charles's Windows
-                PythonEngine.Initialize();
-                dynamic sys = Py.Import("sys");
-                dynamic os = Py.Import("os");
-                string desiredPath = os.path.join(os.getcwd(), "./bin/Debug/net8.0/");
-                sys.path.append(desiredPath);  // enables finding scriptName module
-                sys.path.append(os.getcwd() + "\\pythonModules");
-                Console.WriteLine("PythonEngine init succeeded\n");
-            }
-            catch
-            {
-                Console.WriteLine("Python engine initialization failed");
-                return;
-            }
+            //should never get here:
         }
         using (Py.GIL())
         {
