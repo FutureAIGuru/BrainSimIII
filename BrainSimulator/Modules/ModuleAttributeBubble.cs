@@ -5,22 +5,11 @@
 // 
 
 using System;
-using System.CodeDom;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO.Packaging;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Data;
-using System.Xml.Serialization;
 using UKS;
-using static System.Math;
 
 namespace BrainSimulator.Modules;
 
@@ -82,6 +71,8 @@ public class ModuleAttributeBubble : ModuleBase
         debugString = "Bubbler Started\n";
         foreach (Thing t in theUKS.UKSList)
         {
+            if (t.Label == "Animal")
+            { }
             if (t.HasAncestor("Object"))
                 BubbleChildAttributes(t);
         }
@@ -124,9 +115,6 @@ public class ModuleAttributeBubble : ModuleBase
             //find an existing relationship
             Relationship r = theUKS.GetRelationship(t, rr.relType, rr.target);
             float currentWeight = (r != null) ? r.Weight : 0f;
-
-
-
 
             //We need 1) count for this Relationship, 2) count for any conflicting, 3) count without a reference
             float totalCount = t.Children.Count;
@@ -173,37 +161,41 @@ public class ModuleAttributeBubble : ModuleBase
             float newWeight = currentWeight + targetWeight;
             if (newWeight > 0.99f) newWeight = 0.99f;
 
-
-
-            if (newWeight != currentWeight || r is null)
-            {
-                if (newWeight < .5)
+            if (positiveCount > totalCount / 2)
+                if (newWeight != currentWeight || r is null)
                 {
-                    if (r != null)
+                    if (newWeight < .5)
                     {
-                        t.RemoveRelationship(r);
-                        debugString += $"Removed {r.ToString()} \n";
-                    }
-                }
-                else
-                {
-                    //bubble the property
-                    r = t.AddRelationship(rr.target, rr.relType);
-                    r.Weight = newWeight;
-                    r.Fire();
-                    //if there is a conflicting relationship, delete it
-                    for (int j = 0; j < t.Relationships.Count; j++)
-                    {
-                        if (RelationshipsConflict(new RelDest(r), new RelDest(t.Relationships[j])))
+                        if (r != null)
                         {
-                            t.RemoveRelationship(t.Relationships[j]);
-                            j--;
+                            t.RemoveRelationship(r);
+                            debugString += $"Removed {r.ToString()} \n";
                         }
                     }
+                    else
+                    {
+                        //bubble the property
+                        r = t.AddRelationship(rr.target, rr.relType);
+                        r.Weight = newWeight;
+                        r.Fire();
+                        debugString += $"Added  {r.ToString()}   {r.Weight.ToString(".0")} \n";
 
-                    debugString += $"{r.ToString()}   {r.Weight.ToString(".0")} \n";
+                        foreach (Thing t1 in t.Children)
+                        {
+                            Relationship rrr = t1.RemoveRelationship(rr.target, rr.relType);
+                            debugString += $"Removed {rrr.ToString()} \n";
+                        }
+                        //if there is a conflicting relationship, delete it
+                        for (int j = 0; j < t.Relationships.Count; j++)
+                        {
+                            if (RelationshipsConflict(new RelDest(r), new RelDest(t.Relationships[j])))
+                            {
+                                t.RemoveRelationship(t.Relationships[j]);
+                                j--;
+                            }
+                        }
+                    }
                 }
-            }
         }
 
     }
@@ -282,7 +274,7 @@ public class ModuleAttributeBubble : ModuleBase
 
 
     //if the given thing is an instance of its parent, get the parent
-    public  static Thing GetInstanceType(Thing t)
+    public static Thing GetInstanceType(Thing t)
     {
         bool EndsInInteger(string input)
         {

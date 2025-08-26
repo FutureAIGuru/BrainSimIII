@@ -458,10 +458,11 @@ public partial class Thing
     }
 
 
-    public void RemoveRelationship(Thing t2, Thing relationshipType)
+    public Relationship RemoveRelationship(Thing t2, Thing relationshipType)
     {
         Relationship r = new() { source = this, reltype = relationshipType, target = t2 };
         RemoveRelationship(r);
+        return r;
     }
 
 
