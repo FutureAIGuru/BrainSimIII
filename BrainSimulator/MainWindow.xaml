@@ -73,7 +73,7 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                     <Label Content="Add Module:" Foreground="White"/>
-                    <ComboBox x:Name="ModuleListComboBox"  SelectionChanged="ModuleList_SelectionChanged" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Width="271" Height="26" IsEditable="True">
+                    <ComboBox x:Name="ModuleListComboBox"  VerticalContentAlignment="Center" HorizontalContentAlignment="Left" Width="271" Height="26" IsEditable="True" DropDownClosed="ModuleListComboBox_DropDownClosed" PreviewKeyDown="ModuleListComboBox_PreviewKeyDown">
                     </ComboBox>
                 </StackPanel>
             </DockPanel>
