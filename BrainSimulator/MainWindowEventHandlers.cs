@@ -10,6 +10,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using BrainSimulator.Modules;
+using System.Windows.Input;
 
 namespace BrainSimulator
 {
@@ -73,12 +74,20 @@ namespace BrainSimulator
             theModule.GetUKS();
             return theModule;
         }
-        private void ModuleList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ModuleListComboBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (sender is ComboBox cb)
+                if (e.Key != Key.Enter && e.Key != Key.Escape)
+                    cb.IsDropDownOpen = true;
+        }
+
+        private void ModuleListComboBox_DropDownClosed(object sender, EventArgs e)
         {
             if (sender is ComboBox cb)
             {
                 if (cb.SelectedItem != null)
                 {
+
                     string moduleName = ((Label)cb.SelectedItem).Content.ToString();
                     cb.SelectedIndex = -1;
                     ActivateModule(moduleName);
@@ -86,6 +95,7 @@ namespace BrainSimulator
             }
 
             ReloadActiveModulesSP();
+
         }
         private void button_FileNew_Click(object sender, RoutedEventArgs e)
         {
