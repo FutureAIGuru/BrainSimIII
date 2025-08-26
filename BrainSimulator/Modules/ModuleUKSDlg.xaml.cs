@@ -231,7 +231,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         foreach (Relationship r in sortedReferences)
         {
             if (r.relType?.Label == "has-child") continue;
-            if (r.clausesFrom.Count > 0) continue;  //do not display if target of clause
+            //if (r.clausesFrom.Count > 0) continue;  //do not display if target of clause
             if (r.target != null && r.target.HasAncestorLabeled("Value"))
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r) };

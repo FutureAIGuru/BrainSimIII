@@ -45,7 +45,7 @@ namespace BrainSimulator.Modules
             string newThing2 = sourceText2.Text;
             string targetThing2 = targetText2.Text;
             string relationType2 = relationshipText2.Text;
-            Relationship r2 = UKSClause.AddRelationship(newThing2, targetThing2, relationType2);
+            Relationship r2 = UKSClause.AddRelationship(newThing2, targetThing2, relationType2,true);
             r1.AddClause(theClauseType, r2);
         }
 

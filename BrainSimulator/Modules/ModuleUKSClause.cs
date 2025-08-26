@@ -10,7 +10,7 @@ using UKS;
 
 namespace BrainSimulator.Modules
 {
-    public class ModuleUKSClause: ModuleBase
+    public class ModuleUKSClause : ModuleBase
     {
         //any public variable you create here will automatically be saved and restored  with the network
         //unless you precede it with the [XmlIgnore] directive
@@ -51,7 +51,7 @@ namespace BrainSimulator.Modules
         // delete if not needed
         public override void SizeChanged()
         {
-            
+
         }
 
         // return true if thing was added
@@ -63,7 +63,7 @@ namespace BrainSimulator.Modules
             return theUKS.GetOrAddThing(newThing, "ClauseType");
         }
 
-        public Relationship AddRelationship(string source, string target, string relationshipType)
+        public Relationship AddRelationship(string source, string target, string relationshipType, bool isCondition = false)
         {
             GetUKS();
             if (theUKS == null) return null;
@@ -76,8 +76,8 @@ namespace BrainSimulator.Modules
 
             string[] tempStringArray = source.Split(' ');
             List<string> sourceModifiers = new();
-            source = pluralizer.Singularize(tempStringArray[tempStringArray.Length-1]);
-            for (int i = 0; i < tempStringArray.Length-1; i++) sourceModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+            source = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
+            for (int i = 0; i < tempStringArray.Length - 1; i++) sourceModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
             tempStringArray = target.Split(' ');
             List<string> targetModifiers = new();
@@ -86,11 +86,14 @@ namespace BrainSimulator.Modules
 
             tempStringArray = relationshipType.Split(' ');
             List<string> typeModifiers = new();
-            relationshipType= pluralizer.Singularize(tempStringArray[0]);
+            relationshipType = pluralizer.Singularize(tempStringArray[0]);
             for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
-            Relationship r = theUKS.AddStatement(source, relationshipType, target,sourceModifiers, typeModifiers, targetModifiers);
-            
+            Relationship r;
+//            if (!isCondition)
+                r = theUKS.AddStatement(source, relationshipType, target, sourceModifiers, typeModifiers, targetModifiers);
+  //          else
+    //            r = theUKS.CreateTheRelationship(source, relationshipType, target, sourceModifiers, typeModifiers, targetModifiers);
             return r;
         }
 
