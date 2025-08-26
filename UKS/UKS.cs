@@ -280,6 +280,18 @@ public partial class UKS
         return false;
     }
 
+    private bool RelationshipTypesAreExclusive(Relationship r1, Relationship r2)
+    {
+        IList<Thing> r1RelProps = r1.reltype.GetAttributes();
+        IList<Thing> r2RelProps = r2.reltype.GetAttributes();
+        Thing r1Not = r1RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
+        Thing r2Not = r2RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
+        if (r1.target == r2.target &&
+            (r1Not == null && r2Not != null || r1Not != null && r2Not == null))
+            return true;
+        return false;
+
+    }
 
     private bool HasAttribute(Thing t, string name)
     {
