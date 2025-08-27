@@ -348,17 +348,17 @@ public partial class UKS
         candidateRelationships = candidateRelationships.OrderBy(s => (s.relType == null) ? 0 : int.Parse(Regex.Match(s.reltype.Label, @"\d+").Value)).ToList();
 
         //offset is the number of rels to skip at the beginning of the stored pattern
-        for (int offset = 0; offset < candidateRelationships.Count; offset++)
+        for (int offset = 0; offset < patternRelationships.Count; offset++)
         {
             float score = 0;
-            for (int i = 0; i < patternRelationships.Count; i++)
+            for (int i = 0; i < candidateRelationships.Count; i++)
             {
                 //if circular search is requested and the offset is off the end of the candidate, loop back
                 if (!circularSearch && offset + i >= candidateRelationships.Count) break;
-                int index = (offset + i) % candidateRelationships.Count;
-                if (patternRelationships[i].target == candidateRelationships[index].target)
+                int index = (offset + i) % patternRelationships.Count;
+                if (candidateRelationships[i].target == patternRelationships[index].target)
                 {
-                    score += candidateRelationships[index].Weight;
+                    score += patternRelationships[index].Weight;
                 }
             }
             if (score > bestScore)
@@ -368,7 +368,7 @@ public partial class UKS
             }
         }
 
-        bestScore /= pattern.Relationships.Count;
+        bestScore /= patternRelationships.Count;
         return bestScore;
     }
 
@@ -565,7 +565,12 @@ public partial class UKS
                 //note: order-descriptors DO NOT have attributes while params DO
                 if (targetList.Contains(r1.source)) continue;
                 if (r1.reltype.Label == "has-child") continue;
-                if (r1.source.HasAncestor(root))
+                if (!r1.reltype.HasAncestor(r.relType)) continue;
+                if (RelationshipTypesAreExclusive(r,r1))
+                {
+                    searchCandidates[r1.source]= -1;
+                }
+                else if (r1.source.HasAncestor(root) && r1.reltype.HasAncestor(r.reltype))
                 {
                     if (!searchCandidates.ContainsKey(r1.source))
                         searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
@@ -598,16 +603,35 @@ public partial class UKS
         if (searchCandidates.Count == 0)
             return null;
 
-        //normalize the confidences
-        foreach (var key in searchCandidates)
-            searchCandidates[key.Key] /= target.Relationships.Count;
+
+        // delete items which have ancestor in list toon
+        for (int i = 0; i < searchCandidates.Keys.Count; i++)
+        {
+            Thing t = (Thing)searchCandidates.Keys.ToList()[i];
+            foreach (Thing t1 in t.Ancestors)
+            {
+                if (t1 != t && searchCandidates.ContainsKey(t1) && searchCandidates[t1] < 0)
+                    searchCandidates.Remove(t);
+            }
+        }
 
         ////handle inheritance
         ////TODO: check if this messes up on multiple inheritance and/or problems with the order of processing
-        foreach (Thing t in searchCandidates.Keys)
+        for (int i = 0; i < searchCandidates.Keys.Count; i++)
+        {
+            Thing t = (Thing)searchCandidates.Keys.ToList()[i];
             foreach (Thing t1 in t.Descendents)
-                if (t1 != t && searchCandidates.ContainsKey(t1))
-                    searchCandidates[t1] += searchCandidates[t];
+            {
+                if (t1 != t && !searchCandidates.ContainsKey(t1))
+                    searchCandidates[t1] = 0;
+                if (t1 != t)
+                    searchCandidates[t1] += searchCandidates[t] * .9f;  //give weight to more specific answer
+             }
+        }
+
+        //normalize the confidences
+        //foreach (var key in searchCandidates)
+        //    searchCandidates[key.Key] /= target.Relationships.Count;
 
         //normalize the confidences
         float max = searchCandidates.Max(x => x.Value);

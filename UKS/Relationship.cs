@@ -271,7 +271,7 @@ public class Relationship
         //handle Clauses
         //TODO prevent general circular reference stack overflow
         foreach (Clause c in Clauses)
-            allModifierString += c.clauseType.Label + " " + c.clause.ToString(stack) + " ";
+            allModifierString += c.clauseType?.Label + " " + c.clause.ToString(stack) + " ";
 
         if (allModifierString != "")
             retVal += " " + allModifierString;

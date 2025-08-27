@@ -105,7 +105,27 @@ public partial class UKS
     }
 
     //these are used by the subclass searching system to report back the closest match and what attributes are missing
-    
+    public Relationship CreateTheRelationship(
+      object oSource, object oRelationshipType, object oTarget,
+      object oSourceProperties = null,
+      object oTypeProperties = null,
+      object oTargetProperties = null
+                  )
+    {
+        //Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
+        Thing source = ThingFromObject(oSource);
+        Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
+        Thing target = ThingFromObject(oTarget);
+
+        List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
+        List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "Action");
+        List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
+
+        Relationship theRelationship = CreateTheRelationship(ref source, ref relationshipType, ref target,
+            ref sourceModifiers, relationshipTypeModifiers, ref targetModifiers);
+        return theRelationship;
+    }
+
     public Relationship CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target,
         ref List<Thing> sourceProperties, List<Thing> typeProperties, ref List<Thing> targetProperties)
     {
