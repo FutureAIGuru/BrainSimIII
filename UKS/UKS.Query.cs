@@ -348,17 +348,17 @@ public partial class UKS
         candidateRelationships = candidateRelationships.OrderBy(s => (s.relType == null) ? 0 : int.Parse(Regex.Match(s.reltype.Label, @"\d+").Value)).ToList();
 
         //offset is the number of rels to skip at the beginning of the stored pattern
-        for (int offset = 0; offset < candidateRelationships.Count; offset++)
+        for (int offset = 0; offset < patternRelationships.Count; offset++)
         {
             float score = 0;
-            for (int i = 0; i < patternRelationships.Count; i++)
+            for (int i = 0; i < candidateRelationships.Count; i++)
             {
                 //if circular search is requested and the offset is off the end of the candidate, loop back
                 if (!circularSearch && offset + i >= candidateRelationships.Count) break;
-                int index = (offset + i) % candidateRelationships.Count;
-                if (patternRelationships[i].target == candidateRelationships[index].target)
+                int index = (offset + i) % patternRelationships.Count;
+                if (candidateRelationships[i].target == patternRelationships[index].target)
                 {
-                    score += candidateRelationships[index].Weight;
+                    score += patternRelationships[index].Weight;
                 }
             }
             if (score > bestScore)
@@ -368,7 +368,7 @@ public partial class UKS
             }
         }
 
-        bestScore /= pattern.Relationships.Count;
+        bestScore /= patternRelationships.Count;
         return bestScore;
     }
 

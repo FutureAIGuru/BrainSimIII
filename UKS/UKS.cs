@@ -28,9 +28,6 @@ public partial class UKS
     /// </summary>
     public UKS()
     {
-        //UKSList.Clear();
-        //ThingLabels.ClearLabelList();
-
         if (UKSList.Count == 0)
         {
             UKSList.Clear();
@@ -43,30 +40,41 @@ public partial class UKS
         stateTimer = new Timer(RemoveExpiredRelationships,autoEvent,0, 1000);
     }
 
+    static bool isRunning = false;
     private void RemoveExpiredRelationships(Object stateInfo)
     {
-        for (int i = transientRelationships.Count - 1; i >= 0; i--)
+        if (isRunning) return;
+        isRunning = true;
+        try
         {
-            Relationship r = transientRelationships[i];
-            //check to see if the relationship has expired
-            if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now)
+            for (int i = transientRelationships.Count - 1; i >= 0; i--)
             {
-                r.source.RemoveRelationship(r);
-                //if this leaves an orphan thing, delete the thing
-                if (r.reltype.Label == "has-child" && r.target?.Parents.Count == 0)
+                Relationship r = transientRelationships[i];
+                //check to see if the relationship has expired
+                if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now)
                 {
-                    r.target.AddParent(ThingLabels.GetThing("unknownObject"));
-                }
-                transientRelationships.Remove(r);
-                //HACK
-                if (r.reltype.Label == "has-child")
-                {
-                    DeleteAllChildren(r.target);
-                    DeleteThing(r.target);
+                    r.source.RemoveRelationship(r);
+                    //if this leaves an orphan thing, delete the thing
+                    if (r.reltype.Label == "has-child" && r.target?.Parents.Count == 0)
+                    {
+                        r.target.AddParent(ThingLabels.GetThing("unknownObject"));
+                    }
+                    transientRelationships.Remove(r);
+                    //HACK
+                    if (r.reltype.Label == "has-child")
+                    {
+                        DeleteAllChildren(r.target);
+                        DeleteThing(r.target);
+                    }
                 }
             }
         }
+        finally
+        {
+            isRunning = false;
+        }
     }
+
 
     /// <summary>
     /// This is a primitive method needed only to create ROOT Things which have no parents
