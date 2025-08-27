@@ -32,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Iconsmall.ico" />
+    <Content Include="Python Instructions.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UKS\UKS.csproj">

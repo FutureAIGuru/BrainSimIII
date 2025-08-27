@@ -1,0 +1,28 @@
+﻿This document explains how to run Python modules within the BrainSimulator project. The explanation is for Windows. Hopefuly 
+it will be easy to adapt to other platforms. The UKS.dll is platform independent. The UI of the brain simulator is Windows ONLY because the UI library (WPF) is windows only. The BrainSimMAC uses only python modules and should run on Windows, LINUX and MAC.
+
+
+Steps to Install Python modules under windows
+1) Install Python extension to  Visual Studio
+2) NuGet (if not in project) PythonNet 3.0.5
+3) DO NOT Install Python from Microsoft Store get it direct from the Python.org.  the MS store version is 32-bit and will not work.
+4) Get 64 python version 3.11  (3.12 and later are not supported)
+5) Pip install pythonnet==3.0.5
+
+Running:
+The Project BrainSimulator will run only on Windows. The project BrainSimMAC will run on Windows, (hopefully) LINUX and MAC.
+[insert instructions on building/running on LINUX and MAC]]
+* The first time it is run, it asks if you want to support python modules Select Yes
+* Navigate to python311.dll. Likely in C:\[user]AppData\Local\Programs\Python\Python311\python311.dll";`
+* This will include .py modules in the module dropdown and allow them to be selected.
+* Within the program, there is no way to change the state whether python modules are supported.  You can either use the OS to delete the environment variable PythonPath OR, within the code by setting a breakpoint at MainWindow.xamo.cs (42).
+
+The project PythonProj has individual python modules.
+* You can select this as �Set a startup project�.
+* Select a .py file with �Start with debugging� to run it individually
+The project BrainSimMAC uses ONLY python modules and can run under Windows or other platforms. 
+* It uses the same PythonPath environment variable as the BrainSimulator project to know where to find the python engine but sets it up via console interaction.
+* In Windows, select the project in Visual Studio and run it. 
+* On LINUX, navigate to the BrainSimMAC folder and:
+> dotnet build
+* On MAC.  ??
