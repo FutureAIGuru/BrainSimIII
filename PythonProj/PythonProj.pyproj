@@ -34,13 +34,6 @@
     <Content Include="Iconsmall.ico" />
     <Content Include="Python Instructions.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\UKS\UKS.csproj">
-      <Name>UKS</Name>
-      <Project>{7c22fbb6-fe12-43d3-9f6f-479e830c94f6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
        Visual Studio and specify your pre- and post-build commands in
