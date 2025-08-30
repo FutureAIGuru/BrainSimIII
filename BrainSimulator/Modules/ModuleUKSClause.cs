@@ -89,7 +89,7 @@ namespace BrainSimulator.Modules
             relationshipType= pluralizer.Singularize(tempStringArray[0]);
             for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
-            Relationship r = theUKS.AddStatement(source, relationshipType, target,sourceModifiers, typeModifiers, targetModifiers);
+            Relationship r = theUKS.AddStatement(source, relationshipType, target,sourceModifiers, typeModifiers, targetModifiers, false);
             
             return r;
         }

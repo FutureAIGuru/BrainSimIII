@@ -37,13 +37,23 @@ public partial class UKS
 
                 foreach (Relationship r in t.Relationships)
                 {
+                    //don't save extra clause baggage.
+                    if (!r.isStatement && r.Clauses.Count == 0) continue;
+                    if (r.reltype.Label == "hasProperty" && r.target.Label == "isInstance") continue;
+                    if (r.reltype.Label == "has-child" && r.target.HasProperty("isInstance"))
+                    {
+                        if (seenThings.Add(r.source.Label)) q.Enqueue((r.source, depth + 1));
+                        if (seenThings.Add(r.target.Label)) q.Enqueue((r.target, depth + 1));
+                        continue;
+                    }
 
-                    var line = $"[{r.source.Label},{r.relType.Label},{r.target.Label},{r.Weight.ToString("0.00")}]";
+                    Thing theSource = GetNonInstance(r.source);
+                    var line = $"[{theSource.Label},{r.relType.Label},{r.target.Label},{r.Weight.ToString("0.00")}]";
                     writer.Write(line);
 
                     foreach (Clause c in r.Clauses)
                     {
-                        var clause = $" {c.clauseType.Label} [{c.clause.source.Label},{c.clause.reltype.Label},{c.clause.target.Label}] ";
+                        var clause = $" {c.clauseType.Label} [{c.clause.source.Label},{c.clause.reltype.Label},{c.clause.target.Label},{r.Weight.ToString("0.00")}] ";
                         writer.Write(clause);
                     }
 
@@ -57,6 +67,13 @@ public partial class UKS
             }
             writer.Flush();
         }
+    }
+
+    public static Thing GetNonInstance(Thing source)
+    {
+        Thing theSource = source;
+        while (theSource.HasProperty("isInstance")) theSource = theSource.Parents[0];
+        return theSource;
     }
 
     // int or decimal, optional leading minus
@@ -106,20 +123,26 @@ public partial class UKS
 
         // Build relationships for each [S,R,O(,N)?]
         var rels = new List<Relationship>();
+        bool isStatement = tokens.Count < 3;
         for (int i = 0; i < tokens.Count; i += 2)
         {
             var stmt = ParseBracketStmt(tokens[i], lineNo);
-            rels.Add(AddRelStmt(stmt));
+            Relationship r = AddRelStmt(stmt,isStatement);
+            rels.Add(r);
+            r.isStatement = isStatement;
         }
 
         // Connect adjacent relationships with AddClause(connector)
         for (int i = 1, relIndex = 0; i < tokens.Count; i += 2, relIndex++)
         {
             string relTypeConnector = tokens[i];
+            if (relTypeConnector == "AFTER")
+            { }
             Thing t = Labeled(relTypeConnector);
             if (t == null)
-                t = AddThing(relTypeConnector, "RelationshipType");
-            rels[relIndex].AddClause(relTypeConnector, rels[relIndex + 1]);
+                t = AddThing(relTypeConnector, "ClauseType");
+            Relationship r =  AddClause(rels[relIndex],relTypeConnector, rels[relIndex + 1]);
+            r.isStatement = isStatement;
         }
 
         return true;
@@ -147,9 +170,13 @@ public partial class UKS
     }
 
     // Adds a relationship, honoring numeric sugar (N → R.N + has-value + number typing)
-    private Relationship AddRelStmt(BrStmt s)
+    private Relationship AddRelStmt(BrStmt s,bool isSatement)
     {
-        Relationship r = AddStatement(s.S, s.R, s.O);
+        string[] source = s.S.Split(".");
+        string[] relType = s.R.Split(".");
+        string[] target = s.O.Split(".");
+
+        Relationship r = AddStatement(source[0], relType[0], target[0], source[1..], relType[1..], target[1..], isSatement);
         if (s.N is { } n)
         {
             if (float.TryParse(s.N, out float weight))

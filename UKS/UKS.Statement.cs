@@ -27,7 +27,8 @@ public partial class UKS
         object oSource, object oRelationshipType, object oTarget,
         object oSourceProperties = null,
         object oTypeProperties = null,
-        object oTargetProperties = null
+        object oTargetProperties = null,
+        bool isStatement = true
                     )
     {
         //Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
@@ -40,7 +41,7 @@ public partial class UKS
             List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
 
             Relationship theRelationship = AddStatement(source, relationshipType, target, 
-                sourceModifiers, relationshipTypeModifiers, targetModifiers);
+                sourceModifiers, relationshipTypeModifiers, targetModifiers,isStatement);
             return theRelationship;
     }
 
@@ -48,7 +49,8 @@ public partial class UKS
                     Thing source, Thing relType, Thing target,
                     List<Thing> sourceProperties,
                     List<Thing> typeProperties,
-                    List<Thing> targetProperties
+                    List<Thing> targetProperties,
+                    bool isStatement = true
             )
     {
         if (source == null || relType == null) return null;
@@ -57,6 +59,7 @@ public partial class UKS
         ////if (HandlePronouns(r)) return r;
 
         Relationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
+        r.isStatement = isStatement;
 
         //does this relationship already exist (without conditions)?
         Relationship existing = GetRelationship(r);

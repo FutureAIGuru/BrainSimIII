@@ -46,7 +46,7 @@ namespace BrainSimulator.Modules
             string targetThing2 = targetText2.Text;
             string relationType2 = relationshipText2.Text;
             Relationship r2 = UKSClause.AddRelationship(newThing2, targetThing2, relationType2);
-            r1.AddClause(theClauseType, r2);
+            UKSClause.theUKS.AddClause(r1,theClauseType, r2);
         }
 
         // thingText_TextChanged is called when the thing textbox changes

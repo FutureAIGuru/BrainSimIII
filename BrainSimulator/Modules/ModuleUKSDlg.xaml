@@ -9,19 +9,20 @@
     <Grid >
         <TreeView x:Name="theTreeView" FontSize="16"
                   SizeChanged="TheTreeView_SizeChanged" 
-                  Background="LightGray" Foreground="Black" Margin="0,0,0,65" 
+                  Background="LightGray" Foreground="Black" Margin="0,68,0,-3" 
                   MouseEnter="TheTreeView_MouseEnter" 
                   MouseLeave="TheTreeView_MouseLeave"
                   PreviewMouseWheel="theTreeView_MouseWheel"
                   >
         </TreeView>
-        <Button x:Name="refreshButton" Content="Refresh" HorizontalAlignment="Left" Margin="20,0,0,19" Width="79" Height="27" RenderTransformOrigin="0.519,5.667" VerticalAlignment="Bottom" Click="RefreshButton_Click" FontSize="16" />
-        <CheckBox x:Name="detailsCB" Content="Show Details" HorizontalAlignment="Left" Margin="122,0,0,37" Width="120" Height="19" VerticalAlignment="Bottom" Checked="CheckBoxDetails_Checked" Unchecked="CheckBoxDetails_Unchecked" FontSize="16"/>
-        <CheckBox x:Name="checkBoxAuto" IsChecked="True" Content="Auto-Refresh" HorizontalAlignment="Left" Margin="122,0,0,8" Width="120" Height="19" VerticalAlignment="Bottom" Checked="CheckBoxAuto_Checked" Unchecked="CheckBoxAuto_Unchecked" FontSize="16"/>
-        <CheckBox x:Name="reverseCB" IsChecked="False" Content="Show Rev. Rlshp." HorizontalAlignment="Left" Margin="247,0,0,37" Width="161" Height="19" VerticalAlignment="Bottom" Checked="CheckBoxAuto_Checked" Unchecked="CheckBoxAuto_Unchecked" FontSize="16" RenderTransformOrigin="1.073,-0.658"/>
-        <Label Content="Root:" HorizontalAlignment="Left" Margin="415,0,0,27" Width="90" Height="35" VerticalAlignment="Bottom" FontSize="16"/>
-        <TextBox x:Name="textBoxRoot" HorizontalAlignment="Left" Margin="458,0,0,33" TextWrapping="Wrap" Text="Thing" Width="250" Height="25" VerticalAlignment="Bottom" TextChanged="textBoxRoot_TextChanged" PreviewKeyDown="TextBoxRoot_KeyDown" FontSize="16"/>
-        <Label Content="" x:Name="statusLabel"  HorizontalAlignment="Left" Margin="415,0,0,-2" Width="300" Height="35" VerticalAlignment="Bottom" FontSize="16"/>
-        <Button x:Name="InitializeButton" Content="Initialize" HorizontalAlignment="Right" VerticalAlignment="Top" Height="27" Width="108" Click="InitializeButton_Click" Margin="0,20,22,0" FontSize="16"   />
+        <CheckBox x:Name="detailsCB" Content="Show Details" HorizontalAlignment="Left" Margin="131,10,0,0" Width="120" Checked="CheckBoxDetails_Checked" Unchecked="CheckBoxDetails_Unchecked" FontSize="16" Height="19" VerticalAlignment="Top"/>
+        <CheckBox x:Name="checkBoxAuto" IsChecked="True" Content="Auto-Refresh" HorizontalAlignment="Left" Margin="131,39,0,0" Width="120" Checked="CheckBoxAuto_Checked" Unchecked="CheckBoxAuto_Unchecked" FontSize="16" Height="19" VerticalAlignment="Top"/>
+        <CheckBox x:Name="reverseCB" IsChecked="False" Content="Reverse Rels." HorizontalAlignment="Left" Margin="256,10,0,0" Width="161" Checked="CheckBoxAuto_Checked" Unchecked="CheckBoxAuto_Unchecked" FontSize="16" RenderTransformOrigin="1.073,-0.658" Height="19" VerticalAlignment="Top"/>
+        <CheckBox x:Name="showConditionals" IsChecked="False" Content="Show Conditionals" HorizontalAlignment="Left" Margin="256,39,0,0" Width="161" Checked="CheckBoxAuto_Checked" Unchecked="CheckBoxAuto_Unchecked" FontSize="16" RenderTransformOrigin="1.073,-0.658" Height="19" VerticalAlignment="Top"/>
+
+        <Label Content="Root:" HorizontalAlignment="Left" Margin="424,4,0,0" Width="90" FontSize="16" Height="35" VerticalAlignment="Top"/>
+        <TextBox x:Name="textBoxRoot" HorizontalAlignment="Left" Margin="467,8,0,0" TextWrapping="Wrap" Text="Thing" Width="250" TextChanged="textBoxRoot_TextChanged" PreviewKeyDown="TextBoxRoot_KeyDown" FontSize="16" Height="25" VerticalAlignment="Top"/>
+        <Label Content="" x:Name="statusLabel"  HorizontalAlignment="Left" Margin="424,33,0,0" Width="300" FontSize="16" Height="35" VerticalAlignment="Top"/>
+        <Button x:Name="InitializeButton" Content="Initialize" VerticalAlignment="Top" Height="27" Click="InitializeButton_Click" Margin="18,19,0,0" FontSize="16" HorizontalAlignment="Left" Width="108"   />
     </Grid>
 </local:ModuleBaseDlg>

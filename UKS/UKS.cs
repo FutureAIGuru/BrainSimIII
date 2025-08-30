@@ -26,9 +26,9 @@ public partial class UKS
     /// <summary>
     /// Creates a new reference to the UKS and initializes it if it is the first reference. 
     /// </summary>
-    public UKS()
+    public UKS(bool clear = false)
     {
-        if (UKSList.Count == 0)
+        if (UKSList.Count == 0 || clear)
         {
             UKSList.Clear();
             ThingLabels.ClearLabelList();
@@ -82,7 +82,7 @@ public partial class UKS
     /// <param name="label"></param>
     /// <param name="parent">May be null</param>
     /// <returns></returns>
-    public virtual Thing AddThing(string label, Thing parent)
+    public virtual Thing AddThing(string label, Thing? parent)
     {
         Thing newThing = new();
         newThing.Label = label;
@@ -94,6 +94,9 @@ public partial class UKS
         {
             UKSList.Add(newThing);
         }
+        if (newThing.Label == "has-child0")
+        { }
+
         return newThing;
     }
 
@@ -203,6 +206,9 @@ public partial class UKS
 
         if (r1.target != r2.target && (r1.target == null || r2.target == null)) return false;
         //if (r1.target == r2.target && r1.source != r2.source) return false;
+
+        if (!r1.isStatement) return false;
+        if (!r2.isStatement) return false;
 
         if (r1.source == r2.source ||
             r1.source.AncestorList().Contains(r2.source) ||
@@ -325,7 +331,8 @@ public partial class UKS
         if (
             (r1.source == r2.source || ignoreSource) &&
             r1.target == r2.target &&
-            r1.relType == r2.relType
+            r1.relType == r2.relType &&
+            r1.isStatement == r2.isStatement
           ) return true;
         return false;
     }
@@ -416,6 +423,8 @@ public partial class UKS
             return tl;
         else if (o is null)
             return new();
+        else if (o is string[] array)
+            return ThingListFromStringList(array.ToList(), parentLabel);
         else
             throw new ArgumentException("invalid arg type in AddStatement: " + o.GetType());
     }
@@ -500,4 +509,31 @@ public partial class UKS
         return thingToReturn;
     }
 
+    public Relationship AddClause(Relationship r1, Thing clauseType, Relationship r2)
+    {
+        //does this relation/clause already exist?
+        foreach (Thing t in r1.source.Children)
+        {
+            foreach (Relationship r in t.Relationships)
+            {
+                Clause? c = r.Clauses.FindFirst(x => x?.clauseType == clauseType && x?.clause == r2);
+                if (c != null)
+                    return r;
+            }
+        }
+        //figure out if a new instance is needed
+
+        // Create a new instances of the source
+        Thing newInstance = GetOrAddThing(r1.source.Label + "*", r1.source);
+        //move the existing relationship down
+        r1.source.RemoveRelationship(r1);
+        r1.source = newInstance;
+        Relationship r3 = r1.source.AddRelationship(r1.target, r1.relType);
+        r3.isStatement = false;  //make this conditional
+        r2.isStatement = false;
+        //add the clause
+        r3.AddClause(clauseType, r2);
+        AddStatement(newInstance, "hasProperty", "isInstance");
+        return r3;
+    }
 }

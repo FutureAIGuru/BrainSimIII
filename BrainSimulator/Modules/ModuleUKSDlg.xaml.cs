@@ -48,7 +48,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         if (!base.Draw(checkDrawTimer)) return false;
         if (busy) return false;
         if (!checkBoxAuto.IsChecked == true) { return false; }
-        RefreshButton_Click(null, null);
+        Refresh();
         return true;
     }
 
@@ -229,6 +229,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         foreach (Relationship r in sortedReferences)
         {
             if (r.relType?.Label == "has-child") continue;
+            if (!r.isStatement && showConditionals.IsChecked != true) continue; //hide conditionals
+            //special case for values 
             if (r.target != null && r.target.HasAncestorLabeled("Value"))
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r) };
@@ -236,10 +238,10 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 tviRefLabel.Items.Add(tviRef);
                 totalItemCount++;
             }
-            else if (r.relType is not null) //should ALWAYS be true
+            else 
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r), };
-
+                if (!r.isStatement) tviRef.Header = "*" + tviRef.Header;
                 if (r.source != t) tviRef.Header = r.source?.Label + "->" + tviRef.Header;
                 tviRef.ContextMenu = GetRelationshipContextMenu(r);
                 tviRefLabel.Items.Add(tviRef);
@@ -485,7 +487,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (tParent != null)
             {
                 textBoxRoot.Text = tParent.Label;
-                RefreshButton_Click(null, null);
+                Refresh();
             }
             Thing t = (Thing)m.GetValue(ThingObjectProperty);
             if (t == null)
@@ -493,7 +495,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 Relationship r = (Relationship)m.GetValue(RelationshipObjectProperty);
                 (r.source as Thing).RemoveRelationship(r);
                 //force a repaint
-                RefreshButton_Click(null, null);
+                Refresh();
                 return;
             }
             ModuleUKS parent = (ModuleUKS)ParentModule;
@@ -534,11 +536,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     break;
                 case "Make Root":
                     textBoxRoot.Text = t.Label;
-                    RefreshButton_Click(null, null);
+                    Refresh();
                     break;
             }
             //force a repaint
-            RefreshButton_Click(null, null);
+            Refresh();
         }
     }
 
@@ -676,7 +678,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         ModuleUKS parent = (ModuleUKS)ParentModule;
         if (parent == null) return;
         parent.SetSavedDlgAttribute("Root", textBoxRoot.Text);
-        RefreshButton_Click(null, null);
+        Refresh();
 
     }
 
@@ -743,7 +745,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     }
 
 
-    private void RefreshButton_Click(object sender, RoutedEventArgs e)
+    private void Refresh()
     {
         try
         {
@@ -772,7 +774,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
 
-        //parent.theUKS.UKSList.Clear();
+        //this hack is needed to preserve the info relating to module layout
         for (int i = 0; i < parent.theUKS.UKSList.Count; i++)
         {
             Thing t = parent.theUKS.UKSList[i];
@@ -784,7 +786,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (t.Label == "hasAttribute") continue;
             if (t != null)
             {
-                //                    parent.theUKS.DeleteAllChildren(t);
                 parent.theUKS.DeleteThing(t);
                 i--;
             }
@@ -799,7 +800,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         string root = parent.GetSavedDlgAttribute("root");
         if (string.IsNullOrEmpty(root)) root = "Thing";
         textBoxRoot.Text = root;
-        RefreshButton_Click(null, null);
+        Refresh();
     }
 
     private void CollapseAll()
