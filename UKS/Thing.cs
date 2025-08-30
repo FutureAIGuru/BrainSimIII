@@ -255,7 +255,7 @@ public partial class Thing
     }
 
     /// <summary>
-    /// Rrecursively gets all descendents of a Thing. Use with caution as this might be a large list
+    /// Recursively gets all descendents of a Thing. Use with caution as this might be a large list
     /// </summary>
     public IEnumerable<Thing> Descendents
     {
@@ -459,10 +459,11 @@ public partial class Thing
     }
 
 
-    public void RemoveRelationship(Thing t2, Thing relationshipType)
+    public Relationship RemoveRelationship(Thing t2, Thing relationshipType)
     {
         Relationship r = new() { source = this, reltype = relationshipType, target = t2 };
         RemoveRelationship(r);
+        return r;
     }
 
 
@@ -474,7 +475,7 @@ public partial class Thing
         {
             for (int i = 0; i < Relationships.Count; i++)
             {
-                if (Relationships[i].target.HasAncestor(t))
+                if (Relationships[i].target != null && Relationships[i].target.HasAncestor(t))
                 {
                     retVal.Add(Relationships[i]);
                 }
@@ -530,7 +531,7 @@ public partial class Thing
 
     public Thing AttributeOfType(string label)
     {
-        foreach (Relationship r in relationships)
+        foreach (Relationship r in Relationships)
             if (r.reltype.HasAncestorLabeled(label))
                 return r.target;
         return null;
@@ -538,10 +539,10 @@ public partial class Thing
 
     public Thing GetAttribute(Thing t)
     {
-        foreach (Relationship r in relationships)
+        foreach (Relationship r in Relationships)
         {
             if (r.relType.Label != "hasAttribute" && r.relType.Label != "is") continue;
-            if (r.target.HasAncestor(t))
+            if (r.target != null && r.target.HasAncestor(t))
                 return r.target;
         }
         return null;
@@ -549,7 +550,7 @@ public partial class Thing
     public List<Thing> GetAttributes()
     {
         List<Thing> retVal = new();
-        foreach (Relationship r in relationships)
+        foreach (Relationship r in Relationships)
         {
             if (r.relType.Label != "hasAttribute" && r.relType.Label != "is") continue;
             retVal.Add(r.target);
@@ -563,7 +564,7 @@ public partial class Thing
 
     public bool HasProperty(Thing t)
     {
-        foreach (Relationship r in relationships)
+        foreach (Relationship r in Relationships)
             if (r.reltype.Label.ToLower() == "hasproperty" && r.target == t)
                 return true;
         foreach (Thing t1 in Parents)

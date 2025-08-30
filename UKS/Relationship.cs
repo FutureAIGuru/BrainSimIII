@@ -130,7 +130,7 @@ public class Relationship
     /// </summary>
     public List<Clause> Clauses { get => clauses; set => clauses = value; }
     /// <summary>
-    /// The list of Clauses for which this is the Target Relatiosnmhip
+    /// The list of Clauses for which this is the Target Relationship
     /// </summary>
     public List<Relationship> clausesFrom = new();
 
@@ -271,7 +271,7 @@ public class Relationship
         //handle Clauses
         //TODO prevent general circular reference stack overflow
         foreach (Clause c in Clauses)
-            allModifierString += c.clauseType.Label + " " + c.clause.ToString(stack) + " ";
+            allModifierString += c.clauseType?.Label + " " + c.clause.ToString(stack) + " ";
 
         if (allModifierString != "")
             retVal += " " + allModifierString;

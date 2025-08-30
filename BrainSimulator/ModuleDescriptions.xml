@@ -110,4 +110,19 @@ After the query is performed, any Things in the Filter box will limit the result
 
 Given a number of dogs, some of which are defined as having 4 legs, the having-4-legs attributes  can be added to the "Dog" node. This makes the original relationship(s) redundant and they can subsequently be removed by the "Remove Redundancy"  Agent.</description>
   </ModuleDescription>
+  <ModuleDescription>
+    <moduleName>ModuleTextFile</moduleName>
+    <description>This module imports and exports UKS content to/from a text file in an easy-to-read format.  
+
+Import:
+1. Press "Import” 
+2. Select a .txt file to import
+Content will be added to the UKS using the names of Things in the text file.  That way, it can append new data to existing content, but be sure that usage is consistent across multiple data sources.
+
+Export:
+1. In the UKS display dialog, select the root of the data to be saved. All descendants of that thing will be parsed and saved.
+2. Press “Export”
+3. Select the file location… the system will overwrite existing files.
+</description>
+  </ModuleDescription>
 </ArrayOfModuleDescription>
