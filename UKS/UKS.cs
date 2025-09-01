@@ -12,16 +12,16 @@ public partial class UKS
 
     //This is a temporary copy of the UKS which used internally during the save and restore process to 
     //break circular links by storing index values instead of actual links Note the use of SThing instead of Thing
-    private  List<SThing> UKSTemp = new();
+    private List<SThing> UKSTemp = new();
 
     /// <summary>
     /// Occasionally a list of all the Things in the UKS is needed. This is READ ONLY.
     /// There is only one (shared) list for the App.
     /// </summary>
-    public IList<Thing> UKSList { get => uKSList;}
+    public IList<Thing> UKSList { get => uKSList; }
 
     //TimeToLive processing for relationships
-    static public  List<Relationship> transientRelationships = new List<Relationship>();
+    static public List<Relationship> transientRelationships = new List<Relationship>();
     static Timer stateTimer;
     /// <summary>
     /// Creates a new reference to the UKS and initializes it if it is the first reference. 
@@ -37,7 +37,7 @@ public partial class UKS
         UKSTemp.Clear();
 
         var autoEvent = new AutoResetEvent(false);
-        stateTimer = new Timer(RemoveExpiredRelationships,autoEvent,0, 1000);
+        stateTimer = new Timer(RemoveExpiredRelationships, autoEvent, 0, 1000);
     }
 
     static bool isRunning = false;
@@ -193,7 +193,7 @@ public partial class UKS
         return results;
     }
 
-    private  bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
+    private bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
     {
         //are two relationships mutually exclusive?
         //yes if they differ by a single component property
@@ -349,7 +349,7 @@ public partial class UKS
     {
         foreach (Relationship r1 in r.source.Relationships)
         {
-            if (RelationshipsAreEqual (r,r1)) return r1;
+            if (RelationshipsAreEqual(r, r1)) return r1;
         }
         return null;
     }
@@ -477,6 +477,28 @@ public partial class UKS
         thingToReturn = ThingLabels.GetThing(label);
         if (thingToReturn != null) return thingToReturn;
 
+        //are used to indicate that a new instance is needed
+        if (label.Contains(".") && label != "." && !label.Contains(".py"))
+        {
+            string[] attribs = label.Split(".");
+            Thing baseThing = Labeled(attribs[0]);
+            if (baseThing == null) baseThing = AddThing(attribs[0], "unknownObject"); 
+            Thing instanceThing = Labeled(label);
+            if (instanceThing == null)
+            {
+                instanceThing = AddThing(label, baseThing);
+            }
+            for (int i = 1; i < attribs.Length; i++)
+            {
+                Thing attrib = Labeled(attribs[i]);
+                if (attrib == null) 
+                    attrib = AddThing(attribs[i], "unknownObject");
+                instanceThing.AddRelationship(attrib, "is");
+            }
+            return instanceThing;
+        }
+
+
         Thing correctParent = null;
         if (parent is string s)
             correctParent = ThingLabels.GetThing(s);
@@ -509,31 +531,45 @@ public partial class UKS
         return thingToReturn;
     }
 
-    public Relationship AddClause(Relationship r1, Thing clauseType, Relationship r2)
+    public Relationship AddClause(Relationship r1, Thing clauseType, Thing source, Thing relType, Thing target)
     {
         //does this relation/clause already exist?
+        //rTemp is an orpan...not a real linked-up relationship
+        Relationship rTemp = new() { source = source, reltype = relType, target = target, Weight = .9f, isStatement = false };
         foreach (Thing t in r1.source.Children)
         {
             foreach (Relationship r in t.Relationships)
             {
-                Clause? c = r.Clauses.FindFirst(x => x?.clauseType == clauseType && x?.clause == r2);
+                Clause? c = r.Clauses.FindFirst(x => x?.clauseType == clauseType && x?.clause == rTemp);
                 if (c != null)
                     return r;
             }
         }
-        //figure out if a new instance is needed
 
-        // Create a new instances of the source
-        Thing newInstance = GetOrAddThing(r1.source.Label + "*", r1.source);
-        //move the existing relationship down
-        r1.source.RemoveRelationship(r1);
-        r1.source = newInstance;
-        Relationship r3 = r1.source.AddRelationship(r1.target, r1.relType);
-        r3.isStatement = false;  //make this conditional
-        r2.isStatement = false;
+        //figure out if a new instance is needed
+        bool newInstanceNeeded = false;
+        if (clauseType.Label.ToLower() == "if") newInstanceNeeded = true;
+
+
+        Relationship rRoot = r1;
+
+        if (newInstanceNeeded)
+        {
+            // Create a new instances of the source
+            Thing newInstance = GetOrAddThing(r1.source.Label + "*", r1.source);
+            //move the existing relationship down
+            rRoot = new();
+            r1.source.RemoveRelationship(r1);
+            rRoot.source = newInstance;
+            rRoot = rRoot.source.AddRelationship(r1.target, r1.relType, false);
+            AddStatement(rRoot.source, "hasProperty", "isInstance");
+        }
+        //make rTemp into a real relationship
+        rTemp = rTemp.source.AddRelationship(rTemp.target, rTemp.relType, !newInstanceNeeded);
+
         //add the clause
-        r3.AddClause(clauseType, r2);
-        AddStatement(newInstance, "hasProperty", "isInstance");
-        return r3;
+        rRoot.AddClause(clauseType, rTemp);
+        rRoot.isStatement = false;
+        return rRoot;
     }
 }

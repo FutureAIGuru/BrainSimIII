@@ -124,25 +124,29 @@ public partial class UKS
         // Build relationships for each [S,R,O(,N)?]
         var rels = new List<Relationship>();
         bool isStatement = tokens.Count < 3;
-        for (int i = 0; i < tokens.Count; i += 2)
-        {
-            var stmt = ParseBracketStmt(tokens[i], lineNo);
-            Relationship r = AddRelStmt(stmt,isStatement);
-            rels.Add(r);
-            r.isStatement = isStatement;
-        }
+
+        var stmt = ParseBracketStmt(tokens[0], lineNo);
+        Relationship r = AddRelStmt(stmt);
+        r.isStatement = isStatement;
 
         // Connect adjacent relationships with AddClause(connector)
         for (int i = 1, relIndex = 0; i < tokens.Count; i += 2, relIndex++)
         {
             string relTypeConnector = tokens[i];
+            stmt = ParseBracketStmt(tokens[i+1], lineNo);
             if (relTypeConnector == "AFTER")
             { }
             Thing t = Labeled(relTypeConnector);
             if (t == null)
                 t = AddThing(relTypeConnector, "ClauseType");
-            Relationship r =  AddClause(rels[relIndex],relTypeConnector, rels[relIndex + 1]);
-            r.isStatement = isStatement;
+            Relationship r1 = new()
+            {
+                source = GetOrAddThing(stmt.S),
+                reltype = GetOrAddThing(stmt.R),
+                target = GetOrAddThing(stmt.O)
+            };
+            Relationship r2 = AddClause(r,  t, r1.source, r1.reltype, r1.target);
+            //r.isStatement = isStatement;
         }
 
         return true;
@@ -170,13 +174,13 @@ public partial class UKS
     }
 
     // Adds a relationship, honoring numeric sugar (N → R.N + has-value + number typing)
-    private Relationship AddRelStmt(BrStmt s,bool isSatement)
+    private Relationship AddRelStmt(BrStmt s)
     {
         string[] source = s.S.Split(".");
         string[] relType = s.R.Split(".");
         string[] target = s.O.Split(".");
 
-        Relationship r = AddStatement(source[0], relType[0], target[0], source[1..], relType[1..], target[1..], isSatement);
+        Relationship r = AddStatement(source[0], relType[0], target[0], source[1..], relType[1..], target[1..]);
         if (s.N is { } n)
         {
             if (float.TryParse(s.N, out float weight))

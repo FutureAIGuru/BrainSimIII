@@ -404,6 +404,7 @@
     <Resource Include="Resources\UserInterface\MainWindow\WINDOWS-ICON-Move.png" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
     <PackageReference Include="pythonnet" Version="3.0.5" />

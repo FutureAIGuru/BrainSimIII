@@ -334,6 +334,7 @@ public partial class Thing
             relType = relationshipType,
             source = this,
             target = target,
+            isStatement = isStatement
         };
         if (target != null && relationshipType != null)
         {
