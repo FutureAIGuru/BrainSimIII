@@ -21,7 +21,7 @@
         <CheckBox x:Name="showConditionals" IsChecked="False" Content="Show Conditionals" HorizontalAlignment="Left" Margin="256,39,0,0" Width="161" Checked="CheckBoxAuto_Checked" Unchecked="CheckBoxAuto_Unchecked" FontSize="16" RenderTransformOrigin="1.073,-0.658" Height="19" VerticalAlignment="Top"/>
 
         <Label Content="Root:" HorizontalAlignment="Left" Margin="424,4,0,0" Width="90" FontSize="16" Height="35" VerticalAlignment="Top"/>
-        <TextBox x:Name="textBoxRoot" HorizontalAlignment="Left" Margin="467,8,0,0" TextWrapping="Wrap" Text="Thing" Width="250" TextChanged="textBoxRoot_TextChanged" PreviewKeyDown="TextBoxRoot_KeyDown" FontSize="16" Height="25" VerticalAlignment="Top"/>
+        <TextBox x:Name="textBoxRoot" HorizontalAlignment="Left" Margin="467,8,0,0" TextWrapping="Wrap" Text="Thing" Width="150" TextChanged="textBoxRoot_TextChanged" PreviewKeyDown="TextBoxRoot_KeyDown" FontSize="16" Height="25" VerticalAlignment="Top"/>
         <Label Content="" x:Name="statusLabel"  HorizontalAlignment="Left" Margin="424,33,0,0" Width="300" FontSize="16" Height="35" VerticalAlignment="Top"/>
         <Button x:Name="InitializeButton" Content="Initialize" VerticalAlignment="Top" Height="27" Click="InitializeButton_Click" Margin="18,19,0,0" FontSize="16" HorizontalAlignment="Left" Width="108"   />
     </Grid>

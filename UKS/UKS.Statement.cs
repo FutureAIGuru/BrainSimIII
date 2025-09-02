@@ -23,42 +23,45 @@ public partial class UKS
     /// <param name="oTypeAttributes">Same</param>
     /// <param name="oTargetAttributess">Same</param>
     /// <returns>The primary relationship which was created (others may be created for given attributes</returns>
-    public Relationship AddStatement(
-        object oSource, object oRelationshipType, object oTarget,
-        object oSourceProperties = null,
-        object oTypeProperties = null,
-        object oTargetProperties = null,
+    public Relationship AddStatement(object  oSource, object oRelationshipType, object oTarget,
+        //object oSourceProperties = null,
+        //object oTypeProperties = null,
+        //object oTargetProperties = null,
         bool isStatement = true
                     )
     {
         //Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
-            Thing source = ThingFromObject(oSource);
-            Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
-            Thing target = ThingFromObject(oTarget);
+        Thing source = ThingFromObject(oSource);
+        Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
+        Thing target = ThingFromObject(oTarget);
 
-            List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
-            List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "Action");
-            List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
+        //List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
+        //List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "Action");
+        //List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
 
-            Relationship theRelationship = AddStatement(source, relationshipType, target, 
-                sourceModifiers, relationshipTypeModifiers, targetModifiers,isStatement);
-            return theRelationship;
+        //        Relationship theRelationship = AddStatement(source, relationshipType, target,
+        //            sourceModifiers, relationshipTypeModifiers, targetModifiers, isStatement);
+        Relationship theRelationship = AddStatementAbs(source, relationshipType, target,
+            isStatement);
+        return theRelationship;
     }
 
-    private Relationship AddStatement(
-                    Thing source, Thing relType, Thing target,
-                    List<Thing> sourceProperties,
-                    List<Thing> typeProperties,
-                    List<Thing> targetProperties,
-                    bool isStatement = true
-            )
+    //private Relationship AddStatement(
+    //                Thing source, Thing relType, Thing target,
+    //                List<Thing> sourceProperties,
+    //                List<Thing> typeProperties,
+    //                List<Thing> targetProperties,
+    //                bool isStatement = true
+    //        )
+    private Relationship AddStatementAbs(Thing source, Thing relType, Thing target, bool isStatement = true)
     {
         if (source == null || relType == null) return null;
 
         //this replaces pronouns with antecedents
         ////if (HandlePronouns(r)) return r;
 
-        Relationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
+        //        Relationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
+        Relationship r = CreateTheRelationship(source, relType, target);
         r.isStatement = isStatement;
 
         //does this relationship already exist (without conditions)?
@@ -145,14 +148,14 @@ public partial class UKS
         Thing bestMatch = null;
         List<Thing> missingAttributes = new();
 
-        Thing source1 = SubclassExists(source, sourceProperties,ref bestMatch,ref missingAttributes);
+        Thing source1 = SubclassExists(source, sourceProperties, ref bestMatch, ref missingAttributes);
         if (source1 == null)
         {
             source1 = CreateSubclass(bestMatch, missingAttributes);
         }
         source = source1;
 
-        Thing target1 = SubclassExists(target, targetProperties,ref bestMatch, ref missingAttributes);
+        Thing target1 = SubclassExists(target, targetProperties, ref bestMatch, ref missingAttributes);
         if (target1 == null)
         {
             target1 = CreateSubclass(bestMatch, missingAttributes);
@@ -164,7 +167,7 @@ public partial class UKS
         {
             relType1 = CreateSubclass(bestMatch, missingAttributes);
         }
- 
+
         relType = relType1;
 
         Relationship r = new Relationship()
@@ -261,7 +264,7 @@ public partial class UKS
         //attrs now contains the remaing attributes we need to find in a descendent
         //bestMatch = null;
         //missingAttributes = new List<Thing>();
-        return ChildHasAllAttributes(t, attrs,ref bestMatch, ref missingAttributes);
+        return ChildHasAllAttributes(t, attrs, ref bestMatch, ref missingAttributes);
     }
 
     List<Thing> GetDirectAttributes(Thing t)
@@ -274,7 +277,7 @@ public partial class UKS
         }
         return retVal;
     }
-    private Thing ChildHasAllAttributes(Thing t, List<Thing> attrs,ref Thing bestMatch, ref List<Thing>missingAttributes, List<Thing> alreadyVisited = null)
+    private Thing ChildHasAllAttributes(Thing t, List<Thing> attrs, ref Thing bestMatch, ref List<Thing> missingAttributes, List<Thing> alreadyVisited = null)
     {
         //circular reference protection
         if (alreadyVisited == null) alreadyVisited = new List<Thing>();
@@ -298,7 +301,7 @@ public partial class UKS
                 bestMatch = child;
             }
             //search any children with the remaining needed attributes
-            Thing retVal = ChildHasAllAttributes(child, localAttrs,ref bestMatch, ref missingAttributes,alreadyVisited);
+            Thing retVal = ChildHasAllAttributes(child, localAttrs, ref bestMatch, ref missingAttributes, alreadyVisited);
             if (retVal != null)
                 return retVal;
             localAttrs = new List<Thing>(attrs);
@@ -319,7 +322,7 @@ public partial class UKS
         string newLabel = t.Label;
         foreach (Thing t1 in attributes)
         {
-            newLabel += ((t1.Label.StartsWith("."))?"":".") + t1.Label;
+            newLabel += ((t1.Label.StartsWith(".")) ? "" : ".") + t1.Label;
         }
         //create the new thing which is child of the original
         Thing retVal = AddThing(newLabel, t);
@@ -389,7 +392,7 @@ public partial class UKS
                             r.target.RelationshipsFromWriteable.Add(r);
                         if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
                             r.reltype.RelationshipsAsTypeWriteable.Add(r);
-                    
+
                     }
         }
     }

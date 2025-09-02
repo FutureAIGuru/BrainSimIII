@@ -10,10 +10,7 @@ public partial class UKS
     /// Emits facts as [S,R,O] (or [S,R,O,N] when R is a numeric specialization like "has.4").
     /// Optionally emits simple clause pairs if Relationship exposes a Clauses collection.
     /// </summary>
-    public void ExportTextFile(
-        string root,
-        string path,
-        int maxDepth = 12)
+    public void ExportTextFile(string root,string path,int maxDepth = 12)
     {
         if (string.IsNullOrWhiteSpace(root)) throw new ArgumentException("Start label is required.", nameof(root));
 
@@ -180,7 +177,7 @@ public partial class UKS
         string[] relType = s.R.Split(".");
         string[] target = s.O.Split(".");
 
-        Relationship r = AddStatement(source[0], relType[0], target[0], source[1..], relType[1..], target[1..]);
+        Relationship r = AddStatement(source[0], relType[0], target[0]);
         if (s.N is { } n)
         {
             if (float.TryParse(s.N, out float weight))

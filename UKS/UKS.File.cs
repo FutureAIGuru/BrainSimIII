@@ -29,11 +29,14 @@ public partial class UKS
 
         AddStatement("is-a", "inverseOf", "has-child");
         AddStatement("has", "is-a", "RelationshipType");
-        AddStatement("Property","is-a", "RelationshipType");
+
+        //properties are intenal capabilities of nodes
+        AddStatement("Property", "is-a", "RelationshipType");
         AddStatement("isExclusive", "is-a", "Property");
         AddStatement("isTransitive", "is-a", "Property");
         AddStatement("isInstance", "is-a", "Property");
         AddStatement("isTransitive", "is-a", "Property");
+        AddStatement("isCommutative", "is-a", "Property");
         AddStatement("allowMultiple", "is-a", "Property");
         AddStatement("isCommutative", "is-a", "Property");
         //        AddStatement("is-part-of", "is-a", "RelationshipType");

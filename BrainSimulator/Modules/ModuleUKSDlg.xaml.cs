@@ -517,7 +517,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     break;
                 case "Fetch GPT Info":
                     //the following is an async call so an immediate refresh is not useful
-                    ModuleGPTInfo.GetChatGPTData(t.Label);
+                    //ModuleGPTInfo.GetChatGPTData(t.Label);
                     break;
                 case "Delete":
                     theUKS.DeleteAllChildren(t);

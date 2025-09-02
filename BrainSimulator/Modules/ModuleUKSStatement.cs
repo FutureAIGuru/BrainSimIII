@@ -68,29 +68,10 @@ namespace BrainSimulator.Modules
         {
             GetUKS();
             if (theUKS == null) return null;
-            IPluralize pluralizer = new Pluralizer();
 
-
-            source = source.Trim();
-            target = target.Trim();
-            relationshipType = relationshipType.Trim();
-
-            string[] tempStringArray = source.Split(' ');
-            List<string> sourceModifiers = new();
-            if (source.Length > 0 && !char.IsUpper(source[0]))
-                source = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
-            for (int i = 0; i < tempStringArray.Length - 1; i++) sourceModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
-
-            tempStringArray = target.Split(' ');
-            List<string> targetModifiers = new();
-            if (target.Length > 0 && !char.IsUpper(target[0]))
-                target = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
-            for (int i = 0; i < tempStringArray.Length - 1; i++) targetModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
-
-            tempStringArray = relationshipType.Split(' ');
-            List<string> typeModifiers = new();
-            relationshipType = pluralizer.Singularize(tempStringArray[0]);
-            for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+            Thing tSource = GetInstanceFromString(source, false);
+            Thing tRelType = GetInstanceFromString(relationshipType, true);
+            Thing tTarget = GetInstanceFromString(target, false);
 
             if (target == "" && relationshipType == "is-a")
             {
@@ -99,12 +80,41 @@ namespace BrainSimulator.Modules
                 return null;
             }
 
-
-            Relationship r = theUKS.AddStatement(source, relationshipType, target, sourceModifiers, typeModifiers, targetModifiers);
-
+            Relationship r = theUKS.AddStatement(tSource, tRelType, tTarget, true);
             return r;
         }
 
+        Thing GetInstanceFromString(string label, bool attributesFollow)
+        {
+            IPluralize pluralizer = new Pluralizer();
+            label = label.Trim();
+            string[] tempStringArray = label.Split(' ');
+            if (tempStringArray.Length == 0 || tempStringArray[0].Length == 0) return null;
+
+            for (int i = 0; i < tempStringArray.Length; i++)
+                if (!char.IsUpper(tempStringArray[i][0]))
+                    tempStringArray[i] = pluralizer.Singularize(tempStringArray[i]);
+
+            string thingLabel;
+            if (attributesFollow)
+            {
+                thingLabel = tempStringArray[0];
+                for (int i = 1; i < tempStringArray.Length; i++)
+                    if (!string.IsNullOrEmpty(tempStringArray[i]))
+                        thingLabel += "." + tempStringArray[i];
+            }
+            else
+            {
+                int last = tempStringArray.Length - 1;
+                thingLabel = tempStringArray[last];
+                for (int i=0; i < last; i++)
+                    if (!string.IsNullOrEmpty(tempStringArray[i]))
+                        thingLabel += "." + tempStringArray[i];
+            }
+
+            Thing t = theUKS.GetOrAddThing(thingLabel);
+            return t;
+        }
 
         public static List<Thing> ThingListFromString(string source)
         {

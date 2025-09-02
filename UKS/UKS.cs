@@ -477,7 +477,7 @@ public partial class UKS
         thingToReturn = ThingLabels.GetThing(label);
         if (thingToReturn != null) return thingToReturn;
 
-        //are used to indicate that a new instance is needed
+        //. are used to indicate attributes to be added
         if (label.Contains(".") && label != "." && !label.Contains(".py"))
         {
             string[] attribs = label.Split(".");
