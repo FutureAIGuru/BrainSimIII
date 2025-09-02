@@ -66,6 +66,9 @@ namespace BrainSimulator.Modules
             var client = new HttpClient();
             string answerString = "";
 
+            // Current model being used (as of 9/2/2025) is gpt-4.1-nano-2025-04-14
+            string model_name = ConfigurationManager.AppSettings["OPENAI_MODEL"];
+            if (string.IsNullOrWhiteSpace(model_name)) model_name = "gpt-4o-mini";
 
             // Define the request body
             var requestBody = new
@@ -77,7 +80,7 @@ namespace BrainSimulator.Modules
                 //model = ConfigurationManager.AppSettings["FineTunedModel"],
                 //model = "gpt-4o", //not fine-tuned
                 //model = "gpt-3.5-turbo", //not fine-tuned
-                model = "gpt-4o-mini",
+                model = model_name,
                 messages = new[] { new { role = "system", content = systemText }, new { role = "user", content = userText } },
             };
 

@@ -8,20 +8,10 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Reflection.Emit;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Pluralize.NET;
 using UKS;
-using static System.Net.WebRequestMethods;
-using static BrainSimulator.Modules.ModuleOnlineInfo;
 
 namespace BrainSimulator.Modules
 {
@@ -706,35 +696,95 @@ Examples:
 Input:
 Fido is a dog that talks.
 Return:
-Fido is-a dog, Fido can talk
+Fido is-a dog,Fido can talk
 
 Input:
 Brazil is a country. Countries have capitals.
 Return: 
-Brazil is-a country, country has capital
+Brazil is-a country,country has capital
 
 Input:
 Jenny can walk. She enjoys walking.
 Return:
-Jenny can walk, Jenny enjoy walks
+Jenny can walk,Jenny enjoy walks
+
+Input:
+Fido can play outside if the weather is sunny. Fido likes to play. Dinosuars are extinct animals.
+Return:
+Fido can play IF weather is sunny,Fido likes playing,dinosaurs are extinct,dinosaurs is-a animal
+
+Input:
+Mary is at the store with George. They are buying biscuits.
+Return:
+Mary at store WITH George at store,Mary buys biscuit,George buy biscuit
 
 
 
 Rules:
-- OUTPUT ONLY DECLARATIVE STATEMENTS that assert a fact or relation. 
-- IGNORE questions, commands, requests, opinions, jokes, hypotheticals, or conditionals without asserted consequence.
+- OUTPUT ONLY DECLARATIVE STATEMENTS that assert a fact or relationship.
+- There are two types of statements, regular ones and clauses that connect two relationships with a relationship.
+- All regular statements have 3 items in them, the format is as follows: origin relationship target
+- All clause statements have 7 items in them, the format is as follows: origin_1 relationship_1 target_1 CLAUSE origin_2 relationship_2 target_2
+- IGNORE questions, commands, requests, opinions, jokes, or hypotheticals.
 - Canonicalize: strip leading articles, remove trailing punctuation, title-case common nouns (keep ALLCAPS and numbers).
 - Be faithful to the text; don't infer unspecified facts.
 - If no valid statements exist, return nothing";
 
-            // Add conditionals later: - For conditionals that assert a rule (e.g., ""If X then Y"" stated as a rule), emit predicate ""implies"" and include the whole clause texts as subject/object phrases.
-
 
             string gptResults = await GPT.GetGPTResult(userInput, systemText);
 
-            Debug.WriteLine(gptResults);
+            Debug.WriteLine("RESULTS: " + gptResults);
 
-            string[] parents = gptResults.Split(',');
+            string[] seperatedResults = gptResults.Split(',');
+
+            foreach (string seperator in seperatedResults)
+            {
+                string[] items = seperator.Split(" ");
+
+                // Basic Statements
+                if (items.Length == 3)
+                {
+                    Debug.WriteLine("Statement: " + seperator);
+                    Relationship r = MainWindow.theUKS.AddStatement(items[0], items[1], items[2]);
+                    // Debug.WriteLine("Rel is " + r);
+                    if (r == null)
+                    {
+                        Debug.WriteLine($"Relationship: {r} in natural to UKS is null!");
+                    }
+                }
+                // Clauses
+                else if (items.Length == 7)
+                {
+                    Debug.WriteLine("Clause: " + seperator);
+
+                    // Setting up the values from GPT
+                    string newThing = items[0].Trim();
+                    string relationType = items[1].Trim();
+                    string targetThing = items[2].Trim();
+
+                    string clauseType = items[3].Trim();
+
+                    string newThing2 = items[4].Trim();
+                    string relationType2 = items[5].Trim();
+                    string targetThing2 = items[6].Trim();
+
+
+                    // Add relationships and clause
+                    Relationship r1 = AddRelationshipClause(newThing, targetThing, relationType);
+
+                    Relationship r2 = AddRelationshipClause(newThing2, targetThing2, relationType2);
+
+                    Thing theClauseType = GetClauseType(clauseType);
+
+                    r1.AddClause(theClauseType, r2);
+
+                    ModuleGPTInfoDlg.relationshipCount += 1;
+                }
+                else
+                {
+                    Debug.WriteLine($"Error! Statement '{seperator}' does not have 3 nor 7 items! (Neither statement nor clause).");
+                }
+            }
 
 
 
