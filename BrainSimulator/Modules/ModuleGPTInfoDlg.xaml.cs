@@ -330,7 +330,94 @@ namespace BrainSimulator.Modules
             SetOutputText($"\n\rDone! Duplicates resolved: {relationshipCount}.");
         }
 
-        
+        // Task to read NLP sentences and convert to UKS.
+
+        /// <summary>
+        /// Function that takes natural language sentences and sends them to ModuleGPTToUKS to handle.
+        /// </summary>
+        private async void ProcessNLPAsync()
+        {
+            try
+            {
+                MainWindow.SuspendEngine();
+                txtOutput.Text = "Select a .txt file with natural-language sentences…";
+
+                // 1) Let user choose a file
+                using var openFileDialog = new System.Windows.Forms.OpenFileDialog
+                {
+                    Title = "Select a text file",
+                    Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*",
+                    CheckFileExists = true,
+                    Multiselect = false
+                };
+
+                if (openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                {
+                    txtOutput.Text = "No file selected.";
+                    return;
+                }
+
+                string filePath = openFileDialog.FileName;
+
+                // 2) Read entire file as text
+                string text;
+                try
+                {
+                    text = await File.ReadAllTextAsync(filePath);
+                }
+                catch (IOException ioex)
+                {
+                    SetOutputText("An error occurred while reading the file:\n" + ioex.Message);
+                    return;
+                }
+
+                // 3) Split into sentences for counting purposes only for now. (simple heuristic; adjust if one has a better splitter)
+                //    This splits on ., !, ? followed by whitespace. Keeps punctuation attached to the sentence.
+                var sentences = System.Text.RegularExpressions.Regex
+                    .Split(text, @"(?<=[\.!\?])\s+")
+                    .Select(s => s.Trim())
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .ToList();
+
+                if (sentences.Count == 0)
+                {
+                    txtOutput.Text = "No sentences found in the file.";
+                    return;
+                }
+
+                // Optional: cap the number of sentences if one wants a quick test cycle for a larger file.
+                // int sentenceMax = 50;
+                // if (sentences.Count > sentenceMax) sentences = sentences.Take(sentenceMax).ToList();
+
+                txtOutput.Text = $"Read (an estimated count of) {sentences.Count} sentence(s). Sending to GPT→UKS module…";
+
+                // 4) Hand off to the LLM→UKS module (adjust signature/types as needed)
+                string report;
+                try
+                {
+                    await ModuleGPTInfo.NaturalToUKS(text);
+                    //Debug.WriteLine("Report is " + report);
+                }
+                catch (Exception ex)
+                {
+                    // If the module throws, surface a friendly message
+                    SetOutputText("An error occurred in ModuleGPTInfo:\n" + ex.Message);
+                    return;
+                }
+
+                // 5) Show result/summary in the UI
+                txtOutput.Text = $"Processed (an estimated count of) {sentences.Count} sentence(s) via GPT→UKS.";
+            }
+            finally
+            {
+                // Make sure the engine is resumed even if something fails
+                try { MainWindow.ResumeEngine(); } catch { /* ignore */ }
+            }
+        }
+
+
+
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -359,6 +446,10 @@ namespace BrainSimulator.Modules
                 else if (b.Content.ToString().StartsWith("Remove Duplicates"))
                 {
                     SolveDuplicatesAsync();
+                }
+                else if (b.Content.ToString().StartsWith("NLP File"))
+                {
+                    ProcessNLPAsync();
                 }
                 else //process unknowns
                 {

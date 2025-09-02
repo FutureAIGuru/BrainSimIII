@@ -8,11 +8,19 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection.Emit;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Pluralize.NET;
 using UKS;
+using static System.Net.WebRequestMethods;
 using static BrainSimulator.Modules.ModuleOnlineInfo;
 
 namespace BrainSimulator.Modules
@@ -674,5 +682,68 @@ is-part-of-speech, ";
 
         }
 
+
+        /// <summary>
+        /// Function to turn natural language sentences into UKS statements.
+        /// </summary>
+        public static async Task NaturalToUKS(string userInput)
+        {
+            if (userInput == null || userInput.Length == 0)
+                Debug.WriteLine("# UKS: (no input)\n");
+            
+            string apiKey = ConfigurationManager.AppSettings["APIKey"];
+
+            if (string.IsNullOrWhiteSpace(apiKey))
+                Debug.WriteLine("# UKS: OPENAI_API_KEY not set; cannot call ChatGPT.\n");
+
+            var model = ConfigurationManager.AppSettings["OPENAI_MODEL"];
+            if (string.IsNullOrWhiteSpace(model)) model = "gpt-4o-mini";
+
+            // Build request
+            var systemText = @"You extract knowledge from user-provided sentences.
+
+Examples:
+Input:
+Fido is a dog that talks.
+Return:
+Fido is-a dog, Fido can talk
+
+Input:
+Brazil is a country. Countries have capitals.
+Return: 
+Brazil is-a country, country has capital
+
+Input:
+Jenny can walk. She enjoys walking.
+Return:
+Jenny can walk, Jenny enjoy walks
+
+
+
+Rules:
+- OUTPUT ONLY DECLARATIVE STATEMENTS that assert a fact or relation. 
+- IGNORE questions, commands, requests, opinions, jokes, hypotheticals, or conditionals without asserted consequence.
+- Canonicalize: strip leading articles, remove trailing punctuation, title-case common nouns (keep ALLCAPS and numbers).
+- Be faithful to the text; don't infer unspecified facts.
+- If no valid statements exist, return nothing";
+
+            // Add conditionals later: - For conditionals that assert a rule (e.g., ""If X then Y"" stated as a rule), emit predicate ""implies"" and include the whole clause texts as subject/object phrases.
+
+
+            string gptResults = await GPT.GetGPTResult(userInput, systemText);
+
+            Debug.WriteLine(gptResults);
+
+            string[] parents = gptResults.Split(',');
+
+
+
+
+
+            
+        }
+
     }
+
+
 }
