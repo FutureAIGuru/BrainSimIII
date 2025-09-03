@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Pluralize.NET;
 using UKS;
+using static BrainSimulator.Modules.ModuleOnlineInfo;
 
 namespace BrainSimulator.Modules
 {
@@ -433,6 +434,9 @@ is-part-of-speech, ";
 
 
                 // Add relationships and clause
+                
+
+                /*
                 Relationship r1 = AddRelationshipClause(newThing, targetThing, relationType);
 
                 Relationship r2 = AddRelationshipClause(newThing2, targetThing2, relationType2);
@@ -442,6 +446,7 @@ is-part-of-speech, ";
                 r1.AddClause(theClauseType, r2);
 
                 ModuleGPTInfoDlg.relationshipCount += 1;
+                */
             }
         }
 
@@ -753,6 +758,7 @@ Rules:
                     }
                 }
                 // Clauses
+                // IMPORTANT: Clauses do not work, maybe finetune a GPT model?
                 else if (items.Length == 7)
                 {
                     Debug.WriteLine("Clause: " + seperator);
@@ -768,17 +774,12 @@ Rules:
                     string relationType2 = items[5].Trim();
                     string targetThing2 = items[6].Trim();
 
+                    Relationship r = MainWindow.theUKS.AddStatement(newThing, relationType, targetThing, clauseType, newThing2, targetThing2);
 
-                    // Add relationships and clause
-                    Relationship r1 = AddRelationshipClause(newThing, targetThing, relationType);
-
-                    Relationship r2 = AddRelationshipClause(newThing2, targetThing2, relationType2);
-
-                    Thing theClauseType = GetClauseType(clauseType);
-
-                    r1.AddClause(theClauseType, r2);
-
-                    ModuleGPTInfoDlg.relationshipCount += 1;
+                    if (r == null)
+                    {
+                        Debug.WriteLine($"Relationship: {r} in natural to UKS is null!");
+                    }
                 }
                 else
                 {
