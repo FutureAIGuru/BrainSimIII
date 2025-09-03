@@ -28,6 +28,10 @@ public partial class UKS
         GetOrAddThing("is", "RelationshipType");
 
         AddStatement("is-a", "inverseOf", "has-child");
+        AddStatement("has-attribute", "is-a", "RelationshipType");
+        AddStatement("contains", "is-a", "RelationshipType");
+        AddStatement("is-part-of", "is-a", "RelationshipType");
+        AddStatement("contains", "inverseOf", "is-part-of");
         AddStatement("has", "is-a", "RelationshipType");
 
         //properties are intenal capabilities of nodes
@@ -38,13 +42,15 @@ public partial class UKS
         AddStatement("isTransitive", "is-a", "Property");
         AddStatement("isCommutative", "is-a", "Property");
         AddStatement("allowMultiple", "is-a", "Property");
-        AddStatement("isCommutative", "is-a", "Property");
-        //        AddStatement("is-part-of", "is-a", "RelationshipType");
-        //        AddStatement("has", "inverseOf", "is-part-of");
+        AddStatement("inheritable", "is-a", "Property");
 
         AddStatement("ClauseType", "is-a", "RelationshipType");
-        //        AddStatement("is-part-of", "hasProperty", "isTransitive");
+        AddStatement("IF", "is-a", "ClauseType");
+        AddStatement("BECAUSE", "is-a", "ClauseType");
         AddStatement("has-child", "hasProperty", "isTransitive");
+        AddStatement("has-child", "hasProperty", "inheritable");
+        AddStatement("is-part-of", "hasProperty", "isTransitive");
+        AddStatement("is-part-of", "hasProperty", "inheritable");
 
         AddBrainSimConfigSectionIfNeeded();
         SetupNumbers();

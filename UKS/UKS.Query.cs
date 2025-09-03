@@ -46,7 +46,6 @@ public partial class UKS
             RemoveConflictingResults(result2);
         RemoveFalseConditionals(result2);
         AlphabetizeRelationships(ref result2);
-        //IncreaseResultWeights(result2);
         return result2;
     }
 

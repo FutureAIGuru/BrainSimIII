@@ -5,8 +5,8 @@
 //
 
 using System.Collections.Generic;
-using Pluralize.NET;
 using UKS;
+using Pluralize.NET;
 
 namespace BrainSimulator.Modules
 {
@@ -69,9 +69,9 @@ namespace BrainSimulator.Modules
             GetUKS();
             if (theUKS == null) return null;
 
-            Thing tSource = GetInstanceFromString(source, false);
-            Thing tRelType = GetInstanceFromString(relationshipType, true);
-            Thing tTarget = GetInstanceFromString(target, false);
+            Thing tSource = theUKS.CreateThingFromDottedAttributes(source, false);
+            Thing tRelType = theUKS.CreateThingFromDottedAttributes(relationshipType, true);
+            Thing tTarget = theUKS.CreateThingFromDottedAttributes(target, false);
 
             if (target == "" && relationshipType == "is-a")
             {
@@ -82,38 +82,6 @@ namespace BrainSimulator.Modules
 
             Relationship r = theUKS.AddStatement(tSource, tRelType, tTarget, true);
             return r;
-        }
-
-        Thing GetInstanceFromString(string label, bool attributesFollow)
-        {
-            IPluralize pluralizer = new Pluralizer();
-            label = label.Trim();
-            string[] tempStringArray = label.Split(' ');
-            if (tempStringArray.Length == 0 || tempStringArray[0].Length == 0) return null;
-
-            for (int i = 0; i < tempStringArray.Length; i++)
-                if (!char.IsUpper(tempStringArray[i][0]))
-                    tempStringArray[i] = pluralizer.Singularize(tempStringArray[i]);
-
-            string thingLabel;
-            if (attributesFollow)
-            {
-                thingLabel = tempStringArray[0];
-                for (int i = 1; i < tempStringArray.Length; i++)
-                    if (!string.IsNullOrEmpty(tempStringArray[i]))
-                        thingLabel += "." + tempStringArray[i];
-            }
-            else
-            {
-                int last = tempStringArray.Length - 1;
-                thingLabel = tempStringArray[last];
-                for (int i=0; i < last; i++)
-                    if (!string.IsNullOrEmpty(tempStringArray[i]))
-                        thingLabel += "." + tempStringArray[i];
-            }
-
-            Thing t = theUKS.GetOrAddThing(thingLabel);
-            return t;
         }
 
         public static List<Thing> ThingListFromString(string source)

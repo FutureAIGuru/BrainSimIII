@@ -1,5 +1,7 @@
 ﻿
 namespace UKS;
+using Pluralize.NET;
+
 
 /// <summary>
 /// Contains a collection of Things linked by Relationships to implement Common Sense and general knowledge.
@@ -493,7 +495,7 @@ public partial class UKS
                 Thing attrib = Labeled(attribs[i]);
                 if (attrib == null) 
                     attrib = AddThing(attribs[i], "unknownObject");
-                instanceThing.AddRelationship(attrib, "is");
+                instanceThing.AddRelationship(attrib, "has");
             }
             return instanceThing;
         }
@@ -530,6 +532,39 @@ public partial class UKS
         thingToReturn = AddThing(label, correctParent);
         return thingToReturn;
     }
+    public Thing CreateThingFromDottedAttributes(string label, bool attributesFollow, bool singularize = true)
+    {
+        IPluralize pluralizer = new Pluralizer();
+        label = label.Trim();
+        string[] tempStringArray = label.Split(' ');
+        if (tempStringArray.Length == 0 || tempStringArray[0].Length == 0) return null;
+
+        for (int i = 0; i < tempStringArray.Length; i++)
+            if (!char.IsUpper(tempStringArray[i][0]) && singularize)
+                tempStringArray[i] = pluralizer.Singularize(tempStringArray[i]);
+
+        string thingLabel;
+        if (attributesFollow)
+        {
+            thingLabel = tempStringArray[0];
+            for (int i = 1; i < tempStringArray.Length; i++)
+                if (!string.IsNullOrEmpty(tempStringArray[i]))
+                    thingLabel += "." + tempStringArray[i];
+        }
+        else
+        {
+            int last = tempStringArray.Length - 1;
+            thingLabel = tempStringArray[last];
+            for (int i = 0; i < last; i++)
+                if (!string.IsNullOrEmpty(tempStringArray[i]))
+                    thingLabel += "." + tempStringArray[i];
+        }
+
+        Thing t = GetOrAddThing(thingLabel);
+        return t;
+    }
+
+
 
     public Relationship AddClause(Relationship r1, Thing clauseType, Thing source, Thing relType, Thing target)
     {

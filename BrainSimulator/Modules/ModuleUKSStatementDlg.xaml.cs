@@ -76,6 +76,7 @@ namespace BrainSimulator.Modules
 
                 if (text == "" && !tb.Name.Contains("arget"))
                 {
+                    tb.Background = new SolidColorBrush(Colors.Pink);
                     SetError("Source and type cannot be empty");
                     return false;
                 }

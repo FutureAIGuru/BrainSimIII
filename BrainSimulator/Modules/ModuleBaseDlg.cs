@@ -81,22 +81,24 @@ public class ModuleBaseDlg : Window
         string theModuleType = this.GetType().Name.ToString();
         string cwd = System.IO.Directory.GetCurrentDirectory();
         cwd = cwd.ToLower().Replace("bin\\debug\\net8.0-windows", "");
-        string fileName = cwd + @"modules\" + theModuleType;
-        if (theModuleType.ToLower().Contains("dlg"))
-            fileName += ".xaml.cs";
-        else
-            fileName += ".cs";
+        string fileNameDlg = cwd + @"modules\" + theModuleType + ".xaml.cs";
+        string fileName = cwd + @"modules\" + theModuleType.Substring(0,theModuleType.Length-3) + ".cs";
 
-
-
-        if (!File.Exists(fileName))
-        { }
-        Process process = new Process();
+        //find visiaul studio
         string taskFile = @"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe";
         if (!File.Exists(taskFile))
             taskFile = @"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe";
-        ProcessStartInfo startInfo = new ProcessStartInfo(taskFile, "/edit " + fileName);
-        process.StartInfo = startInfo;
+        if (!File.Exists(taskFile))
+            return;
+
+        //fire up the processes
+        Process processDlg = new();
+        ProcessStartInfo startInfo = new ProcessStartInfo(taskFile, "/edit " + fileNameDlg);
+        processDlg.StartInfo = startInfo;
+        processDlg.Start();
+        Process process = new();
+        ProcessStartInfo startInfo2 = new ProcessStartInfo(taskFile, "/edit " + fileName);
+        process.StartInfo = startInfo2;
         process.Start();
     }
 
