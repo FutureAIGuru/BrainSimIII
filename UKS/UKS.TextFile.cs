@@ -10,10 +10,7 @@ public partial class UKS
     /// Emits facts as [S,R,O] (or [S,R,O,N] when R is a numeric specialization like "has.4").
     /// Optionally emits simple clause pairs if Relationship exposes a Clauses collection.
     /// </summary>
-    public void ExportTextFile(
-        string root,
-        string path,
-        int maxDepth = 12)
+    public void ExportTextFile(string root, string path, int maxDepth = 12)
     {
         if (string.IsNullOrWhiteSpace(root)) throw new ArgumentException("Start label is required.", nameof(root));
 
@@ -37,13 +34,23 @@ public partial class UKS
 
                 foreach (Relationship r in t.Relationships)
                 {
+                    //don't save extra clause baggage.
+                    if (!r.isStatement && r.Clauses.Count == 0) continue;
+                    if (r.reltype.Label == "hasProperty" && r.target.Label == "isInstance") continue;
+                    if (r.reltype.Label == "has-child" && r.target.HasProperty("isInstance"))
+                    {
+                        if (seenThings.Add(r.source.Label)) q.Enqueue((r.source, depth + 1));
+                        if (seenThings.Add(r.target.Label)) q.Enqueue((r.target, depth + 1));
+                        continue;
+                    }
 
-                    var line = $"[{r.source.Label},{r.relType.Label},{r.target.Label},{r.Weight.ToString("0.00")}]";
+                    Thing theSource = GetNonInstance(r.source);
+                    var line = $"[{theSource.Label},{r.relType.Label},{r.target.Label},{r.Weight.ToString("0.00")}]";
                     writer.Write(line);
 
                     foreach (Clause c in r.Clauses)
                     {
-                        var clause = $" {c.clauseType.Label} [{c.clause.source.Label},{c.clause.reltype.Label},{c.clause.target.Label}] ";
+                        var clause = $" {c.clauseType.Label} [{c.clause.source.Label},{c.clause.reltype.Label},{c.clause.target.Label},{c.clause.Weight.ToString("0.00")}] ";
                         writer.Write(clause);
                     }
 
@@ -57,6 +64,13 @@ public partial class UKS
             }
             writer.Flush();
         }
+    }
+
+    public static Thing GetNonInstance(Thing source)
+    {
+        Thing theSource = source;
+        while (theSource.HasProperty("isInstance")) theSource = theSource.Parents[0];
+        return theSource;
     }
 
     // int or decimal, optional leading minus
@@ -106,20 +120,30 @@ public partial class UKS
 
         // Build relationships for each [S,R,O(,N)?]
         var rels = new List<Relationship>();
-        for (int i = 0; i < tokens.Count; i += 2)
-        {
-            var stmt = ParseBracketStmt(tokens[i], lineNo);
-            rels.Add(AddRelStmt(stmt));
-        }
+        bool isStatement = tokens.Count < 3;
+
+        var stmt = ParseBracketStmt(tokens[0], lineNo);
+        Relationship r = AddRelStmt(stmt);
+        r.isStatement = isStatement;
 
         // Connect adjacent relationships with AddClause(connector)
         for (int i = 1, relIndex = 0; i < tokens.Count; i += 2, relIndex++)
         {
             string relTypeConnector = tokens[i];
+            stmt = ParseBracketStmt(tokens[i + 1], lineNo);
+            if (relTypeConnector == "AFTER")
+            { }
             Thing t = Labeled(relTypeConnector);
             if (t == null)
-                t = AddThing(relTypeConnector, "RelationshipType");
-            rels[relIndex].AddClause(relTypeConnector, rels[relIndex + 1]);
+                t = AddThing(relTypeConnector, "ClauseType");
+            Relationship r1 = new()
+            {
+                source = GetOrAddThing(stmt.S),
+                reltype = GetOrAddThing(stmt.R),
+                target = GetOrAddThing(stmt.O)
+            };
+            Relationship r2 = AddClause(r, t, r1.source, r1.reltype, r1.target);
+            //r.isStatement = isStatement;
         }
 
         return true;
@@ -213,29 +237,17 @@ public partial class UKS
             {
                 int start = i++;
                 int depth = 1;
-                bool inQuotes = false;
                 bool esc = false;
 
                 for (; i < n; i++)
                 {
                     char c = code[i];
-                    if (inQuotes)
+                    if (c == '[') { depth++; continue; }
+                    if (c == ']')
                     {
-                        if (esc) { esc = false; continue; }
-                        if (c == '\\') { esc = true; continue; }
-                        if (c == '"') { inQuotes = false; continue; }
+                        depth--;
+                        if (depth == 0) { i++; break; }
                         continue;
-                    }
-                    else
-                    {
-                        if (c == '"') { inQuotes = true; continue; }
-                        if (c == '[') { depth++; continue; }
-                        if (c == ']')
-                        {
-                            depth--;
-                            if (depth == 0) { i++; break; }
-                            continue;
-                        }
                     }
                 }
 
@@ -267,44 +279,20 @@ public partial class UKS
         void Flush()
         {
             var raw = sb.ToString().Trim();
-            items.Add(Unquote(raw));
+            items.Add(raw);
             sb.Clear();
         }
 
         for (int i = 0; i < s.Length; i++)
         {
             char c = s[i];
-
-            if (inQuotes)
-            {
-                if (esc) { sb.Append(c); esc = false; continue; }
-                if (c == '\\') { esc = true; continue; }
-                if (c == '"') { inQuotes = false; continue; }
-                sb.Append(c);
-                continue;
-            }
-
-            if (c == '"') { inQuotes = true; continue; }
             if (c == ',') { Flush(); continue; }
-
             sb.Append(c);
         }
 
         Flush();
         return items;
     }
-
-    private static string Unquote(string s)
-    {
-        if (s.Length >= 2 && s[0] == '"' && s[^1] == '"')
-        {
-            var inner = s.Substring(1, s.Length - 2);
-            return inner.Replace("\\\"", "\"").Replace("\\\\", "\\");
-        }
-        return s;
-    }
-
-
 }
 
 

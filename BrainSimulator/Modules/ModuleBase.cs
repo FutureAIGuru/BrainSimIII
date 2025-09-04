@@ -8,7 +8,6 @@ using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Collections.Generic;
 using System.Windows.Threading;
 using UKS;
 using System.Diagnostics;

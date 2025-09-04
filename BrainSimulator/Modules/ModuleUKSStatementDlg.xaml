@@ -28,6 +28,6 @@
 
         <Button x:Name="BtnAddRelationship"   IsDefault="True" Content="Add/Update" Height="32" VerticalAlignment="Top" FontSize="16" Margin="78,143,0,0" Click="BtnAddRelationship_Click" HorizontalAlignment="Left" Width="159"/>
         <CheckBox x:Name="setConfCB" Content="Set Confidence/Duration" IsChecked="True" FontSize="16" Height="22" Margin="265,153,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200"/>
-        <Label  x:Name="errorText"            Content=""   HorizontalContentAlignment="Center"   Height="33"   FontSize="16" Margin="10,195,10,0" VerticalAlignment="Top" Background="Gray" Foreground="#FFF80902"/>
+       
     </Grid>
 </local:ModuleBaseDlg>

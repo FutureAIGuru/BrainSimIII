@@ -12,10 +12,10 @@ namespace UKS;
 
 //these are used so that relatinoship lists can be readOnly.
 //This prevents programmers from accidentally doing a (e.g.) relationships.Add() which will not handle reverse links properly
-//Why the IList doesn't have FindAll and FindFirst is a ???
+//Why the IList doesn't have FindFirst, FindAll, and FindIndex is a ???
 public static class IListExtensions
 {
-    public static T FindFirst<T>(this IList<T> source, Func<T, bool> condition)
+    public static T? FindFirst<T>(this IList<T> source, Func<T, bool> condition)
     {
         foreach (T item in source)
             if (condition(item))
@@ -57,7 +57,6 @@ public class Clause
     /// The target Relationship. The "Source" is the owner of the list of clauses
     /// </summary>
     public Relationship clause;
-    public Clause() { }
     public Clause(Thing theType, Relationship clause1)
     {
         clauseType = theType;
@@ -93,7 +92,7 @@ public class QueryRelationship : Relationship
 /// </summary>
 public class Relationship
 {
-    public Thing s = null;
+    public Thing s;
     /// <summary>
     /// the Relationship Source
     /// </summary>
@@ -102,7 +101,7 @@ public class Relationship
         get => s;
         set { s = value; }
     }
-    public Thing reltype = null;
+    public Thing reltype;
     /// <summary>
     /// The Relationship Type
     /// </summary>
@@ -114,7 +113,7 @@ public class Relationship
             reltype = value;
         }
     }
-    private Thing targ = null;
+    private Thing targ;
     public Thing target
     {
         get { /*Hits++; lastUsed = DateTime.Now;*/ return targ; }
@@ -193,6 +192,7 @@ public class Relationship
         }
     }
     public bool GPTVerified = false;
+    public bool isStatement = true;
 
     public Relationship()
     { }
@@ -242,10 +242,8 @@ public class Relationship
     /// <returns></returns>
     public Relationship AddClause(Thing clauseType, Relationship r2)
     {
-        Clause theClause = new();
+        Clause theClause = new(clauseType,r2);
 
-        theClause.clause = r2;
-        theClause.clauseType = clauseType;
         if (Clauses.FindFirst(x => x.clauseType == theClause.clauseType && x.clause == r2) == null)
         {
             Clauses.Add(theClause);
@@ -317,17 +315,28 @@ public class Relationship
         return retVal;
     }
 
-    public static bool operator ==(Relationship a, Relationship b)
+    public static bool operator ==(Relationship? a, Relationship? b)
     {
         if (a is null && b is null)
             return true;
         if (a is null || b is null)
             return false;
-        if (a.targ == b.targ && a.source == b.source && a.relType == b.relType)
+        if (a.targ == b.targ && a.source == b.source && a.relType == b.relType && a.isStatement == b.isStatement)
             return true;
         return false;
     }
-    public static bool operator !=(Relationship a, Relationship b)
+    //The following is needed to suppress a warning
+    public override bool Equals(Object obj)
+    {
+        if (obj is Relationship a)
+        {
+            if (a.targ == targ && a.source == source && a.relType == relType && a.isStatement == isStatement)
+                return true;
+        }
+        return false;
+    }
+
+    public static bool operator !=(Relationship? a, Relationship? b)
     {
         if (a is null && b is null)
             return false;
@@ -336,7 +345,10 @@ public class Relationship
         if (a.target == b.target && a.source == b.source && a.relType == b.relType) return false;
         return true;
     }
-
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
 
     public float Value
     {
@@ -381,5 +393,5 @@ public class SRelationship
     public int relationshipType = -1;
     public int count = -1;
     public bool GPTVerified = false;
-    public List<SClauseType> clauses = new();
+    public List<SClauseType>? clauses = new();
 }
