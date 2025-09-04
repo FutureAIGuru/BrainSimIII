@@ -50,7 +50,7 @@ public partial class UKS
 
                     foreach (Clause c in r.Clauses)
                     {
-                        var clause = $" {c.clauseType.Label} [{c.clause.source.Label},{c.clause.reltype.Label},{c.clause.target.Label},{r.Weight.ToString("0.00")}] ";
+                        var clause = $" {c.clauseType.Label} [{c.clause.source.Label},{c.clause.reltype.Label},{c.clause.target.Label},{c.clause.Weight.ToString("0.00")}] ";
                         writer.Write(clause);
                     }
 
