@@ -45,7 +45,7 @@ namespace BrainSimulator.Modules
                 ModuleMNIST parent = (ModuleMNIST)base.ParentModule;
                 if (b.Content.ToString() == "Train")
                 {
-                    parent.LoadFileList("C:\\Users\\c_sim\\source\\repos\\WORKING\\BrainSimulator\\TestImages\\OtherImages\\Digits");
+                    parent.LoadFileList("C:\\Users\\c_sim\\source\\repos\\BrainSimIII\\BrainSimulator\\TestImages\\OtherImages\\Digits");
                 }
                 else if (b.Content.ToString() == "Run/Stop")
                 {
