@@ -33,6 +33,7 @@ public partial class UKS
         AddStatement("is-part-of", "is-a", "RelationshipType");
         AddStatement("contains", "inverseOf", "is-part-of");
         AddStatement("has", "is-a", "RelationshipType");
+        AddStatement("not", "is-a", "RelationshipType");
 
         //properties are intenal capabilities of nodes
         AddStatement("Property", "is-a", "RelationshipType");

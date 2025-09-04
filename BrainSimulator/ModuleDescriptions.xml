@@ -59,7 +59,7 @@ Would indicate that Fido is a dog. This is shown in the UKS dialog as a parent/c
 Is shown as dog-&gt;has-&gt;fur.  In general, Things in the UKS represent abstract singular entities so the Relationship dog-&gt;has.4-&gt;leg would represent that all dogs have 4 legs.
 If the Things in the text boxes do not exist, the boxes will have a yellow background and the Things will be created. If the relationship already exists, no action will be taken. In some cases the target may be omitted as in Mary runs. If a label is entered with an asterisk, it will have digits appended to it to ensure that it is unique. This feature can be used to create sequences in a specific order as in Pi-&gt;hasDigit*-&gt;3,  Pi-&gt;hasDigit*-&gt;., Pi-&gt;hasDigit*-&gt;1,  Pi-&gt;hasDigit*-&gt;4.
 
-Putting multiple labels in the text boxes will add modifiers. 
+Putting multiple labels in the text boxes will create a subclass. 
 Example
           Source: Fido
           Type: is-a

@@ -9,58 +9,43 @@ public partial class UKS
 {
     /// <summary>
     /// Creates a Relationship. <br/>
-    /// Parameters may be Things or strings. If strings, they represent Thing labels and if the Things with those labels
+    /// Parameters are strings. If the Things with those labels
     /// do not exist, they will be created. <br/>
     /// If the RelationshipType has an inverse, the inverse will be used and the Relationship will be reversed so that 
-    /// Fido IsA Dog become Dog HasChild Fido.<br/>
-    /// If Attributes are given, they apply to the applicable source, type, or target parameter. Example "Fido","IsA","Dog",null,null,"Big" creates or locates 
-    /// an existing Thing which is a child of Dog and has the attribute IS Big (perhaps labeled Dog.Big). Then Fido is made a child of that Thing.
+    /// Fido Is-a cog become cog Has-hild Fido.<br/>
     /// </summary>
-    /// <param name="oSource">string or Thing</param>
-    /// <param name="oRelationshipType">string or Thing</param>
-    /// <param name="oTarget">string or Thing (or null)</param>
-    /// <param name="oSourceAttributess">String containing one or more Thing labels separated by spaces, list of strings with individusl Thing Labels, Thing, OR List of Things</param>
-    /// <param name="oTypeAttributes">Same</param>
-    /// <param name="oTargetAttributess">Same</param>
+    /// <param name="sSource">string or Thing</param>
+    /// <param name="sRelationshipType">string or Thing</param>
+    /// <param name="sTarget">string or Thing (or null)</param>
+    /// <param name="isStatement">Boolean indicating if this is a true statement or part of a conditional</param>
     /// <returns>The primary relationship which was created (others may be created for given attributes</returns>
-    public Relationship AddStatement(object  oSource, object oRelationshipType, object oTarget,
-        //object oSourceProperties = null,
-        //object oTypeProperties = null,
-        //object oTargetProperties = null,
-        bool isStatement = true
-                    )
+    public Relationship AddStatement(string  sSource, string sRelationshipType, string sTarget,bool isStatement = true)
     {
-        //Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
-        Thing source = ThingFromObject(oSource);
-        Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
-        Thing target = ThingFromObject(oTarget);
+        Thing source = ThingFromObject(sSource);
+        Thing relationshipType = ThingFromObject(sRelationshipType, "RelationshipType", source);
+        Thing target = ThingFromObject(sTarget);
 
-        //List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
-        //List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "Action");
-        //List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
-
-        //        Relationship theRelationship = AddStatement(source, relationshipType, target,
-        //            sourceModifiers, relationshipTypeModifiers, targetModifiers, isStatement);
-        Relationship theRelationship = AddStatementAbs(source, relationshipType, target,
-            isStatement);
+        Relationship theRelationship = AddStatement(source, relationshipType, target,isStatement);
         return theRelationship;
     }
-
-    //private Relationship AddStatement(
-    //                Thing source, Thing relType, Thing target,
-    //                List<Thing> sourceProperties,
-    //                List<Thing> typeProperties,
-    //                List<Thing> targetProperties,
-    //                bool isStatement = true
-    //        )
-    private Relationship AddStatementAbs(Thing source, Thing relType, Thing target, bool isStatement = true)
+/// <summary>
+/// Adds a relationship between the specified source, relationship type, and target. No new Things are created.
+/// </summary>
+/// <remarks>If a relationship with the same source, relationship type, and target already exists, the existing
+/// relationship  is returned after being activated. Otherwise, a new relationship is created and added. If the
+/// relationship type  has the "isCommutative" property, a reverse relationship is also created. Additionally, any
+/// extraneous parent  relationships for the source, target, or relationship type are cleared.</remarks>
+/// <param name="source">The source <see cref="Thing"/> of the relationship. Cannot be <see langword="null"/>.</param>
+/// <param name="relType">The relationship type <see cref="Thing"/>. Cannot be <see langword="null"/>.</param>
+/// <param name="target">The target <see cref="Thing"/> of the relationship.</param>
+/// <param name="isStatement">A value indicating whether the relationship is considered a statement.  The default value is <see langword="true"/>.</param>
+/// <returns>The created or existing <see cref="Relationship"/> object that represents the relationship.  Returns <see
+/// langword="null"/> if <paramref name="source"/> or <paramref name="relType"/> is <see langword="null"/>.</returns>
+    public Relationship AddStatement(Thing source, Thing relType, Thing target, bool isStatement = true)
     {
         if (source == null || relType == null) return null;
 
-        //this replaces pronouns with antecedents
-        ////if (HandlePronouns(r)) return r;
-
-        //        Relationship r = CreateTheRelationship(ref source, ref relType, ref target, ref sourceProperties, typeProperties, ref targetProperties);
+        //create the relationship but don't add it to the UKS
         Relationship r = CreateTheRelationship(source, relType, target);
         r.isStatement = isStatement;
 
@@ -88,59 +73,32 @@ public partial class UKS
         ClearExtraneousParents(r.source);
         ClearExtraneousParents(r.target);
         ClearExtraneousParents(r.relType);
-        //ClearRedundancyInAncestry(r.target); //This should be converted to an agent
 
         return r;
     }
 
-    void ClearRedundancyInAncestry(Thing t)
-    {
-        if (t == null) return;
-        //if a direct parent has an ancestor which is also another direct parent, remove that 2nd direct parent
-        var parents = t.Parents;
-        foreach (Thing parent in parents)
-        {
-            var p = parent.AncestorList();
-            p.RemoveAt(0); //don't check yourself
-            foreach (Thing ancestor in p)
-            {
-                if (parents.Contains(ancestor))
-                    t.RemoveParent(ancestor);
-            }
-        }
-    }
 
     //these are used by the subclass searching system to report back the closest match and what attributes are missing
     public Relationship CreateTheRelationship(
-      object oSource, object oRelationshipType, object oTarget,
-      object oSourceProperties = null,
-      object oTypeProperties = null,
-      object oTargetProperties = null
-                  )
+      object oSource, object oRelationshipType, object oTarget)
     {
         //Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
         Thing source = ThingFromObject(oSource);
         Thing relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
         Thing target = ThingFromObject(oTarget);
 
-        List<Thing> sourceModifiers = ThingListFromObject(oSourceProperties);
-        List<Thing> relationshipTypeModifiers = ThingListFromObject(oTypeProperties, "Action");
-        List<Thing> targetModifiers = ThingListFromObject(oTargetProperties);
 
-        Relationship theRelationship = CreateTheRelationship(ref source, ref relationshipType, ref target,
-            ref sourceModifiers, relationshipTypeModifiers, ref targetModifiers);
+        Relationship theRelationship = CreateTheRelationship(ref source, ref relationshipType, ref target);
         return theRelationship;
     }
 
-    public Relationship CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target,
-        ref List<Thing> sourceProperties, List<Thing> typeProperties, ref List<Thing> targetProperties)
+    public Relationship CreateTheRelationship(ref Thing source, ref Thing relType, ref Thing target)
     {
         Thing inverseType1 = CheckForInverse(relType);
         //if this relationship has an inverse, switcheroo so we are storing consistently in one direction
         if (inverseType1 != null)
         {
             (source, target) = (target, source);
-            (sourceProperties, targetProperties) = (targetProperties, sourceProperties);
             relType = inverseType1;
         }
 
@@ -148,6 +106,7 @@ public partial class UKS
         Thing bestMatch = null;
         List<Thing> missingAttributes = new();
 
+        /*
         Thing source1 = SubclassExists(source, sourceProperties, ref bestMatch, ref missingAttributes);
         if (source1 == null)
         {
@@ -169,6 +128,7 @@ public partial class UKS
         }
 
         relType = relType1;
+        */
 
         Relationship r = new Relationship()
         { source = source, reltype = relType, target = target };

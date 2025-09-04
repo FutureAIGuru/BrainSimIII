@@ -8,6 +8,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Security.Permissions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -23,6 +24,7 @@ public class ModuleBaseDlg : Window
     private DateTime dt;
     private DispatcherTimer timer;
     public int UpdateMS = 100;
+    public Label statusLabel;
 
     public ModuleBaseDlg()
     {
@@ -31,7 +33,7 @@ public class ModuleBaseDlg : Window
 
     private void ModuleBaseDlg_Loaded(object sender, RoutedEventArgs e)
     {
-        // Create a button and add it to the panel
+        // Create a help button and add it to the panel
         Button helpButton = new Button
         {
             Content = "?",
@@ -57,6 +59,7 @@ public class ModuleBaseDlg : Window
             Stretch = Stretch.Uniform
         };
 
+        //create a button to show the source code
         Button sourceButton = new Button
         {
             Content = img,
@@ -74,6 +77,17 @@ public class ModuleBaseDlg : Window
         // Add the button to the dialog
         ((Panel)this.Content).Children.Add(helpButton);
         ((Panel)this.Content).Children.Add(sourceButton);
+
+        statusLabel = new()
+        {
+            Content = "OK",
+            Name = "statusLabel",
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Margin = new Thickness(10, 0, 60, 3),
+            FontSize = 18
+        };
+        ((Panel)this.Content).Children.Add(statusLabel);
     }
 
     private void SourceButton_Click(object sender, RoutedEventArgs e)
@@ -134,4 +148,22 @@ public class ModuleBaseDlg : Window
             Draw(false);
     }
 
+    /// <summary>
+    /// Sets a status message at the bottom of the dialog. Seets the background yellow if the color is red or null
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="c">Defaults to red</param>
+    public void SetStatus(string message, Color? c = null)
+    {
+        if (c == null) c = Colors.Red;
+        statusLabel.Background = new SolidColorBrush(Colors.Gray);
+        if (c == Colors.Red && (message != "OK" && message != "" ))
+            statusLabel.Background = new SolidColorBrush(Colors.LemonChiffon);
+        if (message == "OK" || message == "")
+            statusLabel.Foreground = new SolidColorBrush(Colors.Black);
+        else
+            statusLabel.Foreground = new SolidColorBrush((Color)c);
+
+        statusLabel.Content = message;
+    }
 }

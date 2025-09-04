@@ -87,7 +87,8 @@ namespace BrainSimulator
                 if (cb.SelectedItem != null)
                 {
 
-                    string moduleName = ((Label)cb.SelectedItem).Content.ToString();
+//                    string moduleName = ((Label)cb.SelectedItem).Content.ToString();
+                    string moduleName = cb.SelectedItem.ToString();
                     cb.SelectedIndex = -1;
                     ActivateModule(moduleName);
                 }

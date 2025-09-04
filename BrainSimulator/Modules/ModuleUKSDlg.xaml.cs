@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -73,7 +74,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             //you might get this exception if there is a collision
             return;
         }
-        statusLabel.Content = parent.theUKS.UKSList.Count + " Things  " + (childCount + refCount) + " Relationships";
+        statusLabel.Content = parent.theUKS.UKSList.Count + " Things  " + (childCount + refCount) + " Rels.";
         Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.theUKS.FileName);
     }
 
@@ -468,10 +469,14 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         mi = new();
         mi.Click += Mi_Click;
-        mi.Header = "    " + r.target.Label;
+        mi.Header = "    " + r.target?.Label;
         mi.SetValue(ThingObjectProperty, r.target);
         menu.Items.Add(mi);
 
+        foreach (var c in r.Clauses)
+        {
+
+        }
 
         return menu;
     }
@@ -828,4 +833,104 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         ModuleUKS parent = (ModuleUKS)ParentModule;
         textBoxRoot.Text = parent.GetSavedDlgAttribute("Root");
     }
+
+    private string Browse(bool open)
+    {
+        string path = "";
+        System.Windows.Forms.FileDialog dlg;
+        if (open)
+            dlg = new System.Windows.Forms.OpenFileDialog
+            {
+                Title = "Select UKS .txt file",
+                Filter = "UKS text (*.txt)|*.txt|All files (*.*)|*.*",
+                CheckFileExists = false,
+                Multiselect = false
+            };
+        else
+            dlg = new System.Windows.Forms.SaveFileDialog
+            {
+                Title = "Select UKS .txt file",
+                Filter = "UKS text (*.txt)|*.txt|All files (*.*)|*.*",
+                CheckFileExists = false,
+            };
+        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            path = dlg.FileName;
+        return path;
+    }
+
+    private async void ImportButton_Click(object sender, RoutedEventArgs e)
+    {
+        SetStatus("");
+        var path = Browse(true); ;
+        if (string.IsNullOrEmpty(path)) return;
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            SetStatus("Choose a file first.");
+            return;
+        }
+        if (!File.Exists(path))
+        {
+            SetStatus("File not found.");
+            return;
+        }
+
+        try
+        {
+            ModuleUKS parent = (ModuleUKS)base.ParentModule;
+            // Run ingest off the UI thread to keep the window responsive
+            await Task.Run(() => parent.theUKS.ImportTextFile(path));
+
+            SetStatus("Success");
+        }
+        catch (Exception ex)
+        {
+            Mouse.OverrideCursor = null;
+
+            // Show a friendly error, but include details for debugging.
+            System.Windows.MessageBox.Show(this,
+                "Import failed.\n\n" + ex.Message,
+                "UKS Import",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            Mouse.OverrideCursor = null;
+        }
+    }
+
+    private async void ExportButton_Click(object sender, RoutedEventArgs e)
+    {
+        var path = Browse(true); ;
+        if (string.IsNullOrEmpty(path)) return;
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            SetStatus("Choose a file first.");
+            return;
+        }
+        try
+        {
+            ModuleUKS parent = (ModuleUKS)base.ParentModule;
+            //get the root to save the contents of from the UKS dialog root
+            string root = parent.GetSavedDlgAttribute("Root");
+            await Task.Run(() => parent.theUKS.ExportTextFile(root, path));
+            SetStatus("Success")    ;
+        }
+        catch (Exception ex)
+        {
+            Mouse.OverrideCursor = null;
+
+            // Show a friendly error, but include details for debugging.
+            System.Windows.MessageBox.Show(this,
+                "Import failed.\n\n" + ex.Message,
+                "UKS Import",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            Mouse.OverrideCursor = null;
+        }
+    }
+
 }

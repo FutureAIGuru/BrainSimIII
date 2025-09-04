@@ -69,9 +69,9 @@ namespace BrainSimulator.Modules
             GetUKS();
             if (theUKS == null) return null;
 
-            Thing tSource = theUKS.CreateThingFromDottedAttributes(source, false);
-            Thing tRelType = theUKS.CreateThingFromDottedAttributes(relationshipType, true);
-            Thing tTarget = theUKS.CreateThingFromDottedAttributes(target, false);
+            Thing tSource = theUKS.CreateThingFromMultipleAttributes(source, false);
+            Thing tRelType = theUKS.CreateThingFromMultipleAttributes(relationshipType, true);
+            Thing tTarget = theUKS.CreateThingFromMultipleAttributes(target, false);
 
             if (target == "" && relationshipType == "is-a")
             {

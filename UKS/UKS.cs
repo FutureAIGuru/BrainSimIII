@@ -495,7 +495,7 @@ public partial class UKS
                 Thing attrib = Labeled(attribs[i]);
                 if (attrib == null) 
                     attrib = AddThing(attribs[i], "unknownObject");
-                instanceThing.AddRelationship(attrib, "has");
+                instanceThing.AddRelationship(attrib, "is");
             }
             return instanceThing;
         }
@@ -532,7 +532,27 @@ public partial class UKS
         thingToReturn = AddThing(label, correctParent);
         return thingToReturn;
     }
-    public Thing CreateThingFromDottedAttributes(string label, bool attributesFollow, bool singularize = true)
+
+
+    /*Restrictions on Node Names:
+     * must be unique
+     * cannot be empty
+     * cannot include ' ' (use a - instead)
+     * cannot include '.' this is the flag for creating a subclass with following attributes
+     * cannot include '*' this is the flag for auto-increment the label
+     * case insensitive but initial input case is preserved for display
+     * capitalized labels are never signularized even if "singularize=true"
+    */
+
+
+    /// <summary>
+    /// Finds or creates a subclass.  "Has 4" becomes Thing{has.4} and has.4 is 4.
+    /// </summary>
+    /// <param name="label">The string to process</param>
+    /// <param name="attributesFollow">Attributes follow or precede the main</param>
+    /// <param name="singularize"></param>
+    /// <returns></returns>
+    public Thing CreateThingFromMultipleAttributes(string label, bool attributesFollow, bool singularize = true)
     {
         IPluralize pluralizer = new Pluralizer();
         label = label.Trim();
@@ -583,7 +603,7 @@ public partial class UKS
 
         //figure out if a new instance is needed
         bool newInstanceNeeded = false;
-        if (clauseType.Label.ToLower() == "if") newInstanceNeeded = true;
+        if (clauseType.Label.ToLower() == "if" && r1.isStatement) newInstanceNeeded = true;
 
 
         Relationship rRoot = r1;
@@ -597,10 +617,10 @@ public partial class UKS
             r1.source.RemoveRelationship(r1);
             rRoot.source = newInstance;
             rRoot = rRoot.source.AddRelationship(r1.target, r1.relType, false);
-            AddStatement(rRoot.source, "hasProperty", "isInstance");
+            AddStatement(rRoot.source.Label, "hasProperty", "isInstance");
         }
         //make rTemp into a real relationship
-        rTemp = rTemp.source.AddRelationship(rTemp.target, rTemp.relType, !newInstanceNeeded);
+        rTemp = rTemp.source.AddRelationship(rTemp.target, rTemp.relType, r1.isStatement);
 
         //add the clause
         rRoot.AddClause(clauseType, rTemp);

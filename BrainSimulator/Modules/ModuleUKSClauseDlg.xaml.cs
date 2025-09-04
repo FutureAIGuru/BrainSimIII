@@ -34,25 +34,42 @@ namespace BrainSimulator.Modules
             string newThing = sourceText.Text;
             string targetThing = targetText.Text;
             string relationType = relationshipText.Text;
-            string clauseType = clauseTypeText.Text.ToUpper(); ;
+            string clauseLabel = clauseTypeText.Text.ToUpper(); ;
 
             if (!CheckAddRelationshipFieldsFilled()) return;
 
             ModuleUKSClause UKSClause = (ModuleUKSClause)ParentModule;
 
-            Relationship r1 = rBase;
-            if (rBase == null) 
-                r1 = UKSClause.AddRelationship(newThing, targetThing, relationType);
+            Thing source = UKSClause.theUKS.GetOrAddThing(newThing);
+            Thing target = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetThing,false);
+            Thing relType = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationType, true);
+            Thing clauseType = UKSClause.theUKS.CreateThingFromMultipleAttributes(clauseLabel, false);
 
-            Thing theClauseType = UKSClause.GetClauseType(clauseType);
+            Relationship r1 = null;
+            if (rBase != null)
+            {
+                if (GetInstanceRoot(rBase.source) != source ||
+                    GetInstanceRoot(rBase.target) != target ||
+                    GetInstanceRoot(rBase.relType) != relType)
+                    rBase = null;
+                if (rBase != null && !rBase.source.Relationships.Contains(rBase))
+                    rBase = null;
+                if (rBase != null)
+                    r1 = rBase;
+            }
+            if (r1 == null) 
+                r1 = UKSClause.theUKS.AddStatement (source,relType,target, false);
 
-            Thing source2 = UKSClause.theUKS.GetOrAddThing(sourceText2.Text);
-            Thing type2 = UKSClause.theUKS.GetOrAddThing(relationshipText2.Text);
-            Thing target2 = UKSClause.theUKS.GetOrAddThing(targetText2.Text);
-            UKSClause.theUKS.AddClause(r1, theClauseType, source2, type2, target2);
+            Thing theClauseType = UKSClause.theUKS.GetOrAddThing(clauseLabel,"ClauseType");
 
-            SetUpRelComboBox(GetInstanceRoot(r1.source));
+            Thing source2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(sourceText2.Text, false);
+            Thing type2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationshipText2.Text, true);
+            Thing target2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetText2.Text, false);
+            Relationship rAdded = UKSClause.theUKS.AddClause(r1, theClauseType, source2, type2, target2);
+
+            SetUpRelComboBox(GetInstanceRoot(r1.source),rAdded);
         }
+
         private Thing GetInstanceRoot(Thing t)
         {
             Thing t1 = t;
@@ -75,10 +92,11 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
             }
         }
 
-        private void SetUpRelComboBox(Thing sourceThing)
+        private void SetUpRelComboBox(Thing sourceThing,Relationship rSelected = null)
         {
-            SourceDisambuation.Items.Clear();
-            SourceDisambuation.Items.Add("<new>");
+            SourceDisambiguation.Items.Clear();
+            SourceDisambiguation.Items.Add("<new>");
+            SourceDisambiguation.SelectedIndex = 0;
             rBase = null;
             if (sourceThing != null)
             {
@@ -93,16 +111,17 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
                         cbi.Content = r.target.Label;
                         cbi.ToolTip = r.ToString();
                         cbi.SetValue(theRelationship, r);
-                        SourceDisambuation.Items.Add(cbi);
+                        SourceDisambiguation.Items.Add(cbi);
+                        if (r == rSelected)
+                            SourceDisambiguation.SelectedItem = cbi;
                     }
                 }
-                SourceDisambuation.SelectedIndex = 0;
-                if (SourceDisambuation.Items.Count > 1)
-                    SourceDisambuation.Visibility = Visibility.Visible;
+                if (SourceDisambiguation.Items.Count > 1)
+                    SourceDisambiguation.Visibility = Visibility.Visible;
             }
             else
             {
-                SourceDisambuation.Visibility = Visibility.Hidden;
+                SourceDisambiguation.Visibility = Visibility.Hidden;
             }
         }
 
@@ -113,11 +132,8 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
             {
                 if (cb.SelectedIndex < 1)
                 {
-                    relationshipText.Text = "";
-                    targetText.Text = "";
+                    SetStatus("OK");
                     rBase = null;
-                    errorText.Content = "";
-                    errorText.Foreground = Brushes.Red;
                 }
                 else
                 {
@@ -126,8 +142,7 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
                     relationshipText.Text = r.relType.Label;
                     targetText.Text = r.target.Label;
                     rBase = r;
-                    errorText.Content = r.ToString();
-                    errorText.Foreground = Brushes.Yellow;
+                    SetStatus(r.ToString(), Colors.Yellow);
                 }
             }
         }
@@ -142,18 +157,17 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
                 if (text == "" && !tb.Name.Contains("arget"))
                 {
                     tb.Background = new SolidColorBrush(Colors.Pink);
-                    SetError("Source and type cannot be empty");
+                    SetStatus("Source and type cannot be empty");
                     return null;
                 }
                 List<Thing> tl = ModuleUKSStatement.ThingListFromString(text);
                 if (tl == null || tl.Count == 0)
                 {
                     tb.Background = new SolidColorBrush(Colors.LemonChiffon);
-                    SetError("");
                     return null;
                 }
                 tb.Background = new SolidColorBrush(Colors.White);
-                SetError("");
+                SetStatus("");
                 return tl[0];
             }
             return null;
@@ -164,47 +178,35 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
         // Check for parent existence and set background color of the textbox and the error message accordingly.
         private bool CheckAddRelationshipFieldsFilled()
         {
-            SetError("");
+            SetStatus("");
             ModuleUKSClause UKSEvent = (ModuleUKSClause)ParentModule;
 
             if (sourceText.Text == "")
             {
-                SetError("Source not provided");
+                SetStatus("Source not provided");
                 return false;
             }
             if (relationshipText.Text == "")
             {
-                SetError("Type not provided");
+                SetStatus("Type not provided");
                 return false;
             }
             if (clauseTypeText.Text == "")
             {
-                SetError("Clause type not provided");
+                SetStatus("Clause type not provided");
                 return false;
             }
             if (sourceText2.Text == "")
             {
-                SetError("Clause source not provided");
+                SetStatus("Clause source not provided");
                 return false;
             }
             if (relationshipText2.Text == "")
             {
-                SetError("Clause type not provided");
+                SetStatus("Clause type not provided");
                 return false;
             }
             return true;
-        }
-
-
-        // SetError turns the error text yellow and sets the message, or clears the color and the text.
-        private void SetError(string message)
-        {
-            if (string.IsNullOrEmpty(message))
-                errorText.Background = new SolidColorBrush(Colors.Gray);
-            else
-                errorText.Background = new SolidColorBrush(Colors.Yellow);
-
-            errorText.Content = message;
         }
     }
 }

@@ -10,7 +10,7 @@ public partial class UKS
     /// Emits facts as [S,R,O] (or [S,R,O,N] when R is a numeric specialization like "has.4").
     /// Optionally emits simple clause pairs if Relationship exposes a Clauses collection.
     /// </summary>
-    public void ExportTextFile(string root,string path,int maxDepth = 12)
+    public void ExportTextFile(string root, string path, int maxDepth = 12)
     {
         if (string.IsNullOrWhiteSpace(root)) throw new ArgumentException("Start label is required.", nameof(root));
 
@@ -130,7 +130,7 @@ public partial class UKS
         for (int i = 1, relIndex = 0; i < tokens.Count; i += 2, relIndex++)
         {
             string relTypeConnector = tokens[i];
-            stmt = ParseBracketStmt(tokens[i+1], lineNo);
+            stmt = ParseBracketStmt(tokens[i + 1], lineNo);
             if (relTypeConnector == "AFTER")
             { }
             Thing t = Labeled(relTypeConnector);
@@ -142,7 +142,7 @@ public partial class UKS
                 reltype = GetOrAddThing(stmt.R),
                 target = GetOrAddThing(stmt.O)
             };
-            Relationship r2 = AddClause(r,  t, r1.source, r1.reltype, r1.target);
+            Relationship r2 = AddClause(r, t, r1.source, r1.reltype, r1.target);
             //r.isStatement = isStatement;
         }
 
@@ -173,11 +173,7 @@ public partial class UKS
     // Adds a relationship, honoring numeric sugar (N → R.N + has-value + number typing)
     private Relationship AddRelStmt(BrStmt s)
     {
-        string[] source = s.S.Split(".");
-        string[] relType = s.R.Split(".");
-        string[] target = s.O.Split(".");
-
-        Relationship r = AddStatement(source[0], relType[0], target[0]);
+        Relationship r = AddStatement(s.S, s.R, s.O);
         if (s.N is { } n)
         {
             if (float.TryParse(s.N, out float weight))
@@ -241,29 +237,17 @@ public partial class UKS
             {
                 int start = i++;
                 int depth = 1;
-                bool inQuotes = false;
                 bool esc = false;
 
                 for (; i < n; i++)
                 {
                     char c = code[i];
-                    if (inQuotes)
+                    if (c == '[') { depth++; continue; }
+                    if (c == ']')
                     {
-                        if (esc) { esc = false; continue; }
-                        if (c == '\\') { esc = true; continue; }
-                        if (c == '"') { inQuotes = false; continue; }
+                        depth--;
+                        if (depth == 0) { i++; break; }
                         continue;
-                    }
-                    else
-                    {
-                        if (c == '"') { inQuotes = true; continue; }
-                        if (c == '[') { depth++; continue; }
-                        if (c == ']')
-                        {
-                            depth--;
-                            if (depth == 0) { i++; break; }
-                            continue;
-                        }
                     }
                 }
 
@@ -295,44 +279,20 @@ public partial class UKS
         void Flush()
         {
             var raw = sb.ToString().Trim();
-            items.Add(Unquote(raw));
+            items.Add(raw);
             sb.Clear();
         }
 
         for (int i = 0; i < s.Length; i++)
         {
             char c = s[i];
-
-            if (inQuotes)
-            {
-                if (esc) { sb.Append(c); esc = false; continue; }
-                if (c == '\\') { esc = true; continue; }
-                if (c == '"') { inQuotes = false; continue; }
-                sb.Append(c);
-                continue;
-            }
-
-            if (c == '"') { inQuotes = true; continue; }
             if (c == ',') { Flush(); continue; }
-
             sb.Append(c);
         }
 
         Flush();
         return items;
     }
-
-    private static string Unquote(string s)
-    {
-        if (s.Length >= 2 && s[0] == '"' && s[^1] == '"')
-        {
-            var inner = s.Substring(1, s.Length - 2);
-            return inner.Replace("\\\"", "\"").Replace("\\\\", "\\");
-        }
-        return s;
-    }
-
-
 }
 
 

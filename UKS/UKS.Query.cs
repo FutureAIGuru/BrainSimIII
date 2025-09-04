@@ -297,7 +297,7 @@ public partial class UKS
         for (int i = 0; i < result.Count; i++)
         {
             Relationship r1 = result[i];
-            if (!ConditionsAreMet(r1.Clauses, r1))
+            if (!ConditionsAreMet(r1))
             {
                 failedConditions.Add(r1);
                 result.RemoveAt(i);
@@ -438,15 +438,15 @@ public partial class UKS
     }
 
 
-    bool ConditionsAreMet(List<Clause> clauses, Relationship query)
+    bool ConditionsAreMet(Relationship r)
     {
-        if (clauses.Count == 0) return true;
+        if (r.Clauses.Count == 0 && r.isStatement) return true;
         //if (StackContains("ConditionsAreMet",1)) return true;
-        foreach (Clause c in clauses)
+        foreach (Clause c in r.Clauses)
         {
             if (c.clauseType.Label.ToLower() != "if") continue;
-            Relationship r = c.clause;
-            QueryRelationship q = new(r);
+            Relationship r1 = c.clause;
+            QueryRelationship q = new(r1);
             //if (query.source != null && query.source.AncestorList().Contains(q.source))
             //    q.source = query.source;
             //if (query.source != null && query.source.AncestorList().Contains(q.target))
