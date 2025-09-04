@@ -1,11 +1,13 @@
-﻿using Newtonsoft.Json;
-using Pluralize.NET;
-using System.Net.Http;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Pluralize.NET;
 
 namespace BrainSimulator.Modules
 {
@@ -114,7 +116,7 @@ namespace BrainSimulator.Modules
             {
                 throw ex;
             }
-            
+
             // Deserialize the response body to a CompletionResult object
             return answerString;
         }
@@ -129,5 +131,145 @@ namespace BrainSimulator.Modules
             return retVal;
         }
 
+        // ===== Provider selection helpers =====
+        private static readonly HttpClient _http = new HttpClient() { Timeout = TimeSpan.FromSeconds(120) };
+
+        private static string Get(string key, string? fallback = null)
+        {
+            // Prefer App.config; fall back to env var; then explicit fallback.
+            var v = System.Configuration.ConfigurationManager.AppSettings[key];
+            if (!string.IsNullOrWhiteSpace(v)) return v!;
+            v = Environment.GetEnvironmentVariable(key);
+            return string.IsNullOrWhiteSpace(v) ? (fallback ?? "") : v!;
+        }
+
+        private static string ProviderName()
+        {
+            var p = Get("LLM_PROVIDER", "openai").Trim().ToLowerInvariant();
+            return string.IsNullOrWhiteSpace(p) ? "openai" : p;
+        }
+
+        // ===== Public entrypoints you can call from elsewhere =====
+        public static async Task<string> RunTextAsync(string prompt, string system, bool asChat = false)
+        {
+            switch (ProviderName())
+            {
+                case "ollama":
+                    if (asChat)
+                        return await OllamaChatAsync(new[] { Msg("user", prompt) });
+                    return await OllamaGenerateAsync(prompt, system);
+
+                // keep existing OpenAI path intact
+                case "openai":
+                default:
+                    // If one wishes to call OpenAI, route to it:
+                    return await GetGPTResult(prompt, system);
+            }
+        }
+
+        // Optional helper to pass multi-turn messages to the chat endpoint
+        public static (string role, string content) Msg(string role, string content) => (role, content);
+
+        // ===== OLLAMA IMPLEMENTATION =====
+        private static async Task<string> OllamaGenerateAsync(string prompt, string system)
+        {
+            var baseUrl = Get("OLLAMA_BASE_URL", "http://localhost:11434").TrimEnd('/');
+            var model = Get("OLLAMA_MODEL", "llama3:8b");
+
+            string combined = system + " " + prompt;
+
+            var payload = new JObject
+            {
+                ["model"] = model,
+                ["prompt"] = combined,
+                ["stream"] = false
+            };
+
+            try
+            {
+                using (var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/generate"))
+                {
+                    req.Content = new StringContent(payload.ToString(), Encoding.UTF8, "application/json");
+                    using (var res = await _http.SendAsync(req))
+                    {
+                        res.EnsureSuccessStatusCode();
+
+                        var json = await res.Content.ReadAsStringAsync();
+                        var obj = JObject.Parse(json);
+
+                        string? response = obj.Value<string>("response")
+                                         ?? obj.SelectToken("message.content")?.ToString();
+
+                        if (string.IsNullOrWhiteSpace(response))
+                        {
+                            Debug.WriteLine("Ollama: response field missing or empty.");
+                            return "";
+                        }
+
+                        Debug.WriteLine("Ollama return: " + response);
+                        return response;
+                    }
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                Debug.WriteLine($"[Ollama] HTTP error: {ex.Message}");
+                return $"[Error contacting Ollama at {baseUrl}: {ex.Message}]";
+            }
+            catch (TaskCanceledException ex)
+            {
+                Debug.WriteLine($"[Ollama] Timeout: {ex.Message}");
+                return "[Error: Ollama request timed out]";
+            }
+            catch (JsonException ex)
+            {
+                Debug.WriteLine($"[Ollama] JSON parse error: {ex.Message}");
+                return "[Error: Invalid JSON from Ollama]";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[Ollama] Unexpected error: {ex}");
+                return $"[Unexpected Ollama error: {ex.Message}]";
+            }
+        }
+
+
+        private static async Task<string> OllamaChatAsync(IEnumerable<(string role, string content)> messages)
+        {
+            var baseUrl = Get("OLLAMA_BASE_URL", "http://localhost:11434").TrimEnd('/');
+            var model = Get("OLLAMA_MODEL", "llama3:8b");
+
+            var jMsgs = new JArray();
+            foreach (var (role, content) in messages)
+            {
+                jMsgs.Add(new JObject
+                {
+                    ["role"] = role,
+                    ["content"] = content
+                });
+            }
+
+            var payload = new JObject
+            {
+                ["model"] = model,
+                ["messages"] = jMsgs,
+                ["stream"] = false
+            };
+
+            using (var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/chat"))
+            {
+                req.Content = new StringContent(payload.ToString(), Encoding.UTF8, "application/json");
+                using (var res = await _http.SendAsync(req))
+                {
+                    res.EnsureSuccessStatusCode();
+                    var json = await res.Content.ReadAsStringAsync();
+                    var obj = JObject.Parse(json);
+                    // Try chat shape first, then fallback
+                    return obj.SelectToken("message.content")?.ToString()
+                           ?? obj.Value<string>("response")
+                           ?? "";
+                }
+            }
+        }
     }
 }

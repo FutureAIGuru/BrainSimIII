@@ -89,7 +89,7 @@ Rules:
 - If no valid statements exist, return nothing";
 
 
-            string gptResults = await GPT.GetGPTResult(userInput, systemText);
+            string gptResults = await GPT.RunTextAsync(userInput, systemText);
 
             Debug.WriteLine("RESULTS: " + gptResults);
 

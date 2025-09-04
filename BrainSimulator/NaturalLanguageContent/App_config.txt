@@ -1,0 +1,16 @@
+﻿=== Pase the files below into a NEW FILE: App.config to access GPT information, change and add the necessary values===
+
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+	<!-- Application Settings -->
+	<appSettings>
+		<add key="APIKey" value=""/>
+		<add key="CurrentFile" value = ""/>
+		<add key="OPENAI_MODEL" value = ""/>
+		<!-- switch providers without code changes, either openai for GPT or ollama for local -->
+		<add key="LLM_PROVIDER" value="openai" />
+		<!-- Ollama defaults (can also set via env vars) -->
+		<add key="OLLAMA_BASE_URL" value="http://localhost:11434" />
+		<add key="OLLAMA_MODEL" value="llama3.1" />
+	</appSettings>
+</configuration>

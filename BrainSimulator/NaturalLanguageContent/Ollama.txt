@@ -1,0 +1,6 @@
+﻿Link to website: https://ollama.com/
+Ollama enables one to run local LLMs easily, which could be cheaper in certain instances than GPT.
+
+To run, make sure Ollama is installed and the model you want to run is installed too (more information on the website).
+When I ran llama3.1 it was slower and didn't output valid results so we may have to fine tune.
+Make sure your hardware can support the model you are running as it could be very slow.
