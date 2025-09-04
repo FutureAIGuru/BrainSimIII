@@ -76,7 +76,9 @@ public class ModuleAddCounts : ModuleBase
                 Relationship existingRelationship = theUKS.GetRelationship(r.source, useRelType.ToString() + "." + match.bestCount.ToString(), match.tMatch);
                 if (existingRelationship == null)
                 {
-                    Relationship rAdded = theUKS.AddStatement(r.source, useRelType, match.tMatch, null, match.bestCount.ToString());
+                    string newRelLabel = useRelType.ToString() + "." + match.bestCount.ToString();
+                    Thing newRelType = theUKS.GetOrAddThing(newRelLabel, useRelType.Parents[0]);
+                    Relationship rAdded = theUKS.AddStatement(r.source.Label, newRelType, match.tMatch);
                     debugString += $"Added: {rAdded}\n";
                 }
             }

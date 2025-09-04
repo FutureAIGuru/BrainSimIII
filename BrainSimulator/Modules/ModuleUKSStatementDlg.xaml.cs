@@ -77,18 +77,18 @@ namespace BrainSimulator.Modules
                 if (text == "" && !tb.Name.Contains("arget"))
                 {
                     tb.Background = new SolidColorBrush(Colors.Pink);
-                    SetError("Source and type cannot be empty");
+                    SetStatus("Source and type cannot be empty");
                     return false;
                 }
                 List<Thing> tl = ModuleUKSStatement.ThingListFromString(text);
-                if (tl == null || tl.Count ==0)
+                if (tl == null || tl.Count == 0)
                 {
                     tb.Background = new SolidColorBrush(Colors.LemonChiffon);
-                    SetError("");
+                    SetStatus("OK");
                     return false;
                 }
                 tb.Background = new SolidColorBrush(Colors.White);
-                SetError("");
+                SetStatus("OK");
                 return true;
             }
             return false;
@@ -110,32 +110,20 @@ namespace BrainSimulator.Modules
         // Check for parent existence and set background color of the textbox and the error message accordingly.
         private bool CheckAddRelationshipFieldsFilled()
         {
-            SetError("");
+            SetStatus("OK");
             ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
 
             if (sourceText.Text == "")
             {
-                SetError("Source not provided");
+                SetStatus("Source not provided");
                 return false;
             }
             if (relationshipText.Text == "")
             {
-                SetError("Type not provided");
+                SetStatus("Type not provided");
                 return false;
             }
             return true;
-        }
-
-
-        // SetError turns the error text yellow and sets the message, or clears the color and the text.
-        private void SetError(string message)
-        {
-            if (string.IsNullOrEmpty(message))
-                errorText.Background = new SolidColorBrush(Colors.Gray);
-            else
-                errorText.Background = new SolidColorBrush(Colors.LemonChiffon);
-
-            errorText.Content = message;
         }
     }
 }

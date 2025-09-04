@@ -8,13 +8,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using UKS;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace BrainSimulator.Modules;
 
@@ -49,7 +49,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         if (!base.Draw(checkDrawTimer)) return false;
         if (busy) return false;
         if (!checkBoxAuto.IsChecked == true) { return false; }
-        RefreshButton_Click(null, null);
+        Refresh();
         return true;
     }
 
@@ -74,7 +74,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             //you might get this exception if there is a collision
             return;
         }
-        statusLabel.Content = parent.theUKS.UKSList.Count + " Things  " + (childCount + refCount) + " Relationships";
+        statusLabel.Content = parent.theUKS.UKSList.Count + " Things  " + (childCount + refCount) + " Rels.";
         Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.theUKS.FileName);
     }
 
@@ -231,7 +231,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         foreach (Relationship r in sortedReferences)
         {
             if (r.relType?.Label == "has-child") continue;
-            //if (r.clausesFrom.Count > 0) continue;  //do not display if target of clause
+            if (!r.isStatement && showConditionals.IsChecked != true) continue; //hide conditionals
+            //special case for values 
             if (r.target != null && r.target.HasAncestorLabeled("Value"))
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r) };
@@ -239,10 +240,10 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 tviRefLabel.Items.Add(tviRef);
                 totalItemCount++;
             }
-            else if (r.relType is not null) //should ALWAYS be true
+            else 
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r), };
-
+                if (!r.isStatement) tviRef.Header = "*" + tviRef.Header;
                 if (r.source != t) tviRef.Header = r.source?.Label + "->" + tviRef.Header;
                 tviRef.ContextMenu = GetRelationshipContextMenu(r);
                 tviRefLabel.Items.Add(tviRef);
@@ -469,10 +470,14 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         mi = new();
         mi.Click += Mi_Click;
-        mi.Header = "    " + r.target.Label;
+        mi.Header = "    " + r.target?.Label;
         mi.SetValue(ThingObjectProperty, r.target);
         menu.Items.Add(mi);
 
+        foreach (var c in r.Clauses)
+        {
+
+        }
 
         return menu;
     }
@@ -488,7 +493,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (tParent != null)
             {
                 textBoxRoot.Text = tParent.Label;
-                RefreshButton_Click(null, null);
+                Refresh();
             }
             Thing t = (Thing)m.GetValue(ThingObjectProperty);
             if (t == null)
@@ -496,7 +501,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 Relationship r = (Relationship)m.GetValue(RelationshipObjectProperty);
                 (r.source as Thing).RemoveRelationship(r);
                 //force a repaint
-                RefreshButton_Click(null, null);
+                Refresh();
                 return;
             }
             ModuleUKS parent = (ModuleUKS)ParentModule;
@@ -518,7 +523,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     break;
                 case "Fetch GPT Info":
                     //the following is an async call so an immediate refresh is not useful
-                    ModuleGPTInfo.GetChatGPTData(t.Label);
+                    //ModuleGPTInfo.GetChatGPTData(t.Label);
                     break;
                 case "Delete":
                     theUKS.DeleteAllChildren(t);
@@ -537,11 +542,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     break;
                 case "Make Root":
                     textBoxRoot.Text = t.Label;
-                    RefreshButton_Click(null, null);
+                    Refresh();
                     break;
             }
             //force a repaint
-            RefreshButton_Click(null, null);
+            Refresh();
         }
     }
 
@@ -679,7 +684,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         ModuleUKS parent = (ModuleUKS)ParentModule;
         if (parent == null) return;
         parent.SetSavedDlgAttribute("Root", textBoxRoot.Text);
-        RefreshButton_Click(null, null);
+        Refresh();
 
     }
 
@@ -746,7 +751,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     }
 
 
-    private void RefreshButton_Click(object sender, RoutedEventArgs e)
+    private void Refresh()
     {
         try
         {
@@ -775,7 +780,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
 
-        //parent.theUKS.UKSList.Clear();
+        //this hack is needed to preserve the info relating to module layout
         for (int i = 0; i < parent.theUKS.UKSList.Count; i++)
         {
             Thing t = parent.theUKS.UKSList[i];
@@ -787,7 +792,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (t.Label == "hasAttribute") continue;
             if (t != null)
             {
-                //                    parent.theUKS.DeleteAllChildren(t);
                 parent.theUKS.DeleteThing(t);
                 i--;
             }
@@ -802,7 +806,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         string root = parent.GetSavedDlgAttribute("root");
         if (string.IsNullOrEmpty(root)) root = "Thing";
         textBoxRoot.Text = root;
-        RefreshButton_Click(null, null);
+        Refresh();
     }
 
     private void CollapseAll()
@@ -830,4 +834,104 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         ModuleUKS parent = (ModuleUKS)ParentModule;
         textBoxRoot.Text = parent.GetSavedDlgAttribute("Root");
     }
+
+    private string Browse(bool open)
+    {
+        string path = "";
+        System.Windows.Forms.FileDialog dlg;
+        if (open)
+            dlg = new System.Windows.Forms.OpenFileDialog
+            {
+                Title = "Select UKS .txt file",
+                Filter = "UKS text (*.txt)|*.txt|All files (*.*)|*.*",
+                CheckFileExists = false,
+                Multiselect = false
+            };
+        else
+            dlg = new System.Windows.Forms.SaveFileDialog
+            {
+                Title = "Select UKS .txt file",
+                Filter = "UKS text (*.txt)|*.txt|All files (*.*)|*.*",
+                CheckFileExists = false,
+            };
+        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            path = dlg.FileName;
+        return path;
+    }
+
+    private async void ImportButton_Click(object sender, RoutedEventArgs e)
+    {
+        SetStatus("");
+        var path = Browse(true); ;
+        if (string.IsNullOrEmpty(path)) return;
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            SetStatus("Choose a file first.");
+            return;
+        }
+        if (!File.Exists(path))
+        {
+            SetStatus("File not found.");
+            return;
+        }
+
+        try
+        {
+            ModuleUKS parent = (ModuleUKS)base.ParentModule;
+            // Run ingest off the UI thread to keep the window responsive
+            await Task.Run(() => parent.theUKS.ImportTextFile(path));
+
+            SetStatus("Success");
+        }
+        catch (Exception ex)
+        {
+            Mouse.OverrideCursor = null;
+
+            // Show a friendly error, but include details for debugging.
+            System.Windows.MessageBox.Show(this,
+                "Import failed.\n\n" + ex.Message,
+                "UKS Import",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            Mouse.OverrideCursor = null;
+        }
+    }
+
+    private async void ExportButton_Click(object sender, RoutedEventArgs e)
+    {
+        var path = Browse(true); ;
+        if (string.IsNullOrEmpty(path)) return;
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            SetStatus("Choose a file first.");
+            return;
+        }
+        try
+        {
+            ModuleUKS parent = (ModuleUKS)base.ParentModule;
+            //get the root to save the contents of from the UKS dialog root
+            string root = parent.GetSavedDlgAttribute("Root");
+            await Task.Run(() => parent.theUKS.ExportTextFile(root, path));
+            SetStatus("Success")    ;
+        }
+        catch (Exception ex)
+        {
+            Mouse.OverrideCursor = null;
+
+            // Show a friendly error, but include details for debugging.
+            System.Windows.MessageBox.Show(this,
+                "Import failed.\n\n" + ex.Message,
+                "UKS Import",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            Mouse.OverrideCursor = null;
+        }
+    }
+
 }

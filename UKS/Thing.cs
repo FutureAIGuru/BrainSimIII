@@ -315,7 +315,7 @@ public partial class Thing
     /// <param name="target">Target Thing</param>
     /// <param name="relationshipType">RelatinoshipType Thing</param>
     /// <returns>the new or existing Relationship</returns>
-    public Relationship AddRelationship(Thing target, Thing relationshipType)
+    public Relationship AddRelationship(Thing target, Thing relationshipType,bool isStatement = true)
     {
         if (relationshipType == null)  //NULL relationship types could be allowed in search Thingys Parameter?
         {
@@ -323,7 +323,7 @@ public partial class Thing
         }
 
         //does the relationship already exist?
-        Relationship r = HasRelationship(target, relationshipType);
+        Relationship r = HasRelationship(target, relationshipType,isStatement);
         if (r != null)
         {
             //AdjustRelationship(r.T);
@@ -334,6 +334,7 @@ public partial class Thing
             relType = relationshipType,
             source = this,
             target = target,
+            isStatement = isStatement
         };
         if (target != null && relationshipType != null)
         {
@@ -368,11 +369,11 @@ public partial class Thing
     }
 
     //TODO reverse the parameters so it's type,target
-    private Relationship HasRelationship(Thing target, Thing relationshipType)
+    private Relationship HasRelationship(Thing target, Thing relationshipType, bool isStatement = true)
     {
         foreach (Relationship r in relationships)
         {
-            if (r.source == this && r.target == target && r.reltype == relationshipType)
+            if (r.source == this && r.target == target && r.reltype == relationshipType && r.isStatement == isStatement)
                 return r;
         }
         return null;
@@ -391,8 +392,8 @@ public partial class Thing
             {
                 lock (r.target.RelationshipsFromWriteable)
                 {
-                    r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
-                    r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
+                    r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);
+                    r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);
                 }
             }
         }
@@ -402,9 +403,8 @@ public partial class Thing
             {
                 lock (r.relType.RelationshipsFromWriteable)
                 {
-                    r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
-                    r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target); ;
-                }
+                    r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement); ;
+                    r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);                }
             }
         }
         else
@@ -415,9 +415,9 @@ public partial class Thing
                 {
                     lock (r.target.RelationshipsFromWriteable)
                     {
-                        r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
-                        r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
-                        r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target);
+                        r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);
+                        r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);
+                        r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);
                     }
                 }
             }
@@ -458,10 +458,11 @@ public partial class Thing
     }
 
 
-    public void RemoveRelationship(Thing t2, Thing relationshipType)
+    public Relationship RemoveRelationship(Thing t2, Thing relationshipType)
     {
         Relationship r = new() { source = this, reltype = relationshipType, target = t2 };
         RemoveRelationship(r);
+        return r;
     }
 
 

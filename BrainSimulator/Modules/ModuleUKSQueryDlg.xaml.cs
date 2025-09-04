@@ -82,6 +82,8 @@ namespace BrainSimulator.Modules
             ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
             UKSQuery.QueryUKS(source, type, target, filter, out things, out relationships);
 
+
+
             if (things.Count > 0)
                 OutputResults(things);
             else
@@ -152,8 +154,12 @@ namespace BrainSimulator.Modules
                         else if (noTarget && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
                             resultString += $"{r2.source.ToString()} {r2.relType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                         else
-                            resultString += $"{r2.source.ToString()} {r2.relType.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
-                        //                            resultString += r2.ToString() + "\n";
+                        {
+                            Thing theSource = UKS.UKS.GetNonInstance(r2.source);
+                            if (fullCB.IsChecked == true)
+                                resultString += $"{theSource.Label} ";
+                            resultString += $"{r2.relType.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                        }
                     }
                     else
                         resultString += r1.ToString() + "\n";

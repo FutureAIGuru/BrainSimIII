@@ -5,8 +5,8 @@
 //
 
 using System.Collections.Generic;
-using Pluralize.NET;
 using UKS;
+using Pluralize.NET;
 
 namespace BrainSimulator.Modules
 {
@@ -68,29 +68,10 @@ namespace BrainSimulator.Modules
         {
             GetUKS();
             if (theUKS == null) return null;
-            IPluralize pluralizer = new Pluralizer();
 
-
-            source = source.Trim();
-            target = target.Trim();
-            relationshipType = relationshipType.Trim();
-
-            string[] tempStringArray = source.Split(' ');
-            List<string> sourceModifiers = new();
-            if (source.Length > 0 && !char.IsUpper(source[0]))
-                source = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
-            for (int i = 0; i < tempStringArray.Length - 1; i++) sourceModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
-
-            tempStringArray = target.Split(' ');
-            List<string> targetModifiers = new();
-            if (target.Length > 0 && !char.IsUpper(target[0]))
-                target = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
-            for (int i = 0; i < tempStringArray.Length - 1; i++) targetModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
-
-            tempStringArray = relationshipType.Split(' ');
-            List<string> typeModifiers = new();
-            relationshipType = pluralizer.Singularize(tempStringArray[0]);
-            for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
+            Thing tSource = theUKS.CreateThingFromMultipleAttributes(source, false);
+            Thing tRelType = theUKS.CreateThingFromMultipleAttributes(relationshipType, true);
+            Thing tTarget = theUKS.CreateThingFromMultipleAttributes(target, false);
 
             if (target == "" && relationshipType == "is-a")
             {
@@ -99,12 +80,9 @@ namespace BrainSimulator.Modules
                 return null;
             }
 
-
-            Relationship r = theUKS.AddStatement(source, relationshipType, target, sourceModifiers, typeModifiers, targetModifiers);
-
+            Relationship r = theUKS.AddStatement(tSource, tRelType, tTarget, true);
             return r;
         }
-
 
         public static List<Thing> ThingListFromString(string source)
         {

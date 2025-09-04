@@ -4,8 +4,6 @@ from typing import Union
 from abc import abstractmethod
 import tkinter as tk
 ## Import UKS.dll from C# modules
-##import pythonnet
-##pythonnet.load("coreclr")
 import clr
 clr.AddReference("UKS")
 from UKS import *
