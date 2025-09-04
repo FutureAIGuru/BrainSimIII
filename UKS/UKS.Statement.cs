@@ -12,7 +12,7 @@ public partial class UKS
     /// Parameters are strings. If the Things with those labels
     /// do not exist, they will be created. <br/>
     /// If the RelationshipType has an inverse, the inverse will be used and the Relationship will be reversed so that 
-    /// Fido Is-a cog become cog Has-hild Fido.<br/>
+    /// Fido Is-a Dog become Dog Has-child Fido.<br/>
     /// </summary>
     /// <param name="sSource">string or Thing</param>
     /// <param name="sRelationshipType">string or Thing</param>
