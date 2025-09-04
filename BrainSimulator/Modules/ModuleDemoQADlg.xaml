@@ -5,16 +5,135 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
-        Title="(Work in Progress) QA Demo System" Height="500" Width="800" Background="Gray" ShowInTaskbar="False">
-    <Grid Name="theGrid" SizeChanged="TheGrid_SizeChanged">
-        <Label x:Name="inputLbl" FontSize="16" Content="Input Natural Language Sentences Directly or From a File to ChatGPT:" HorizontalAlignment="Center" VerticalAlignment="Top" Width="780"/>
-        <TextBox x:Name="inputTextBox" Margin="0,39,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Height="114" Width="780"></TextBox>
-        <Button Content="A) Ingest Text -> UKS" HorizontalAlignment="Right" Margin="0,158,608,0" Height="59" Width="164" Click="Button_Click" FontSize="16" VerticalAlignment="Top" />
-        <Button Content="B) Ingest File -> UKS" HorizontalAlignment="Right" Margin="0,158,426,0" Height="59" Width="162" Click="Button_Click" FontSize="16" VerticalAlignment="Top" />
-        <Label x:Name="outputLbl" FontSize="16" Content="Ask a question using the UKS:" Margin="0,217,0,233" HorizontalAlignment="Center" VerticalAlignment="Top" Width="780"/>
-        <Label x:Name="inputOutcomeLbl" FontSize="16" Content="Input Status: " HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,158,0,0" Height="84" Width="421"/>
-        <Label x:Name="queryOutcomeLbl" FontSize="16" Content="Query Status: " HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,365,10,0" Height="109" Width="411"/>
-        <Button Content="Query UKS" HorizontalAlignment="Right" Margin="0,370,608,0" Height="59" Width="164" Click="Button_Click" FontSize="16" VerticalAlignment="Top" />
-        <TextBox x:Name="queryTextBox" Margin="0,251,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Height="114" Width="780"/>
+        Title="(Work in Progress) QA Demo System"
+        Background="Gray"
+        Width="800" Height="500"
+        MinWidth="640" MinHeight="420"
+        ShowInTaskbar="False">
+
+    <!-- Outer padding -->
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Input label -->
+            <RowDefinition Height="*"/>
+            <!-- Input textbox grows -->
+            <RowDefinition Height="Auto"/>
+            <!-- Ingest buttons + status -->
+            <RowDefinition Height="Auto"/>
+            <!-- Output label -->
+            <RowDefinition Height="*"/>
+            <!-- Query textbox grows -->
+            <RowDefinition Height="Auto"/>
+            <!-- Query button + status -->
+        </Grid.RowDefinitions>
+
+        <!-- INPUT: label -->
+        <Label x:Name="inputLbl"
+               Grid.Row="0"
+               FontSize="16"
+               HorizontalAlignment="Stretch"
+               HorizontalContentAlignment="Center"
+               Content="Input Natural Language Sentences Directly or From a File to ChatGPT:"/>
+
+        <!-- INPUT: textbox (stretches with window) -->
+        <TextBox x:Name="inputTextBox"
+                 Grid.Row="1"
+                 Margin="0,8,0,0"
+                 HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch"
+                 VerticalContentAlignment="Top"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 MinHeight="100"/>
+
+        <!-- INPUT: actions + status in a 3-column grid -->
+        <Grid Grid.Row="2" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <!-- Button A -->
+                <ColumnDefinition Width="8"/>
+                <!-- Gap -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- Button B -->
+                <ColumnDefinition Width="16"/>
+                <!-- Gap -->
+                <ColumnDefinition Width="*"/>
+                <!-- Status expands -->
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Content="A) Ingest Text -> UKS"
+                    Click="Button_Click"
+                    FontSize="16"
+                    Padding="12,8"
+                    MinWidth="180"
+                    HorizontalAlignment="Left"/>
+
+            <Button Grid.Column="2"
+                    Content="B) Ingest File -> UKS"
+                    Click="Button_Click"
+                    FontSize="16"
+                    Padding="12,8"
+                    MinWidth="180"
+                    HorizontalAlignment="Left"/>
+
+            <TextBlock x:Name="inputOutcomeLbl"
+               Grid.Column="4"
+               FontSize="16"
+               Text="Input Status: "
+               TextWrapping="Wrap"
+               VerticalAlignment="Center" Height="58"/>
+
+        </Grid>
+
+        <!-- QUERY: label -->
+        <Label x:Name="outputLbl"
+               Grid.Row="3"
+               Margin="0,16,0,0"
+               FontSize="16"
+               HorizontalAlignment="Stretch"
+               HorizontalContentAlignment="Center"
+               Content="Ask a question using the UKS:"/>
+
+        <!-- QUERY: textbox (stretches with window) -->
+        <TextBox x:Name="queryTextBox"
+                 Grid.Row="4"
+                 Margin="0,8,0,0"
+                 HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch"
+                 VerticalContentAlignment="Top"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 MinHeight="100"/>
+
+        <!-- QUERY: action + status -->
+        <Grid Grid.Row="5" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <!-- Query button -->
+                <ColumnDefinition Width="16"/>
+                <!-- Gap -->
+                <ColumnDefinition Width="*"/>
+                <!-- Status expands -->
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Content="Query UKS"
+                    Click="Button_Click"
+                    FontSize="16"
+                    Padding="12,8"
+                    MinWidth="160"
+                    HorizontalAlignment="Left"/>
+
+            <TextBlock x:Name="queryOutcomeLbl"
+                   Grid.Column="2"
+                   FontSize="16"
+                   VerticalAlignment="Center"
+                   TextWrapping="Wrap"
+                   Text="Query Status: " Height="73" />
+        </Grid>
     </Grid>
 </local:ModuleBaseDlg>

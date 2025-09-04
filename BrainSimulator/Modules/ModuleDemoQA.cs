@@ -126,12 +126,16 @@ Rules:
                     string relationType2 = items[5].Trim();
                     string targetThing2 = items[6].Trim();
 
+                    Debug.WriteLine("Clauses being reworked.");
+
+                    /*
                     Relationship r = MainWindow.theUKS.AddStatement(newThing, relationType, targetThing, clauseType, newThing2, targetThing2);
 
                     if (r == null)
                     {
                         Debug.WriteLine($"Relationship: {r} in natural to UKS is null!");
                     }
+                    */
                 }
                 else
                 {

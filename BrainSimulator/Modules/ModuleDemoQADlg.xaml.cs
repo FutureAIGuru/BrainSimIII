@@ -52,6 +52,10 @@ namespace BrainSimulator.Modules
                 {
                     QueryNLP();
                 }
+                else
+                {
+                    Debug.WriteLine("Problem Running: -> " + b.Content.ToString());
+                }
 
             }
 
@@ -84,7 +88,7 @@ namespace BrainSimulator.Modules
             // Guard: nothing to do
             if (string.IsNullOrWhiteSpace(raw))
             {
-                queryOutcomeLbl.Content = "No query text.";
+                queryOutcomeLbl.Text = "Query Status: No query text.";
                 return;
             }
 
@@ -120,9 +124,9 @@ namespace BrainSimulator.Modules
                 */
 
                 if (things.Count > 0)
-                    queryOutcomeLbl.Content = "Query Status: " + OutputResults(things);
+                    queryOutcomeLbl.Text = "Query Status: " + OutputResults(things);
                 else
-                    queryOutcomeLbl.Content = "Query Status: Nothing Found.";
+                    queryOutcomeLbl.Text = "Query Status: Nothing Found.";
             }
 
             // Small extract helpers
@@ -231,7 +235,7 @@ namespace BrainSimulator.Modules
             try
             {
                 MainWindow.SuspendEngine();
-                inputOutcomeLbl.Content = "Input Status: Processing input...";
+                inputOutcomeLbl.Text = "Input Status: Processing input...";
 
                 // 1) Read the textbox text as text
                 string text;
@@ -241,7 +245,7 @@ namespace BrainSimulator.Modules
                 }
                 catch (IOException ioex)
                 {
-                    inputOutcomeLbl.Content = "Input Status: An error occurred while reading the file:\n" + ioex.Message;
+                    inputOutcomeLbl.Text = "Input Status: An error occurred while reading the file:\n" + ioex.Message;
                     return;
                 }
 
@@ -256,7 +260,7 @@ namespace BrainSimulator.Modules
                 // Make sure there is at least one sentence.
                 if (sentences.Count == 0)
                 {
-                    inputOutcomeLbl.Content = "Input Status: No sentences found in the file.";
+                    inputOutcomeLbl.Text = "Input Status: No sentences found in the file.";
                     return;
                 }
 
@@ -264,7 +268,7 @@ namespace BrainSimulator.Modules
                 // int sentenceMax = 50;
                 // if (sentences.Count > sentenceMax) sentences = sentences.Take(sentenceMax).ToList();
 
-                inputOutcomeLbl.Content = $"Input Status: Read (an estimated) {sentences.Count} sentence(s). Sending to GPT→UKS module…";
+                inputOutcomeLbl.Text = $"Input Status: Read (an estimated) {sentences.Count} sentence(s). Sending to GPT→UKS module…";
 
                 // 3) Hand off to the LLM→UKS module (adjust signature/types as needed)
                 string report;
@@ -276,12 +280,12 @@ namespace BrainSimulator.Modules
                 catch (Exception ex)
                 {
                     // If the module throws, surface a friendly message
-                    inputOutcomeLbl.Content = "Input Status: An error occurred in ModuleDemoQA:\n" + ex.Message;
+                    inputOutcomeLbl.Text = "Input Status: An error occurred in ModuleDemoQA:\n" + ex.Message;
                     return;
                 }
 
                 // 4) Show result/summary in the UI
-                inputOutcomeLbl.Content = $"Input Status: Processed (an estimated) {sentences.Count} sentence(s) via GPT→UKS.";
+                inputOutcomeLbl.Text = $"Input Status: Processed (an estimated) {sentences.Count} sentence(s) via GPT→UKS.";
             }
             finally
             {
@@ -299,7 +303,7 @@ namespace BrainSimulator.Modules
             try
             {
                 MainWindow.SuspendEngine();
-                inputOutcomeLbl.Content = "Input Status: Waiting for text file input...";
+                inputOutcomeLbl.Text = "Input Status: Waiting for text file input...";
 
                 // 1) Let user choose a file
                 using var openFileDialog = new System.Windows.Forms.OpenFileDialog
@@ -312,7 +316,7 @@ namespace BrainSimulator.Modules
 
                 if (openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                 {
-                    inputOutcomeLbl.Content = "Input Status: No file selected.";
+                    inputOutcomeLbl.Text = "Input Status: No file selected.";
                     return;
                 }
 
@@ -326,7 +330,7 @@ namespace BrainSimulator.Modules
                 }
                 catch (IOException ioex)
                 {
-                    inputOutcomeLbl.Content = "Input Status: An error occurred while reading the file:\n" + ioex.Message;
+                    inputOutcomeLbl.Text = "Input Status: An error occurred while reading the file:\n" + ioex.Message;
                     return;
                 }
 
@@ -340,7 +344,7 @@ namespace BrainSimulator.Modules
 
                 if (sentences.Count == 0)
                 {
-                    inputOutcomeLbl.Content = "Input Status: No sentences found in the file.";
+                    inputOutcomeLbl.Text = "Input Status: No sentences found in the file.";
                     return;
                 }
 
@@ -348,7 +352,7 @@ namespace BrainSimulator.Modules
                 // int sentenceMax = 50;
                 // if (sentences.Count > sentenceMax) sentences = sentences.Take(sentenceMax).ToList();
 
-                inputOutcomeLbl.Content = $"Input Status: Read (an estimated) {sentences.Count} sentence(s). Sending to GPT→UKS module…";
+                inputOutcomeLbl.Text = $"Input Status: Read (an estimated) {sentences.Count} sentence(s). Sending to GPT→UKS module…";
 
                 // 4) Hand off to the LLM→UKS module (adjust signature/types as needed)
                 string report;
@@ -360,12 +364,12 @@ namespace BrainSimulator.Modules
                 catch (Exception ex)
                 {
                     // If the module throws, surface a friendly message
-                    inputOutcomeLbl.Content = "Input Status: An error occurred in ModuleDemoQA:\n" + ex.Message;
+                    inputOutcomeLbl.Text = "Input Status: An error occurred in ModuleDemoQA:\n" + ex.Message;
                     return;
                 }
 
                 // 5) Show result/summary in the UI
-                inputOutcomeLbl.Content = $"Input Status: Processed (an estimated) {sentences.Count} sentence(s) via GPT→UKS.";
+                inputOutcomeLbl.Text = $"Input Status: Processed (an estimated) {sentences.Count} sentence(s) via GPT→UKS.";
             }
             finally
             {
@@ -403,12 +407,12 @@ namespace BrainSimulator.Modules
                         //                            resultString += r2.ToString() + "\n";
                                             */
                         if (noSource && r2.Clauses.Count == 0)
-                            resultString += $"{r2.relType?.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                            resultString += $"{r2.relType?.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")}), ";
                         else if (noTarget && r2.Clauses.Count == 0)
-                            resultString += $"{r2.source.ToString()} {r2.relType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                            resultString += $"{r2.source.ToString()} {r2.relType.ToString()}  ({r2.Weight.ToString("0.00")}), ";
                     }
                     else
-                        resultString += r1.ToString() + "\n";
+                        resultString += r1.ToString() + ", ";
                 }
             return resultString;
         }
