@@ -30,13 +30,22 @@ public partial class UKS
     }
     public List<Relationship> GetAllRelationships(List<Thing> sources, bool reverse) //with inheritance, conflicts, etc
     {
+        //expand search list to include instances of given objects
+        for (int i = 0; i < sources.Count; i++)
+        {
+            Thing t = sources[i];
+            foreach (Thing child in t.Children)
+                if (child.HasProperty("isInstance"))
+                    sources.Add(child);
+        }
+
+
         var result1 = BuildSearchList(sources, reverse);
         List<Relationship> result2 = GetAllRelationshipsInt(result1);
         if (result2.Count < 200)
             RemoveConflictingResults(result2);
         RemoveFalseConditionals(result2);
         AlphabetizeRelationships(ref result2);
-        //IncreaseResultWeights(result2);
         return result2;
     }
 
@@ -119,6 +128,20 @@ public partial class UKS
                 }
 
             foreach (Relationship r in t.Relationships) //has-a et al
+            {
+                //special case to pick up insances
+                if (r.relType.HasAncestorLabeled("has-child") && r.target.HasProperty("isInstance"))
+                {
+                    ThingWithQueryParams thingToAdd = new ThingWithQueryParams
+                    {
+                        thing = r.target,
+                        hopCount = hopCount,
+                        weight = curWeight * r.Weight,
+                        reachedWith = r.relType,
+                    };
+                    thingsToExamine.Add(thingToAdd);
+                    continue;
+                }
                 if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
                     (r.relType.HasAncestorLabeled("has") && !reverse))
                 {
@@ -146,6 +169,7 @@ public partial class UKS
                         thingToAdd.haveCount = curCount * val;
                     }
                 }
+            }
             if (i == currentEnd - 1)
             {
                 hopCount++;
@@ -229,6 +253,13 @@ public partial class UKS
         for (int i = 0; i < result.Count; i++)
         {
             Relationship r1 = result[i];
+
+            //remove properties from the results list (they are internal)
+            if (r1.reltype.Label == "hasProperty")
+            {
+                result.RemoveAt(i);
+                continue;
+            }
             for (int j = i + 1; j < result.Count; j++)
             {
                 Relationship r2 = result[j];
@@ -266,7 +297,7 @@ public partial class UKS
         for (int i = 0; i < result.Count; i++)
         {
             Relationship r1 = result[i];
-            if (!ConditionsAreMet(r1.Clauses, r1))
+            if (!ConditionsAreMet(r1))
             {
                 failedConditions.Add(r1);
                 result.RemoveAt(i);
@@ -407,21 +438,21 @@ public partial class UKS
     }
 
 
-    bool ConditionsAreMet(List<Clause> clauses, Relationship query)
+    bool ConditionsAreMet(Relationship r)
     {
-        if (clauses.Count == 0) return true;
+        if (r.Clauses.Count == 0 && r.isStatement) return true;
         //if (StackContains("ConditionsAreMet",1)) return true;
-        foreach (Clause c in clauses)
+        foreach (Clause c in r.Clauses)
         {
             if (c.clauseType.Label.ToLower() != "if") continue;
-            Relationship r = c.clause;
-            QueryRelationship q = new(r);
-            if (query.source != null && query.source.AncestorList().Contains(q.source))
-                q.source = query.source;
-            if (query.source != null && query.source.AncestorList().Contains(q.target))
-                q.target = query.target;
-            if (query.target != null && query.target.AncestorList().Contains(q.source))
-                q.source = query.target;
+            Relationship r1 = c.clause;
+            QueryRelationship q = new(r1);
+            //if (query.source != null && query.source.AncestorList().Contains(q.source))
+            //    q.source = query.source;
+            //if (query.source != null && query.source.AncestorList().Contains(q.target))
+            //    q.target = query.target;
+            //if (query.target != null && query.target.AncestorList().Contains(q.source))
+            //    q.source = query.target;
             var qResult = GetRelationship(q);
             if (qResult != null && qResult.Weight < 0.8)
                 return false;

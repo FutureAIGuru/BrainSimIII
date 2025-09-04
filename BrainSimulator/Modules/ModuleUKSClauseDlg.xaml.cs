@@ -34,29 +34,121 @@ namespace BrainSimulator.Modules
             string newThing = sourceText.Text;
             string targetThing = targetText.Text;
             string relationType = relationshipText.Text;
-            string clauseType = clauseTypeText.Text;
+            string clauseLabel = clauseTypeText.Text.ToUpper(); ;
 
             if (!CheckAddRelationshipFieldsFilled()) return;
 
             ModuleUKSClause UKSClause = (ModuleUKSClause)ParentModule;
-            Relationship r1 = UKSClause.AddRelationship(newThing, targetThing, relationType);
 
-            Thing theClauseType = UKSClause.GetClauseType(clauseType);
-            string newThing2 = sourceText2.Text;
-            string targetThing2 = targetText2.Text;
-            string relationType2 = relationshipText2.Text;
-            Relationship r2 = UKSClause.AddRelationship(newThing2, targetThing2, relationType2);
-            r1.AddClause(theClauseType, r2);
+            Thing source = UKSClause.theUKS.GetOrAddThing(newThing);
+            Thing target = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetThing,false);
+            Thing relType = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationType, true);
+            Thing clauseType = UKSClause.theUKS.CreateThingFromMultipleAttributes(clauseLabel, false);
+
+            Relationship r1 = null;
+            if (rBase != null)
+            {
+                if (GetInstanceRoot(rBase.source) != source ||
+                    GetInstanceRoot(rBase.target) != target ||
+                    GetInstanceRoot(rBase.relType) != relType)
+                    rBase = null;
+                if (rBase != null && !rBase.source.Relationships.Contains(rBase))
+                    rBase = null;
+                if (rBase != null)
+                    r1 = rBase;
+            }
+            if (r1 == null) 
+                r1 = UKSClause.theUKS.AddStatement (source,relType,target, false);
+
+            Thing theClauseType = UKSClause.theUKS.GetOrAddThing(clauseLabel,"ClauseType");
+
+            Thing source2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(sourceText2.Text, false);
+            Thing type2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationshipText2.Text, true);
+            Thing target2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetText2.Text, false);
+            Relationship rAdded = UKSClause.theUKS.AddClause(r1, theClauseType, source2, type2, target2);
+
+            SetUpRelComboBox(GetInstanceRoot(r1.source),rAdded);
         }
+
+        private Thing GetInstanceRoot(Thing t)
+        {
+            Thing t1 = t;
+            while (t1.HasProperty("isInstance")) t1 = t1.Parents[0];
+            return t1;
+        }
+
+
+        public static readonly DependencyProperty theRelationship=
+DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBoxItem));
+
 
         // thingText_TextChanged is called when the thing textbox changes
         private void Text_TextChanged(object sender, TextChangedEventArgs e)
         {
-            CheckThingExistence(sender);
+            Thing sourceThing = CheckThingExistence(sender);
+            if (sender is TextBox source && source.Name == "sourceText")
+            {
+                SetUpRelComboBox(sourceThing);
+            }
+        }
+
+        private void SetUpRelComboBox(Thing sourceThing,Relationship rSelected = null)
+        {
+            SourceDisambiguation.Items.Clear();
+            SourceDisambiguation.Items.Add("<new>");
+            SourceDisambiguation.SelectedIndex = 0;
+            rBase = null;
+            if (sourceThing != null)
+            {
+                foreach (Thing t in sourceThing.Descendents)
+                {
+                    if (t != sourceThing && !t.HasProperty("isInstance")) continue;
+                    foreach (Relationship r in t.Relationships)
+                    {
+                        if (r.reltype.Label == "has-child") continue;
+                        if (r.reltype.Label == "hasProperty") continue;
+                        var cbi = new ComboBoxItem();
+                        cbi.Content = r.target.Label;
+                        cbi.ToolTip = r.ToString();
+                        cbi.SetValue(theRelationship, r);
+                        SourceDisambiguation.Items.Add(cbi);
+                        if (r == rSelected)
+                            SourceDisambiguation.SelectedItem = cbi;
+                    }
+                }
+                if (SourceDisambiguation.Items.Count > 1)
+                    SourceDisambiguation.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                SourceDisambiguation.Visibility = Visibility.Hidden;
+            }
+        }
+
+        Relationship rBase = null;
+        private void SourceDisambuation_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox cb)
+            {
+                if (cb.SelectedIndex < 1)
+                {
+                    SetStatus("OK");
+                    rBase = null;
+                }
+                else
+                {
+                    ComboBoxItem cbi = (ComboBoxItem)cb.SelectedItem;
+                    Relationship r = (Relationship)cbi.GetValue(theRelationship);
+                    relationshipText.Text = r.relType.Label;
+                    targetText.Text = r.target.Label;
+                    rBase = r;
+                    SetStatus(r.ToString(), Colors.Yellow);
+                }
+            }
         }
 
         //copied from UKSStatementDlg.cs
-        private bool CheckThingExistence(object sender)
+        private Thing CheckThingExistence(object sender)
         {
             if (sender is TextBox tb)
             {
@@ -65,21 +157,20 @@ namespace BrainSimulator.Modules
                 if (text == "" && !tb.Name.Contains("arget"))
                 {
                     tb.Background = new SolidColorBrush(Colors.Pink);
-                    SetError("Source and type cannot be empty");
-                    return false;
+                    SetStatus("Source and type cannot be empty");
+                    return null;
                 }
                 List<Thing> tl = ModuleUKSStatement.ThingListFromString(text);
                 if (tl == null || tl.Count == 0)
                 {
                     tb.Background = new SolidColorBrush(Colors.LemonChiffon);
-                    SetError("");
-                    return false;
+                    return null;
                 }
                 tb.Background = new SolidColorBrush(Colors.White);
-                SetError("");
-                return true;
+                SetStatus("");
+                return tl[0];
             }
-            return false;
+            return null;
         }
 
 
@@ -87,47 +178,35 @@ namespace BrainSimulator.Modules
         // Check for parent existence and set background color of the textbox and the error message accordingly.
         private bool CheckAddRelationshipFieldsFilled()
         {
-            SetError("");
+            SetStatus("");
             ModuleUKSClause UKSEvent = (ModuleUKSClause)ParentModule;
 
             if (sourceText.Text == "")
             {
-                SetError("Source not provided");
+                SetStatus("Source not provided");
                 return false;
             }
             if (relationshipText.Text == "")
             {
-                SetError("Type not provided");
+                SetStatus("Type not provided");
                 return false;
             }
             if (clauseTypeText.Text == "")
             {
-                SetError("Clause type not provided");
+                SetStatus("Clause type not provided");
                 return false;
             }
             if (sourceText2.Text == "")
             {
-                SetError("Clause source not provided");
+                SetStatus("Clause source not provided");
                 return false;
             }
             if (relationshipText2.Text == "")
             {
-                SetError("Clause type not provided");
+                SetStatus("Clause type not provided");
                 return false;
             }
             return true;
-        }
-
-
-        // SetError turns the error text yellow and sets the message, or clears the color and the text.
-        private void SetError(string message)
-        {
-            if (string.IsNullOrEmpty(message))
-                errorText.Background = new SolidColorBrush(Colors.Gray);
-            else
-                errorText.Background = new SolidColorBrush(Colors.Yellow);
-
-            errorText.Content = message;
         }
     }
 }

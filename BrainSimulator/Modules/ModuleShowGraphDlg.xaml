@@ -1,0 +1,14 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleShowGraphDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules" xmlns:wfi="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
+                     mc:Ignorable="d"
+        Title="Empty Dialog Template" Height="170" Width="560" Background="Gray" ShowInTaskbar="False" >
+
+    <Grid SizeChanged="TheGrid_SizeChanged">
+        <wfi:WindowsFormsHost x:Name="wfHost" Margin="0,60,0,0"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <Button x:Name="buttonRefresh" Content="Refresh" Width="90" IsDefault="True" Click="ButtonRefresh_Click" Height="29" Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" />
+    </Grid>
+</local:ModuleBaseDlg>

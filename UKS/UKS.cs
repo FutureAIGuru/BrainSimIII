@@ -1,5 +1,7 @@
 ﻿
 namespace UKS;
+using Pluralize.NET;
+
 
 /// <summary>
 /// Contains a collection of Things linked by Relationships to implement Common Sense and general knowledge.
@@ -12,23 +14,23 @@ public partial class UKS
 
     //This is a temporary copy of the UKS which used internally during the save and restore process to 
     //break circular links by storing index values instead of actual links Note the use of SThing instead of Thing
-    private  List<SThing> UKSTemp = new();
+    private List<SThing> UKSTemp = new();
 
     /// <summary>
     /// Occasionally a list of all the Things in the UKS is needed. This is READ ONLY.
     /// There is only one (shared) list for the App.
     /// </summary>
-    public IList<Thing> UKSList { get => uKSList;}
+    public IList<Thing> UKSList { get => uKSList; }
 
     //TimeToLive processing for relationships
-    static public  List<Relationship> transientRelationships = new List<Relationship>();
+    static public List<Relationship> transientRelationships = new List<Relationship>();
     static Timer stateTimer;
     /// <summary>
     /// Creates a new reference to the UKS and initializes it if it is the first reference. 
     /// </summary>
-    public UKS()
+    public UKS(bool clear = false)
     {
-        if (UKSList.Count == 0)
+        if (UKSList.Count == 0 || clear)
         {
             UKSList.Clear();
             ThingLabels.ClearLabelList();
@@ -37,7 +39,7 @@ public partial class UKS
         UKSTemp.Clear();
 
         var autoEvent = new AutoResetEvent(false);
-        stateTimer = new Timer(RemoveExpiredRelationships,autoEvent,0, 1000);
+        stateTimer = new Timer(RemoveExpiredRelationships, autoEvent, 0, 1000);
     }
 
     static bool isRunning = false;
@@ -82,7 +84,7 @@ public partial class UKS
     /// <param name="label"></param>
     /// <param name="parent">May be null</param>
     /// <returns></returns>
-    public virtual Thing AddThing(string label, Thing parent)
+    public virtual Thing AddThing(string label, Thing? parent)
     {
         Thing newThing = new();
         newThing.Label = label;
@@ -94,6 +96,7 @@ public partial class UKS
         {
             UKSList.Add(newThing);
         }
+
         return newThing;
     }
 
@@ -190,7 +193,7 @@ public partial class UKS
         return results;
     }
 
-    private  bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
+    private bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
     {
         //are two relationships mutually exclusive?
         //yes if they differ by a single component property
@@ -203,6 +206,9 @@ public partial class UKS
 
         if (r1.target != r2.target && (r1.target == null || r2.target == null)) return false;
         //if (r1.target == r2.target && r1.source != r2.source) return false;
+
+        if (!r1.isStatement) return false;
+        if (!r2.isStatement) return false;
 
         if (r1.source == r2.source ||
             r1.source.AncestorList().Contains(r2.source) ||
@@ -325,7 +331,8 @@ public partial class UKS
         if (
             (r1.source == r2.source || ignoreSource) &&
             r1.target == r2.target &&
-            r1.relType == r2.relType
+            r1.relType == r2.relType &&
+            r1.isStatement == r2.isStatement
           ) return true;
         return false;
     }
@@ -342,7 +349,7 @@ public partial class UKS
     {
         foreach (Relationship r1 in r.source.Relationships)
         {
-            if (RelationshipsAreEqual (r,r1)) return r1;
+            if (RelationshipsAreEqual(r, r1)) return r1;
         }
         return null;
     }
@@ -416,6 +423,8 @@ public partial class UKS
             return tl;
         else if (o is null)
             return new();
+        else if (o is string[] array)
+            return ThingListFromStringList(array.ToList(), parentLabel);
         else
             throw new ArgumentException("invalid arg type in AddStatement: " + o.GetType());
     }
@@ -468,6 +477,28 @@ public partial class UKS
         thingToReturn = ThingLabels.GetThing(label);
         if (thingToReturn != null) return thingToReturn;
 
+        //. are used to indicate attributes to be added
+        if (label.Contains(".") && label != "." && !label.Contains(".py"))
+        {
+            string[] attribs = label.Split(".");
+            Thing baseThing = Labeled(attribs[0]);
+            if (baseThing == null) baseThing = AddThing(attribs[0], "unknownObject"); 
+            Thing instanceThing = Labeled(label);
+            if (instanceThing == null)
+            {
+                instanceThing = AddThing(label, baseThing);
+            }
+            for (int i = 1; i < attribs.Length; i++)
+            {
+                Thing attrib = Labeled(attribs[i]);
+                if (attrib == null) 
+                    attrib = AddThing(attribs[i], "unknownObject");
+                instanceThing.AddRelationship(attrib, "is");
+            }
+            return instanceThing;
+        }
+
+
         Thing correctParent = null;
         if (parent is string s)
             correctParent = ThingLabels.GetThing(s);
@@ -500,4 +531,98 @@ public partial class UKS
         return thingToReturn;
     }
 
+
+    /*Restrictions on Node Names:
+     * must be unique
+     * cannot be empty
+     * cannot include ' ' (use a - instead)
+     * cannot include '.' this is the flag for creating a subclass with following attributes
+     * cannot include '*' this is the flag for auto-increment the label
+     * case insensitive but initial input case is preserved for display
+     * capitalized labels are never signularized even if "singularize=true"
+    */
+
+
+    /// <summary>
+    /// Finds or creates a subclass.  "Has 4" becomes Thing{has.4} and has.4 is 4.
+    /// </summary>
+    /// <param name="label">The string to process</param>
+    /// <param name="attributesFollow">Attributes follow or precede the main</param>
+    /// <param name="singularize"></param>
+    /// <returns></returns>
+    public Thing CreateThingFromMultipleAttributes(string label, bool attributesFollow, bool singularize = true)
+    {
+        IPluralize pluralizer = new Pluralizer();
+        label = label.Trim();
+        string[] tempStringArray = label.Split(' ');
+        if (tempStringArray.Length == 0 || tempStringArray[0].Length == 0) return null;
+
+        for (int i = 0; i < tempStringArray.Length; i++)
+            if (!char.IsUpper(tempStringArray[i][0]) && singularize)
+                tempStringArray[i] = pluralizer.Singularize(tempStringArray[i]);
+
+        string thingLabel;
+        if (attributesFollow)
+        {
+            thingLabel = tempStringArray[0];
+            for (int i = 1; i < tempStringArray.Length; i++)
+                if (!string.IsNullOrEmpty(tempStringArray[i]))
+                    thingLabel += "." + tempStringArray[i];
+        }
+        else
+        {
+            int last = tempStringArray.Length - 1;
+            thingLabel = tempStringArray[last];
+            for (int i = 0; i < last; i++)
+                if (!string.IsNullOrEmpty(tempStringArray[i]))
+                    thingLabel += "." + tempStringArray[i];
+        }
+
+        Thing t = GetOrAddThing(thingLabel);
+        return t;
+    }
+
+
+
+    public Relationship AddClause(Relationship r1, Thing clauseType, Thing source, Thing relType, Thing target)
+    {
+        //does this relation/clause already exist?
+        //rTemp is an orpan...not a real linked-up relationship
+        Relationship rTemp = new() { source = source, reltype = relType, target = target, Weight = .9f, isStatement = false };
+        foreach (Thing t in r1.source.Children)
+        {
+            foreach (Relationship r in t.Relationships)
+            {
+                Clause? c = r.Clauses.FindFirst(x => x?.clauseType == clauseType && x?.clause == rTemp);
+                if (c != null)
+                    return r;
+            }
+        }
+
+        //figure out if a new instance is needed
+        bool newInstanceNeeded = false;
+        if (clauseType.Label.ToLower() == "if" && r1.isStatement) newInstanceNeeded = true;
+
+
+        Relationship rRoot = r1;
+
+        if (newInstanceNeeded)
+        {
+            // Create a new instances of the source
+            Thing newInstance = GetOrAddThing(r1.source.Label + "*", r1.source);
+            //move the existing relationship down
+            rRoot = new();
+            r1.source.RemoveRelationship(r1);
+            rRoot.source = newInstance;
+            rRoot = rRoot.source.AddRelationship(r1.target, r1.relType, false);
+            AddStatement(rRoot.source.Label, "hasProperty", "isInstance");
+        }
+        //make rTemp into a real relationship
+        rTemp = rTemp.source.AddRelationship(rTemp.target, rTemp.relType, r1.isStatement);
+
+        //add the clause
+        rRoot.AddClause(clauseType, rTemp);
+        rRoot.isStatement = false;
+        return rRoot;
+    }
 }

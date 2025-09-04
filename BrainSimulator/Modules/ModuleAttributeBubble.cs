@@ -271,8 +271,6 @@ public class ModuleAttributeBubble : ModuleBase
 
 
 
-
-
     //if the given thing is an instance of its parent, get the parent
     public static Thing GetInstanceType(Thing t)
     {
@@ -282,7 +280,8 @@ public class ModuleAttributeBubble : ModuleBase
             return Regex.IsMatch(input, @"\d+$");
         }
         Thing useRelType = t;
-        while (useRelType.Parents.Count > 0 && EndsInInteger(useRelType.Label) && !t.Label.Contains(".") && useRelType.Label.StartsWith(useRelType.Parents[0].Label))
+        while (useRelType.Parents.Count > 0 && EndsInInteger(useRelType.Label) && 
+            !t.Label.Contains(".") && useRelType.Label.StartsWith(useRelType.Parents[0].Label))
             useRelType = useRelType.Parents[0];
         return useRelType;
     }

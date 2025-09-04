@@ -336,10 +336,16 @@ namespace BrainSimulator
             }
 
             ModuleListComboBox.Items.Clear();
+            ModuleListComboBox.FontSize = 18;
             foreach (Thing t in theUKS.Labeled("AvailableModule").Children)
             {
-                ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = t.Label, Margin = new Thickness(0), Padding = new Thickness(0) });
+                //ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = t.Label, Margin = new Thickness(0), Padding = new Thickness(0) });
+                ModuleListComboBox.Items.Add(t.Label);
             }
+            ModuleListComboBox.Items.SortDescriptions.Add(
+                new System.ComponentModel.SortDescription(
+                    "", // empty = sort by the item itself (e.g., string)
+                    System.ComponentModel.ListSortDirection.Ascending));
         }
     }
 }

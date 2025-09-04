@@ -13,7 +13,9 @@ public partial class UKS
     {
         if (Labeled("Thing") == null)
             AddThing("Thing", null);
-        Thing hasChild = AddThing("has-child", null);
+        Thing hasChild = Labeled("has-child");
+        if (hasChild == null)
+            hasChild = AddThing("has-child", null);
         Thing relType = GetOrAddThing("RelationshipType", "Thing");
         hasChild.AddParent(relType);
         GetOrAddThing("Object", "Thing");
@@ -26,15 +28,30 @@ public partial class UKS
         GetOrAddThing("is", "RelationshipType");
 
         AddStatement("is-a", "inverseOf", "has-child");
-        AddStatement("isExclusive", "is-a", "RelationshipType");
-        AddStatement("isTransitive", "is-a", "RelationshipType");
+        AddStatement("has-attribute", "is-a", "RelationshipType");
+        AddStatement("contains", "is-a", "RelationshipType");
+        AddStatement("is-part-of", "is-a", "RelationshipType");
+        AddStatement("contains", "inverseOf", "is-part-of");
         AddStatement("has", "is-a", "RelationshipType");
-        //        AddStatement("is-part-of", "is-a", "RelationshipType");
-        //        AddStatement("has", "inverseOf", "is-part-of");
+        AddStatement("not", "is-a", "RelationshipType");
+
+        //properties are intenal capabilities of nodes
+        AddStatement("Property", "is-a", "RelationshipType");
+        AddStatement("isExclusive", "is-a", "Property");
+        AddStatement("isTransitive", "is-a", "Property");
+        AddStatement("isInstance", "is-a", "Property");
+        AddStatement("isTransitive", "is-a", "Property");
+        AddStatement("isCommutative", "is-a", "Property");
+        AddStatement("allowMultiple", "is-a", "Property");
+        AddStatement("inheritable", "is-a", "Property");
 
         AddStatement("ClauseType", "is-a", "RelationshipType");
-        //        AddStatement("is-part-of", "hasProperty", "isTransitive");
+        AddStatement("IF", "is-a", "ClauseType");
+        AddStatement("BECAUSE", "is-a", "ClauseType");
         AddStatement("has-child", "hasProperty", "isTransitive");
+        AddStatement("has-child", "hasProperty", "inheritable");
+        AddStatement("is-part-of", "hasProperty", "isTransitive");
+        AddStatement("is-part-of", "hasProperty", "inheritable");
 
         AddBrainSimConfigSectionIfNeeded();
         SetupNumbers();
@@ -43,14 +60,14 @@ public partial class UKS
     public void SetupNumbers()
     {
         GetOrAddThing("number", "Object");
-        AddStatement("greaterThan", "is-a", "RelationshipType");
+        AddStatement("Comparison", "is-a", "RelationshipType");
+        AddStatement("greaterThan", "is-a", "Comparison");
         AddStatement("greaterThan", "hasProperty", "isTransitive");
         AddStatement("lessThan", "inverseOf", "greaterThan");
-        AddStatement("lessThan", "is-a", "RelationshipType");
+        AddStatement("lessThan", "is-a", "Comparison");
         AddStatement("number", "hasProperty", "isExclusive");
         GetOrAddThing("digit", "number");
-        GetOrAddThing("isSimilarTo", "RelationshipType");
-        GetOrAddThing("isCommutative", "RelationshipType");
+        GetOrAddThing("isSimilarTo", "Comparison");
         AddStatement("isSimilarTo", "hasProperty", "isCommutative");
         AddStatement("hasDigit", "is-a", "has");
 
@@ -123,13 +140,16 @@ public partial class UKS
     {
         if (stack.Contains(l)) return null;
         stack.Add(l);
-        List<SClauseType> clauseList = null;
-        if (l.Clauses.Count > 0) clauseList = new();
-        foreach (Clause c in l.Clauses)
+        List<SClauseType>? clauseList = null;
+        if (l.Clauses.Count > 0)
         {
-            int clauseType = UKSList.FindIndex(x => x == c.clauseType);
-            SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause, stack) };
-            clauseList.Add(ct);
+            clauseList = new();
+            foreach (Clause c in l.Clauses)
+            {
+                int clauseType = UKSList.FindIndex(x => x == c.clauseType);
+                SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause, stack) };
+                clauseList.Add(ct);
+            }
         }
 
         SRelationship sR = new SRelationship()
@@ -256,7 +276,7 @@ public partial class UKS
         {
             foreach (SClauseType sc in p.clauses)
             {
-                Clause ct = new Clause() { clauseType = UKSList[sc.clauseType], clause = UnConvertRelationship(sc.r, stack) };
+                Clause ct = new Clause(UKSList[sc.clauseType], UnConvertRelationship(sc.r, stack));
                 if (ct.clause != null)
                     r.Clauses.Add(ct);
             }

@@ -33,6 +33,8 @@
     <Compile Remove="Modules\Module2DVision.cs" />
     <Compile Remove="Modules\ModuleAttentionManager.cs" />
     <Compile Remove="Modules\ModuleFrequencyConfidence2.cs" />
+    <Compile Remove="Modules\ModuleGPTInfo.cs" />
+    <Compile Remove="Modules\ModuleGPTInfoDlg.xaml.cs" />
     <Compile Remove="Modules\ModuleMove.cs" />
     <Compile Remove="Modules\ModuleObject.cs" />
     <Compile Remove="Modules\ModulePodArmExtension.cs" />
@@ -84,6 +86,7 @@
     <None Remove="Resources\Icons\SaveAs_16x.png" />
     <None Remove="Resources\Icons\Save_16x.png" />
     <None Remove="Resources\Icons\SelectAll_16x.png" />
+    <None Remove="Resources\Icons\TextFileIcon.png" />
     <None Remove="Resources\Icons\Undo_16x.png" />
     <None Remove="Resources\Icons\ZoomIn_16x.png" />
     <None Remove="Resources\Icons\ZoomOriginalSize_16x.png" />
@@ -193,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <Page Remove="Modules\Module2DSimDlg.xaml" />
+    <Page Remove="Modules\ModuleGPTInfoDlg.xaml" />
     <Page Remove="Modules\ModuleObjectDlg.xaml" />
     <Page Remove="Modules\ModulePremiseDlg.xaml" />
     <Page Remove="Tools\ModuleDlg.xaml" />
@@ -404,6 +408,7 @@
     <Resource Include="Resources\UserInterface\MainWindow\WINDOWS-ICON-Move.png" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Pluralize.NET" Version="1.0.2" />
     <PackageReference Include="pythonnet" Version="3.0.5" />
@@ -442,5 +447,14 @@
     <None Include="..\PythonProj\module*.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Modules\Vision\**" />
+    <EmbeddedResource Remove="Modules\Vision\**" />
+    <None Remove="Modules\Vision\**" />
+    <Page Remove="Modules\Vision\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\TextFileIcon.png" />
   </ItemGroup>
 </Project>
