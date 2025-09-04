@@ -96,8 +96,6 @@ public partial class UKS
         {
             UKSList.Add(newThing);
         }
-        if (newThing.Label == "has-child0")
-        { }
 
         return newThing;
     }
