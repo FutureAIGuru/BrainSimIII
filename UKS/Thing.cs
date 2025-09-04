@@ -255,7 +255,7 @@ public partial class Thing
     }
 
     /// <summary>
-    /// Rrecursively gets all descendents of a Thing. Use with caution as this might be a large list
+    /// Recursively gets all descendents of a Thing. Use with caution as this might be a large list
     /// </summary>
     public IEnumerable<Thing> Descendents
     {
