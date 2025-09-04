@@ -15,6 +15,6 @@
         <Label x:Name="inputOutcomeLbl" FontSize="16" Content="Input Status: " HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,158,0,0" Height="84" Width="421"/>
         <Label x:Name="queryOutcomeLbl" FontSize="16" Content="Query Status: " HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,365,10,0" Height="109" Width="411"/>
         <Button Content="Query UKS" HorizontalAlignment="Right" Margin="0,370,608,0" Height="59" Width="164" Click="Button_Click" FontSize="16" VerticalAlignment="Top" />
-        <TextBox x:Name="outputTextBox" Margin="0,251,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Height="114" Width="780"/>
+        <TextBox x:Name="queryTextBox" Margin="0,251,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Height="114" Width="780"/>
     </Grid>
 </local:ModuleBaseDlg>

@@ -62,19 +62,30 @@ Follow has ONLY if called out in type
 
          */
 
+
+        // keep the current instance method for backward-compat
         public void QueryUKS(string sourceIn, string relTypeIn, string targetIn,
-                string filter, out List<Thing> thingResult, out List<Relationship> relationships)
+            string filter, out List<Thing> thingResult, out List<Relationship> relationships)
+        {
+            GetUKS(); // ensures 'theUKS' is available
+            QueryUKSStatic(theUKS, sourceIn, relTypeIn, targetIn, filter, out thingResult, out relationships);
+        }
+
+        // static helper — now we can call this from any other module
+        public static void QueryUKSStatic(UKS.UKS uks,
+            string sourceIn, string relTypeIn, string targetIn, string filter,
+            out List<Thing> thingResult, out List<Relationship> relationships)
         {
             thingResult = new();
             relationships = new();
-            GetUKS();
-            if (theUKS == null) return;
+            if (uks == null) return;
+
+
             string source = sourceIn.Trim();
             string relType = relTypeIn.Trim();
             string target = targetIn.Trim();
 
             bool reverse = false;
-            //if (source == "" && target == "") return;
             int paramCount = 0;
             if (source != "") paramCount++;
             if (relType != "") paramCount++;
@@ -87,10 +98,8 @@ Follow has ONLY if called out in type
             }
 
             List<Thing> sourceList = ModuleUKSStatement.ThingListFromString(source);
-            //if (sourceList.Count == 0) return;
             List<Thing> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
             List<Thing> targetList = ModuleUKSStatement.ThingListFromString(target);
-
 
             //Handle is-a queries as a special case
             if (relType.Contains("is-a") && reverse ||
@@ -115,17 +124,17 @@ Follow has ONLY if called out in type
                 Thing target1 = new Thing() { Label = "searchPattern" };
                 foreach (Thing t in sourceList)
                     target1.AddRelationship(t, (relTypeList.Count > 0) ? relTypeList[0] : null);
-                Thing result = theUKS.SearchForClosestMatch(target1, "Thing", ref confidence);
+                Thing result = uks.SearchForClosestMatch(target1, "Thing", ref confidence);
                 if (result != null)
                 {
-                    float confidence1 = theUKS.HasSequence(target1, result, out int offset);
+                    float confidence1 = uks.HasSequence(target1, result, out int offset);
                     if (confidence1 > 0.0f)
                         thingResult.Add(result);
                 }
-                theUKS.DeleteThing(target1);
+                uks.DeleteThing(target1);
             }
 
-            relationships = theUKS.GetAllRelationships(sourceList, reverse);
+            relationships = uks.GetAllRelationships(sourceList, reverse);
 
             //unreverse the source and target
             if (reverse)
@@ -163,6 +172,7 @@ Follow has ONLY if called out in type
             //        if (relTypeIn == "") thingResult.Add(r.relType);
             //    }
             //}
+
         }
     }
 }
