@@ -636,7 +636,7 @@ namespace BrainSimulator.Modules
                     }
                 }
             }
-            float tolerance = 2.3f;
+            float tolerance = 2.7f;
             for (int i = 0; i < segments.Count - 1; i++)
             {
                 Segment s1 = segments[i];
@@ -982,7 +982,7 @@ namespace BrainSimulator.Modules
                     //let's add it to the UKS
                     Thing corner = theUKS.GetOrAddThing("corner*", tCorners);
                     corner.V = c;
-                    theUKS.AddStatement(outlineThing, "has*", corner);
+                    theUKS.AddStatement(outlineThing.Label, "has*", corner.Label);
                 }
             }
         }

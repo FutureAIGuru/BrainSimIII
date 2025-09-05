@@ -449,12 +449,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Modules\Vision\**" />
-    <EmbeddedResource Remove="Modules\Vision\**" />
-    <None Remove="Modules\Vision\**" />
-    <Page Remove="Modules\Vision\**" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Icons\TextFileIcon.png" />
   </ItemGroup>
 </Project>

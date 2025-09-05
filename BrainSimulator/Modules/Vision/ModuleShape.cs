@@ -102,7 +102,7 @@ namespace BrainSimulator.Modules
                         foundShape.SetFired();
                         //TODO: add the offset & rotation to the parent
                         if (newParent != null)
-                            theUKS.AddStatement(newParent, "go*", foundShape);
+                            theUKS.AddStatement(newParent.Label, "go*", foundShape.Label);
 
                         newStoredShape = null;
                         //are we running MNIST and did we get the correct answer?
@@ -305,7 +305,7 @@ namespace BrainSimulator.Modules
                     float radius = circle.radius / maxDist;
                     int iDiameter = ((int)Round(radius*20));
                     Thing theArc = theUKS.GetOrAddThing("arc" + sweep + "D." + iDiameter, "Arc");
-                    Relationship r1 = theUKS.AddStatement(currentShape, "go*", theArc);
+                    Relationship r1 = theUKS.AddStatement(currentShape.Label, "go*", theArc.Label);
                     r1.TimeToLive = TimeSpan.FromSeconds(secondsForTemporaryShapes);
                 }
                 else
@@ -327,7 +327,7 @@ namespace BrainSimulator.Modules
                     while (turn.Degrees <= -180) turn += Angle.FromDegrees(360);
                     int a1 = IRound(turn.Degrees, 10);
                     Thing theAngle = theUKS.GetOrAddThing("angle" + a1, "Angle");
-                    Relationship r = theUKS.AddStatement(currentShape, "go*", theAngle);
+                    Relationship r = theUKS.AddStatement(currentShape.Label, "go*", theAngle.Label);
                     r.TimeToLive = TimeSpan.FromSeconds(secondsForTemporaryShapes);
                     if (!isClosed && i == corners.Count - 1 && corners.Count != 1) //only include a following move if this is not a closed shape
                     {
@@ -345,7 +345,7 @@ namespace BrainSimulator.Modules
             string distName = "distance." + ((int)Round(dist*10)).ToString();
             if (Round(dist * 10) == 10) distName = "distance1.0";
             Thing theDist = theUKS.GetOrAddThing(distName, "distance");
-            Relationship r = theUKS.AddStatement(currentShape, "go*", theDist);
+            Relationship r = theUKS.AddStatement(currentShape.Label, "go*", theDist.Label);
             r.TimeToLive = TimeSpan.FromSeconds(secondsForTemporaryShapes);
         }
 
