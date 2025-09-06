@@ -143,16 +143,20 @@ namespace BrainSimulator.Modules
             return string.IsNullOrWhiteSpace(v) ? (fallback ?? "") : v!;
         }
 
-        private static string ProviderName()
+        private static string ProviderName(string providerName)
         {
+            if (!string.IsNullOrEmpty(providerName))
+            {
+                return providerName.Trim().ToLowerInvariant();
+            }
             var p = Get("LLM_PROVIDER", "openai").Trim().ToLowerInvariant();
             return string.IsNullOrWhiteSpace(p) ? "openai" : p;
         }
 
-        // ===== Public entrypoints you can call from elsewhere =====
-        public static async Task<string> RunTextAsync(string prompt, string system, bool asChat = false)
+        // ===== Public entrypoints one can call from elsewhere =====
+        public static async Task<string> RunTextAsync(string prompt, string system, string providerName = "", bool asChat = false)
         {
-            switch (ProviderName())
+            switch (ProviderName(providerName))
             {
                 case "ollama":
                     if (asChat)

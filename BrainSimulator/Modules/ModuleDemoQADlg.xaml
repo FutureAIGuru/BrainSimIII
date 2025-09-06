@@ -11,129 +11,106 @@
         MinWidth="640" MinHeight="420"
         ShowInTaskbar="False">
 
-    <!-- Outer padding -->
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Input label -->
+            <!-- Header -->
+            <RowDefinition Height="Auto"/>
+            <!-- Provider picker -->
             <RowDefinition Height="*"/>
-            <!-- Input textbox grows -->
+            <!-- Transcript -->
             <RowDefinition Height="Auto"/>
-            <!-- Ingest buttons + status -->
+            <!-- Input -->
             <RowDefinition Height="Auto"/>
-            <!-- Output label -->
-            <RowDefinition Height="*"/>
-            <!-- Query textbox grows -->
-            <RowDefinition Height="Auto"/>
-            <!-- Query button + status -->
+            <!-- Send row -->
         </Grid.RowDefinitions>
 
-        <!-- INPUT: label -->
-        <Label x:Name="inputLbl"
-               Grid.Row="0"
+        <!-- HEADER -->
+        <Label Grid.Row="0"
                FontSize="16"
                HorizontalAlignment="Stretch"
                HorizontalContentAlignment="Center"
-               Content="Input Natural Language Sentences Directly or From a File to ChatGPT:"/>
+               Content="Chat with the QA Demo Bot"/>
 
-        <!-- INPUT: textbox (stretches with window) -->
-        <TextBox x:Name="inputTextBox"
-                 Grid.Row="1"
-                 Margin="0,8,0,0"
-                 HorizontalAlignment="Stretch"
-                 VerticalAlignment="Stretch"
-                 VerticalContentAlignment="Top"
-                 AcceptsReturn="True"
-                 TextWrapping="Wrap"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 MinHeight="100"/>
-
-        <!-- INPUT: actions + status in a 3-column grid -->
-        <Grid Grid.Row="2" Margin="0,12,0,0">
+        <!-- PROVIDER PICKER -->
+        <Grid Grid.Row="1" Margin="0,8,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
-                <!-- Button A -->
                 <ColumnDefinition Width="8"/>
-                <!-- Gap -->
-                <ColumnDefinition Width="Auto"/>
-                <!-- Button B -->
+                <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="16"/>
-                <!-- Gap -->
                 <ColumnDefinition Width="*"/>
-                <!-- Status expands -->
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0"
-                    Content="A) Ingest Text -> UKS"
-                    Click="Button_Click"
-                    FontSize="16"
-                    Padding="12,8"
-                    MinWidth="180"
-                    HorizontalAlignment="Left"/>
+            <TextBlock Grid.Column="0"
+                       VerticalAlignment="Center"
+                       FontWeight="SemiBold"
+                       Text="Provider:"/>
 
-            <Button Grid.Column="2"
-                    Content="B) Ingest File -> UKS"
-                    Click="Button_Click"
-                    FontSize="16"
-                    Padding="12,8"
-                    MinWidth="180"
-                    HorizontalAlignment="Left"/>
+            <ComboBox x:Name="providerCombo"
+                      Grid.Column="2"
+                      SelectionChanged="ProviderCombo_SelectionChanged"
+                      ToolTip="Choose GPT (OpenAI) or Ollama (local)">
+                <ComboBoxItem Content="GPT (OpenAI)"/>
+                <ComboBoxItem Content="Ollama (local)"/>
+            </ComboBox>
 
-            <TextBlock x:Name="inputOutcomeLbl"
-               Grid.Column="4"
-               FontSize="16"
-               Text="Input Status: "
-               TextWrapping="Wrap"
-               VerticalAlignment="Center" Height="58"/>
-
+            <TextBlock x:Name="providerHint"
+                       Grid.Column="4"
+                       VerticalAlignment="Center"
+                       Opacity="0.7"
+                       Text="GPT uses OPENAI_API_KEY • Ollama uses OLLAMA_BASE_URL / OLLAMA_MODEL"/>
         </Grid>
 
-        <!-- QUERY: label -->
-        <Label x:Name="outputLbl"
-               Grid.Row="3"
-               Margin="0,16,0,0"
-               FontSize="16"
-               HorizontalAlignment="Stretch"
-               HorizontalContentAlignment="Center"
-               Content="Ask a question using the UKS:"/>
-
-        <!-- QUERY: textbox (stretches with window) -->
-        <TextBox x:Name="queryTextBox"
-                 Grid.Row="4"
+        <!-- TRANSCRIPT -->
+        <TextBox x:Name="chatTranscript"
+                 Grid.Row="2"
                  Margin="0,8,0,0"
-                 HorizontalAlignment="Stretch"
-                 VerticalAlignment="Stretch"
-                 VerticalContentAlignment="Top"
+                 IsReadOnly="True"
                  AcceptsReturn="True"
                  TextWrapping="Wrap"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 MinHeight="100"/>
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Disabled"
+                 FontFamily="Consolas"
+                 MinHeight="200"
+                 Background="#111315"
+                 Foreground="#EDEDED"
+                 BorderThickness="1"
+                 BorderBrush="#30343A"
+                 Padding="8"
+                 Text="Welcome! Ask a question to begin.&#x0a;"/>
 
-        <!-- QUERY: action + status -->
-        <Grid Grid.Row="5" Margin="0,12,0,0">
+        <!-- INPUT BOX -->
+        <TextBox x:Name="chatInput"
+                 Grid.Row="3"
+                 Margin="0,12,0,0"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto"
+                 MinHeight="64"
+                 ToolTip="Enter to send • Shift+Enter for newline"
+                 KeyDown="ChatInput_KeyDown"/>
+
+        <!-- SEND BUTTON + HINT -->
+        <Grid Grid.Row="4" Margin="0,8,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
-                <!-- Query button -->
-                <ColumnDefinition Width="16"/>
-                <!-- Gap -->
+                <ColumnDefinition Width="12"/>
                 <ColumnDefinition Width="*"/>
-                <!-- Status expands -->
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0"
-                    Content="Query UKS"
-                    Click="Button_Click"
-                    FontSize="16"
-                    Padding="12,8"
-                    MinWidth="160"
-                    HorizontalAlignment="Left"/>
+            <Button x:Name="sendButton"
+                    Grid.Column="0"
+                    Content="Send"
+                    Padding="16,8"
+                    MinWidth="100"
+                    FontSize="14"
+                    Click="SendButton_Click"/>
 
-            <TextBlock x:Name="queryOutcomeLbl"
-                   Grid.Column="2"
-                   FontSize="16"
-                   VerticalAlignment="Center"
-                   TextWrapping="Wrap"
-                   Text="Query Status: " Height="73" />
+            <TextBlock Grid.Column="2"
+                       VerticalAlignment="Center"
+                       Opacity="0.7"
+                       Text="Tip: Press Enter to send (still working on it), Shift+Enter for a new line."/>
         </Grid>
     </Grid>
 </local:ModuleBaseDlg>
