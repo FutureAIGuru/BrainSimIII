@@ -536,7 +536,7 @@ namespace BrainSimulator
             Vector AP = P - A;       //Vector from A to P   
             Vector AB = B - A;    //Vector from A to B  
 
-            float magnitudeAB = (float)(AB.Length * AB.Length);     //Magnitude of AB vector (it's length squared)     
+            float magnitudeAB = (float)(AB.Length * AB.Length);     //Magnitude of AB vector (its length squared)     
             float ABAPproduct = (float)Vector.Multiply(AP, AB);    //The DOT product of a_to_p and a_to_b--projection of P onto AB     
             float distance = ABAPproduct / magnitudeAB; //The normalized "distance" from a to your closest point  
 

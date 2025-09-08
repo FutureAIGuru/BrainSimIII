@@ -79,7 +79,7 @@ public partial class ModuleVision
             RemoveOrphanPoints(ptsInThisScan);
             strokePoints.AddRange(ptsInThisScan);
         }
-        MergeNearbyPoints(strokePoints);
+        //MergeNearbyPoints(strokePoints);
         if (fortyFiveScan)
         {
             dx = 1;
@@ -99,7 +99,7 @@ public partial class ModuleVision
                 ptsInThisScan.AddRange(pts);
                 //FindBoundaryPtsInRay(sx, 0, dx, dy, rayThruImage);
             }
-            RemoveOrphanPoints(ptsInThisScan);
+            //RemoveOrphanPoints(ptsInThisScan);
             strokePoints.AddRange(ptsInThisScan);
         }
         if (minusFortyFiveScan)
@@ -121,7 +121,7 @@ public partial class ModuleVision
                 ptsInThisScan.AddRange(pts);
                 //FindBoundaryPtsInRay(imageArray.GetLength(0) - 1, sy, dx, dy, rayThruImage);
             }
-            RemoveOrphanPoints(ptsInThisScan);
+            //RemoveOrphanPoints(ptsInThisScan);
             strokePoints.AddRange(ptsInThisScan);
         }
     }
@@ -208,14 +208,16 @@ public partial class ModuleVision
     }
     private List<PointPlus> FindStrokePtsInRay(float sx, float sy, float dx, float dy, List<Color> rayThruImage)
     {
-        if (sy == 10)
+        if (sx == 15)
         { }
+        //create an array of the luminance values at each point in the ray for faster reference
         List<float> luminance = new List<float>();
         foreach (var color in rayThruImage)
         {
             float lum = new HSLColor(color).luminance;
             luminance.Add(lum );
         }
+
         List<PointPlus> ptsInThisScan = new();
         (List<(int index, float value)> maxima, List<(int index, float value)> minima) v = FindLocalExtrema(luminance, 0.06f);
         for (int i = 0; i < v.Item1.Count; i++)
@@ -223,7 +225,7 @@ public partial class ModuleVision
             (int index, float value) item = v.maxima[i];
             float minBrightness = 0.35f;  //max brightnesee for a "black" pixel
             float minBrightness1 = 0.7f;  //min brightness for white pixel
-            int maxStrokeWidth = 6;
+            int maxStrokeWidth = 10;
 
             if (item.Item2 < minBrightness1) continue;
             //find start and end of stroke

@@ -58,7 +58,7 @@ public partial class ModuleVision
         }
 
 
-        //find arc  and straight segments in the curves
+        //find arc and straight segments in the curves
         while (curves.Count > 0)
         {
             MergeCurvePointLists(curves);
@@ -576,8 +576,6 @@ public partial class ModuleVision
         if (segs.FindFirst(x => (x.P1.Near(seg.P1, 1) && x.P2.Near(seg.P2, 1)) || (x.P1.Near(seg.P2, 1) && x.P2.Near(seg.P1, 1))) is null)
         {
             seg.debugIndex = segs.Count;
-            if (segs.Count == 10)
-            { }
             segs.Add(seg);
             return true;
         }

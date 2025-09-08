@@ -76,7 +76,8 @@ namespace BrainSimulator.Modules
                                     Width = pixelSize,
                                     Stroke = b,
                                     Fill = b,
-                                    ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 50, Content = $"({(int)x},{(int)y}) {lum.ToString("0.00")}" },
+                                    ToolTip = new System.Windows.Controls.ToolTip 
+                                    { HorizontalOffset = 100, Content = $"({(int)x},{(int)y}) {lum.ToString("0.00")}" },
                                 };
                                 Canvas.SetLeft(e, x * scale - pixelSize / 2);
                                 Canvas.SetTop(e, y * scale - pixelSize / 2);
@@ -108,6 +109,28 @@ namespace BrainSimulator.Modules
                     }
                 }
                 //draw the strokes
+                if (cbShowCenterPts.IsChecked == true && parent.CenterLinePts != null)
+                {
+                    foreach (var pt in parent.CenterLinePts)
+                    {
+                        Rectangle e = new()
+                        {
+                            Height = pixelSize / 2,
+                            Width = pixelSize / 2,
+                            Stroke = Brushes.DarkRed,
+                            Fill = Brushes.DarkRed,
+                            ToolTip = new System.Windows.Controls.ToolTip
+                            {
+                                HorizontalOffset = 100,
+                                Content = $"({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")})"
+                            },
+                        };
+                        Canvas.SetLeft(e, pt.X * scale - pixelSize / 4);
+                        Canvas.SetTop(e, pt.Y * scale - pixelSize / 4);
+                        theCanvas.Children.Add(e);
+                    }
+                }
+
                 if (cbShowBoundaries.IsChecked == true && parent.boundaryPoints != null)
                 {
                     foreach (var pt in parent.boundaryPoints)
@@ -120,7 +143,7 @@ namespace BrainSimulator.Modules
                             Fill = Brushes.Blue,
                             ToolTip = new System.Windows.Controls.ToolTip
                             {
-                                HorizontalOffset = 70,
+                                HorizontalOffset = 100,
                                 Content = $"({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")})"
                             },
                         };
@@ -148,6 +171,7 @@ namespace BrainSimulator.Modules
                             Opacity = .5,
                             ToolTip = new System.Windows.Controls.ToolTip
                             {
+                                HorizontalOffset = 100,
                                 Content = $"{segment.debugIndex}:({segment.P1.X.ToString("0.0")},{segment.P1.Y.ToString("0.0")}) - " +
                                 $"-({segment.P2.X.ToString("0.0")},{segment.P2.Y.ToString("0,0")})"
                             },
@@ -173,7 +197,7 @@ namespace BrainSimulator.Modules
                             Width = size,
                             Stroke = b,
                             Fill = b,
-                            ToolTip = new System.Windows.Controls.ToolTip { HorizontalOffset = 100, Content = $"{i}", },
+                            ToolTip = new ToolTip { HorizontalOffset = 100, Content = $"{i}", },
                         };
                         Canvas.SetTop(e, corner.pt.Y * scale - size / 2);
                         Canvas.SetLeft(e, corner.pt.X * scale - size / 2);
@@ -213,13 +237,13 @@ namespace BrainSimulator.Modules
                             };
                             theCanvas.Children.Add(l);
                         }
-                        if (corner is ModuleVision.Arc a)
+                        if (corner is Arc a)
                         {
                             Corner alreadyInList = parent.corners.FindFirst(x =>
                                 x != corner && x.curve && 
                                 ((x.nextPt - corner.nextPt).R < 3.5 ||
                                  (x.prevPt - corner.nextPt).R < 3.5));
-                            if (alreadyInList == null)
+                            //if (alreadyInList == null)
                             {
                                 e = new Ellipse()
                                 {
@@ -236,7 +260,7 @@ namespace BrainSimulator.Modules
                                 x != corner && x.curve &&
                                 ((x.nextPt - corner.prevPt).R < 3.5 ||
                                  (x.prevPt - corner.prevPt).R < 3.5));
-                            if (alreadyInList == null)
+                            //if (alreadyInList == null)
                             {
                                 e = new Ellipse()
                                 {

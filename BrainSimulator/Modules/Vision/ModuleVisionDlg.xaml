@@ -23,6 +23,7 @@
         <Button Content="Refresh" HorizontalAlignment="Left" Margin="254,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
         <CheckBox Content="Horiz" IsChecked="true" HorizontalAlignment="Left" Margin="297,0,0,234" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <CheckBox Content="Vert" IsChecked="true" HorizontalAlignment="Left" Margin="297,255,0,214" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="cbShowCenterPts" Content="CenterPts" HorizontalAlignment="Left" Margin="180,0,0,189" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom" />
         <!--<CheckBox Content="45" IsChecked="true" HorizontalAlignment="Left" Margin="297,276,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <CheckBox Content="-45" IsChecked="true" HorizontalAlignment="Left" Margin="297,296,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>-->
     </Grid></local:ModuleBaseDlg>
