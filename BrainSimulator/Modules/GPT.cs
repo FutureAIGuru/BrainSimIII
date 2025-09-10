@@ -107,7 +107,9 @@ namespace BrainSimulator.Modules
                 if (completionResult.choices != null)
                 {
                     // Extract the generated text from the CompletionResult object
-                    answerString = completionResult.choices[0].message.content.Trim().ToLower();
+                    // answerString = completionResult.choices[0].message.content.Trim().ToLower();
+                    // Don't lower case the text (yet).
+                    answerString = completionResult.choices[0].message.content.Trim();
                 }
                 else
                     if (completionResult.error != null) answerString = "ERROR: " + completionResult.error.message;
