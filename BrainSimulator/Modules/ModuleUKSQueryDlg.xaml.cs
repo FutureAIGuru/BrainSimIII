@@ -149,6 +149,7 @@ namespace BrainSimulator.Modules
                 {
                     if (r1 is Relationship r2)
                     {
+                        //if (!r2.isStatement) continue;
                         if (noSource && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
                             resultString += $"{r2.relType?.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                         else if (noTarget && r2.Clauses.Count == 0 && fullCB.IsChecked == false)

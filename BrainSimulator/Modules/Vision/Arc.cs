@@ -122,10 +122,6 @@ public partial class ModuleVision
 
             return (center, radius);
         }
-
-
     }
-
-
 }
 

@@ -76,7 +76,7 @@ namespace BrainSimulator.Modules
                                     Width = pixelSize,
                                     Stroke = b,
                                     Fill = b,
-                                    ToolTip = new System.Windows.Controls.ToolTip 
+                                    ToolTip = new System.Windows.Controls.ToolTip
                                     { HorizontalOffset = 100, Content = $"({(int)x},{(int)y}) {lum.ToString("0.00")}" },
                                 };
                                 Canvas.SetLeft(e, x * scale - pixelSize / 2);
@@ -211,36 +211,43 @@ namespace BrainSimulator.Modules
 
                         if (!corner.curve)
                         {
-                            Line l = new Line()
+                            Corner target = parent.corners.FindFirst(x => x.pt == corner.prevPt);
+                            if (target != null && !target.curve)
                             {
-                                X1 = corner.pt.X * scale,
-                                Y1 = corner.pt.Y * scale,
-                                X2 = corner.prevPt.X * scale,
-                                Y2 = corner.prevPt.Y * scale,
-                                Stroke = Brushes.DarkGray,
-                                StrokeThickness = 2,
-                            };
-                            theCanvas.Children.Add(l);
-
+                                Line l1 = new Line()
+                                {
+                                    X1 = corner.pt.X * scale,
+                                    Y1 = corner.pt.Y * scale,
+                                    X2 = corner.prevPt.X * scale,
+                                    Y2 = corner.prevPt.Y * scale,
+                                    Stroke = Brushes.DarkGray,
+                                    StrokeThickness = 4,
+                                };
+                                theCanvas.Children.Add(l1);
+                            }
                             delta = corner.nextPt - corner.pt;
                             delta.R = i1;
                             PointPlus pt2 = corner.pt + delta;
 
-                            l = new Line()
+                            target = parent.corners.FindFirst(x => x.pt == corner.nextPt);
+                            if (target != null && !target.curve)
                             {
-                                X1 = corner.pt.X * scale,
-                                Y1 = corner.pt.Y * scale,
-                                X2 = corner.nextPt.X * scale,
-                                Y2 = corner.nextPt.Y * scale,
-                                Stroke = Brushes.DarkGray,
-                                StrokeThickness = 2,
-                            };
-                            theCanvas.Children.Add(l);
+                                Line l2 = new Line()
+                                {
+                                    X1 = corner.pt.X * scale,
+                                    Y1 = corner.pt.Y * scale,
+                                    X2 = corner.nextPt.X * scale,
+                                    Y2 = corner.nextPt.Y * scale,
+                                    Stroke = Brushes.DarkGray,
+                                    StrokeThickness = 4,
+                                };
+                                theCanvas.Children.Add(l2);
+                            }
                         }
                         if (corner is Arc a)
                         {
                             Corner alreadyInList = parent.corners.FindFirst(x =>
-                                x != corner && x.curve && 
+                                x != corner && x.curve &&
                                 ((x.nextPt - corner.nextPt).R < 3.5 ||
                                  (x.prevPt - corner.nextPt).R < 3.5));
                             //if (alreadyInList == null)

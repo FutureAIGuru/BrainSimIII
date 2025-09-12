@@ -8,10 +8,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UKS;
+using static BrainSimulator.Modules.ModuleVision;
 using static System.Math;
 
 namespace BrainSimulator.Modules;
@@ -79,8 +81,14 @@ public partial class ModuleVision : ModuleBase
 
         FindBackgroundColor();
 
+
+        segments = new();
+        corners = new();
         FindBoundaries(imageArray);
         CenterLinePts = GetCenterlinePoints(boundaryPoints, strokePoints);
+
+        //FindSegments();
+        //FindArcs();
 
         //strokePoints = FindStrokeeCentersFromBoundaryPoints(boundaryPoints);
         isSingleDigit = false;
@@ -96,9 +104,6 @@ public partial class ModuleVision : ModuleBase
                 ms.MNISTDigit = "MNIST" + theDigit;
         }
 
-
-        segments = new();
-        corners = new();
         if (isSingleDigit)
         {
             //FindArcsAndSegments(strokePoints);
@@ -116,6 +121,197 @@ public partial class ModuleVision : ModuleBase
         WriteBitmapToMentalModel();
 
         UpdateDialog();
+    }
+
+    void FindSegments()
+    {
+        segments = new();
+        for (int x = 0; x < imageArray.GetLength(0); x++)
+        {
+            for (int y = 0; y < imageArray.GetLength(1); y++)
+            {
+                if (x == 9 && y == 5)
+                { }
+                Color c = imageArray[x, y];
+                HSLColor hslC = new HSLColor(c);
+                if (hslC.luminance < .9) continue;
+                PointPlus start = new((float)x, (float)y);
+                for (Angle a1 = 0; a1 < Angle.FromDegrees(180); a1 += Angle.FromDegrees(10))
+                {
+                    PointPlus end = new(start);
+                    for (int i = 1; i < 20; i++)
+                    {
+                        PointPlus pos = new((float)(start.X + i * Cos(a1)), (float)(start.Y + i * Sin(a1)));
+                        int x1 = (int)Round(pos.X);
+                        int y1 = (int)Round(pos.Y);
+                        if (x1 < 0 || x1 >= imageArray.GetLength(0)) break;
+                        if (y1 < 0 || y1 >= imageArray.GetLength(1)) break;
+                        c = imageArray[x1, y1];
+                        hslC = new HSLColor(c);
+                        if (hslC.luminance < .75) break;
+                        end = pos;
+                    }
+                    IsSegmentCenteredBySum(start, end, boundaryPoints, out double score);
+                    if (a1 == 0 && (end - start).R > 4 && end.Y > 20)
+                    { }
+                    if ((end - start).R > 3 && score > .9)// && a1 == 0)
+                        segments.Add(new Segment(start, end));
+                }
+            }
+        }
+    }
+
+    //interpolate the luminance in the image array givine a real-valued point
+    float GetLuminanceAtPoint(PointPlus pt)
+    {
+        if (pt.X < 0 || pt.Y < 0) return 0;
+        if (pt.X > imageArray.GetLength(0) - 1) return 0;
+        if (pt.Y > imageArray.GetLength(1) - 1) return 0;
+
+        int x0 = (int)Math.Floor(pt.X);
+        int y0 = (int)Math.Floor(pt.Y);
+
+        float a = GetLuminanceFromColor(imageArray[(int)pt.X, (int)pt.Y]);
+        float b = GetLuminanceFromColor(imageArray[(int)pt.X + 1, (int)pt.Y]);
+        float c = GetLuminanceFromColor(imageArray[(int)pt.X, (int)pt.Y + 1]);
+        float d = GetLuminanceFromColor(imageArray[(int)pt.X + 1, (int)pt.Y + 1]);
+
+        float top = a + (pt.X - x0) * (b - a);
+        float bottom = c + (pt.X - x0) * (d - c);
+
+        float result = top + (pt.Y - y0) * (bottom - top);
+
+        return result;
+
+    }
+    float GetLuminanceFromColor(Color c)
+    {
+        HSLColor hSLColor = new(c);
+        return hSLColor.luminance;
+    }
+
+    bool IsSegmentCenteredBySum(
+    PointPlus A, PointPlus B,
+    IReadOnlyList<PointPlus> boundary,
+    out double balance                 // 0..1; 1 = perfectly balanced
+)
+    {
+        balance = 0;
+        if (boundary == null || boundary.Count == 0) return false;
+
+        // Sampling
+        double weightL = 0, weightR = 0;
+
+        Segment s = new(A, B);
+        foreach (PointPlus pt in boundary)
+        {
+            float dist = PerpendicularDistancePointToSegment(s, pt);
+            if (Abs(dist) > 2) continue;
+            if (dist >= 0)
+                weightL += dist;
+            else
+                weightR += Abs(dist);
+        }
+        double denom = Math.Max(weightL, weightR);
+        if (denom == 0) return false;
+        balance = denom > 0 ? 1.0 - Math.Abs(weightL - weightR) / denom : 0.0;
+        return true;
+    }
+
+    //Move this to Utils
+    float PerpendicularDistancePointToSegment(Segment ABin, PointPlus pt)
+    {
+        var AP = pt - ABin.P1;
+        var AB = ABin.P2 - ABin.P1;
+        float magnituesAB = AB.R * AB.R;
+        float ABAProduct = (float)Vector.Multiply(AP.V, AB.V);
+        float distance = ABAProduct / magnituesAB;
+        if (distance >= 0 && distance <= 1) //does the projections fall along the segment?
+        {
+            PointPlus closestOnSegment = ABin.P1 + AB * distance;
+            int sign = 0;
+            if (closestOnSegment.Y - pt.Y > .1)
+                sign = 1;
+            else if (closestOnSegment.Y - pt.Y < -.1)
+                sign = -1;
+            else if (closestOnSegment.X > pt.X)
+                sign = -1;
+            else
+                sign = 1;
+            return sign * (closestOnSegment - pt).R;
+        }
+        return 0;
+    }
+
+    void FindArcs()
+    {
+        Arc a = new();
+        (PointPlus center, float radius) bestCirc = new();
+        int bestNumHits = 0;
+        for (int x = 0; x < imageArray.GetLength(0); x++)
+        {
+            for (int y = 0; y < imageArray.GetLength(1); y++)
+            {
+                PointPlus center = new((float)x, (float)y);
+                for (int r = 4; r < 10; r++)
+                {
+                    int numHits = 0;
+                    for (Angle a1 = 0; a1 < Angle.FromDegrees(360); a1 += Angle.FromDegrees(10))
+                    {
+                        PointPlus pos = new PointPlus((float)(x + r * Cos(a1)), (float)(y + r * Sin(a1)));
+                        int x1 = (int)pos.X;
+                        int y1 = (int)pos.Y;
+                        if (x1 < 0 || x1 >= imageArray.GetLength(0)) continue;
+                        if (y1 < 0 || y1 >= imageArray.GetLength(1)) continue;
+                        PointPlus nearby = GetNearestPointInList(pos, CenterLinePts);
+                        float dist = (nearby - pos).R;
+                        if (dist < 1)
+                            numHits += (int)(5 * (1 - dist));
+                        Color c = imageArray[x1, y1];
+                        HSLColor hslC = new HSLColor(c);
+                        if (hslC.luminance > .9)
+                            numHits++;
+                    }
+                    if (numHits > bestNumHits)
+                    {
+                        bestNumHits = numHits;
+                        bestCirc = new(center, (float)r);
+                    }
+                }
+            }
+        }
+        bool inArc = false;
+        Angle startAngle = 0;
+
+        for (Angle a1 = 0; a1 < Angle.FromDegrees(360); a1 += Angle.FromDegrees(10))
+        {
+            PointPlus pos = new PointPlus((float)(bestCirc.center.X + bestCirc.radius * Cos(a1)),
+                (float)(bestCirc.center.Y + bestCirc.radius * Sin(a1)));
+            int x1 = (int)pos.X;
+            int y1 = (int)pos.Y;
+            if (x1 < 0 || x1 >= imageArray.GetLength(0)) continue;
+            if (y1 < 0 || y1 >= imageArray.GetLength(1)) continue;
+            Color c = imageArray[x1, y1];
+            HSLColor hslC = new HSLColor(c);
+            if (hslC.luminance > .9 && !inArc)
+            {
+                inArc = true;
+                a.curve = true;
+                a.prevPt = pos;
+                startAngle = a1;
+            }
+            if (hslC.luminance < .9 && inArc)
+            {
+                inArc = false;
+                a.curve = true;
+                a.nextPt = pos;
+                Angle a2 = (startAngle + a1) / 2;
+                a.pt = new PointPlus((float)(bestCirc.center.X + bestCirc.radius * Cos(a2)),
+                (float)(bestCirc.center.Y + bestCirc.radius * Sin(a2)));
+                corners.Add(a);
+                a = new();
+            }
+        }
     }
 
     //This is different from FindOutlines in several ways
@@ -286,7 +482,7 @@ public partial class ModuleVision : ModuleBase
             //at this angle, extend the segment in either direction until you run out of nearby boundary points
             PointPlus step = new((float)Cos(a), (float)Sin(a));
 
-            int maxExtend = 4;
+            int maxExtend = 5;
 
             //lengthen the first endpoint to another boundary point unless it is already attached to another corner or arc
 
@@ -308,42 +504,32 @@ public partial class ModuleVision : ModuleBase
                 {
                     p1 += step;
                     //make sure we're still on the white part of the image
-                    try //this try-catchy is just to trap running off the edge of the array
-                    {
-                        int x = (int)Round(p1.X);
-                        int y = (int)Round(p1.Y);
-                        HSLColor pixel = new HSLColor(imageArray[x, y]);
-                        if (pixel.luminance < .9)
-                            break;
-                    }
-                    catch
-                    {
-                        break;
-                    }
-                    List<PointPlus> nearby = GetNearbyPoints(p1, 2f, CenterLinePts);
-                    //find the point which is close to the extended segment but furthest from the other end
-                    //and use that as the endpoint
-                    float bestDist = (betterP2 - betterP1).R;
-                    PointPlus best = null;
-                    for (int i = 0; i < nearby.Count; i++)
-                    {
-                        if (Utils.DistancePointToLine(nearby[i], betterP1, betterP2) > 1f)
-                        {
-                            nearby.RemoveAt(i);
-                            i--;
-                            continue;
-                        }
-                        if ((betterP2 - nearby[i]).R > bestDist)
-                        {
-                            bestDist = (betterP2 - nearby[i]).R;
-                            best = nearby[i];
-                        }
-                    }
-                    if (best != null)
-                    {
-                        betterP1 = p1;
-                        count = 0;
-                    }
+                    if (GetLuminanceAtPoint(p1) < 0.85) break;
+
+                    //List<PointPlus> nearby = GetNearbyPoints(p1, 2f, CenterLinePts);
+                    ////find the point which is close to the extended segment but furthest from the other end
+                    ////and use that as the endpoint
+                    //float bestDist = (betterP2 - betterP1).R;
+                    //PointPlus best = null;
+                    //for (int i = 0; i < nearby.Count; i++)
+                    //{
+                    //    if (Utils.DistancePointToLine(nearby[i], betterP1, betterP2) > 1f)
+                    //    {
+                    //        nearby.RemoveAt(i);
+                    //        i--;
+                    //        continue;
+                    //    }
+                    //    if ((betterP2 - nearby[i]).R > bestDist)
+                    //    {
+                    //        bestDist = (betterP2 - nearby[i]).R;
+                    //        best = nearby[i];
+                    //    }
+                    //}
+                    //if (best != null)
+                    //{
+                    betterP1 = p1;
+                    //    count = 0;
+                    //}
 
                 } while (count++ < maxExtend);
             }
@@ -356,42 +542,31 @@ public partial class ModuleVision : ModuleBase
                 {
                     p2 -= step;
                     //make sure we're still on the white part of the image
-                    try
-                    {
-                        int x = (int)Round(p2.X);
-                        int y = (int)Round(p2.Y);
-                        HSLColor pixel = new HSLColor(imageArray[x, y]);
-                        if (pixel.luminance < .9)
-                            break;
-                    }
-                    catch
-                    {
-                        break;
-                    }
-                    List<PointPlus> nearby = GetNearbyPoints(p2, 2f, CenterLinePts);
-                    //find the point which is close to the extended segment but furthest from the other end
-                    //and use that as the endpoint
-                    float bestDist = (betterP2 - betterP1).R;
-                    PointPlus best = null;
-                    for (int i = 0; i < nearby.Count;i++)
-                    {
-                        if (Utils.DistancePointToLine(nearby[i], betterP1, betterP2) > 1f)
-                        {
-                            nearby.RemoveAt(i);
-                            i--;
-                            continue;
-                        }
-                        if ((betterP1 - nearby[i]).R > bestDist)
-                        {
-                            bestDist = (betterP1 - nearby[i]).R;
-                            best = nearby[i];
-                        }
-                    }
-                    if (best != null)
-                    {
-                        betterP2 = p2;
-                        count = 0;
-                    }
+                    if (GetLuminanceAtPoint(p2) < 0.85) break;
+                    //List<PointPlus> nearby = GetNearbyPoints(p2, 2f, CenterLinePts);
+                    ////find the point which is close to the extended segment but furthest from the other end
+                    ////and use that as the endpoint
+                    //float bestDist = (betterP2 - betterP1).R;
+                    //PointPlus best = null;
+                    //for (int i = 0; i < nearby.Count; i++)
+                    //{
+                    //    if (Utils.DistancePointToLine(nearby[i], betterP1, betterP2) > 1f)
+                    //    {
+                    //        nearby.RemoveAt(i);
+                    //        i--;
+                    //        continue;
+                    //    }
+                    //    if ((betterP1 - nearby[i]).R > bestDist)
+                    //    {
+                    //        bestDist = (betterP1 - nearby[i]).R;
+                    //        best = nearby[i];
+                    //    }
+                    //}
+                    //if (best != null)
+                    //{
+                    betterP2 = p2;
+                    //    count = 0;
+                    //}
                 } while (count++ < maxExtend);
             }
             segment.P1 = betterP1;
@@ -432,7 +607,7 @@ public partial class ModuleVision : ModuleBase
 
     void ExtendArcs()
     {
-        const int maxExtend = 20;
+        int maxExtend = 2;
         foreach (Corner c in corners)
         {
             Arc a = c as Arc;
@@ -520,12 +695,88 @@ public partial class ModuleVision : ModuleBase
     private void FindCorners(ref List<Segment> segmentsIn)
     {
         ExtendSegments();
-        //ExtendArcs();
+        ExtendArcs();
+
+        //put arcs in correct order
+        for (int i = 0; i < corners.Count; i++)
+        {
+            if (corners[i] is Arc a1)
+            {
+                if (a1.StartAngle > a1.EndAngle)
+                    (a1.prevPt, a1.nextPt) = (a1.nextPt, a1.prevPt);
+            }
+        }
+        //merge arcs
+        for (int i = 0; i < corners.Count - 1; i++)
+        {
+            // break;
+            if (corners[i] is Arc a1)
+            {
+                for (int j = i + 1; j < corners.Count; j++)
+                {
+                    if (corners[j] is Arc a2)
+                    {
+                        var cir1 = a1.GetCircleFromArc();
+                        var cir2 = a2.GetCircleFromArc();
+                        if (cir1.center.Near(cir2.center, 2) && Abs(cir1.radius - cir2.radius) < 1)
+                        {
+                            if (a1.StartAngle > a2.StartAngle)
+                                a1.prevPt = a2.prevPt;
+                            if (a1.EndAngle < a2.EndAngle && a2.MidAngle < a2.EndAngle)
+                                a1.nextPt = a2.nextPt;
+                            else if (a1.EndAngle < a2.EndAngle && a2.MidAngle > a2.EndAngle)
+                                a1.prevPt = a2.nextPt;
+                            corners.RemoveAt(j);
+                            j--;
+                        }
+                    }
+                }
+            }
+        }
 
         //merge overlapping/duplicate segmenst
-        for (int i = 0; i < segments.Count - 1; i++)
+        for (int i = 0; i < segments.Count; i++)
         {
             Segment s1 = segments[i];
+            for (int j = 0; j < corners.Count; j++)
+            {
+                if (corners[j] is Arc arc)
+                {
+                    if (arc.prevPt.Near(s1.P1, 3))
+                    {
+                        PointPlus newPoint = new Segment(s1.P1, arc.prevPt).MidPoint;
+                        arc.prevPt = newPoint;
+                        AddCornerToList(newPoint, s1.P2, arc.pt);
+                        s1.P1 = newPoint;
+                        continue;
+                    }
+                    if (arc.prevPt.Near(s1.P2, 3))
+                    {
+                        PointPlus newPoint = new Segment(s1.P2, arc.prevPt).MidPoint;
+                        arc.prevPt = newPoint;
+                        AddCornerToList(newPoint, s1.P1, arc.pt);
+                        s1.P2 = newPoint;
+                        continue;
+                    }
+                    if (arc.nextPt.Near(s1.P1, 3))
+                    {
+                        PointPlus newPoint = new Segment(s1.P1, arc.nextPt).MidPoint;
+                        arc.nextPt = newPoint;
+                        AddCornerToList(newPoint, s1.P2, arc.pt);
+                        s1.P1 = newPoint;
+                        continue;
+                    }
+                    if (arc.nextPt.Near(s1.P2, 3))
+                    {
+                        PointPlus newPoint = new Segment(s1.P2, arc.nextPt).MidPoint;
+                        arc.nextPt = newPoint;
+                        AddCornerToList(newPoint, s1.P1, arc.pt);
+                        s1.P2 = newPoint;
+                        continue;
+                    }
+                }
+            }
+
             for (int j = i + 1; j < segments.Count; j++)
             {
                 Segment s2 = segments[j];
@@ -622,100 +873,51 @@ public partial class ModuleVision : ModuleBase
     }
 
 
-    private List<List<Corner>> FindOutlinesInSegments()
+    private void FindOutlines()
     {
-        List<List<Corner>> outlines = new();
-
-        //convert the corners list into a segmens list
-        //for this purpose, arcs are just segments
-        List<Segment> segmentsInternal = new();
-        foreach (Segment s in segments)
-            AddSegmentToList(s, segmentsInternal);
-        foreach (Corner corner in corners)
+        //Find the orphans in the corners list
+        //and add corners there.
+        for (int i = 0; i < corners.Count; i++)
         {
-            if (corner.curve)
+            Corner c1 = corners[i];
+            if (corners.FindFirst(x => c1.nextPt.Near(x.pt,1)) == null)
+                corners.Add(new Corner() { pt = c1.nextPt, nextPt = c1.pt, prevPt = c1.pt,curve=false });
+            if (corners.FindFirst(x => c1.prevPt.Near(x.pt,1)) == null)
+                corners.Add(new Corner() { pt = c1.prevPt, nextPt = c1.pt, prevPt = c1.pt,curve=false });
+        }
+
+        List<Corner> newCorners = new();
+        while (corners.Count > 0)
+        {
+            Corner start = corners.FindFirst(x => x.prevPt == x.nextPt);
+            if (start == null)
+                start = corners[0];
+            newCorners.Add(start);
+            corners.Remove(start);
+            Corner next = start;
+            while (next == start || next.nextPt != next.prevPt)
             {
-                Segment s1 = new Segment(corner.prevPt, corner.nextPt);
-                AddSegmentToList(s1, segmentsInternal);
-            }
-            else
-            {
-                //add both endpoints if this is not an orphan point
-                if (corner.prevPt != corner.nextPt)
+                var temp = corners.FindFirst(x => x.pt.Near(next.nextPt,1));
+                if (temp == null)
+                    temp = corners.FindFirst(x => x.pt.Near(next.prevPt,1));
+                if (temp == null)
+                    break;
+                next = temp;
+                if (next != null)
                 {
-                    Segment s1 = new Segment(corner.prevPt, corner.pt);
-                    AddSegmentToList(s1, segmentsInternal);
-                    s1 = new Segment(corner.pt, corner.nextPt);
-                    AddSegmentToList(s1, segmentsInternal);
+                    newCorners.Add(next);
+                    corners.Remove(next);
                 }
-                else //if this is an orphan segment add it
+                else
                 {
-                    Corner nextCorner = corners.FindFirst(x => x.pt.Near(corner.nextPt, 2));
-                    if (nextCorner != null && nextCorner.prevPt == nextCorner.nextPt)
-                    {
-                        Segment s1 = new Segment(corner.pt, corner.nextPt);
-                        AddSegmentToList(s1, segmentsInternal);
-                    }
+                    break;//problem with corners list
                 }
             }
         }
-        var groups = GroupLineSegments(segmentsInternal);
-        foreach (var group in groups)
-            OrderSegmentsInGroup(group);
-
-        //convert the list of segments back into a list of corners
-        foreach (var group in groups)
-        {
-            List<Corner> outline = new();
-            outlines.Add(outline);
-            bool outlineIsClosed = group.First().P1.Near(group.Last().P2, 3);
-
-            for (int i = 0; i < group.Count; i++)
-            {
-                Segment seg = group[i];
-                Arc a = IsSegmentAnArc(seg);
-                if (a != null)
-                {
-                    outline.Add(new Arc()
-                    {
-                        prevPt = seg.P1,
-                        nextPt = seg.P2,
-                        pt = a.pt,
-                        curve = true,
-                    });
-                }
-                else if (outlineIsClosed || (i != group.Count - 1))
-                {
-                    outline.Add(new Corner()
-                    {
-                        prevPt = seg.P1,
-                        pt = seg.P2,
-                        nextPt = group[(i + 1) % group.Count].P1,
-                        curve = false,
-                    });
-                }
-                else if (group.Count == 1) //special case for a single segment
-                {
-                    outline.Add(new Corner()
-                    {
-                        prevPt = seg.P1,
-                        pt = seg.MidPoint,
-                        nextPt = seg.P1,
-                        curve = false,
-                    });
-                }
-            }
-        }
-        return outlines;
+        corners = newCorners;
+        return;
     }
 
-    Arc IsSegmentAnArc(Segment segment)
-    {
-        Corner c1 = corners.FindFirst(x => (x.prevPt == segment.P1 && x.nextPt == segment.P2) ||
-                                           (x.prevPt == segment.P2 && x.nextPt == segment.P1));
-        if (c1 != null && c1.curve) return (Arc)c1;
-        return null;
-    }
 
     void OrderSegmentsInGroup(List<Segment> segments)
     {
@@ -849,52 +1051,20 @@ public partial class ModuleVision : ModuleBase
 
         if (corners.Count == 0) return;
 
-        //for convenience in debugging
-        corners = corners.OrderBy(x => x.pt.X).OrderBy(x => x.pt.Y).ToList();
+        FindOutlines();
 
-        var outlines = FindOutlinesInSegments();
+        bool outlineIsClosed = (corners[0].nextPt != corners[0].prevPt);
 
-        foreach (var outline in outlines)
+        Thing outlineThing = theUKS.GetOrAddThing("Outline*", "Outlines");
+        outlineThing.SetAttribute(theUKS.GetOrAddThing(outlineIsClosed ? "isSolidArea" : "notSolidArea", "Attribute"));
+
+        foreach (var c in corners)
         {
-            if (outline.Count < 1) continue;
-            Thing outlineThing = theUKS.GetOrAddThing("Outline*", "Outlines");
-
-            bool outlineIsClosed = outline.First().pt.Near(outline.Last().nextPt, 2);
-
-            outlineThing.SetAttribute(theUKS.GetOrAddThing(outlineIsClosed ? "isSolidArea" : "notSolidArea", "Attribute"));
-
-            if (outlineIsClosed)
-            {
-                //make this a right-handed list of points  
-                MakeClosedOutlineRightHanded(outline);
-
-                //find the color at the center of the polygon
-
-                List<Point> thePoints = new();
-                foreach (Corner c in outline)
-                    thePoints.Add(c.pt);
-                Point centroid = Utils.GetCentroid(thePoints);
-
-                //get the color (the centroid might be outside the image)
-                try
-                {
-                    //HSLColor theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
-                    Color theCenterColor = imageArray[(int)centroid.X, (int)centroid.Y];
-                    Thing theColor = GetOrAddColor(theCenterColor);
-                    outlineThing.SetAttribute(theColor);
-                }
-                catch (Exception e) { }
-            }
-
             //add each corner/arc to UKS as a "V" (value on a Thing)
-            for (int i = 1; i < outline.Count + 1; i++)
-            {
-                Corner c = outline[i % outline.Count];
-                //let's add it to the UKS
-                Thing corner = theUKS.GetOrAddThing("corner*", tCorners);
-                corner.V = c;
-                theUKS.AddStatement(outlineThing.Label, "has*", corner.Label);
-            }
+            //let's add it to the UKS
+            Thing corner1 = theUKS.GetOrAddThing("corner*", tCorners);
+            corner1.V = c;
+            theUKS.AddStatement(outlineThing.Label, "has*", corner1.Label);
         }
     }
 

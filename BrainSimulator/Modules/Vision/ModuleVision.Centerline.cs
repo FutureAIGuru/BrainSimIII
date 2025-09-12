@@ -29,27 +29,26 @@ public partial class ModuleVision
         List<Vec> boundary = boundaryPoints.Select(p => new Vec(p.X, p.Y)).ToList();
         List<Vec> seeds = strokePoints.Select(p => new Vec(p.X, p.Y)).ToList();
         //Func<Vec, bool> inside = v => isInsideFunc(Vec pt);
-        List<(Vec center, double radius)> centers = ComputeCenters(boundary, seeds, epsMove, maxIters, suppression);
+        List<(Vec center, double radius)> centers = ComputeCenters(boundary, strokePoints, epsMove, maxIters, suppression);
         return centers.Select(c => new PointPlus((float)c.center.X, (float)c.center.Y)).ToList();
     }
 
     // boundary: polygon vertices in order (CCW or CW), closed implicitly
-    public static List<(Vec center, double radius)> ComputeCenters(
+    public  List<(Vec center, double radius)> ComputeCenters(
         List<Vec> boundaries,
-        IList<Vec> seeds,
+        IList<PointPlus> seeds,
         double epsMove = 1e-3,
         int maxIters = 50,
         double suppression = 0.5)
     {
         suppression = 0.5;
-        //bool ccw = PolygonArea(boundary) > 0; // orientation
-        //var segments = BuildSegments(boundary);
-        //var seeds = BuildSeeds(boundary, imageArray, ccw); // edge midpoints nudged inward
 
         var centers = new List<(Vec center, double radius)>();
         foreach (var s in seeds)
         {
-            var (c, r, ok) = AscendToMedialCenter(s, boundaries, epsMove, maxIters);
+            if (GetLuminanceAtPoint(s) < .8) continue;
+            Vec v = new(s.X, s.Y);
+            var (c, r, ok) = AscendToMedialCenter(v, boundaries, epsMove, maxIters);
             if (!ok) continue;
 
             // Non-maximum suppression
@@ -70,14 +69,14 @@ public partial class ModuleVision
         double lastR = 0;
         Vec xInit = new(seedPt.X, seedPt.Y);
         epsMove = .1;
-        if (Near(seedPt, new Vec(15.7,14.7)))
+        if (Near(seedPt, new Vec(15.7, 14.7)))
         { }
         maxIters = 1;
 
         for (int k = 0; k < maxIters; k++)
         {
             // get closest boundary contact: projection to nearest segment
-            if (Near(seedPt, new Vec(15.0,14.3)))
+            if (Near(seedPt, new Vec(13.3, 5.0)))
             { }
             var p1 = ClosestBoundaryPoint(seedPt, boundaries);
             var d2 = (p1 - seedPt).Len();
@@ -87,21 +86,21 @@ public partial class ModuleVision
             //get first boundary hit by ray in opposide direction
             if (!RayFirstHit(seedPt, p1, boundaries, out Vec p3))
             {
+                if (Near(seedPt, new Vec(14.1, 4.9)))
+                { }
                 return (seedPt, lastR, false); // reached maxIters; accept
             }
-
-            //if (!AngleOpposite(p1-seedPt, p3-seedPt))
-            //    return (default, 0, false);
-
             // midpoint update
             var mid = (p1 + p3) / 2.0;
             double move = (mid - seedPt).Len();
-            if (move > .5)
-                return (seedPt, lastR, true);
+            //if (move > .5)
+            //    return (seedPt, lastR, true);
             double r = 0.5 * (p1 - p3).Len();
             var oldSeed = seedPt;
             seedPt = mid;
-            if (move < epsMove) 
+            if (Near(seedPt, new Vec(14.1, 4.9)))
+            { }
+            if (move < epsMove)
                 return (seedPt, r, true);
 
             prev = seedPt; lastR = r;
@@ -131,7 +130,7 @@ public partial class ModuleVision
         for (int i = 0; i < boundaries.Count; i++)
         {
             var dist = (boundaries[i] - x).Len();
-            if (dist < 1e-9) 
+            if (dist < 1e-9)
                 return boundaries[i]; // exactly on vertex
             if (dist < bestD2)
             {
@@ -156,7 +155,7 @@ public partial class ModuleVision
 
         hit = default;
         double bestT = double.PositiveInfinity;
-        if (Near(origin, new Vec(15.4,17.0)))
+        if (Near(origin, new Vec(15.4, 17.0)))
         { }
 
         Vec dir = origin - (p1 - origin); //get the opposite direction
@@ -175,12 +174,12 @@ public partial class ModuleVision
 
             //find the distance from the pt to the ray defined by origin, dir
             var distToRay = Utils.DistancePointToSegment(s2, GetPPfromVec(pt));
-            var distToRay2 = Utils.FindDistanceToSegment(GetPPfromVec(pt), s2.P1,s2.P2,out System.Windows.Point closest);
+            var distToRay2 = Utils.FindDistanceToSegment(GetPPfromVec(pt), s2.P1, s2.P2, out System.Windows.Point closest);
             Vec closestV = new(closest.X, closest.Y);
             if (Near(closestV, new Vec(19.9, 23.0)))
             { }
             //hack because closest might be in the wrong direction completely
-            if (closest == (System.Windows.Point) s2.P1)
+            if (closest == (System.Windows.Point)s2.P1)
             { }
             else if (closest == (System.Windows.Point)s2.P2)
             { }
@@ -192,6 +191,5 @@ public partial class ModuleVision
         }
         return bestT < double.PositiveInfinity;
     }
-
 }
 

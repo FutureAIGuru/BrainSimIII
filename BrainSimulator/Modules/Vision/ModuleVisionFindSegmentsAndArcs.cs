@@ -57,7 +57,6 @@ public partial class ModuleVision
             curves.Add(orderedPts);
         }
 
-
         //find arc and straight segments in the curves
         while (curves.Count > 0)
         {
@@ -359,6 +358,22 @@ public partial class ModuleVision
                 mayBeCurveLeft = false;
         }
         return mayBeCurveLeft || mayBeCurveRight;
+
+        /*Version which allows one outlier point
+         * int mayBeCurveLeft = 2;
+        int mayBeCurveRight = 2;
+        for (int i = 0; i < dAngles.Count; i++)
+        {
+            Angle a = dAngles[i];
+            if (mayBeCurveLeft<=0 && mayBeCurveRight<=0) break;
+            if (mayBeCurveRight>0 && (a < Angle.FromDegrees(1) || a > threshold))
+                mayBeCurveRight--;
+            if (mayBeCurveLeft>0 && (a > Angle.FromDegrees(-1) || a < -threshold))
+                mayBeCurveLeft--;
+        }
+        return mayBeCurveLeft>0 || mayBeCurveRight>0;
+
+         */
     }
     static bool IsLine(List<PointPlus> points, double threshold)
     {

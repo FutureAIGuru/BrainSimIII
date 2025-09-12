@@ -90,14 +90,14 @@ public partial class ModuleVision
                 var rayThruImage = LineThroughArray(dx, dy, 0, sy, imageArray);
                 var pts = FindStrokePtsInRay(0, sy, dx, dy, rayThruImage);
                 ptsInThisScan.AddRange(pts);
-                //FindBoundaryPtsInRay(0, sy, dx, dy, rayThruImage);
+                FindBoundaryPtsInRay(0, sy, dx, dy, rayThruImage);
             }
             for (sx = 0; sx < imageArray.GetLength(0); sx++)
             {
                 var rayThruImage = LineThroughArray(dx, dy, sx, 0, imageArray);
                 var pts = FindStrokePtsInRay(sx, 0, dx, dy, rayThruImage);
                 ptsInThisScan.AddRange(pts);
-                //FindBoundaryPtsInRay(sx, 0, dx, dy, rayThruImage);
+                FindBoundaryPtsInRay(sx, 0, dx, dy, rayThruImage);
             }
             //RemoveOrphanPoints(ptsInThisScan);
             strokePoints.AddRange(ptsInThisScan);
@@ -112,14 +112,14 @@ public partial class ModuleVision
                 var rayThruImage = LineThroughArray(dx, dy, sx, 0, imageArray);
                 var pts = FindStrokePtsInRay(sx, 0, dx, dy, rayThruImage);
                 ptsInThisScan.AddRange(pts);
-                //FindBoundaryPtsInRay(sx, 0, dx, dy, rayThruImage);
+                FindBoundaryPtsInRay(sx, 0, dx, dy, rayThruImage);
             }
             for (sy = 0; sy < imageArray.GetLength(1); sy++)
             {
                 var rayThruImage = LineThroughArray(dx, dy, imageArray.GetLength(0) - 1, sy, imageArray);
                 var pts = FindStrokePtsInRay(imageArray.GetLength(0) - 1, sy, dx, dy, rayThruImage);
                 ptsInThisScan.AddRange(pts);
-                //FindBoundaryPtsInRay(imageArray.GetLength(0) - 1, sy, dx, dy, rayThruImage);
+                FindBoundaryPtsInRay(imageArray.GetLength(0) - 1, sy, dx, dy, rayThruImage);
             }
             //RemoveOrphanPoints(ptsInThisScan);
             strokePoints.AddRange(ptsInThisScan);
@@ -200,12 +200,7 @@ public partial class ModuleVision
         }
         return strokeCenters;
     }
-    float GetLuminanceAtPoint(PointPlus pt)
-    {
-        var c = imageArray[(int)Round(pt.X), (int)Round(pt.Y)];
-        HSLColor c1 = new(c);
-        return c1.luminance;
-    }
+
     private List<PointPlus> FindStrokePtsInRay(float sx, float sy, float dx, float dy, List<Color> rayThruImage)
     {
         if (sx == 15)
