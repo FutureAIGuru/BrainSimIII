@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UKS;
 
 namespace BrainSimulator.Modules
 {
@@ -107,14 +110,155 @@ namespace BrainSimulator.Modules
             public string? SparqlLike { get; set; }   // optional if there should be support for a formal query
         }
 
-        // Stub this out so the code compiles for now.
-        private string QueryNLP(string nlQuery)
+        // Overload that prefers a structured query (from the LLM) but also works with plain NL.
+        private string QueryNLP(string nlQuery, UksQuery? q = null)
         {
-            // TODO: replace with the real UKS query call (ModuleUKSQuery, etc.)
-            System.Diagnostics.Debug.WriteLine("QueryNLP placeholder called with: " + nlQuery);
+            if (MainWindow.theUKS == null)
+                return "UKS is not initialized. Open the UKS module or load a knowledge base first.";
 
-            return "(query engine not wired yet)";
+
+            // Map to the UKS static call args
+            string src = "";
+            string typ = "";
+            string tgt = "";
+            string? filt = null;
+
+            // 1) Prefer structured fields if provided by the LLM
+            if (q != null)
+            {
+                if (q.Entities is { Count: > 0 }) src = q.Entities[0] ?? "";
+                if (q.Entities is { Count: > 1 }) tgt = q.Entities[1] ?? "";
+                if (q.Predicates is { Count: > 0 }) typ = q.Predicates[0] ?? "";
+
+                if (q.Constraints is { Count: > 0 })
+                    filt = string.Join(";", q.Constraints.Select(kv => $"{kv.Key}={kv.Value}"));
+
+                // If nothing useful was provided, fall back to NL parse
+                if (string.IsNullOrWhiteSpace(src) && string.IsNullOrWhiteSpace(typ) && string.IsNullOrWhiteSpace(tgt))
+                    FillFromNatural(nlQuery, ref src, ref typ, ref tgt, ref filt);
+            }
+            else
+            {
+                // 2) No structured query → parse simple NL patterns
+                FillFromNatural(nlQuery, ref src, ref typ, ref tgt, ref filt);
+            }
+
+            // Normalize common types.
+            typ = (typ ?? "").Trim().ToLowerInvariant() switch
+            {
+                "is a" or "isa" or "is_a" => "is-a",
+                "type-of" or "typeof" => "type-of",
+                "hasprop" or "has_prop" => "hasProp",
+                _ => typ
+            };
+
+
+            // 3) Call the UKS query
+            List<Thing> things;
+            List<Relationship> rels;
+            try
+            {
+                ModuleUKSQuery.QueryUKSStatic(MainWindow.theUKS, src, typ, tgt, filt, out things, out rels);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("QueryUKSStatic error: " + ex);
+                return "There was an error while querying the UKS.";
+            }
+
+            // 4) Render a friendly answer
+            if (rels != null && rels.Count > 0)
+            {
+                var lines = rels.Take(20).Select(RelToString);
+                var more = rels.Count > 20 ? $"\n(+{rels.Count - 20} more…)" : "";
+                return "I found these grounded relationships:\n - " + string.Join("\n - ", lines) + more;
+            }
+
+            if (things != null && things.Count > 0)
+            {
+                var names = things.Take(20).Select(ThingToString);
+                var more = things.Count > 20 ? $"\n(+{things.Count - 20} more…)" : "";
+                return "I found these related things:\n - " + string.Join("\n - ", names) + more;
+            }
+
+            Debug.WriteLine($"NL Query: {nlQuery}");
+            return "I don’t have a grounded fact for that yet.";
         }
+
+        // ——— Helpers ———
+
+        // Very light NL → (src, typ, tgt) patterns.
+        private static void FillFromNatural(string nl, ref string src, ref string typ, ref string tgt, ref string? filt)
+        {
+            string s = (nl ?? "").Trim();
+
+            // Pattern 1: "Is A a/an B?" or "Is A B?"
+            var m1 = Regex.Match(s, @"^\s*is\s+(?<s>.+?)\s+(?:an?\s+)?(?<o>.+?)\s*\?\s*$", RegexOptions.IgnoreCase);
+            if (m1.Success)
+            {
+                if (string.IsNullOrWhiteSpace(src)) src = m1.Groups["s"].Value;
+                if (string.IsNullOrWhiteSpace(typ)) typ = "isA";
+                if (string.IsNullOrWhiteSpace(tgt)) tgt = m1.Groups["o"].Value;
+                return;
+            }
+
+
+            // Pattern 2: "Does/Do/Can S (P) O ?"  e.g., "Do penguins fly?"
+            var m2 = Regex.Match(s, @"^\s*(?:does|do|can)\s+(?<s>.+?)\s+(?<p>\w+)(?:\s+(?<o>.+?))?\s*\?\s*$", RegexOptions.IgnoreCase);
+            if (m2.Success)
+            {
+                if (string.IsNullOrWhiteSpace(src)) src = m2.Groups["s"].Value;
+                if (string.IsNullOrWhiteSpace(typ)) typ = m2.Groups["p"].Value;
+                if (m2.Groups["o"].Success && string.IsNullOrWhiteSpace(tgt)) tgt = m2.Groups["o"].Value;
+                return;
+            }
+
+            // Pattern 3: "What is the P of S?" → typ=P, src=S
+            var m3 = Regex.Match(s, @"^\s*what\s+is\s+(?:the\s+)?(?<p>\w+)\s+of\s+(?<s>.+?)\s*\?\s*$", RegexOptions.IgnoreCase);
+            if (m3.Success)
+            {
+                if (string.IsNullOrWhiteSpace(src)) src = m3.Groups["s"].Value;
+                if (string.IsNullOrWhiteSpace(typ)) typ = m3.Groups["p"].Value;
+                return;
+            }
+
+            // Fallback: treat whole query as a free-form filter
+            filt ??= s;
+        }
+
+        // Print a relationship even if we don’t know the exact property names.
+        private static string RelToString(Relationship r)
+        {
+            try
+            {
+                dynamic d = r;
+                // Try common field names used in your AddStatement signature
+                string s = SafeStr(d.sSource) ?? SafeStr(d.Source) ?? "?";
+                string p = SafeStr(d.sRelationshipType) ?? SafeStr(d.RelationshipType) ?? "?";
+                string o = SafeStr(d.sTarget) ?? SafeStr(d.Target) ?? "?";
+                return $"{s} -[{p}]-> {o}";
+            }
+            catch
+            {
+                return r?.ToString() ?? "(relationship)";
+            }
+        }
+
+        private static string ThingToString(object t)
+        {
+            // Try to display a human-readable name for Thing using dynamic fallback
+            try
+            {
+                dynamic d = t;
+                return SafeStr(d.Name) ?? SafeStr(d.sName) ?? t.ToString();
+            }
+            catch
+            {
+                return t?.ToString() ?? "(thing)";
+            }
+        }
+
+        private static string? SafeStr(object? x) => x == null ? null : x.ToString();
 
         private async Task<string> CallChatbotAsync(string userText)
         {
@@ -125,11 +269,11 @@ Return STRICT JSON ONLY (no markdown, no commentary) with this schema:
 
 {
   "Mode": "statement" | "question" | "instruction" | "multi",
-  "Confidence": number, 
-  "Facts": [ {"S": "...", "P": "...", "O": "..."} ],   // for statements
-  "Query": {                                            // for questions
-    "Entities": [string], 
-    "Predicates": [string], 
+  "Confidence": number,
+  "Facts": [ {"S": "...", "P": "...", "O": "..."} ],
+  "Query": {
+    "Entities": [string],
+    "Predicates": [string],
     "Constraints": {string:string},
     "Natural": "recommended natural-language query phrasing",
     "SparqlLike": "optional formal query if applicable"
@@ -137,8 +281,15 @@ Return STRICT JSON ONLY (no markdown, no commentary) with this schema:
   "Notes": [string]
 }
 
-Rules and exceptions are handled internally by UKS—DO NOT output rules; convert everything to facts (triples).
-If the user asks a question, leave Facts empty and fill Query.Natural with a normalized question.
+*** RULES FOR FACTS (VERY IMPORTANT) ***
+- Emit facts ONLY if they are ATOMIC (a single relation between two nouns).
+- NO prepositional phrases or conjunctions in S/P/O (reject: "with", "by", "and", "that", "which", commas).
+- NO pronouns in O (reject: "it", "they", "their", "its", "them", "those", "these").
+- PREDICATE must be from this whitelist ONLY (lowercase): 
+  ["is-a","has","part-of","located-in","can","uses","made-of","causes","prevents"]
+- If the user statement is complex or compositional, DO NOT emit any Facts. Use Notes to say "complex".
+- If the user asks a question, leave Facts empty and fill Query.Natural.
+
 Return ONLY the JSON object.
 """;
 
@@ -191,6 +342,11 @@ Return ONLY the JSON object.
                         try
                         {
                             // The provided API: Relationship AddStatement(source, relationshipType, target, isStatement=true)
+                            // Fixed "is a" bug.
+                            if (f.P == "is a")
+                            {
+                                f.P = "is-a";
+                            }
                             var rel = MainWindow.theUKS.AddStatement(f.S, f.P, f.O);
                             added.Add($"{f.S} -[{f.P}]-> {f.O}");
                         }
@@ -221,7 +377,7 @@ Return ONLY the JSON object.
                         nl = userText;
                     }
 
-                    var result = QueryNLP(nl);
+                    var result = QueryNLP(nl, plan.Query);
 
                     // If one can surface a proof/explanation from your query engine, append it here.
                     return string.IsNullOrWhiteSpace(result)
