@@ -14,6 +14,12 @@ With the UKS, this project is leapfrogging other AI technologies which are unabl
 •	Update content in real time to handle real-world robotic applications. 
 •	Incorporate agent software Modules  to perform any desired functionality. 
 
+---
+
+| [Frequently Asked Questions (FAQ)](./faq.md) | [Documentation](./docs/documentation.md) | [Installation Guide](./docs/installation.md) | [Website](https://futureaisociety.org/) | [Youtube Channel](https://www.youtube.com/@FutureAISociety) |
+
+---
+
 # About the UKS
 The UKS includes a graph of nodes connected by edges. Within the UKS, nodes are called “Things”. Things can be related by edges called “Relationships” which consist of a source Thing, a target Thing, and a relationship Type (which is also a Thing).  For example: Fido is-a dog would be represented by a single is-a relationship relating Things representing “Fido” and “dog” with the “is-a” Relationship type. 
 
