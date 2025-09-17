@@ -16,7 +16,7 @@ With the UKS, this project is leapfrogging other AI technologies which are unabl
 
 ---
 
-| [Frequently Asked Questions (FAQ)](./faq.md) | [Documentation](./docs/documentation.md) | [Installation Guide](./docs/installation.md) | [Website](https://futureaisociety.org/) | [Youtube Channel](https://www.youtube.com/@FutureAISociety) |
+| [Frequently Asked Questions (FAQ)](./FAQ.md) | [Documentation](./docs/documentation.md) | [Installation Guide](./docs/installation.md) | [Website](https://futureaisociety.org/) | [Youtube Channel](https://www.youtube.com/@FutureAISociety) |
 
 ---
 
