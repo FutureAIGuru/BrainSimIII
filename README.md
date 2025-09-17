@@ -1,7 +1,7 @@
 # BrainSim3
 Adding Common Sense to Artificial Intelligence.
 
-Brain Simulator III is a knowledge system capable of representing and relating information needed to implement Common Sense. Centered on the Universal Knowledge Store (UKS), the system creates a web of nodes and edges and has a growing library if modular software agents which can preform any desired function.
+Brain Simulator III is a knowledge system capable of representing and relating information needed to implement Common Sense. Centered on the Universal Knowledge Store (UKS), the system creates a web of nodes and edges and has a growing library of modular software agents which can preform any desired function.
 
 Agents are independent modules and can be written in C# or Python. The Brain Simulator system runs on Windows or MAC. A growing library of modules is being adapted from previous research and development.
 
