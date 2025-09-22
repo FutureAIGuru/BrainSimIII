@@ -10,7 +10,9 @@ Incremental development: Creating the simplest ideas first.
 
 
 # Architecture
-[Block Diagram]
+![BlockDiagram1](Content/Img/BrainSimIII-Block-Diagram-2048x1152.webp)
+
+![BlockDiagram2](Content/Img/Brain-Sim-diagram-2.webp)
 
 
 # Code
@@ -74,25 +76,30 @@ Link: https://discord.com/invite/Vk7snD6TvG
 - Github
 - Website
 
+
 ## DocumentationFormat
 Markdown (.md) to HTML.
 
 ## DocumentationGitHubRepositoryStructure
-**./docs/**
+**./Docs/**
 
-//direcory for automaticly generated documentation files and selfwritten documentation-parts, which combined make up the full documentation.
+**./Docs/Build**
 
-**./docs/build**
+// Output-Direcory of build up documentation from a static site generator (SSG).
 
-//output-direcory of build up documentation from a static site builder.
+**./Docs/Content/**
 
-**documentaionBuilderConig.xml (TBD)**
+// Direcory for selfwritten documentation parts.
+
+**./Docs/ContentGenereated/**
+
+// Direcory for automaticly generated documentation files.
 
 ## DocumentationSidebarStrucure
 > - Area
->    - AreaThing
+> - AreaThing
 
-Two level.
+One level. (Lets the content be in the foreground) (Helps with quick navigation)
 
 ## DocumentationSorage
 - Github
@@ -123,15 +130,13 @@ Via Visual Studio (not VSCode).
 Video: Getting Started with Brain Simulator III - 
 Future AI Society (https://www.youtube.com/watch?v=eSNRHZ6mypk)
 
-[Installation Guide](installation.md)
-
 ## SoftwareDownload
 - Downloading the repository from GitHub
 - GitHub Packages (TBD)
 - GitHub Releases (TBD)
 
 ## SoftwareInstallation
-See 'SoftwareCompilation'.
+For the time being: [SoftwareCompilation](#softwarecompilation).
 
 ## SoftwareModule
 //API documentaion. Respectively here or "SoftwareModule" in/on its own website-tab?
@@ -144,8 +149,8 @@ See 'SoftwareCompilation'.
 
 
 # Tools
-- documentationBuilderXYZ (TBD)
-- GitHub
+- MkDocs (https://www.mkdocs.org/) (https://squidfunk.github.io/mkdocs-material/)
+- GitHub (https://github.com/)
 
 
 # Website

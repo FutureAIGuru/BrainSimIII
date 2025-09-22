@@ -62,20 +62,14 @@ Unlike deep learning systems that require massive datasets and compute power, Br
 
 - Extends the traditional Knowledge Graph paradigm by adding:
     - Bi-directional edges
-
     - Attribute inheritance in a hierarchy of is-a relationship
-
     - Multiple inheritance
-
     - Exceptions
-
     - Conditional relationships (which are relationships between relationships).
 
 - Allows modules which can form agents which perform actions like:
     - Bubbling common attributes to ancestor nodes
-
     - Removing expired information from the graph
-
     - Creating subclasses when class membership becomes too large.
 
      New modules can be created easily.
