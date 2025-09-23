@@ -26,7 +26,10 @@ Incremental development: Creating the simplest ideas first.
 - Python
 
 ## CodeRepositoryStructure
-(https://github.com/FutureAIGuru/BrainSimIII)
+**At the moment**
+Link: https://github.com/FutureAIGuru/BrainSimIII
+
+**Idea**
 
 # Community
 
@@ -71,11 +74,34 @@ Link: https://discord.com/invite/Vk7snD6TvG
 
 # Documentation
 
+The central place to learn more about the project. The Goal would be to have every relevant thing findable here. Either by text, picture or a link for more information.
+
 ## DocumentationAccess
 - Git
 - Github
 - Website
 
+## DocumentationBuild
+**GitHub Actions**
+
+Can be used to automate the build-process of the HTML-documentation-files whenever a commit to the main branch is made. So the Docs can always stay up to date.
+
+GitHub Action Documentation Build Config: [link]
+
+**MkDocs**
+
+A config file "/Docs/mkdocs.yml" needs to be created. Parameters for the build-process and output can be written in it. Mkdocs, when run, will basically then read the content-files from "/Docs/Content/" ('docs_dir') and give out the HTML-files into "/Docs/Site/" ('site_dir').
+
+## DocumentationDeployment
+**GitHub Pages**
+
+Setup atm: GitHub Pages reads the website-files from the folder "/Docs/Site/" and puts the site available/usable via a webserver. 
+
+(/By default GitHub Pages uses a branch from the project-repository with just the website-files on it. But that is less easy to navigate and inspect the website-files, and can conflict with the understanding of what branches are usually for.)
+
+**GitHub Pages Configuration**
+
+(TBD)
 
 ## DocumentationFormat
 Markdown (.md) to HTML.
@@ -83,17 +109,25 @@ Markdown (.md) to HTML.
 ## DocumentationGitHubRepositoryStructure
 **./Docs/**
 
-**./Docs/Build**
+**./Docs/Content**
 
-// Output-Direcory of build up documentation from a static site generator (SSG).
+// Direcory for selfwritten documentation md-files.
 
-**./Docs/Content/**
+**./Docs/ContentAPI**
 
-// Direcory for selfwritten documentation parts.
+// Direcory for automaticly generated API documentation files.
 
-**./Docs/ContentGenereated/**
+**./Docs/Content/Image**
 
-// Direcory for automaticly generated documentation files.
+// Direcory for images used for the documentation md-files. Seperated for easier handling of each files of a filetype.
+
+**./Docs/Site**
+
+// Output-Direcory of build up documentation from a static site generator (SSG) ('MkDocs' atm).
+
+**./Docs/Stylsheet**
+
+// Direcory for styling-parameters to build the documentation beyond the default possable styles of the documentation-tool ('MkDocs'). (//A placeholder-folder atm)
 
 ## DocumentationSidebarStrucure
 > - Area
@@ -103,7 +137,6 @@ One level. (Lets the content be in the foreground) (Helps with quick navigation)
 
 ## DocumentationSorage
 - Github
-
 
 ## DocumentationTitles
 > ThingDetailDetailDe..
@@ -149,7 +182,12 @@ For the time being: [SoftwareCompilation](#softwarecompilation).
 
 
 # Tools
-- MkDocs (https://www.mkdocs.org/) (https://squidfunk.github.io/mkdocs-material/)
+- MkDocs (https://www.mkdocs.org/) 
+    - Plugins:
+        - awsome-pages
+        - search
+    - Theme (Websitedesign):
+        - Material for MkDocs (https://squidfunk.github.io/mkdocs-material/).
 - GitHub (https://github.com/)
 
 
