@@ -599,13 +599,13 @@ public partial class UKS
                 //TODO: make this handle order-independency (go0,go1) vs relType params (has.2, has.4)
                 //note: order-descriptors DO NOT have attributes while params DO
                 if (targetList.Contains(r1.source)) continue;
-                if (r1.reltype.Label == "has-child") continue;
+                if (r1.reltype.Label == "is-a") continue;
                 if (!r1.reltype.HasAncestor(r.relType)) continue;
                 if (RelationshipTypesAreExclusive(r,r1))
                 {
                     searchCandidates[r1.source]= -1;
                 }
-                else if (r1.source.HasAncestor(root) && r1.reltype.HasAncestor(r.reltype))
+                else if (r1.target.HasAncestor(root) && r1.reltype.HasAncestor(r.reltype) && r1.source != target)
                 {
                     if (!searchCandidates.ContainsKey(r1.source))
                         searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
@@ -622,7 +622,7 @@ public partial class UKS
                 if (targetList.Contains(item.thing)) continue;
                 foreach (Relationship r1 in item.thing.RelationshipsFrom)
                 {
-                    if (r1.source.HasAncestor(root))
+                    if (r1.source.HasAncestor(root) && r.source != target)
                     {
                         if (!searchCandidates.ContainsKey(r1.source))
                             searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed

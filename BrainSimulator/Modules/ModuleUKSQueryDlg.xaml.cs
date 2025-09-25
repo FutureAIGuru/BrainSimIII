@@ -98,7 +98,7 @@ namespace BrainSimulator.Modules
                 ancestor = UKSQuery.theUKS.Labeled("Thing");
 
             //build the query object
-            Thing queryThing = new Thing() ;
+            Thing queryThing = new Thing() { Label = "theQuery" } ;
             string[] rels = queryText1.Text.Split('\n');
             foreach (string s in rels)
             {

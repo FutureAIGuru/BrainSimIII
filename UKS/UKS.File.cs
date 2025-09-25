@@ -492,6 +492,7 @@ public partial class UKS
         }
 
         //more hacks for compatibility old file formatting
+        //this does nothing on updated file content
         Thing hasChild = Labeled("has-child");
         if (hasChild != null)
         {
