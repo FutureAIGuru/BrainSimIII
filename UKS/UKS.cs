@@ -304,7 +304,6 @@ public partial class UKS
             (r1Not == null && r2Not != null || r1Not != null && r2Not == null))
             return true;
         return false;
-
     }
 
     private bool HasAttribute(Thing t, string name)

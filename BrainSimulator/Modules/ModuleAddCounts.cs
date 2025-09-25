@@ -65,7 +65,7 @@ public class ModuleAddCounts : ModuleBase
         for (int j = 0; j < t.Relationships.Count; j++)
         {
             Relationship r = t.Relationships[j];
-            if (r.reltype == Thing.HasChild) continue;
+            if (r.reltype == Thing.IsA) continue;
             Thing useRelType = ModuleAttributeBubble.GetInstanceType(r.reltype);
 
             //get the counts of targets and/or their ancestors

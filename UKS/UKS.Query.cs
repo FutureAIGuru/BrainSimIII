@@ -96,15 +96,16 @@ public partial class UKS
             int curCount = thingsToExamine[i].haveCount;
             Thing reachedWith = thingsToExamine[i].reachedWith;
 
-            foreach (Relationship r in t.RelationshipsFrom)  //has-child et al
-                if ((r.relType.HasAncestorLabeled("has-child") && !reverse) ||
-                    (r.relType.HasAncestorLabeled("has") && reverse))
+            foreach (Relationship r in t.Relationships)  //has-child et al
+            {
+                if (r.relType.HasProperty("inheritable") && !reverse)// ||
+//                    (r.relType.HasAncestorLabeled("has") && reverse))
                 {
                     //if there are several relationship, ignore the is-a, it is likely wrong
                     var existingRelationships = GetRelationshipsBetween(r.source, r.target);
                     if (existingRelationships.Count > 1) continue;
 
-                    if (thingsToExamine.FindFirst(x => x.thing == r.source) is ThingWithQueryParams twgp)
+                    if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twgp)
                         twgp.hitCount++;//thing is in the list, increment its count
                     else
                     {//thing is not in the list, add it
@@ -112,49 +113,6 @@ public partial class UKS
                             thingsToExamine[i].reachedWith != null;
                         if (corner)
                         { } //TODO: corners are the reasons in a logic progression
-                        thingsToExamine[i].corner |= corner;
-                        ThingWithQueryParams thingToAdd = new ThingWithQueryParams
-                        {
-                            thing = r.source,
-                            hopCount = hopCount,
-                            weight = curWeight * r.Weight,
-                            reachedWith = r.relType,
-                        };
-                        thingsToExamine.Add(thingToAdd);
-                        //if things have counts, they are multiplied
-                        int val = GetCount(r.reltype);
-                        thingToAdd.haveCount = curCount * val;
-                    }
-                }
-
-            foreach (Relationship r in t.Relationships) //has-a et al
-            {
-                //special case to pick up insances
-                if (r.relType.HasAncestorLabeled("has-child") && r.target.HasProperty("isInstance"))
-                {
-                    ThingWithQueryParams thingToAdd = new ThingWithQueryParams
-                    {
-                        thing = r.target,
-                        hopCount = hopCount,
-                        weight = curWeight * r.Weight,
-                        reachedWith = r.relType,
-                    };
-                    thingsToExamine.Add(thingToAdd);
-                    continue;
-                }
-                if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
-                    (r.relType.HasAncestorLabeled("has") && !reverse))
-                {
-                    if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twqp)
-                    {
-                        twqp.hitCount++;
-                    }
-                    else
-                    {
-                        bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
-                            thingsToExamine[i].reachedWith != null;
-                        if (corner)
-                        { }
                         thingsToExamine[i].corner |= corner;
                         ThingWithQueryParams thingToAdd = new ThingWithQueryParams
                         {
@@ -170,13 +128,59 @@ public partial class UKS
                     }
                 }
             }
-            if (i == currentEnd - 1)
-            {
-                hopCount++;
-                currentEnd = thingsToExamine.Count;
-                if (hopCount > maxHops) break;
-            }
+            /*
+             * foreach (Relationship r in t.Relationships) //has-a et al
+                        {
+                            //special case to pick up instances
+                            if (r.relType.HasAncestorLabeled("is-a") && r.target.HasProperty("isInstance"))
+                            {
+                                ThingWithQueryParams thingToAdd = new ThingWithQueryParams
+                                {
+                                    thing = r.target,
+                                    hopCount = hopCount,
+                                    weight = curWeight * r.Weight,
+                                    reachedWith = r.relType,
+                                };
+                                thingsToExamine.Add(thingToAdd);
+                                continue;
+                            }
+                            if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
+                                (r.relType.HasAncestorLabeled("has") && !reverse))
+                            {
+                                if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twqp)
+                                {
+                                    twqp.hitCount++;
+                                }
+                                else
+                                {
+                                    bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
+                                        thingsToExamine[i].reachedWith != null;
+                                    if (corner)
+                                    { }
+                                    thingsToExamine[i].corner |= corner;
+                                    ThingWithQueryParams thingToAdd = new ThingWithQueryParams
+                                    {
+                                        thing = r.target,
+                                        hopCount = hopCount,
+                                        weight = curWeight * r.Weight,
+                                        reachedWith = r.relType,
+                                    };
+                                    thingsToExamine.Add(thingToAdd);
+                                    //if things have counts, they are multiplied
+                                    int val = GetCount(r.reltype);
+                                    thingToAdd.haveCount = curCount * val;
+                                }
+                            }
+                        }
+                        if (i == currentEnd - 1)
+                        {
+                            hopCount++;
+                            currentEnd = thingsToExamine.Count;
+                            if (hopCount > maxHops) break;
+                        }
+            */
         }
+
         return thingsToExamine;
     }
     private List<Relationship> GetRelationshipsBetween(Thing t1, Thing t2)
@@ -205,7 +209,7 @@ public partial class UKS
             relationshipsToAdd.AddRange(t.Relationships);
             foreach (Relationship r in relationshipsToAdd)
             {
-                if (r.reltype == Thing.HasChild) continue;
+                if (r.reltype == Thing.IsA) continue;
                 //only add the new relatinoship to the list if it is not already in the list
                 bool ignoreSource = thingsToExamine[i].hopCount > 1;
                 Relationship existing = result.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));

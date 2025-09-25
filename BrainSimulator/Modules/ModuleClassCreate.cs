@@ -77,7 +77,7 @@ public class ModuleClassCreate : ModuleBase
         {
             foreach (Relationship r in t1.Relationships)
             {
-                if (r.reltype == Thing.HasChild) continue;
+                if (r.reltype == Thing.IsA) continue;
                 Thing useRelType = GetInstanceType(r.reltype);
 
                 RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.target);
