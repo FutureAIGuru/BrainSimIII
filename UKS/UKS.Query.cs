@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 namespace UKS;
 public partial class UKS
 {
+    //keeps track of the conditions of the previous query in order to answer "Why?" or "Why not?"
     List<Relationship> failedConditions = new();
     List<Relationship> succeededConditions = new();
 
@@ -14,23 +15,10 @@ public partial class UKS
     /// Gets all relationships to a group of Things including inherited relationships
     /// </summary>
     /// <param name="sources"></param>
-    /// <param name="reverse">if true, the first parameter is a list of targets rather than sources</param>
     /// <returns>List of matching relationships</returns>
-    public List<Thing> GetAllAttributes(Thing t) //with inheritance, conflicts, etc
+    public List<Relationship> GetAllRelationships(List<Thing> sources) //with inheritance, conflicts, etc
     {
-        //TODO This is hard-codedd to "is" relationships
-        List<Thing> retVal = new();
-
-        var temp1 = BuildSearchList(new List<Thing>() { t });
-        var temp2 = GetAllRelationshipsInt(temp1);
-        foreach (Relationship r in temp2)
-            if (r.relType.Label == "is")
-                retVal.Add(r.target);
-        return retVal;
-    }
-    public List<Relationship> GetAllRelationships(List<Thing> sources, bool reverse) //with inheritance, conflicts, etc
-    {
-        //expand search list to include instances of given objects
+        //expand search list to include instances of given objects  WHY??
         for (int i = 0; i < sources.Count; i++)
         {
             Thing t = sources[i];
@@ -39,19 +27,18 @@ public partial class UKS
                     sources.Add(child);
         }
 
-
-        var result1 = BuildSearchList(sources, reverse);
+        var result1 = BuildSearchList(sources);
         List<Relationship> result2 = GetAllRelationshipsInt(result1);
-        if (result2.Count < 200)
+        if (result2.Count < 200)  //the conflict-remover is really slow on large numbers
             RemoveConflictingResults(result2);
         RemoveFalseConditionals(result2);
-        AlphabetizeRelationships(ref result2);
+        SortRelationships(ref result2);
         return result2;
     }
 
-    private void AlphabetizeRelationships(ref List<Relationship> result2)
+    private void SortRelationships(ref List<Relationship> result2)
     {
-        result2 = result2.OrderBy(x => x.ToString()).ToList();
+        result2 = result2.OrderByDescending(x => x.Weight).ToList();
     }
 
 
@@ -72,10 +59,9 @@ public partial class UKS
         }
     }
 
-    //TODO This is hardcoded to only follow "has" and "has-child" transitive relationships
-    private List<ThingWithQueryParams> BuildSearchList(List<Thing> q, bool reverse = false)
+    //this follows "inheritable" relationships...should it follow transitive too?
+    private List<ThingWithQueryParams> BuildSearchList(List<Thing> q)
     {
-
         List<ThingWithQueryParams> thingsToExamine = new();
         int maxHops = 8;
         int hopCount = 0;
@@ -86,7 +72,7 @@ public partial class UKS
                 hopCount = hopCount,
                 weight = 1,
                 reachedWith = null
-            }); ;
+            });
         hopCount++;
         int currentEnd = thingsToExamine.Count;
         for (int i = 0; i < thingsToExamine.Count; i++)
@@ -98,12 +84,11 @@ public partial class UKS
 
             foreach (Relationship r in t.Relationships)  //has-child et al
             {
-                if (r.relType.HasProperty("inheritable") && !reverse)// ||
-//                    (r.relType.HasAncestorLabeled("has") && reverse))
+                if (r.relType.HasProperty("inheritable"))
                 {
-                    //if there are several relationship, ignore the is-a, it is likely wrong
-                    var existingRelationships = GetRelationshipsBetween(r.source, r.target);
-                    if (existingRelationships.Count > 1) continue;
+                    //if there are several relationships, ignore the is-a, it is likely wrong
+                    //var existingRelationships = GetRelationshipsBetween(r.source, r.target);
+                    //if (existingRelationships.Count > 1) continue;
 
                     if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twgp)
                         twgp.hitCount++;//thing is in the list, increment its count
@@ -128,59 +113,7 @@ public partial class UKS
                     }
                 }
             }
-            /*
-             * foreach (Relationship r in t.Relationships) //has-a et al
-                        {
-                            //special case to pick up instances
-                            if (r.relType.HasAncestorLabeled("is-a") && r.target.HasProperty("isInstance"))
-                            {
-                                ThingWithQueryParams thingToAdd = new ThingWithQueryParams
-                                {
-                                    thing = r.target,
-                                    hopCount = hopCount,
-                                    weight = curWeight * r.Weight,
-                                    reachedWith = r.relType,
-                                };
-                                thingsToExamine.Add(thingToAdd);
-                                continue;
-                            }
-                            if ((r.relType.HasAncestorLabeled("has-child") && reverse) ||
-                                (r.relType.HasAncestorLabeled("has") && !reverse))
-                            {
-                                if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twqp)
-                                {
-                                    twqp.hitCount++;
-                                }
-                                else
-                                {
-                                    bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
-                                        thingsToExamine[i].reachedWith != null;
-                                    if (corner)
-                                    { }
-                                    thingsToExamine[i].corner |= corner;
-                                    ThingWithQueryParams thingToAdd = new ThingWithQueryParams
-                                    {
-                                        thing = r.target,
-                                        hopCount = hopCount,
-                                        weight = curWeight * r.Weight,
-                                        reachedWith = r.relType,
-                                    };
-                                    thingsToExamine.Add(thingToAdd);
-                                    //if things have counts, they are multiplied
-                                    int val = GetCount(r.reltype);
-                                    thingToAdd.haveCount = curCount * val;
-                                }
-                            }
-                        }
-                        if (i == currentEnd - 1)
-                        {
-                            hopCount++;
-                            currentEnd = thingsToExamine.Count;
-                            if (hopCount > maxHops) break;
-                        }
-            */
         }
-
         return thingsToExamine;
     }
     private List<Relationship> GetRelationshipsBetween(Thing t1, Thing t2)
@@ -217,11 +150,10 @@ public partial class UKS
 
                 if (haveCount > 1 && r.relType?.HasAncestorLabeled("has") != null)
                 {
-                    //this creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
+                    //this HACK creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
                     Relationship r1 = new Relationship(r);
                     Thing newCountType = GetOrAddThing((GetCount(r.reltype) * haveCount).ToString(), "number");
-                    //Thing newCountType = GetOrAddThing((haveCount).ToString(), "number");
 
                     //hack for numeric labels
                     Thing rootThing = r1.reltype;
@@ -242,15 +174,6 @@ public partial class UKS
         return result;
     }
 
-    private void IncreaseResultWeights(List<Relationship> result)
-    {
-        foreach (Relationship r in result)
-        {
-            r.Weight += .01f;
-            if (r.Weight > 0.98)
-                r.Weight = 0.98f;
-        }
-    }
 
     private void RemoveConflictingResults(List<Relationship> result)
     {
@@ -276,22 +199,9 @@ public partial class UKS
                 if (r1.reltype.Label.Contains(".") && r2.reltype.Label.Contains("."))
                     if (RelationshipsAreExclusive(r1, r2))
                     {
-                        //if two relationships are in conflict, use the encountered second
+                        //if two relationships are in conflict, delete the 2nd one (First takes priority)
                         result.RemoveAt(j);
                         break;
-                        //if two relationships are in conflict, use the one with higher weight
-                        //????
-                        if (r1.Weight > r2.Weight)
-                        {
-                            result.RemoveAt(j);
-                            j--;
-                        }
-                        else if (r1.Weight > r2.Weight)
-                        {
-                            result.RemoveAt(i);
-                            i--;
-                            break;
-                        }
                     }
             }
         }
@@ -407,40 +317,6 @@ public partial class UKS
         return bestScore;
     }
 
-    //TODO add parameter to allow some number of misses
-    private bool HasAllAttributes(Thing t, List<Thing> targetAttributes)
-    {
-        List<Thing> thingAttributes = GetAllAttributes(t);
-        foreach (Thing t2 in targetAttributes)
-            if (!thingAttributes.Contains(t2) && !t.AncestorList().Contains(t2)) return false;
-        return true;
-    }
-    /// <summary>
-    /// Returns a list of Things which have ALL the given attributes (IS Relationships)
-    /// </summary>
-    /// <param name="attributes">List of Things</param>
-    /// <returns></returns>
-    public List<Thing> FindThingsWithAttributes(List<Thing> attributes)
-    {
-        List<Thing> retVal = new();
-        List<Thing> attribOwners = new List<Thing>();
-        foreach (Thing t in attributes)
-        {
-            foreach (Relationship r in t.RelationshipsFrom)
-                if (r.reltype.Label == "is")
-                {
-                    attribOwners.Add(r.source);
-                }
-        }
-        List<ThingWithQueryParams> results = BuildSearchList(attribOwners);
-        foreach (var t in results)
-        {
-            if (HasAllAttributes(t.thing, attributes))
-                retVal.Add(t.thing);
-        }
-        return retVal;
-    }
-
 
     bool ConditionsAreMet(Relationship r)
     {
@@ -515,66 +391,16 @@ public partial class UKS
         return bestThing;
     }
 
-    //This is cloned from BuildSearchList
-    private List<ThingWithQueryParams> BuildListOfSimilarThings(Thing q)
+    private List<Thing> GetListOfSimilarThings(Thing t)
     {
-        List<ThingWithQueryParams> thingsToExamine = new();
-        int maxHops = 8;
-        int hopCount = 0;
-        //foreach (Thing t in q)
-        thingsToExamine.Add(new ThingWithQueryParams
-        {
-            thing = q,
-            hopCount = hopCount,
-            weight = 1,
-            reachedWith = null
-        });
-        hopCount++;
-        int currentEnd = thingsToExamine.Count;
-        for (int i = 0; i < thingsToExamine.Count; i++)
-        {
-            Thing t = thingsToExamine[i].thing;
-            float curWeight = thingsToExamine[i].weight;
-            int curCount = thingsToExamine[i].haveCount;
-            Thing reachedWith = thingsToExamine[i].reachedWith;
-
-            foreach (Relationship r in t.Relationships)  //has-child et al
-            {
-                if (r.relType.Label != "isSimilarTo") continue;
-                //if there are several relationship, ignore the is-a, it is likely wrong
-                //var existingRelationships = GetRelationshipsBetween(r.source, r.target);
-                //if (existingRelationships.Count > 1) continue;
-
-                if (thingsToExamine.FindFirst(x => x.thing == r.target) is ThingWithQueryParams twgp)
-                    twgp.hitCount++;//thing is in the list, increment its count
-                else
-                {//thing is not in the list, add it
-                    //bool corner = !ThingInTree(r.relType, thingsToExamine[i].reachedWith) &&
-                    //    thingsToExamine[i].reachedWith != null;
-                    //if (corner)
-                    //{ } //TODO: corners are the reasons in a logic progression
-                    //thingsToExamine[i].corner |= corner;
-                    ThingWithQueryParams thingToAdd = new ThingWithQueryParams
-                    {
-                        thing = r.target,
-                        hopCount = hopCount,
-                        weight = curWeight * r.Weight,
-                        reachedWith = r.relType,
-                    };
-                    thingsToExamine.Add(thingToAdd);
-                    //if things have counts, they are multiplied
-                    int val = GetCount(r.reltype);
-                    thingToAdd.haveCount = curCount * val;
-                }
-            }
-            if (i == currentEnd - 1)
-            {
-                hopCount++;
-                currentEnd = thingsToExamine.Count;
-                if (hopCount > maxHops) break;
-            }
-        }
-        return thingsToExamine;
+        List<Thing> retVal = new();
+        foreach (Relationship r in t.Relationships)
+            if (r.relType.Label == "isSimilarTo")
+                retVal.Add(r.target);
+        foreach (Relationship r in t.RelationshipsFrom)
+            if (r.relType.Label == "isSimilarTo" && !retVal.Contains(r.source))
+                retVal.Add(r.source);
+        return retVal;
     }
 
     /// <summary>
@@ -587,59 +413,49 @@ public partial class UKS
     public Thing SearchForClosestMatch(Thing target, Thing root, ref float confidence)
     {
         searchCandidates = new();
-
-        //perform the search
+        Dictionary<Thing, float> searchCandidates1 = new();
+        //initialize the search queue
+        Queue<Thing> thingsToSearch = new();
+        Queue<Thing> alreadySearched = new();
         foreach (Relationship r in target.Relationships)
         {
-            //debug hack
-            //if (!r.reltype.Label.StartsWith("go")) continue;
-            List<Thing> targetList = new(); //this prevents a single relationship from creating multiple votes
             foreach (Relationship r1 in r.target.RelationshipsFrom)
             {
-                //TODO: make this handle order-independency (go0,go1) vs relType params (has.2, has.4)
-                //note: order-descriptors DO NOT have attributes while params DO
-                if (targetList.Contains(r1.source)) continue;
-                if (r1.reltype.Label == "is-a") continue;
-                if (!r1.reltype.HasAncestor(r.relType)) continue;
-                if (RelationshipTypesAreExclusive(r,r1))
+                if (r1.source == target) continue;
+                var newItem = (r1.source, r1.Weight);
+                if (r1.reltype.HasAncestor(r.reltype) && r1.target == r.target && !thingsToSearch.Contains(r1.source))
                 {
-                    searchCandidates[r1.source]= -1;
-                }
-                else if (r1.target.HasAncestor(root) && r1.reltype.HasAncestor(r.reltype) && r1.source != target)
-                {
+                    thingsToSearch.Enqueue(r1.source);
                     if (!searchCandidates.ContainsKey(r1.source))
                         searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
                     searchCandidates[r1.source] += r1.Weight;
-                    targetList.Add(r1.source);
-                }
-            }
-            //add any similar attributes
-            var similarValues = BuildListOfSimilarThings(r.target);
-            for (int i = 1; i < similarValues.Count; i++)
-            {
-                ThingWithQueryParams? item = similarValues[i];
-                if (item.weight < 0.4f) continue;
-                if (targetList.Contains(item.thing)) continue;
-                foreach (Relationship r1 in item.thing.RelationshipsFrom)
-                {
-                    if (r1.source.HasAncestor(root) && r.source != target)
-                    {
-                        if (!searchCandidates.ContainsKey(r1.source))
-                            searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
-                        searchCandidates[r1.source] += item.weight;
-                        targetList.Add(r1.source);
-                    }
                 }
             }
         }
+        //fan out from these seeds following all "inheritable" reverse connections.
+        while (thingsToSearch.Count > 0)
+        {
+            var t = thingsToSearch.Dequeue();
+            alreadySearched.Enqueue(t);
+            foreach (Relationship r in t.RelationshipsFrom)
+            {
+                if (!r.relType.HasProperty("inheritable")) continue;
+                if (ThingsHaveConflictingRelationship(r.source, target)) continue;
+                AddToQueues(t, r.source);
+                //TODO fix this to handle isSimilarTo
+                //var similarThings = GetListOfSimilarThings(r.source);
+                //foreach (Thing t1 in similarThings)
+                //    AddToQueues(t, t1);
+            }
+        }
+             
         Thing bestThing = null;
         confidence = -1;
 
         if (searchCandidates.Count == 0)
             return null;
 
-
-        // delete items which have ancestor in list toon
+        // delete items which have ancestor in list too
         for (int i = 0; i < searchCandidates.Keys.Count; i++)
         {
             Thing t = (Thing)searchCandidates.Keys.ToList()[i];
@@ -649,24 +465,6 @@ public partial class UKS
                     searchCandidates.Remove(t);
             }
         }
-
-        ////handle inheritance
-        ////TODO: check if this messes up on multiple inheritance and/or problems with the order of processing
-        for (int i = 0; i < searchCandidates.Keys.Count; i++)
-        {
-            Thing t = (Thing)searchCandidates.Keys.ToList()[i];
-            foreach (Thing t1 in t.Descendents)
-            {
-                if (t1 != t && !searchCandidates.ContainsKey(t1))
-                    searchCandidates[t1] = 0;
-                if (t1 != t)
-                    searchCandidates[t1] += searchCandidates[t] * .9f;  //give weight to more specific answer
-             }
-        }
-
-        //normalize the confidences
-        //foreach (var key in searchCandidates)
-        //    searchCandidates[key.Key] /= target.Relationships.Count;
 
         //normalize the confidences
         float max = searchCandidates.Max(x => x.Value);
@@ -681,9 +479,31 @@ public partial class UKS
                 confidence = key.Value;
                 bestThing = key.Key;
             }
-        //remove the item from the dictionary
+
+        //remove the top item from the dictionary... so GetNextClosestMatch will work
         if (bestThing != null)
             searchCandidates.Remove(bestThing);
         return bestThing;
+
+        bool AddToQueues(Thing tPrev, Thing tNew)
+        {
+            if (!tNew.HasAncestor(root)) return false;
+            if (!searchCandidates.ContainsKey(tNew))
+                searchCandidates[tNew] = 0; //initialize a new dictionary entry if needed
+            searchCandidates[tNew] += searchCandidates[tPrev];
+            if (alreadySearched.Contains(tNew)) return false;
+            if (thingsToSearch.Contains(tNew)) return false;
+            thingsToSearch.Enqueue(tNew);
+            return true;
+        }
+    }
+
+    private bool ThingsHaveConflictingRelationship(Thing source, Thing target)
+    {
+        foreach (Relationship r1 in source.Relationships)
+            foreach (Relationship r2 in target.Relationships)
+                if (RelationshipsAreExclusive(r1, r2)) 
+                    return true;
+        return false;
     }
 }

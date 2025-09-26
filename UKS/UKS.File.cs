@@ -11,6 +11,23 @@ public partial class UKS
 
     public void CreateInitialStructure()
     {
+        //this hack is needed to preserve the info relating to module layout
+        for (int i = 0; i < UKSList.Count; i++)
+        {
+            Thing t = UKSList[i];
+            if (t.HasAncestorLabeled("BrainSim"))
+                continue;
+            if (t.Label == "is-a") continue;
+            //if (t.Label == "Thing") continue;
+            //if (t.Label == "RelationshipType") continue;
+            if (t.Label == "hasAttribute") continue;
+            if (t != null)
+            {
+                DeleteThing(t);
+                i--;
+            }
+        }
+
         if (Labeled("Thing") == null)
             AddThing("Thing", null);
         Thing isA = Labeled("is-a");

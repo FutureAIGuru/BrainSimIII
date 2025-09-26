@@ -6,165 +6,196 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 using UKS;
 
-namespace BrainSimulator.Modules
+namespace BrainSimulator.Modules;
+
+public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 {
-    public partial class ModuleUKSQueryDlg : ModuleBaseDlg
+    DispatcherTimer requeryTimer = new DispatcherTimer();
+    
+    public ModuleUKSQueryDlg()
     {
-        DispatcherTimer requeryTimer = new DispatcherTimer();
-        
-        public ModuleUKSQueryDlg()
+        InitializeComponent();
+        requeryTimer.Interval = TimeSpan.FromSeconds(3);
+        requeryTimer.Tick += RequeryTimer_Tick;
+
+    }
+
+    private void RequeryTimer_Tick(object sender, EventArgs e)
+    {
+        QueryForAttributes();
+        QueryByAttributes();
+    }
+
+    List<Relationship> result = new();
+
+
+    // Draw gets called to draw the dialog when it needs refreshing
+    public override bool Draw(bool checkDrawTimer)
+    {
+        if (!base.Draw(checkDrawTimer)) return false;
+        return true;
+    }
+
+    private void BtnRelationships_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button b)
         {
-            InitializeComponent();
-            requeryTimer.Interval = TimeSpan.FromSeconds(3);
-            requeryTimer.Tick += RequeryTimer_Tick;
-
-        }
-
-        private void RequeryTimer_Tick(object sender, EventArgs e)
-        {
-            DoTheQuery();
-            QueryAttribs();
-        }
-
-        List<Relationship> result = new();
-
-
-        // Draw gets called to draw the dialog when it needs refreshing
-        public override bool Draw(bool checkDrawTimer)
-        {
-            if (!base.Draw(checkDrawTimer)) return false;
-            return true;
-        }
-
-        private void BtnRelationships_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button b)
+            if (b.Content.ToString() == "Add")
             {
-                if (b.Content.ToString() == "Add")
+                string newText = typeText1.Text + "," + targetText1.Text;
+                if (!queryText1.Text.Contains(newText))
                 {
-                    string newText = typeText1.Text + " " + targetText1.Text;
-                    if (!queryText1.Text.Contains(newText))
-                    {
-                        if (!string.IsNullOrEmpty(queryText1.Text))
-                            queryText1.Text += "\n";
-                        queryText1.Text += newText;
-                    }
-                    QueryAttribs();
+                    if (!string.IsNullOrEmpty(queryText1.Text))
+                        queryText1.Text += "\n";
+                    queryText1.Text += newText;
                 }
-                if (b.Content.ToString() == "Clear")
-                {
-                    queryText1.Text = "";
-                    resultText1.Text = "";
-                }
-                if (b.Content.ToString() == "Query")
-                {
-                    DoTheQuery();
-                }
+                QueryByAttributes();
             }
-        }
-
-        private void DoTheQuery()
-        {
-            string source = sourceText.Text;
-            string type = typeText.Text;
-            string target = targetText.Text;
-            string filter = filterText.Text;
-
-            requeryTimer.Start();
-            List<Thing> things;
-            List<Relationship> relationships;
-            ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-            UKSQuery.QueryUKS(source, type, target, filter, out things, out relationships);
-
-
-
-            if (things.Count > 0)
-                OutputResults(things);
-            else
-                OutputResults(relationships, target == "", source == "");
-        }
-
-        private void QueryAttribs()
-        {
-            ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-            Thing ancestor = UKSQuery.theUKS.Labeled(ancestorText1.Text);
-            if (ancestor == null)
-                ancestor = UKSQuery.theUKS.Labeled("Thing");
-
-            //build the query object
-            Thing queryThing = new Thing() { Label = "theQuery" } ;
-            string[] rels = queryText1.Text.Split('\n');
-            foreach (string s in rels)
+            if (b.Content.ToString() == "Clear")
             {
-                string[] relParams = s.Split(' ',StringSplitOptions.RemoveEmptyEntries);
-                if (relParams.Length == 2)
-                {
-                    Thing relType = UKSQuery.theUKS.Labeled(relParams[0]);
-                    Thing relTarget = UKSQuery.theUKS.Labeled(relParams[1]);
-                    if (relType == null)
-                    {
-                        resultText1.Text = $"<{relParams[0]} not found>";
-                        return;
-                    }
-                    if (relTarget == null)
-                    {
-                        resultText1.Text = $"<{relParams[1]} not found>";
-                        return;
-                    }
-
-                    queryThing.AddRelationship(relTarget, relType);
-                }
+                queryText1.Text = "";
+                resultText1.Text = "";
             }
-            float confidence = 0;
-            Thing result = UKSQuery.theUKS.SearchForClosestMatch(queryThing, ancestor, ref confidence);
-            UKSQuery.theUKS.DeleteThing(queryThing);
-            if (result == null)
+            if (b.Content.ToString() == "Query")
             {
-                resultText1.Text = "<No Results>";
-                return;
+                QueryForAttributes();
             }
-            resultText1.Text = result.Label + "   " + confidence.ToString("0.00");
-            while (result != null)
-            {
-                result = UKSQuery.theUKS.GetNextClosestMatch(ref confidence);
-                if (result != null)
-                    resultText1.Text += "\n" + result.Label + "   " + confidence.ToString("0.00");
-
-            }
-        }
-
-        private void OutputResults<T>(IList<T> r, bool noSource = false, bool noTarget = false)
-        {
-            string resultString = "";
-            if (r == null || r.Count == 0)
-                resultString = "No Results";
-            else
-                foreach (var r1 in r)
-                {
-                    if (r1 is Relationship r2)
-                    {
-                        if (noSource && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
-                            resultString += $"{r2.relType?.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
-                        else if (noTarget && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
-                            resultString += $"{r2.source.ToString()} {r2.relType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
-                        else
-                        {
-                            Thing theSource = UKS.UKS.GetNonInstance(r2.source);
-                            if (fullCB.IsChecked == true)
-                                resultString += $"{theSource.Label} ";
-                            resultString += $"{r2.relType.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
-                        }
-                    }
-                    else
-                        resultString += r1.ToString() + "\n";
-                }
-            resultText.Text = resultString;
         }
     }
+
+    private void QueryForAttributes()
+    {
+        string source = sourceText.Text;
+        string type = typeText.Text;
+        string target = targetText.Text;
+        string filter = filterText.Text;
+
+        requeryTimer.Start();
+        List<Thing> things;
+        List<Relationship> relationships;
+        ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
+        UKSQuery.QueryUKS(source, type, target, filter, out things, out relationships);
+
+        if (things.Count > 0)
+            OutputResults(things);
+        else
+            OutputResults(relationships, target == "", source == "");
+    }
+
+    //query by attributes
+    private void QueryByAttributes()
+    {
+        ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
+        Thing ancestor = UKSQuery.theUKS.Labeled(ancestorText1.Text);
+        if (ancestor == null)
+            ancestor = UKSQuery.theUKS.Labeled("Thing");
+
+        //build the query object
+        Thing queryThing = new Thing() { Label = "theQuery" } ;
+        string[] rels = queryText1.Text.Split('\n');
+        foreach (string s in rels)
+        {
+            string[] relParams = s.Split(',',StringSplitOptions.RemoveEmptyEntries);
+            if (relParams.Length == 2)
+            {
+                Thing relType = UKSQuery.theUKS.CreateThingFromMultipleAttributes(relParams[0], true);
+                Thing relTarget = UKSQuery.theUKS.CreateThingFromMultipleAttributes(relParams[1], false);
+                if (relType == null)
+                {
+                    resultText1.Text = $"<{relParams[0]} not found>";
+                    return;
+                }
+                if (relTarget == null)
+                {
+                    resultText1.Text = $"<{relParams[1]} not found>";
+                    return;
+                }
+
+                queryThing.AddRelationship(relTarget, relType);
+            }
+        }
+        float confidence = 0;
+        Thing result = UKSQuery.theUKS.SearchForClosestMatch(queryThing, ancestor, ref confidence);
+        UKSQuery.theUKS.DeleteThing(queryThing);
+        if (result == null)
+        {
+            resultText1.Text = "<No Results>";
+            return;
+        }
+        resultText1.Text = result.Label + "   " + confidence.ToString("0.00");
+        while (result != null)
+        {
+            result = UKSQuery.theUKS.GetNextClosestMatch(ref confidence);
+            if (result != null)
+                resultText1.Text += "\n" + result.Label + "   " + confidence.ToString("0.00");
+
+        }
+    }
+
+    private void OutputResults<T>(IList<T> r, bool noSource = false, bool noTarget = false)
+    {
+        string resultString = "";
+        if (r == null || r.Count == 0)
+            resultString = "No Results";
+        else
+            foreach (var r1 in r)
+            {
+                if (r1 is Relationship r2)
+                {
+                    if (noSource && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
+                        resultString += $"{r2.relType?.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                    else if (noTarget && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
+                        resultString += $"{r2.source.ToString()} {r2.relType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                    else
+                    {
+                        Thing theSource = UKS.UKS.GetNonInstance(r2.source);
+                        if (fullCB.IsChecked == true)
+                            resultString += $"{theSource.Label} ";
+                        resultString += $"{r2.relType.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                    }
+                }
+                else
+                    resultString += r1.ToString() + "\n";
+            }
+        resultText.Text = resultString;
+    }
+
+    // thingText_TextChanged is called when the thing textbox changes
+    private void Text_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        CheckThingExistence(sender);
+    }
+    //copied from UKSStatementDlg.cs
+    private Thing CheckThingExistence(object sender)
+    {
+        if (sender is TextBox tb)
+        {
+            string text = tb.Text.Trim();
+
+            if (text == "" && !tb.Name.Contains("arget") && tb.Name != "typeText")
+            {
+                tb.Background = new SolidColorBrush(Colors.Pink);
+                SetStatus("Source and type cannot be empty");
+                return null;
+            }
+            List<Thing> tl = ModuleUKSStatement.ThingListFromString(text);
+            if (tl == null || tl.Count == 0)
+            {
+                tb.Background = new SolidColorBrush(Colors.LemonChiffon);
+                SetStatus("");
+                return null;
+            }
+            tb.Background = new SolidColorBrush(Colors.White);
+            SetStatus("");
+            return tl[0];
+        }
+        return null;
+    }
+
 }

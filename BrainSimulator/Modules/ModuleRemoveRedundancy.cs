@@ -60,7 +60,7 @@ public class ModuleRemoveRedundancy : ModuleBase
     {
         foreach (Thing parent in t.Parents) //usually only a single parent
         {
-            List<Relationship> relationshipsWithInheritance = theUKS.GetAllRelationships(new List<Thing> { parent }, false);
+            List<Relationship> relationshipsWithInheritance = theUKS.GetAllRelationships(new List<Thing> { parent });
             for (int i = 0; i < t.Relationships.Count; i++)
             {
                 Relationship r = t.Relationships[i];
