@@ -513,6 +513,7 @@ public partial class UKS
 
         //more hacks for compatibility old file formatting
         //this does nothing on updated file content
+        AddStatement("inheritable", "is-a", "Property");
         Thing hasChild = Labeled("has-child");
         if (hasChild != null)
         {
@@ -526,8 +527,13 @@ public partial class UKS
             isA.AddRelationship("inheritable", "hasProperty");
             isA.AddRelationship("isTransitive", "hasProperty");
             isA.RemoveRelationship("has-child", "inverseOf");
+            isA.RemoveRelationship(null,"hasProperty");
         }
-
+        Thing has = Labeled("has");
+        if (has != null)
+        {
+            has.AddRelationship("inheritable", "hasProperty");
+        }
         return true;
     }
 }

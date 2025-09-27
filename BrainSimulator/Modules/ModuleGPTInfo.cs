@@ -35,7 +35,7 @@ namespace BrainSimulator.Modules
         public override void SetUpAfterLoad()
         {
             string apiKey = ConfigurationManager.AppSettings["APIKey"];
-            if (!apiKey.StartsWith("sk"))
+            if (apiKey == null|| !apiKey.StartsWith("sk"))
             {
                 MessageBox.Show(@"OpenAI GPT API Key was not found in the app.config file. GPT Info requests will be ignored. To set up: after getting an API key from OpenAI, put it in the app.config file in the form:
     <appSettings>
@@ -131,7 +131,7 @@ namespace BrainSimulator.Modules
                     textIn = textIn.Substring(1);
 
                 string answerString = "";
-                string userText = $"Provide commonsense clasification answer the request which is appropriate for a 5 year old: What is-a {textIn}";
+                string userText = $"Provide commonsense classification answer the request which is appropriate for a 5 year old: What is-a {textIn}";
                 string systemText = 
 $@"This is a classification request. Examples: horse is-a | animal, mammal \n\r chimpanzee is-a | primate, mammal
 Answer is formatted: is-a | VALUE, VALUE, VALUE with no more than 3 values and VAIUES are 1 or 2 words.
@@ -475,7 +475,7 @@ is-part-of-speech, ";
             relationshipType = pluralizer.Singularize(tempStringArray[0]);
             for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
-            Relationship r = theUKS.AddStatement(source, relationshipType, target, sourceModifiers, typeModifiers, targetModifiers);
+            Relationship r = theUKS.AddStatement(source, relationshipType, target);
 
             return r;
         }
@@ -598,22 +598,22 @@ is-part-of-speech, ";
                         }
                         else if (valueType.StartsWith("has-properties"))
                         {
-                            theUKS.AddStatement("." + textIn, "is", "." + value, null, null, valueProperties);
+                            theUKS.AddStatement("." + textIn, "is", "." + value);
                         }
                         else if (valueType.Contains("contains"))
                         {
                             Relationship r;
                             if (count == "" || count == "1")
-                                r = theUKS.AddStatement("." + textIn, "has", "." + value, null, null, valueProperties);
+                                r = theUKS.AddStatement("." + textIn, "has", "." + value);
                             else
-                                r = theUKS.AddStatement("." + textIn, "has", "." + value, null, count, valueProperties);
+                                r = theUKS.AddStatement("." + textIn, "has", "." + value);
                             ModuleGPTInfoDlg.relationshipCount += 1;
                             if (valueType.Contains("usually"))
                                 r.Weight = .75f;
                         }
                         else
                         {
-                            theUKS.AddStatement("." + textIn, valueType, "." + value, null, valueTypeAttributes, valueProperties);
+                            theUKS.AddStatement("." + textIn, valueType, "." + value);
                             ModuleGPTInfoDlg.relationshipCount += 1;
                         }
                         ///////   null reltypes? This was a safety check
