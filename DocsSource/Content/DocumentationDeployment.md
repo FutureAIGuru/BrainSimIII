@@ -8,4 +8,6 @@ Setup atm: GitHub Pages reads the website-files from the folder "/Docs/Site/" an
 
 **GitHub Pages Configuration**
 
-(TBD)
+Settings -> Pages -> Build and deployment > Source (Branch: main, Folder: "/Site/")
+
+GitHub Pages does an automatic rebuild of the website (in seconds) if a file in "/Site/" changes.
