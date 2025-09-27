@@ -107,7 +107,7 @@ public partial class UKS
                             reachedWith = r.relType,
                         };
                         thingsToExamine.Add(thingToAdd);
-                        //if things have counts, they are multiplied
+                        //JUST FOR FUN: if things have counts, the counts are multiplied...  2hands * 5 fingers/hand = 10 fingers
                         int val = GetCount(r.reltype);
                         thingToAdd.haveCount = curCount * val;
                     }
@@ -391,6 +391,7 @@ public partial class UKS
         return bestThing;
     }
 
+    //this will be expanded to transitive...
     private List<Thing> GetListOfSimilarThings(Thing t)
     {
         List<Thing> retVal = new();
@@ -413,10 +414,11 @@ public partial class UKS
     public Thing SearchForClosestMatch(Thing target, Thing root, ref float confidence)
     {
         searchCandidates = new();
-        Dictionary<Thing, float> searchCandidates1 = new();
-        //initialize the search queue
+        //initialize the search queues
         Queue<Thing> thingsToSearch = new();
         Queue<Thing> alreadySearched = new();
+
+        //seed the search queue with the given parameters.
         foreach (Relationship r in target.Relationships)
         {
             foreach (Relationship r1 in r.target.RelationshipsFrom)
@@ -442,7 +444,7 @@ public partial class UKS
                 if (!r.relType.HasProperty("inheritable")) continue;
                 if (ThingsHaveConflictingRelationship(r.source, target)) continue;
                 AddToQueues(t, r.source);
-                //TODO fix this to handle isSimilarTo
+                //TODO fix this to handle isSimilarTo  (and transitive...?)
                 //var similarThings = GetListOfSimilarThings(r.source);
                 //foreach (Thing t1 in similarThings)
                 //    AddToQueues(t, t1);

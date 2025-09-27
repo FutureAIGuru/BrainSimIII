@@ -95,6 +95,7 @@ public class ModuleAddCounts : ModuleBase
             List<IList<Thing>> theAncestors = new();
             foreach (Thing t in ts)
             {
+                if (t == null) continue;
                 foreach (Thing t1 in t.AncestorList())
                 {
                     if (dict.ContainsKey(t1))

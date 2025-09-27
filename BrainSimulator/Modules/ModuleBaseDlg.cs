@@ -7,8 +7,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
-using System.Security.Permissions;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -90,13 +89,30 @@ public class ModuleBaseDlg : Window
         ((Panel)this.Content).Children.Add(statusLabel);
     }
 
+    /// <summary>
+    /// Searches for a file with the given name (no path) in the specified root directory
+    /// and all its subdirectories.
+    /// </summary>
+    public static string? FindFile(string rootPath, string fileName)
+    {
+        if (!Directory.Exists(rootPath))
+            throw new DirectoryNotFoundException($"Root path not found: {rootPath}");
+
+        // Enumerate all files recursively and compare names only
+        return Directory.EnumerateFiles(rootPath, "*", SearchOption.AllDirectories)
+                        .FirstOrDefault(f => string.Equals(
+                            Path.GetFileName(f),
+                            fileName,
+                            StringComparison.OrdinalIgnoreCase));
+    }
+
     private void SourceButton_Click(object sender, RoutedEventArgs e)
     {
         string theModuleType = this.GetType().Name.ToString();
         string cwd = System.IO.Directory.GetCurrentDirectory();
-        cwd = cwd.ToLower().Replace("bin\\debug\\net8.0-windows", "");
-        string fileNameDlg = cwd + @"modules\" + theModuleType + ".xaml.cs";
-        string fileName = cwd + @"modules\" + theModuleType.Substring(0,theModuleType.Length-3) + ".cs";
+        cwd = cwd.ToLower().Replace("bin\\debug\\net8.0-windows", "") + @"modules\";
+        string dlgFilePath = FindFile(cwd, theModuleType + ".xaml.cs");
+        string csFilePath = FindFile(cwd,theModuleType.Substring(0,theModuleType.Length-3) + ".cs");
 
         //find visiaul studio
         string taskFile = @"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe";
@@ -107,11 +123,11 @@ public class ModuleBaseDlg : Window
 
         //fire up the processes
         Process processDlg = new();
-        ProcessStartInfo startInfo = new ProcessStartInfo(taskFile, "/edit " + fileNameDlg);
+        ProcessStartInfo startInfo = new ProcessStartInfo(taskFile, "/edit " + dlgFilePath);
         processDlg.StartInfo = startInfo;
         processDlg.Start();
         Process process = new();
-        ProcessStartInfo startInfo2 = new ProcessStartInfo(taskFile, "/edit " + fileName);
+        ProcessStartInfo startInfo2 = new ProcessStartInfo(taskFile, "/edit " + csFilePath);
         process.StartInfo = startInfo2;
         process.Start();
     }

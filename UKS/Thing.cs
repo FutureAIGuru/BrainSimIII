@@ -127,7 +127,7 @@ public partial class Thing
         IList<Thing> retVal = new List<Thing>();
         if (!useRelationshipFrom)
         {
-            lock (relationshipsFrom)
+            lock (relationships)
             {
                 foreach (Relationship r in relationships)
                     if (r.relType != null && r.relType == relType && r.source == this)
@@ -161,7 +161,8 @@ public partial class Thing
     {
         get
         {
-            List<Thing> retVal = (List<Thing>)RelationshipsOfType(IsA, false);
+            List<Thing> retVal = (List<Thing>)RelationshipsOfType(IsA, true);
+
             for (int i = 0; i < retVal.Count; i++)
             {
                 Thing t = retVal[i];
@@ -528,7 +529,7 @@ public partial class Thing
 
     public void RemoveChild(Thing t)
     {
-        Relationship r = new() { source = this, reltype = IsA, target = t };
+        Relationship r = new() { source = t, reltype = IsA, target = this };
         RemoveRelationship(r);
     }
 

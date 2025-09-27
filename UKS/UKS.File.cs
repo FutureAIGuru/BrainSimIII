@@ -116,6 +116,9 @@ public partial class UKS
         GetOrAddThing("some", "number");
         GetOrAddThing("many", "number");
         GetOrAddThing("none", "number");
+        for (int i = 9; i > 0; i--)
+            AddStatement(i.ToString(), "greaterThan", (i - 1).ToString());
+
 
 
         //demo to add PI to the structure
