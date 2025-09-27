@@ -32,12 +32,12 @@ public partial class UKS
                 var (t, depth) = q.Dequeue();
                 if (depth > maxDepth) continue;
 
-                foreach (Relationship r in t.Relationships)
+                foreach (Relationship r in t.RelationshipsFrom)
                 {
                     //don't save extra clause baggage.
                     if (!r.isStatement && r.Clauses.Count == 0) continue;
                     if (r.reltype.Label == "hasProperty" && r.target.Label == "isInstance") continue;
-                    if (r.reltype.Label == "has-child" && r.target.HasProperty("isInstance"))
+                    if (r.reltype.Label == "is-a" && r.source.HasProperty("isInstance"))
                     {
                         if (seenThings.Add(r.source.Label)) q.Enqueue((r.source, depth + 1));
                         if (seenThings.Add(r.target.Label)) q.Enqueue((r.target, depth + 1));

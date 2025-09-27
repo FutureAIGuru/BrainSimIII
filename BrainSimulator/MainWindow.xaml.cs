@@ -326,7 +326,9 @@ namespace BrainSimulator
             foreach (var moduleType in moduleTypes)
             {
                 string moduleName = moduleType.Name;
-                theUKS.GetOrAddThing(moduleName, "AvailableModule");
+                Thing t = theUKS.GetOrAddThing(moduleName, "AvailableModule");
+                //TODO: delete the following
+                t.AddParent("AvailableModule");
             }
 
             var pythonModules = moduleHandler.GetListOfExistingPythonModuleTypes();

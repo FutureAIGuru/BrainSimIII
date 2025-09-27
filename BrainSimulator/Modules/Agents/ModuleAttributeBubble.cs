@@ -90,7 +90,7 @@ public class ModuleAttributeBubble : ModuleBase
         {
             foreach (Relationship r in t1.Relationships)
             {
-                if (r.reltype == Thing.HasChild) continue;
+                if (r.reltype == Thing.IsA) continue;
                 Thing useRelType = GetInstanceType(r.reltype);
 
                 RelDest foundItem = itemCounts.FindFirst(x => x.relType == useRelType && x.target == r.target);

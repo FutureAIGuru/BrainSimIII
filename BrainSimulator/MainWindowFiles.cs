@@ -56,6 +56,9 @@ namespace BrainSimulator
             ActiveModuleSP.Children.Clear();
 
             Thing activeModuleParent = theUKS.Labeled("ActiveModule");
+            //TODO: Remove
+            activeModuleParent.AddParent("BrainSim");
+
             if (activeModuleParent == null) { return; }
             var activeModules1 = activeModuleParent.Children;
             activeModules1 = activeModules1.OrderBy(x => x.Label).ToList();

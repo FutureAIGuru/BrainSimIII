@@ -304,7 +304,6 @@ public partial class UKS
             (r1Not == null && r2Not != null || r1Not != null && r2Not == null))
             return true;
         return false;
-
     }
 
     private bool HasAttribute(Thing t, string name)
@@ -602,7 +601,7 @@ public partial class UKS
         //figure out if a new instance is needed
         bool newInstanceNeeded = false;
         if (clauseType.Label.ToLower() == "if" && r1.isStatement) newInstanceNeeded = true;
-
+        if (clauseType.Label.ToLower() == "because") r1.isStatement = true;
 
         Relationship rRoot = r1;
 
@@ -620,9 +619,10 @@ public partial class UKS
         //make rTemp into a real relationship
         rTemp = rTemp.source.AddRelationship(rTemp.target, rTemp.relType, r1.isStatement);
 
+
         //add the clause
         rRoot.AddClause(clauseType, rTemp);
-        rRoot.isStatement = false;
+        rRoot.isStatement = r1.isStatement;
         return rRoot;
     }
 }

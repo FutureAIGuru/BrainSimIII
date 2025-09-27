@@ -4,11 +4,8 @@
 // © 2022 FutureAI, Inc., all rights reserved
 // 
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Web;
 using UKS;
 using static BrainSimulator.Modules.ModuleAttributeBubble;
 
@@ -77,7 +74,7 @@ public class ModuleClassCreate : ModuleBase
         {
             foreach (Relationship r in t1.Relationships)
             {
-                if (r.reltype == Thing.HasChild) continue;
+                if (r.reltype == Thing.IsA) continue;
                 Thing useRelType = GetInstanceType(r.reltype);
 
                 RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.target);
@@ -86,7 +83,8 @@ public class ModuleClassCreate : ModuleBase
                     foundItem = new RelDest { relType = useRelType, target = r.target };
                     attributes.Add(foundItem);
                 }
-                foundItem.relationships.Add(r);
+                if (foundItem.relationships.FindFirst(x=>x.source == r.source && x.target == r.target) == null)
+                    foundItem.relationships.Add(r);
             }
         }
         //create intermediate parent Things

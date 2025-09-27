@@ -103,32 +103,6 @@ public partial class UKS
         }
 
         //CREATE new subclasses if needed
-        Thing bestMatch = null;
-        List<Thing> missingAttributes = new();
-
-        /*
-        Thing source1 = SubclassExists(source, sourceProperties, ref bestMatch, ref missingAttributes);
-        if (source1 == null)
-        {
-            source1 = CreateSubclass(bestMatch, missingAttributes);
-        }
-        source = source1;
-
-        Thing target1 = SubclassExists(target, targetProperties, ref bestMatch, ref missingAttributes);
-        if (target1 == null)
-        {
-            target1 = CreateSubclass(bestMatch, missingAttributes);
-        }
-        target = target1;
-
-        Thing relType1 = SubclassExists(relType, typeProperties, ref bestMatch, ref missingAttributes);
-        if (relType1 == null)
-        {
-            relType1 = CreateSubclass(bestMatch, missingAttributes);
-        }
-
-        relType = relType1;
-        */
 
         Relationship r = new Relationship()
         { source = source, reltype = relType, target = target };

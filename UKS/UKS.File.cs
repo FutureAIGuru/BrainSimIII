@@ -11,13 +11,35 @@ public partial class UKS
 
     public void CreateInitialStructure()
     {
+        //this hack is needed to preserve the info relating to module layout
+        for (int i = 0; i < UKSList.Count; i++)
+        {
+            Thing t = UKSList[i];
+            if (t.HasAncestorLabeled("BrainSim"))
+                continue;
+            if (t.Label == "is-a") continue;
+            //if (t.Label == "Thing") continue;
+            //if (t.Label == "RelationshipType") continue;
+            if (t.Label == "hasAttribute") continue;
+            if (t != null)
+            {
+                DeleteThing(t);
+                i--;
+            }
+        }
+
         if (Labeled("Thing") == null)
             AddThing("Thing", null);
+        Thing isA = Labeled("is-a");
+        if (isA == null)
+            isA = AddThing("is-a", null);
         Thing hasChild = Labeled("has-child");
         if (hasChild == null)
             hasChild = AddThing("has-child", null);
-        Thing relType = GetOrAddThing("RelationshipType", "Thing");
+        Thing relType = AddThing("RelationshipType", "Thing");
+        isA.AddParent(relType);
         hasChild.AddParent(relType);
+
         GetOrAddThing("Object", "Thing");
         GetOrAddThing("Action", "Thing");
         GetOrAddThing("RelationshipType", "Thing");
@@ -27,7 +49,8 @@ public partial class UKS
         GetOrAddThing("hasProperty", "RelationshipType");
         GetOrAddThing("is", "RelationshipType");
 
-        AddStatement("is-a", "inverseOf", "has-child");
+        //AddStatement("is-a", "inverseOf", "has-child");
+        AddStatement("has-child", "inverseOf", "is-a");
         AddStatement("has-attribute", "is-a", "RelationshipType");
         AddStatement("contains", "is-a", "RelationshipType");
         AddStatement("is-part-of", "is-a", "RelationshipType");
@@ -45,13 +68,18 @@ public partial class UKS
         AddStatement("allowMultiple", "is-a", "Property");
         AddStatement("inheritable", "is-a", "Property");
 
+        //underlying properties
+        AddStatement("is-a", "hasProperty", "isTransitive");
+        AddStatement("is-a", "hasProperty", "inheritable");
+        AddStatement("has", "hasProperty", "isTransitive");
+        AddStatement("has", "hasProperty", "inheritable");
+
+        //Clauses
         AddStatement("ClauseType", "is-a", "RelationshipType");
         AddStatement("IF", "is-a", "ClauseType");
         AddStatement("BECAUSE", "is-a", "ClauseType");
-        AddStatement("has-child", "hasProperty", "isTransitive");
-        AddStatement("has-child", "hasProperty", "inheritable");
-        AddStatement("is-part-of", "hasProperty", "isTransitive");
-        AddStatement("is-part-of", "hasProperty", "inheritable");
+
+
 
         AddBrainSimConfigSectionIfNeeded();
         SetupNumbers();
@@ -88,6 +116,9 @@ public partial class UKS
         GetOrAddThing("some", "number");
         GetOrAddThing("many", "number");
         GetOrAddThing("none", "number");
+        for (int i = 9; i > 0; i--)
+            AddStatement(i.ToString(), "greaterThan", (i - 1).ToString());
+
 
 
         //demo to add PI to the structure
@@ -212,7 +243,10 @@ public partial class UKS
             {
                 Relationship r = UnConvertRelationship(p, new List<SRelationship>());
                 if (r != null)
-                    UKSList[i].RelationshipsWriteable.Add(r);
+                    if (r.reltype.Label != "is-a") //swap has-child for is-a
+                        UKSList[i].RelationshipsWriteable.Add(r);
+                    else
+                        r.source.RelationshipsWriteable.Add(r);
             }
         }
         //rebuild all the reverse linkages
@@ -260,6 +294,15 @@ public partial class UKS
         Thing target = null;
         if (p.target != -1)
             target = UKSList[p.target];
+
+        //conversion for files using has-child to is-a
+        if (relationshipType?.Label == "has-child")
+        {
+            relationshipType = Labeled("is-a");
+            (source, target) = (target, source);
+        }
+
+
         Relationship r = new()
         {
             source = source,
@@ -386,27 +429,6 @@ public partial class UKS
                     extraTypes.Add(theType);
             }
         }
-        /*
-                // Add classes so XML saving works
-                extraTypes.Add(typeof(Angle));
-                //extraTypes.Add(typeof(CornerTwoD));
-                extraTypes.Add(typeof(HSLColor));
-                //extraTypes.Add(typeof(KnownArea));
-                extraTypes.Add(typeof(Point3DPlus));
-                extraTypes.Add(typeof(List<Point3DPlus>));
-                extraTypes.Add(typeof(PointPlus));
-                //extraTypes.Add(typeof(PointTwoD));
-                //extraTypes.Add(typeof(Polar));
-                //extraTypes.Add(typeof(SegmentTwoD));
-                //extraTypes.Add(typeof(SentenceType));
-                //the following are needed to handle the new nested graphic representation
-                extraTypes.Add(typeof(System.Windows.Media.Color));
-                extraTypes.Add(typeof(System.Windows.Media.Media3D.TranslateTransform3D));
-                extraTypes.Add(typeof(System.Windows.Media.Media3D.ScaleTransform3D));
-                extraTypes.Add(typeof(System.Windows.Media.Media3D.RotateTransform3D));
-                extraTypes.Add(typeof(System.Windows.Media.Media3D.AxisAngleRotation3D));
-                extraTypes.Add(typeof(ValueTuple<string, string>));
-           */
         return extraTypes;
     }
 
@@ -487,6 +509,30 @@ public partial class UKS
         {
             if (!t.Label.ToLower().StartsWith("module"))
                 t.Label = "Module" + t.Label;
+        }
+
+        //more hacks for compatibility old file formatting
+        //this does nothing on updated file content
+        AddStatement("inheritable", "is-a", "Property");
+        Thing hasChild = Labeled("has-child");
+        if (hasChild != null)
+        {
+            hasChild.AddRelationship("is-a", "inverseOf");
+            hasChild.RemoveRelationship("isTransitive", "hasProperty");
+            hasChild.RemoveRelationship("inheritable", "hasProperty");
+        }
+        Thing isA = Labeled("is-a");
+        if (isA != null)
+        {
+            isA.AddRelationship("inheritable", "hasProperty");
+            isA.AddRelationship("isTransitive", "hasProperty");
+            isA.RemoveRelationship("has-child", "inverseOf");
+            isA.RemoveRelationship(null,"hasProperty");
+        }
+        Thing has = Labeled("has");
+        if (has != null)
+        {
+            has.AddRelationship("inheritable", "hasProperty");
         }
         return true;
     }
