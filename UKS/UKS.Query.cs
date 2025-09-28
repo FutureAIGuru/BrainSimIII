@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace UKS;
 public partial class UKS
@@ -28,7 +24,7 @@ public partial class UKS
         }
 
         var result1 = BuildSearchList(sources);
-        List<Relationship> result2 = GetAllRelationshipsInt(result1);
+        List<Relationship> result2 = GetAllRelationshipsInternal(result1);
         if (result2.Count < 200)  //the conflict-remover is really slow on large numbers
             RemoveConflictingResults(result2);
         RemoveFalseConditionals(result2);
@@ -40,7 +36,6 @@ public partial class UKS
     {
         result2 = result2.OrderByDescending(x => x.Weight).ToList();
     }
-
 
     //This is used to store temporary content during queries
     private class ThingWithQueryParams
@@ -129,7 +124,7 @@ public partial class UKS
             if (r.target == t1) retVal.Add(r);
         return retVal;
     }
-    private List<Relationship> GetAllRelationshipsInt(List<ThingWithQueryParams> thingsToExamine)
+    private List<Relationship> GetAllRelationshipsInternal(List<ThingWithQueryParams> thingsToExamine)
     {
         List<Relationship> result = new();
         for (int i = 0; i < thingsToExamine.Count; i++)
@@ -137,10 +132,7 @@ public partial class UKS
             Thing t = thingsToExamine[i].thing;
             if (t == null) continue; //safety
             int haveCount = thingsToExamine[i].haveCount;
-            List<Relationship> relationshipsToAdd = null;
-            relationshipsToAdd = new();
-            relationshipsToAdd.AddRange(t.Relationships);
-            foreach (Relationship r in relationshipsToAdd)
+            foreach (Relationship r in t.Relationships)
             {
                 if (r.reltype == Thing.IsA) continue;
                 //only add the new relatinoship to the list if it is not already in the list
@@ -153,6 +145,7 @@ public partial class UKS
                     //this HACK creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
                     Relationship r1 = new Relationship(r);
+                    r1.Weight *= thingsToExamine[i].weight;
                     Thing newCountType = GetOrAddThing((GetCount(r.reltype) * haveCount).ToString(), "number");
 
                     //hack for numeric labels
@@ -168,7 +161,11 @@ public partial class UKS
                     result.Add(r1);
                 }
                 else
-                    result.Add(r);
+                {
+                    Relationship r1 = new Relationship(r);
+                    r1.Weight *= thingsToExamine[i].weight;
+                    result.Add(r1);
+                }
             }
         }
         return result;
@@ -415,8 +412,8 @@ public partial class UKS
     {
         searchCandidates = new();
         //initialize the search queues
-        Queue<Thing> thingsToSearch = new();
-        Queue<Thing> alreadySearched = new();
+        List<Thing> thingsToSearch = new();
+        List<Thing> alreadySearched = new();
 
         //seed the search queue with the given parameters.
         foreach (Relationship r in target.Relationships)
@@ -424,12 +421,16 @@ public partial class UKS
             foreach (Relationship r1 in r.target.RelationshipsFrom)
             {
                 if (r1.source == target) continue;
-                var newItem = (r1.source, r1.Weight);
-                if (r1.reltype.HasAncestor(r.reltype) && r1.target == r.target && !thingsToSearch.Contains(r1.source))
+                var existing = thingsToSearch.FindFirst(x => x == r1.source);
+                if (r1.reltype.HasAncestor(r.reltype) && r1.target == r.target &&  existing == null)
                 {
-                    thingsToSearch.Enqueue(r1.source);
+                    thingsToSearch.Add(r1.source);
                     if (!searchCandidates.ContainsKey(r1.source))
                         searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
+                    searchCandidates[r1.source] += r1.Weight;
+                }
+                else if (existing != null)
+                {
                     searchCandidates[r1.source] += r1.Weight;
                 }
             }
@@ -437,8 +438,9 @@ public partial class UKS
         //fan out from these seeds following all "inheritable" reverse connections.
         while (thingsToSearch.Count > 0)
         {
-            var t = thingsToSearch.Dequeue();
-            alreadySearched.Enqueue(t);
+            var t = thingsToSearch[0];
+            thingsToSearch.RemoveAt(0);
+            alreadySearched.Add(t);
             foreach (Relationship r in t.RelationshipsFrom)
             {
                 if (!r.relType.HasProperty("inheritable")) continue;
@@ -493,9 +495,9 @@ public partial class UKS
             if (!searchCandidates.ContainsKey(tNew))
                 searchCandidates[tNew] = 0; //initialize a new dictionary entry if needed
             searchCandidates[tNew] += searchCandidates[tPrev];
-            if (alreadySearched.Contains(tNew)) return false;
-            if (thingsToSearch.Contains(tNew)) return false;
-            thingsToSearch.Enqueue(tNew);
+            if (alreadySearched.FindFirst(x=>x ==tNew) != null) return false;
+            if (thingsToSearch.FindFirst(x=>x ==tNew) != null) return false;
+            thingsToSearch.Add(tNew);
             return true;
         }
     }
