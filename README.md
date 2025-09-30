@@ -16,7 +16,8 @@ With the UKS, this project is leapfrogging other AI technologies which are unabl
 
 ---
 
-| [Books](https://futureaisociety.org/resources/books/) | [Documentation](./docs/documentation.md) | [FAQ](./FAQ.md) | [Installation Guide](./docs/documentation.md#softwareinstallation) | [Website](https://futureaisociety.org/) | [Youtube](https://www.youtube.com/@FutureAISociety) |
+| [Books](https://futureaisociety.org/resources/books/) | [Documentation](https://futureaiguru.github.io/BrainSimIII/
+) | [FAQ](./FAQ.md) | [Installation Guide](https://futureaiguru.github.io/BrainSimIII/SoftwareInstallation/) | [Website](https://futureaisociety.org/) | [Youtube](https://www.youtube.com/@FutureAISociety) |
 
 ---
 
