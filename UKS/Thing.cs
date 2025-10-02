@@ -319,7 +319,7 @@ public partial class Thing
     /// <param name="target">Target Thing</param>
     /// <param name="relationshipType">RelatinoshipType Thing</param>
     /// <returns>the new or existing Relationship</returns>
-    public Relationship AddRelationship(Thing target, Thing relationshipType,bool isStatement = true)
+    public Relationship AddRelationship(Thing target, Thing relationshipType,bool isStatement = true, IEnumerable<Thing>? provenance = null)
     {
         if (relationshipType == null)  //NULL relationship types could be allowed in search Thingys Parameter?
         {
@@ -331,6 +331,7 @@ public partial class Thing
         if (r != null)
         {
             //AdjustRelationship(r.T);
+            r.AddProvenance(provenance);
             return r;
         }
         r = new Relationship()
@@ -369,6 +370,7 @@ public partial class Thing
                         relationshipType.RelationshipsAsTypeWriteable.Add(r);
                 }
         }
+        r.AddProvenance(provenance);
         return r;
     }
 

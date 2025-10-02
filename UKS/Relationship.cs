@@ -133,6 +133,14 @@ public class Relationship
     /// </summary>
     public List<Relationship> clausesFrom = new();
 
+    private readonly List<Thing> provenance = new();
+    /// <summary>
+    /// Things that represent the provenance (sources) of this relationship.
+    /// </summary>
+    public IReadOnlyList<Thing> Provenance => provenance.AsReadOnly();
+
+    internal List<Thing> ProvenanceWriteable => provenance;
+
     private float weight = 1;
     public float Weight
     {
@@ -218,6 +226,7 @@ public class Relationship
         else Clauses = new(r.Clauses);
         if (r.clausesFrom == null) clausesFrom = new();
         else clausesFrom = new(r.clausesFrom);
+        provenance.AddRange(r.ProvenanceWriteable);
     }
 
     public void ClearHits()
@@ -251,6 +260,22 @@ public class Relationship
         }
 
         return this;
+    }
+
+    public void AddProvenance(Thing? provenanceSource)
+    {
+        if (provenanceSource == null) return;
+        if (!provenance.Contains(provenanceSource))
+            provenance.Add(provenanceSource);
+    }
+
+    public void AddProvenance(IEnumerable<Thing>? provenanceSources)
+    {
+        if (provenanceSources == null) return;
+        foreach (Thing source in provenanceSources)
+        {
+            AddProvenance(source);
+        }
     }
 
     public string ToString(List<Relationship> stack)
@@ -394,4 +419,6 @@ public class SRelationship
     public int count = -1;
     public bool GPTVerified = false;
     public List<SClauseType>? clauses = new();
+    public List<int>? provenance = new();
 }
+

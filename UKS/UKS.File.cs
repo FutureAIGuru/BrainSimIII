@@ -183,6 +183,22 @@ public partial class UKS
             }
         }
 
+        List<int>? provenance = null;
+        if (l.ProvenanceWriteable.Count > 0)
+        {
+            provenance = new List<int>(l.ProvenanceWriteable.Count);
+            foreach (Thing source in l.ProvenanceWriteable)
+            {
+                int index = UKSList.FindIndex(x => x == source);
+                if (index >= 0)
+                {
+                    provenance.Add(index);
+                }
+            }
+            if (provenance.Count == 0)
+                provenance = null;
+        }
+
         SRelationship sR = new SRelationship()
         {
             source = UKSList.FindIndex(x => x == l.source),
@@ -194,6 +210,7 @@ public partial class UKS
             count = l.count,
             GPTVerified = l.GPTVerified,
             clauses = clauseList,
+            provenance = provenance,
         };
         return sR;
     }
@@ -322,6 +339,16 @@ public partial class UKS
                 Clause ct = new Clause(UKSList[sc.clauseType], UnConvertRelationship(sc.r, stack));
                 if (ct.clause != null)
                     r.Clauses.Add(ct);
+            }
+        }
+        if (p.provenance != null)
+        {
+            foreach (int idx in p.provenance)
+            {
+                if (idx >= 0 && idx < UKSList.Count)
+                {
+                    r.AddProvenance(UKSList[idx]);
+                }
             }
         }
         return r;

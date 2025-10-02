@@ -19,13 +19,17 @@ public partial class UKS
     /// <param name="sTarget">string or Thing (or null)</param>
     /// <param name="isStatement">Boolean indicating if this is a true statement or part of a conditional</param>
     /// <returns>The primary relationship which was created (others may be created for given attributes</returns>
-    public Relationship AddStatement(string  sSource, string sRelationshipType, string sTarget,bool isStatement = true)
+    public Relationship AddStatement(string sSource, string sRelationshipType, string sTarget, bool isStatement = true, object? provenance = null)
     {
         Thing source = ThingFromObject(sSource);
         Thing relationshipType = ThingFromObject(sRelationshipType, "RelationshipType", source);
         Thing target = ThingFromObject(sTarget);
 
-        Relationship theRelationship = AddStatement(source, relationshipType, target,isStatement);
+        List<Thing>? provenanceList = null;
+        if (provenance is not null)
+            provenanceList = ThingListFromObject(provenance);
+
+        Relationship theRelationship = AddStatement(source, relationshipType, target, isStatement, provenanceList);
         return theRelationship;
     }
 /// <summary>
@@ -41,7 +45,7 @@ public partial class UKS
 /// <param name="isStatement">A value indicating whether the relationship is considered a statement.  The default value is <see langword="true"/>.</param>
 /// <returns>The created or existing <see cref="Relationship"/> object that represents the relationship.  Returns <see
 /// langword="null"/> if <paramref name="source"/> or <paramref name="relType"/> is <see langword="null"/>.</returns>
-    public Relationship AddStatement(Thing source, Thing relType, Thing target, bool isStatement = true)
+    public Relationship AddStatement(Thing source, Thing relType, Thing target, bool isStatement = true, IEnumerable<Thing>? provenance = null)
     {
         if (source == null || relType == null) return null;
 
@@ -55,12 +59,14 @@ public partial class UKS
         {
             WeakenConflictingRelationships(source, existing);
             existing.Fire();
+            existing.AddProvenance(provenance);
             return existing;
         }
 
         WeakenConflictingRelationships(source, r);
 
         WriteTheRelationship(r);
+        r.AddProvenance(provenance);
         if (r.relType != null && HasProperty(r.relType, "isCommutative"))
         {
             Relationship rReverse = new Relationship(r);
