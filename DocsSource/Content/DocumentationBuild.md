@@ -8,4 +8,4 @@ GitHub Action Documentation Build Config: [link]
 
 **MkDocs**
 
-A config file "/Docs/mkdocs.yml" needs to be created. Parameters for the build-process and output can be written in it. Mkdocs, when run, will basically then read the content-files from "/Docs/Content/" ('docs_dir') and give out the HTML-files into "/Docs/Site/" ('site_dir').
+A config file "/DocsSource/mkdocs.yml" needs to be created. Parameters for the build-process and output can be written in it. Mkdocs, when run, will basically then read the content-files from "/DocsSource/Content/" ('docs_dir') and give out the HTML-files into "/docs/" ('site_dir').

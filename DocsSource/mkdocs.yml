@@ -1,5 +1,5 @@
 docs_dir: Content
-site_dir: Site
+site_dir: ../Docs
 site_name: BrainSimIII Documentation
 site_url: https://futureaisociety.org/
 

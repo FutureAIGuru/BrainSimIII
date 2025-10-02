@@ -5,4 +5,4 @@
 - Cooperation
 - Open source
 
-(https://futureaisociety.org/participate/volunteer/)
+(<https://futureaisociety.org/participate/volunteer/>)
