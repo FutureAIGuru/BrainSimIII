@@ -553,7 +553,7 @@ public partial class UKS
     {
         IPluralize pluralizer = new Pluralizer();
         label = label.Trim();
-        string[] tempStringArray = label.Split(' ');
+        string[] tempStringArray = label.Split(' ',StringSplitOptions.RemoveEmptyEntries);
         if (tempStringArray.Length == 0 || tempStringArray[0].Length == 0) return null;
 
         for (int i = 0; i < tempStringArray.Length; i++)

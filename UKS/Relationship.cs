@@ -144,7 +144,7 @@ public class Relationship
         {
             weight = value;
             //if this is a commutative relationship, also set the weight on the reverse
-            if (relType?.HasProperty("IsCommutative") != null)
+            if (relType?.HasProperty("IsCommutative") == true)
             {
                 Relationship rReverse = target.Relationships.FindFirst(x => x.reltype == relType && x.target == source);
                 if (rReverse != null)
@@ -267,9 +267,8 @@ public class Relationship
         retVal = BasicRelationshipToString(retVal, sourceModifierString, typeModifierString, targetModifierString);
 
         //handle Clauses
-        //TODO prevent general circular reference stack overflow
         foreach (Clause c in Clauses)
-            allModifierString += c.clauseType?.Label + " " + c.clause.ToString(stack) + " ";
+            allModifierString += $"({c.clauseType?.Label} {c.clause.ToString(stack)}) ";
 
         if (allModifierString != "")
             retVal += " " + allModifierString;
