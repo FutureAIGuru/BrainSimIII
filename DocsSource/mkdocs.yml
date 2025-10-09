@@ -1,0 +1,33 @@
+docs_dir: Content
+site_dir: ../Docs
+site_name: BrainSimIII Documentation
+site_url: https://futureaisociety.org/
+
+# extra:
+#   header_links:
+#     - title: Website
+#       url: https://futureaisociety.org/
+#     - title: Documentation
+#       url: "" # setting this URL when available
+#     - title: API Documentation
+#       url: "https://futureaisociety.org/Documentation/html/" 
+
+extra_css:
+  - Stylesheet/extra.css
+
+markdown_extensions:
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - awesome-pages
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.top
+  palette: 
+    accent: custom
+    primary: custom #can be overwritten by "Stylesheet/extra.css", when the option extra_css is enabled.

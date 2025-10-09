@@ -27,7 +27,7 @@ namespace BrainSimulator.Modules
         /*
         Conventions [hard-coded relationships]:
 
-All Thing labels are sigularized. Case is preserved but all searches are case-insensitive.
+All Thing labels are sigularized unless they start with a capital letter. Case is preserved but all searches are case-insensitive.
 is-a = has parent of (inverse of has-child)
 is = has attribute of
 has = has a part of  (arm has elbow) (al
@@ -125,7 +125,7 @@ Follow has ONLY if called out in type
                 theUKS.DeleteThing(target1);
             }
 
-            relationships = theUKS.GetAllRelationships(sourceList, reverse);
+            relationships = theUKS.GetAllRelationships(sourceList);
 
             //unreverse the source and target
             if (reverse)
@@ -148,11 +148,11 @@ Follow has ONLY if called out in type
                 { relationships.RemoveAt(i); i--; continue; }
             }
 
-            //if (filter != "")
-            //{
-            //    List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
-            //    relationships = theUKS.FilterResults(relationships, filterThings).ToList();
-            //}
+            if (filter != "")
+            {
+                List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
+                relationships = theUKS.FilterResults(relationships, filterThings).ToList();
+            }
 
             //if (paramCount == 2)
             //{

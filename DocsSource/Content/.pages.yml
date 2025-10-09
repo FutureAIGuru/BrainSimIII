@@ -1,0 +1,8 @@
+exclude: 
+  - Img
+
+sort_type: natural
+ignore_case: true
+
+hide:
+  - index.md # Hides the index.md from the sidebar

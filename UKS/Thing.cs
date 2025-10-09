@@ -32,7 +32,8 @@ public partial class Thing
         //            throw new ArgumentNullException($"No Thing found with label: {label}");
         return t;
     }
-    public static Thing HasChild { get => ThingLabels.GetThing("has-child"); }
+//    public static Thing HasChild { get => ThingLabels.GetThing("has-child"); }
+    public static Thing IsA { get => ThingLabels.GetThing("is-a"); }
 
     private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
     private List<Relationship> relationshipsFrom = new List<Relationship>(); //synapses from
@@ -126,7 +127,7 @@ public partial class Thing
         IList<Thing> retVal = new List<Thing>();
         if (!useRelationshipFrom)
         {
-            lock (relationshipsFrom)
+            lock (relationships)
             {
                 foreach (Relationship r in relationships)
                     if (r.relType != null && r.relType == relType && r.source == this)
@@ -150,17 +151,18 @@ public partial class Thing
     /// <summary>
     /// "Safe" list of direct ancestors
     /// </summary>
-    public IList<Thing> Parents { get => RelationshipsOfType(HasChild, true); }
+    public IList<Thing> Parents { get => RelationshipsOfType(IsA, false); }
 
     /// <summary>
     /// "Safe" list of direct descendants
     /// </summary>
-    public IList<Thing> Children { get => RelationshipsOfType(HasChild, false); }
+    public IList<Thing> Children { get => RelationshipsOfType(IsA, true); }
     public IList<Thing> ChildrenWithSubclasses
     {
         get
         {
-            List<Thing> retVal = (List<Thing>)RelationshipsOfType(HasChild, false);
+            List<Thing> retVal = (List<Thing>)RelationshipsOfType(IsA, true);
+
             for (int i = 0; i < retVal.Count; i++)
             {
                 Thing t = retVal[i];
@@ -196,7 +198,7 @@ public partial class Thing
     //////////////////////////////////////////////////////////////
     public IList<Thing> AncestorList()
     {
-        return FollowTransitiveRelationships(HasChild, true);
+        return FollowTransitiveRelationships(IsA, true);
     }
 
     /// <summary>
@@ -232,7 +234,7 @@ public partial class Thing
     /// <returns></returns>
     public bool HasAncestor(Thing t)
     {
-        var x = FollowTransitiveRelationships(HasChild, true, t);
+        var x = FollowTransitiveRelationships(IsA, true, t);
         return x.Count != 0;
     }
 
@@ -251,7 +253,7 @@ public partial class Thing
     /// <returns></returns>
     public IList<Thing> DescendentsList()
     {
-        return FollowTransitiveRelationships(HasChild, false);
+        return FollowTransitiveRelationships(IsA, false);
     }
 
     /// <summary>
@@ -280,10 +282,12 @@ public partial class Thing
         for (int i = 0; i < retVal.Count; i++)
         {
             Thing t = retVal[i];
-            IList<Relationship> relationshipsToFollow = followUpwards ? t.RelationshipsFrom : t.Relationships;
+            //IList<Relationship> relationshipsToFollow = followUpwards ? t.RelationshipsFrom : t.Relationships;
+            IList<Relationship> relationshipsToFollow = followUpwards ? t.Relationships : t.RelationshipsFrom;
             foreach (Relationship r in relationshipsToFollow)
             {
-                Thing thingToAdd = followUpwards ? r.source : r.target;
+                //Thing thingToAdd = followUpwards ? r.source : r.target;
+                Thing thingToAdd = followUpwards ? r.target : r.source;
                 if (r.reltype == relType)
                 {
                     if (!retVal.Contains(thingToAdd))
@@ -504,7 +508,8 @@ public partial class Thing
         if (newParent == null) return;
         if (!Parents.Contains(newParent))
         {
-            newParent.AddRelationship(this, HasChild);
+            //newParent.AddRelationship(this, IsA);
+            AddRelationship(newParent, IsA);
         }
     }
     /// <summary>
@@ -513,18 +518,18 @@ public partial class Thing
     /// <param name="t">If the Thing is not a parent, the function does nothing</param>
     public void RemoveParent(Thing t)
     {
-        Relationship r = new() { source = t, reltype = HasChild, target = this };
+        Relationship r = new() { source = this, reltype = IsA, target = t };
         t.RemoveRelationship(r);
     }
 
     public Relationship AddChild(Thing t)
     {
-        return AddRelationship(t, HasChild);
+        return t.AddRelationship(this, IsA);
     }
 
     public void RemoveChild(Thing t)
     {
-        Relationship r = new() { source = this, reltype = HasChild, target = t };
+        Relationship r = new() { source = t, reltype = IsA, target = this };
         RemoveRelationship(r);
     }
 

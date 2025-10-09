@@ -33,8 +33,6 @@
     <Compile Remove="Modules\Module2DVision.cs" />
     <Compile Remove="Modules\ModuleAttentionManager.cs" />
     <Compile Remove="Modules\ModuleFrequencyConfidence2.cs" />
-    <Compile Remove="Modules\ModuleGPTInfo.cs" />
-    <Compile Remove="Modules\ModuleGPTInfoDlg.xaml.cs" />
     <Compile Remove="Modules\ModuleMove.cs" />
     <Compile Remove="Modules\ModuleObject.cs" />
     <Compile Remove="Modules\ModulePodArmExtension.cs" />
@@ -196,7 +194,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Remove="Modules\Module2DSimDlg.xaml" />
-    <Page Remove="Modules\ModuleGPTInfoDlg.xaml" />
     <Page Remove="Modules\ModuleObjectDlg.xaml" />
     <Page Remove="Modules\ModulePremiseDlg.xaml" />
     <Page Remove="Tools\ModuleDlg.xaml" />
@@ -451,4 +448,5 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\TextFileIcon.png" />
   </ItemGroup>
+
 </Project>

@@ -129,23 +129,22 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         if (totalItemCount > 500) return;
 
         List<Relationship> theChildren = new();
-        foreach (Relationship r in t.Relationships)
+        foreach (Relationship r in t.RelationshipsFrom)
         {
-            if (r.relType?.Label.StartsWith("has-child") == true && r.target != null)
+            if (r.relType?.Label.StartsWith("is-a") == true && r.target != null)
             {
                 theChildren.Add(r);
             }
         }
-        theChildren = theChildren.OrderBy(x => x.target.Label).ToList();
+        theChildren = theChildren.OrderBy(x => x.source.Label).ToList();
 
         ModuleUKS UKS = (ModuleUKS)ParentModule;
 
         foreach (Relationship r in theChildren)
         {
             if (totalItemCount > 500) return;
-            Thing child = r.target;
-            if (child.Label == "Alice")
-            { }
+            Thing child = r.source;
+            //int descCount = child.GetDescendentsCount(); //this makes the system too slow
             int descCount = 10;
             string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
             string header = child.ToString();
@@ -170,7 +169,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
             if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
                 tviChild.IsExpanded = true;
-            if (r.target.AncestorList().Contains(ThingLabels.GetThing(expandAll)) &&
+            if (r.source.AncestorList().Contains(expandAll) &&
                 (child.Label == "" || !parentLabel.Contains("|" + child.Label)))
                 tviChild.IsExpanded = true;
 
@@ -195,7 +194,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     CountNonChildRelationships(child.RelationshipsNoCount) > 0
                     || CountNonChildRelationships(child.RelationshipsFrom) > 0)
                 {
-                    // don't load those that aren't expanded, put in a dummy instead so there is and expander-handle
+                    // don't load those that aren't expanded, put in a dummy instead so there is an expander-handle
                     TreeViewItem emptyChild = new() { Header = "" };
                     tviChild.Items.Add(emptyChild);
                     tviChild.Expanded += EmptyChild_Expanded;
@@ -230,7 +229,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => x.relType?.Label).ToList();
         foreach (Relationship r in sortedReferences)
         {
-            if (r.relType?.Label == "has-child") continue;
+            if (r.relType?.Label == "is-a") continue;
             if (!r.isStatement && showConditionals.IsChecked != true) continue; //hide conditionals
             //special case for values 
             if (r.target != null && r.target.HasAncestorLabeled("Value"))
@@ -620,7 +619,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     int CountNonChildRelationships(IList<Relationship> list)
     {
-        return list.Count - list.Count(x => x.relType?.Label == "has-child");
+        return list.Count - list.Count(x => x.relType?.Label == "is-a");
     }
 
 
@@ -779,23 +778,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void InitializeButton_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKS parent = (ModuleUKS)base.ParentModule;
-
-        //this hack is needed to preserve the info relating to module layout
-        for (int i = 0; i < parent.theUKS.UKSList.Count; i++)
-        {
-            Thing t = parent.theUKS.UKSList[i];
-            if (t.HasAncestorLabeled("BrainSim"))
-                continue;
-            if (t.Label == "has-child") continue;
-            if (t.Label == "Thing") continue;
-            if (t.Label == "RelationshipType") continue;
-            if (t.Label == "hasAttribute") continue;
-            if (t != null)
-            {
-                parent.theUKS.DeleteThing(t);
-                i--;
-            }
-        }
 
         parent.theUKS.CreateInitialStructure();
         parent.Initialize();

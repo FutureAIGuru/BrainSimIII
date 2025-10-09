@@ -1,7 +1,7 @@
 # BrainSim3
 Adding Common Sense to Artificial Intelligence.
 
-Brain Simulator III is a knowledge system capable of representing and relating information needed to implement Common Sense. Centered on the Universal Knowledge Store (UKS), the system creates a web of nodes and edges and has a growing library if modular software agents which can preform any desired function.
+Brain Simulator III is a knowledge system capable of representing and relating information needed to implement Common Sense. Centered on the Universal Knowledge Store (UKS), the system creates a web of nodes and edges and has a growing library of modular software agents which can perform any desired function.
 
 Agents are independent modules and can be written in C# or Python. The Brain Simulator system runs on Windows or MAC. A growing library of modules is being adapted from previous research and development.
 
@@ -13,6 +13,13 @@ With the UKS, this project is leapfrogging other AI technologies which are unabl
 •	Store action information so it learns which actions lead to positive outcomes for a current situation.  
 •	Update content in real time to handle real-world robotic applications. 
 •	Incorporate agent software Modules  to perform any desired functionality. 
+
+---
+
+| [Books](https://futureaisociety.org/resources/books/) | [Documentation](https://futureaiguru.github.io/BrainSimIII/
+) | [FAQ](./FAQ.md) | [Installation Guide](https://futureaiguru.github.io/BrainSimIII/SoftwareInstallation/) | [Website](https://futureaisociety.org/) | [Youtube](https://www.youtube.com/@FutureAISociety) |
+
+---
 
 # About the UKS
 The UKS includes a graph of nodes connected by edges. Within the UKS, nodes are called “Things”. Things can be related by edges called “Relationships” which consist of a source Thing, a target Thing, and a relationship Type (which is also a Thing).  For example: Fido is-a dog would be represented by a single is-a relationship relating Things representing “Fido” and “dog” with the “is-a” Relationship type. 
