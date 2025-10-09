@@ -6,14 +6,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UKS;
-using static BrainSimulator.Modules.ModuleVision;
 using static System.Math;
 
 namespace BrainSimulator.Modules;
@@ -165,8 +162,8 @@ public partial class ModuleVision : ModuleBase
     float GetLuminanceAtPoint(PointPlus pt)
     {
         if (pt.X < 0 || pt.Y < 0) return 0;
-        if (pt.X > imageArray.GetLength(0) - 1) return 0;
-        if (pt.Y > imageArray.GetLength(1) - 1) return 0;
+        if ((int)pt.X > imageArray.GetLength(0) - 2) return 0;
+        if ((int)pt.Y > imageArray.GetLength(1) - 2) return 0;
 
         int x0 = (int)Math.Floor(pt.X);
         int y0 = (int)Math.Floor(pt.Y);
@@ -506,30 +503,7 @@ public partial class ModuleVision : ModuleBase
                     //make sure we're still on the white part of the image
                     if (GetLuminanceAtPoint(p1) < 0.85) break;
 
-                    //List<PointPlus> nearby = GetNearbyPoints(p1, 2f, CenterLinePts);
-                    ////find the point which is close to the extended segment but furthest from the other end
-                    ////and use that as the endpoint
-                    //float bestDist = (betterP2 - betterP1).R;
-                    //PointPlus best = null;
-                    //for (int i = 0; i < nearby.Count; i++)
-                    //{
-                    //    if (Utils.DistancePointToLine(nearby[i], betterP1, betterP2) > 1f)
-                    //    {
-                    //        nearby.RemoveAt(i);
-                    //        i--;
-                    //        continue;
-                    //    }
-                    //    if ((betterP2 - nearby[i]).R > bestDist)
-                    //    {
-                    //        bestDist = (betterP2 - nearby[i]).R;
-                    //        best = nearby[i];
-                    //    }
-                    //}
-                    //if (best != null)
-                    //{
                     betterP1 = p1;
-                    //    count = 0;
-                    //}
 
                 } while (count++ < maxExtend);
             }
@@ -543,30 +517,7 @@ public partial class ModuleVision : ModuleBase
                     p2 -= step;
                     //make sure we're still on the white part of the image
                     if (GetLuminanceAtPoint(p2) < 0.85) break;
-                    //List<PointPlus> nearby = GetNearbyPoints(p2, 2f, CenterLinePts);
-                    ////find the point which is close to the extended segment but furthest from the other end
-                    ////and use that as the endpoint
-                    //float bestDist = (betterP2 - betterP1).R;
-                    //PointPlus best = null;
-                    //for (int i = 0; i < nearby.Count; i++)
-                    //{
-                    //    if (Utils.DistancePointToLine(nearby[i], betterP1, betterP2) > 1f)
-                    //    {
-                    //        nearby.RemoveAt(i);
-                    //        i--;
-                    //        continue;
-                    //    }
-                    //    if ((betterP1 - nearby[i]).R > bestDist)
-                    //    {
-                    //        bestDist = (betterP1 - nearby[i]).R;
-                    //        best = nearby[i];
-                    //    }
-                    //}
-                    //if (best != null)
-                    //{
                     betterP2 = p2;
-                    //    count = 0;
-                    //}
                 } while (count++ < maxExtend);
             }
             segment.P1 = betterP1;
