@@ -49,9 +49,10 @@ public partial class UKS
         GetOrAddThing("hasProperty", "RelationshipType");
         GetOrAddThing("is", "RelationshipType");
 
-        //AddStatement("is-a", "inverseOf", "has-child");
         AddStatement("has-child", "inverseOf", "is-a");
-        AddStatement("has-attribute", "is-a", "RelationshipType");
+        AddStatement("hasAttribute", "is-a", "RelationshipType");
+        AddStatement("can", "is-a", "RelationshipType");
+        AddStatement("mostRecent", "is-a", "RelationshipType");
         AddStatement("contains", "is-a", "RelationshipType");
         AddStatement("is-part-of", "is-a", "RelationshipType");
         AddStatement("contains", "inverseOf", "is-part-of");
@@ -67,6 +68,22 @@ public partial class UKS
         AddStatement("isCommutative", "is-a", "Property");
         AddStatement("allowMultiple", "is-a", "Property");
         AddStatement("inheritable", "is-a", "Property");
+
+
+        //colors
+        AddStatement("color", "is-a", "object");
+        AddStatement("color", "hasProperty", "isExclusive");
+        AddStatement("red", "is-a", "color");
+        AddStatement("orange", "is-a", "color");
+        AddStatement("yellow", "is-a", "color");
+        AddStatement("green", "is-a", "color");
+        AddStatement("blue", "is-a", "color");
+        AddStatement("purple", "is-a", "color");
+        AddStatement("brown", "is-a", "color");
+        AddStatement("pink", "is-a", "color");
+        AddStatement("black", "is-a", "color");
+        AddStatement("white", "is-a", "color");
+        AddStatement("gray", "is-a", "color");
 
         //underlying properties
         AddStatement("is-a", "hasProperty", "isTransitive");

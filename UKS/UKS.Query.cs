@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 
 namespace UKS;
 public partial class UKS
@@ -408,12 +409,14 @@ public partial class UKS
     /// <param name="root">All searching is done within the descendents of this Thing</param>
     /// <param name="confidence">value representing the quality of the match. </param>
     /// <returns></returns>
-    public Thing SearchForClosestMatch(Thing target, Thing root, ref float confidence)
+    public List<(Thing t, float conf)> SearchForClosestMatch(Thing target, Thing root)
     {
-        searchCandidates = new();
+        List<(Thing t, float conf)> retVal = new();
+        if (target.Relationships.Count == 0) return retVal;
         //initialize the search queues
         List<Thing> thingsToSearch = new();
         List<Thing> alreadySearched = new();
+        searchCandidates = new();
 
         //seed the search queue with the given parameters.
         foreach (Relationship r in target.Relationships)
@@ -422,16 +425,16 @@ public partial class UKS
             {
                 if (r1.source == target) continue;
                 var existing = thingsToSearch.FindFirst(x => x == r1.source);
-                if (r1.reltype.HasAncestor(r.reltype) && r1.target == r.target &&  existing == null)
+                if (r1.reltype.HasAncestor(r.reltype) && r1.target == r.target && existing == null)
                 {
                     thingsToSearch.Add(r1.source);
                     if (!searchCandidates.ContainsKey(r1.source))
                         searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
-                    searchCandidates[r1.source] += r1.Weight;
+                    searchCandidates[r1.source] += r1.Weight * r.Weight;
                 }
                 else if (existing != null)
                 {
-                    searchCandidates[r1.source] += r1.Weight;
+                    searchCandidates[r1.source] += r1.Weight * r.Weight;
                 }
             }
         }
@@ -444,7 +447,7 @@ public partial class UKS
             foreach (Relationship r in t.RelationshipsFrom)
             {
                 if (!r.relType.HasProperty("inheritable")) continue;
-                if (ThingsHaveConflictingRelationship(r.source, target)) continue;
+                if (r.source == target) continue;
                 AddToQueues(t, r.source);
                 //TODO fix this to handle isSimilarTo  (and transitive...?)
                 //var similarThings = GetListOfSimilarThings(r.source);
@@ -452,12 +455,15 @@ public partial class UKS
                 //    AddToQueues(t, t1);
             }
         }
-             
-        Thing bestThing = null;
-        confidence = -1;
 
+        foreach (var key in searchCandidates.ToList())
+        {
+            if (!ThingsHaveConflictingRelationship(key.Key, target)) continue;
+            //searchCandidates.Remove(key.Key);
+            searchCandidates[key.Key] = searchCandidates[key.Key] - .5f;
+        }
         if (searchCandidates.Count == 0)
-            return null;
+            return retVal;
 
         // delete items which have ancestor in list too
         for (int i = 0; i < searchCandidates.Keys.Count; i++)
@@ -470,43 +476,72 @@ public partial class UKS
             }
         }
 
-        //normalize the confidences
-        float max = searchCandidates.Max(x => x.Value);
-        foreach (var v in searchCandidates)
-        {
-            searchCandidates[v.Key] /= max;
-        }
-        //find the best value
-        foreach (var key in searchCandidates)
-            if (key.Value > confidence)
-            {
-                confidence = key.Value;
-                bestThing = key.Key;
-            }
+        ////normalize the confidences
+        //float max = searchCandidates.Max(x => x.Value);
+        //if (max < target.Relationships.Count) max = target.Relationships.Count;
+        //foreach (var v in searchCandidates)
+        //{
+        //    searchCandidates[v.Key] /= max;
+        //}
 
-        //remove the top item from the dictionary... so GetNextClosestMatch will work
-        if (bestThing != null)
-            searchCandidates.Remove(bestThing);
-        return bestThing;
+        //create the output list
+        var ordered = searchCandidates.OrderByDescending(kv => kv.Value);
+        foreach (var kv in ordered)
+            retVal.Add((kv.Key, kv.Value));
+
+        return retVal;
 
         bool AddToQueues(Thing tPrev, Thing tNew)
         {
             if (!tNew.HasAncestor(root)) return false;
             if (!searchCandidates.ContainsKey(tNew))
                 searchCandidates[tNew] = 0; //initialize a new dictionary entry if needed
-            searchCandidates[tNew] += searchCandidates[tPrev];
-            if (alreadySearched.FindFirst(x=>x ==tNew) != null) return false;
-            if (thingsToSearch.FindFirst(x=>x ==tNew) != null) return false;
+            searchCandidates[tNew] += searchCandidates[tPrev] * GetRelationshipWeight(tNew, tPrev);
+            if (alreadySearched.FindFirst(x => x == tNew) != null) return false;
+            if (thingsToSearch.FindFirst(x => x == tNew) != null) return false;
             thingsToSearch.Add(tNew);
             return true;
         }
     }
+    public float GetRelationshipWeight(Thing t1, Thing t2)
+    {
+        foreach (var r in t1.Relationships)
+            if (r.target == t2) return r.Weight;
+        foreach (var r in t1.RelationshipsFrom)
+            if (r.target == t2) return r.Weight;
+        return 0;
+    }
+    public void SetRelationshipWeight(Thing t1, Thing t2, float newWeight)
+    {
+        foreach (var r in t1.Relationships)
+            if (r.target == t2) r.Weight = newWeight;
+        foreach (var r in t1.RelationshipsFrom)
+            if (r.target == t2) r.Weight = newWeight;
+        foreach (var r in t2.Relationships)
+            if (r.target == t1) r.Weight = newWeight;
+        foreach (var r in t2.RelationshipsFrom)
+            if (r.target == t1) r.Weight = newWeight;
+    }
 
-    private bool ThingsHaveConflictingRelationship(Thing source, Thing target)
+    public bool ThingsHaveConflictingRelationship(Thing source, Thing target)
     {
         foreach (Relationship r1 in source.Relationships)
             foreach (Relationship r2 in target.Relationships)
-                if (RelationshipsAreExclusive(r1, r2)) 
+                if (RelationshipsAreExclusive(r1, r2))
+                    return true;
+        return false;
+    }
+    private bool RelationshipsAreSimilar(Relationship r1, Relationship r2)
+    {
+        if (r1.reltype != r2.reltype) return false;
+        if (FindCommonParents(r1.target, r2.target).Count == 0) return false;
+        return true;
+    }
+    public bool ThingsHaveSimilarRelationship(Thing source, Thing target)
+    {
+        foreach (Relationship r1 in source.Relationships)
+            foreach (Relationship r2 in target.Relationships)
+                if (RelationshipsAreSimilar(r1, r2))
                     return true;
         return false;
     }
