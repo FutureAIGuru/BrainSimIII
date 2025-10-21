@@ -484,17 +484,14 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
                 if (newParent == null)
                     newParent = UKSQuery.theUKS.GetOrAddThing("newParent", tExisting.Parents[0]);
                 newParent.AddRelationship(key.target, key.relType);
-                //Thread.Sleep(500);
                 foreach (Relationship r in key.relationships)
                 {
                     Thing tChild = (Thing)r.source;
-                    //tChild.RemoveRelationship(key.target, key.relType);
                     Relationship rp = tChild.AddParent(newParent);
                     rp.Weight = .9f;
                     if (tChild.Parents[0] != newParent)
                         tChild.RemoveParent(tChild.Parents[0]);
                     RemoveRedundantInheritedAttributes(tChild);  //for animation...do one at a time
-                    //Thread.Sleep(500);
                 }
             }
         }
