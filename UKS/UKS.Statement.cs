@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http.Headers;
+using System.Xml;
 
 namespace UKS;
 
@@ -114,40 +115,46 @@ public partial class UKS
         return r;
     }
 
-    private void WeakenConflictingRelationships(Thing newSource, Relationship existingRelationship)
+    private void WeakenConflictingRelationships(Thing newSource, Relationship newRelationship)
     {
         //does this new relationship conflict with an existing relationship)?
         for (int i = 0; i < newSource?.Relationships.Count; i++)
         {
-            Relationship sourceRel = newSource.Relationships[i];
-            if (sourceRel == existingRelationship)
+            Relationship existingRelationship = newSource.Relationships[i];
+            if (existingRelationship == newRelationship)
             {
                 //strengthen this relationship
-                existingRelationship.Weight += (1 - existingRelationship.Weight) / 2.0f;
-                existingRelationship.Fire();
+                newRelationship.Weight += (1 - newRelationship.Weight) / 2.0f;
+                newRelationship.Fire();
             }
-            else if (RelationshipsAreExclusive(existingRelationship, sourceRel))
+            else if (RelationshipsAreExclusive(newRelationship, existingRelationship))
             {
                 //special cases for "not" so we delete rather than weakening
-                if (existingRelationship.reltype.Children.Contains(sourceRel.relType) && HasAttribute(sourceRel.relType, "not"))
+                if (newRelationship.reltype.Children.Contains(existingRelationship.relType) && HasAttribute(existingRelationship.relType, "not"))
                 {
-                    newSource.RemoveRelationship(sourceRel);
-                    i--;
+                    existingRelationship.isStatement = false;
+                    Thing after = GetOrAddThing("AFTER", "ClauseType");
+                    newRelationship.AddClause(after, existingRelationship);
+                    //                    newSource.RemoveRelationship(existingRelationship);
+                    //                    i--;
                 }
-                if (sourceRel.reltype.Children.Contains(existingRelationship.relType) && HasAttribute(existingRelationship.relType, "not"))
+                if (existingRelationship.reltype.Children.Contains(newRelationship.relType) && HasAttribute(newRelationship.relType, "not"))
                 {
-                    newSource.RemoveRelationship(sourceRel);
-                    i--;
+                    existingRelationship.isStatement = false;
+                    Thing after = GetOrAddThing("AFTER", "ClauseType");
+                    newRelationship.AddClause(after, existingRelationship);
+//                    newSource.RemoveRelationship(existingRelationship);
+//                    i--;
                 }
                 else
                 {
-                    if (existingRelationship.Weight == 1 && sourceRel.Weight == 1)
-                        sourceRel.Weight = .5f;
+                    if (newRelationship.Weight == 1 && existingRelationship.Weight == 1)
+                        existingRelationship.Weight = .5f;
                     else
-                        sourceRel.Weight = Math.Clamp(sourceRel.Weight - .2f, -1, 1);
-                    if (sourceRel.Weight <= 0)
+                        existingRelationship.Weight = Math.Clamp(existingRelationship.Weight - .2f, -1, 1);
+                    if (existingRelationship.Weight <= 0)
                     {
-                        newSource.RemoveRelationship(sourceRel);
+                        newSource.RemoveRelationship(existingRelationship);
                         i--;
                     }
                 }

@@ -115,12 +115,12 @@ Follow has ONLY if called out in type
                 Thing target1 = new Thing() { Label = "searchPattern" };
                 foreach (Thing t in sourceList)
                     target1.AddRelationship(t, (relTypeList.Count > 0) ? relTypeList[0] : null);
-                Thing result = theUKS.SearchForClosestMatch(target1, "Thing", ref confidence);
-                if (result != null)
+                var result = theUKS.SearchForClosestMatch(target1, "Thing");
+                if (result.Count > 0)
                 {
-                    float confidence1 = theUKS.HasSequence(target1, result, out int offset);
+                    float confidence1 = theUKS.HasSequence(target1, result[0].t, out int offset);
                     if (confidence1 > 0.0f)
-                        thingResult.Add(result);
+                        thingResult.Add(result[0].t);
                 }
                 theUKS.DeleteThing(target1);
             }

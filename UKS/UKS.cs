@@ -25,6 +25,8 @@ public partial class UKS
     //TimeToLive processing for relationships
     static public List<Relationship> transientRelationships = new List<Relationship>();
     static Timer stateTimer;
+
+
     /// <summary>
     /// Creates a new reference to the UKS and initializes it if it is the first reference. 
     /// </summary>
@@ -208,7 +210,7 @@ public partial class UKS
         //  several other cases
 
         if (r1.target != r2.target && (r1.target == null || r2.target == null)) return false;
-        //if (r1.target == r2.target && r1.source != r2.source) return false;
+        if (r1.target == r2.target && r1.relType == r2.relType) return false;
 
         if (!r1.isStatement) return false;
         if (!r2.isStatement) return false;
@@ -556,7 +558,7 @@ public partial class UKS
     {
         IPluralize pluralizer = new Pluralizer();
         label = label.Trim();
-        string[] tempStringArray = label.Split(' ');
+        string[] tempStringArray = label.Split(' ',StringSplitOptions.RemoveEmptyEntries);
         if (tempStringArray.Length == 0 || tempStringArray[0].Length == 0) return null;
 
         for (int i = 0; i < tempStringArray.Length; i++)
