@@ -162,6 +162,10 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
             //change color of things which just fired or are about to expire
             tviChild.SetValue(ThingObjectProperty, child);
+            Thing mostRecent = UKS.theUKS.Labeled("mostRecent");
+            mostRecent = mostRecent?.Relationships.FindFirst(x=>x.relType.Label == "is")?.target;
+            if (child == mostRecent)
+                tviChild.Background = new SolidColorBrush(Colors.Pink);
             if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
                 tviChild.Background = new SolidColorBrush(Colors.LightGreen);
             if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
@@ -432,7 +436,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             {
                 t.Label = tb.Text;
                 //clear any time-to-live on this new image
-                t.RelationshipsFrom.FindFirst(x => x.reltype.Label == "has-child").TimeToLive = TimeSpan.MaxValue;
+                t.RelationshipsFrom.FindFirst(x => x.reltype.Label == "is-a")?.TimeToLive = TimeSpan.MaxValue;
                 cm.IsOpen = false;
             }
             if (e.Key == Key.Escape)
@@ -785,8 +789,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         CollapseAll();
         expandAll = parent.GetSavedDlgAttribute("ExpandAll");
         if (expandAll == null) expandAll = "";
-        string root = parent.GetSavedDlgAttribute("root");
-        if (string.IsNullOrEmpty(root)) root = "Thing";
+        string root = parent.GetSavedDlgAttribute("Root");
+        if (string.IsNullOrEmpty(root)) 
+            root = "Thing";
         textBoxRoot.Text = root;
         Refresh();
     }

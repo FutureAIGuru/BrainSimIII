@@ -33,9 +33,27 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
     // BtnAddRelationship_Click is called when the AddRelationship button is clicked
     private void BtnAddRelationship_Click(object sender, RoutedEventArgs e)
     {
+        ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
         string newThing = sourceText.Text;
         string targetThing = targetText.Text;
         string relationType = relationshipText.Text;
+
+        //Special case for [This,is-a,dog]
+        if (newThing.ToLower() == "this")
+        {
+            if (relationType.ToLower().Contains("called"))
+            {
+                Thing mostRecent = UKSStatement.theUKS.Labeled("mostRecent");
+                if (mostRecent == null)
+                {
+                    SetStatus("'This' is not defined at this time");
+                    return;
+                }
+                Thing mostRecentTarget = mostRecent.Relationships.FindFirst(x => x.relType.Label == "is").target;
+                mostRecentTarget.Label = targetThing;
+            }
+            return;
+        }
 
         if (!CheckAddRelationshipFieldsFilled()) return;
 
@@ -52,8 +70,6 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         }
         float confidence = (float)confidenceSlider.Value;
 
-
-        ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
         Relationship r1 = UKSStatement.AddRelationship(newThing, targetThing, relationType);
         if (r1 != null && setConfCB.IsChecked == true)
         {
@@ -67,7 +83,7 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
     }
 
     // Check for thing existence and set background color of the textbox and the error message accordingly.
-    private  bool CheckThingExistence(object sender)
+    private bool CheckThingExistence(object sender)
     {
         if (sender is TextBox tb)
         {

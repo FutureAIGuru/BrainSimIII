@@ -118,6 +118,7 @@ public partial class Thing
         set
         {
             if (value == label) return; //label is unchanged
+            ThingLabels.RemoveThingLabel(label);
             label = ThingLabels.AddThingLabel(value, this);
         }
     }
@@ -372,12 +373,26 @@ public partial class Thing
         return r;
     }
 
+    public void RemoveRelationships(Thing relationshipType)
+    {
+        for (int i = 0; i < relationships.Count; i++)
+        {
+            Relationship r = relationships[i];
+            if (r.source == this && r.reltype == relationshipType)
+            {
+                RemoveRelationship(r);
+                i--;
+            }
+        }
+    }
+
     //TODO reverse the parameters so it's type,target
     private Relationship HasRelationship(Thing target, Thing relationshipType, bool isStatement = true)
     {
         foreach (Relationship r in relationships)
         {
             if (r.source == this && r.target == target && r.reltype == relationshipType && r.isStatement == isStatement)
+
                 return r;
         }
         return null;
@@ -503,14 +518,15 @@ public partial class Thing
     /// Addsa a parent to a Thing
     /// </summary>
     /// <param name="newParent"></param>
-    public void AddParent(Thing newParent)
+    public Relationship AddParent(Thing newParent)
     {
-        if (newParent == null) return;
+        if (newParent == null) return null;
         if (!Parents.Contains(newParent))
         {
             //newParent.AddRelationship(this, IsA);
-            AddRelationship(newParent, IsA);
+            return AddRelationship(newParent, IsA);
         }
+        return Relationships.FindFirst(x => x.target == newParent && x.relType == IsA);
     }
     /// <summary>
     /// Remove a parent from a Thing
