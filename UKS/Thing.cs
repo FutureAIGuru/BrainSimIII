@@ -320,18 +320,23 @@ public partial class Thing
     /// <param name="target">Target Thing</param>
     /// <param name="relationshipType">RelatinoshipType Thing</param>
     /// <returns>the new or existing Relationship</returns>
-    public Relationship AddRelationship(Thing target, Thing relationshipType,bool isStatement = true)
+    public Relationship AddRelationship(Thing target, Thing relationshipType,bool isStatement = true, float weight=-10)
     {
         if (relationshipType == null)  //NULL relationship types could be allowed in search Thingys Parameter?
         {
             return null;
         }
 
+        float newWeight = 1;
+        if (weight != -10)
+            newWeight = weight;
+
         //does the relationship already exist?
         Relationship r = HasRelationship(target, relationshipType,isStatement);
         if (r != null)
         {
             //AdjustRelationship(r.T);
+            r.Weight = newWeight;
             return r;
         }
         r = new Relationship()
@@ -339,7 +344,8 @@ public partial class Thing
             relType = relationshipType,
             source = this,
             target = target,
-            isStatement = isStatement
+            isStatement = isStatement,
+            Weight = newWeight
         };
         if (target != null && relationshipType != null)
         {

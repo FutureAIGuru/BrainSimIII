@@ -64,9 +64,11 @@ public class ModuleShape : ModuleBase
             float bestValue = 0;
             //currehtShape has a set of attributes. We search the descendents of StoredShape for the
             // entry with the best match.
-            Thing foundShape = theUKS.SearchForClosestMatch(shape, storedShapes, ref bestValue);
-            //if (foundShape != null)
+            var foundShapes = theUKS.SearchForClosestMatch(shape, storedShapes);
+
+            if (foundShapes.Count > 0)
             {
+                Thing foundShape = foundShapes[0].t;
                 Thing nextBest = foundShape;
                 float bestSeqsScore = -1;
                 float angleOffset = 0; //degrees

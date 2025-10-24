@@ -1,0 +1,29 @@
+﻿<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleVision2Dlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="Vision" Height="500" Width="530" Background="Gray" ShowInTaskbar="False" 
+                     SizeChanged="ModuleBaseDlg_SizeChanged" PreviewKeyDown="ModuleBaseDlg_PreviewKeyDown"
+                     MouseWheel="ModuleBaseDlg_MouseWheel" MouseMove="ModuleBaseDlg_MouseMove" >
+    <Grid Name="theGrid" Margin="0,0,0,0" >
+        <TextBox  x:Name="textBoxPath"               TabIndex="7"   FontSize="16"   Margin="78,320,120,131"  VerticalAlignment="Bottom" />
+        <Button x:Name="BtnBrowseFile"   IsDefault="True" Content="Select Image File" Click="Button_Browse_Click" FontSize="16" Margin="78,0,0,82" HorizontalAlignment="Left" Width="159" VerticalAlignment="Bottom"/>
+        <Label Content="Path"      HorizontalAlignment="Left"   Margin="10,320,0,131"   FontSize="16"  Width="68" VerticalAlignment="Bottom"/>
+        <Canvas x:Name="theCanvas" ClipToBounds="True" Margin="27,17,10,267" />
+        <Label x:Name="labelProperties" Content="Image" HorizontalAlignment="Left" Margin="383,0,0,160" FontSize="16" Width="137"  VerticalAlignment="Bottom" Height="100"/>
+        <CheckBox x:Name="cbShowPixels" Content="Pixel Array" HorizontalAlignment="Left" Margin="74,230,0,234" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="cbShowBoundaries" Content="Boundaries" HorizontalAlignment="Left" Margin="74,250,0,214" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom" />
+        <CheckBox x:Name="cbShowSrokes" Content="Strokes" HorizontalAlignment="Left" Margin="180,250,0,214" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom" />
+        <CheckBox x:Name="cbShowCenterPts" Content="CenterPts" HorizontalAlignment="Left" Margin="180,0,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom" />
+        <CheckBox x:Name="cbShowSegments" Content="Segments" HorizontalAlignment="Left" Margin="74,270,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="cbShowCorners" Content="Corners" HorizontalAlignment="Left" Margin="74,290,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <Button Content="Refresh" HorizontalAlignment="Left" Margin="254,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
+        <CheckBox Content="Horiz" IsChecked="true" HorizontalAlignment="Left" Margin="297,0,0,234" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <CheckBox Content="Vert" IsChecked="true" HorizontalAlignment="Left" Margin="297,255,0,214" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <CheckBox Content="45" IsChecked="false" HorizontalAlignment="Left" Margin="297,276,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <CheckBox Content="-45" IsChecked="false" HorizontalAlignment="Left" Margin="297,296,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+    </Grid>
+</local:ModuleBaseDlg>
