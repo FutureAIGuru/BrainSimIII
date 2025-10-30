@@ -405,25 +405,24 @@ public partial class UKS
     /// <summary>
     /// Search for the Thing which most closely resembles the target Thing based on the attributes of the target
     /// </summary>
-    /// <param name="target">The Relationships of this Thing are the attributes to search on</param>
+    /// <param name="queryThing">The Relationships of this Thing are the attributes to search on</param>
     /// <param name="root">All searching is done within the descendents of this Thing</param>
-    /// <param name="confidence">value representing the quality of the match. </param>
     /// <returns></returns>
-    public List<(Thing t, float conf)> SearchForClosestMatch(Thing target, Thing root)
+    public List<(Thing t, float conf)> SearchForClosestMatch(Thing queryThing, Thing root)
     {
         List<(Thing t, float conf)> retVal = new();
-        if (target.Relationships.Count == 0) return retVal;
+        if (queryThing.Relationships.Count == 0) return retVal;
         //initialize the search queues
         List<Thing> thingsToSearch = new();
         List<Thing> alreadySearched = new();
         searchCandidates = new();
 
         //seed the search queue with the given parameters.
-        foreach (Relationship r in target.Relationships)
+        foreach (Relationship r in queryThing.Relationships)
         {
             foreach (Relationship r1 in r.target.RelationshipsFrom)
             {
-                if (r1.source == target) continue;
+                if (r1.source == queryThing) continue;
                 var existing = thingsToSearch.FindFirst(x => x == r1.source);
                 if (r1.reltype.HasAncestor(r.reltype) && r1.target == r.target && existing == null)
                 {
@@ -447,7 +446,7 @@ public partial class UKS
             foreach (Relationship r in t.RelationshipsFrom)
             {
                 if (!r.relType.HasProperty("inheritable")) continue;
-                if (r.source == target) continue;
+                if (r.source == queryThing) continue;
                 AddToQueues(t, r.source);
                 //TODO fix this to handle isSimilarTo  (and transitive...?)
                 //var similarThings = GetListOfSimilarThings(r.source);
@@ -458,7 +457,7 @@ public partial class UKS
 
         foreach (var key in searchCandidates.ToList())
         {
-            if (!ThingsHaveConflictingRelationship(key.Key, target)) continue;
+            if (!ThingsHaveConflictingRelationship(key.Key, queryThing)) continue;
             //searchCandidates.Remove(key.Key);
             searchCandidates[key.Key] = searchCandidates[key.Key] - .5f;
         }
@@ -494,6 +493,7 @@ public partial class UKS
         bool AddToQueues(Thing tPrev, Thing tNew)
         {
             if (!tNew.HasAncestor(root)) return false;
+            if (tNew == queryThing) return false;
             if (!searchCandidates.ContainsKey(tNew))
                 searchCandidates[tNew] = 0; //initialize a new dictionary entry if needed
             searchCandidates[tNew] += searchCandidates[tPrev] * GetRelationshipWeight(tNew, tPrev);

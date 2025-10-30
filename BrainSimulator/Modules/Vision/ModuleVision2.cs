@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -20,9 +21,9 @@ namespace BrainSimulator.Modules;
 public partial class ModuleVision2 : ModuleBase
 {
     private string currentFilePath = "";
-    public string previousFilePath = "";
+    public string previousFilePath = null;
     public BitmapImage bitmap = null;
-    public List<Corner> corners;
+    //    public List<Corner> corners;
     public List<Segment> segments;
     public Color[,] imageArray;
     //public HoughTransform segmentFinder;
@@ -31,40 +32,8 @@ public partial class ModuleVision2 : ModuleBase
     public List<PointPlus> boundaryPoints = new();
     bool isSingleDigit = false;
 
-    public class Corner
-    {
-        public PointPlus pt;
-        public virtual Angle angle
-        {
-            get
-            {
-                Segment s1 = new Segment(prevPt, pt);
-                Segment s2 = new Segment(pt, nextPt);
-                Angle a = s2.Angle - s1.Angle;
-                while (a.Degrees > 180)
-                    a = a - Angle.FromDegrees(180);
-                while (a.Degrees < -180)
-                    a = a + Angle.FromDegrees(180);
-                return a;
-            }
-        }
-        public bool curve = false;
-        public PointPlus prevPt;
-        public PointPlus nextPt;
-        public override string ToString()
-        {
-            if (curve)
-                return $"[mid:({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")}) " +//A: {angle}] " +
-                $"start:[({prevPt.X.ToString("0.0")},{prevPt.Y.ToString("0.0")})] " +
-                $"end:[({nextPt.X.ToString("0.0")},{nextPt.Y.ToString("0.0")})]";
-            else
-                return $"[x,y:({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")}) " +//A: {angle}] " +
-                $"prevPt:[({prevPt.X.ToString("0.0")},{prevPt.Y.ToString("0.0")})] " +
-                $"nextPt:[({nextPt.X.ToString("0.0")},{nextPt.Y.ToString("0.0")})]";
-        }
-    }
 
-    string CurrentFilePath
+    public string CurrentFilePath
     {
         get { return currentFilePath; }
         set
@@ -82,20 +51,21 @@ public partial class ModuleVision2 : ModuleBase
 
     //fill this method in with code which will execute
     //once for each cycle of the engine
+    bool init = false;
     public override void Fire()
     {
         Init();  //be sure to leave this here
+
+        UpdateDialog();
 
         if (CurrentFilePath == previousFilePath) return;
         previousFilePath = CurrentFilePath;
 
         LoadImageFileToPixelArray(CurrentFilePath);
 
-        //FindBackgroundColor();
         segments = new();
-        corners = new();
-        //FindBoundaries(imageArray);
         boundaryArray = new bool[28, 28];
+        theUKS.GetOrAddThing("boundaryPoint");
         for (int x = 0; x < boundaryArray.GetLength(0); x++)
             for (int y = 0; y < boundaryArray.GetLength(1); y++)
             {
@@ -103,26 +73,44 @@ public partial class ModuleVision2 : ModuleBase
                 theUKS.GetOrAddThing(attrName, "boundaryPoint").SetFired();
             }
         Random rand = new();
-        //Point p1 = new Point(rand.Next(1, 26), rand.Next(1, 26));
-        //Point p2 = new Point(rand.Next(1, 26), rand.Next(1, 26));
+
+        if (!init)
+            InitHVLInes();
+        init = true;
+
+
+        Point p1, p2;
+        p1 = new Point(1, 1);
+        p2 = new Point(20, counter*10);
+        counter++;
+        DrawLine(p1, p2);
+        CreateBoundaryArray();
+
+        UpdateDialog();
+    }
+
+    private void InitHVLInes()
+    {
+        Thing horiz = theUKS.GetOrAddThing("Horiz");
+        Thing vert = theUKS.GetOrAddThing("Vert");
+        Point p1 = new(5, 5);
+        Point p2 = new(15, 5);
         for (int x = 0; x < 28; x++)
         {
-            Point p1 = new Point(x, 0);
-            Point p2 = new Point(x, 27);
+            p1 = new Point(x, 0);
+            p2 = new Point(x, 27);
             DrawLine(p1, p2);
-            CreateBoundaryArray();
+            CreateBoundaryArray(vert);
+            ClearBoundaryArray();
         }
         for (int y = 0; y < 28; y++)
         {
-            Point p1 = new Point(0, y);
-            Point p2 = new Point(27, y);
+            p1 = new Point(0, y);
+            p2 = new Point(27, y);
             DrawLine(p1, p2);
-            CreateBoundaryArray();
+            CreateBoundaryArray(horiz);
+            ClearBoundaryArray();
         }
-
-
-        UpdateDialog();
-        UpdateDialog();
     }
 
     void DrawLine(Point p1, Point pt)
@@ -156,30 +144,28 @@ public partial class ModuleVision2 : ModuleBase
     }
 
     public bool[,] boundaryArray;
-    private void CreateBoundaryArray()
+
+    void ClearBoundaryArray()
+    {
+        for (int x = 0; x < boundaryArray.GetLength(0); x++)
+            for (int y = 0; y < boundaryArray.GetLength(1); y++)
+                boundaryArray[x, y] = false;
+    }
+
+
+    public int squareSize = 5;
+    public int offset = 5;
+    public int counter = 0;
+    private void CreateBoundaryArray(Thing parent = null)
     {
         theUKS.GetOrAddThing("boundaryPoint", "Thing");
         theUKS.GetOrAddThing("hasBoundary", "RelationshipType");
         //create an array of the boundary points at 10x the resolution of the original image.
         int sizeMultipler = 1;
-        //boundaryArray = new bool[imageArray.GetLength(0) * sizeMultipler, imageArray.GetLength(1) * sizeMultipler];
-        //foreach (var pt in boundaryPoints)
-        //{
-        //    int x = (int)(pt.X * sizeMultipler);
-        //    int y = (int)(pt.Y * sizeMultipler);
-        //    if (x < 0 || x >= boundaryArray.GetLength(0)) continue;
-        //    if (y < 0 || y >= boundaryArray.GetLength(1)) continue;
-        //    boundaryArray[x, y] = true;
-        //    string attrName = $"Pt_{x}_{y}";
-        //    theUKS.GetOrAddThing(attrName, "boundaryPoint").SetFired();
-        //}
-        //now build a UKS query thing which takes a limited array within this boundary array and adds attributes "hasBoundary" Ptx,y
-        // and moves this arraay round to cover the entire image similar to a convolutional filter
-        //at each location check the theUKS.searchForClosestMatch function  and learn the pattern if no match is found
 
-        int squareSize = 8;
-        int offset = 4;
-        for (int offsetX = 0; offsetX < boundaryArray.GetLength(0)-squareSize; offsetX+=offset)
+        int squareSize = 5;
+        int offset = 5;
+        for (int offsetX = 0; offsetX < boundaryArray.GetLength(0) - squareSize; offsetX += offset)
         {
             for (int offsetY = 0; offsetY < boundaryArray.GetLength(1) - squareSize; offsetY += offset)
             {
@@ -208,17 +194,17 @@ public partial class ModuleVision2 : ModuleBase
                                     attrName = $"Pt_{nx:D2}_{ny:D2}";
                                     Relationship r = queryThing.HasRelationship(queryThing, "hasBoundary", attrName);
                                     if (r == null || r.Weight < 1)
-                                       queryThing.AddRelationship(attrName, "hasBoundary", true, .5f);
+                                        queryThing.AddRelationship(attrName, "hasBoundary", true, .5f);
                                 }
                             }
                         }
                     }
                 }
-                if (queryThing.Relationships.Count > 0)
+                if (queryThing.Relationships.Count > 1)
                 {
                     var match = theUKS.SearchForClosestMatch(queryThing, "Thing");
                     int pixelCount = queryThing.Relationships.Count(x => x.Weight == 1);
-                    if (match.Count ==0 || match[0].conf  < pixelCount)
+                    if (match.Count == 0 || match[0].conf < pixelCount*1.5)
                     {
                         //learn this pattern
                         lock (theUKS.UKSList)
@@ -227,15 +213,23 @@ public partial class ModuleVision2 : ModuleBase
                         }
                         string boxName = $"Box_{offsetX:D2}_{offsetY:D2}_*";
                         queryThing.Label = boxName;
-                        queryThing.AddParent("UnknownObject");
+                        if (parent == null)
+                            queryThing.AddParent("UnknownObject");
+                        else
+                            queryThing.AddParent(parent);
+                        queryThing.SetFired();
                         continue;
                     }
                     else
                     {
-                        match[0].t.SetFired();
+                        theUKS.DeleteThing(queryThing);
+                        if (match[0].conf < 5)
+                            continue;
+                        Thing t = match[0].t;
+                        if (t.lastFiredTime < DateTime.Now - TimeSpan.FromSeconds(10))
+                            match[0].t.SetFired();
                     }
                 }
-                theUKS.DeleteThing(queryThing);
             }
         }
 
@@ -371,7 +365,11 @@ public partial class ModuleVision2 : ModuleBase
 
     public void LoadImageFileToPixelArray(string filePath)
     {
-        if (string.IsNullOrEmpty(filePath)) return;
+        if (string.IsNullOrEmpty(filePath))
+        {
+            imageArray = new Color[28, 28];
+            return;
+        }
         using (System.Drawing.Bitmap bitmap2 = new(CurrentFilePath))
         {
             System.Drawing.Bitmap theBitmap = bitmap2;
@@ -466,21 +464,21 @@ public partial class ModuleVision2 : ModuleBase
                     HSLColor theColor = new(hue, saturation, luminance);
                     t.V = theColor;
                 }
-                if (nodes[0].Value == "Corner")
-                {
-                    Corner c = new();
-                    //get a pointplus node
-                    float x = float.Parse(nodes[1].FirstChild.InnerText);
-                    float y = float.Parse(nodes[1].FirstChild.NextSibling.InnerText);
-                    float conf = float.Parse(nodes[1].FirstChild.NextSibling.NextSibling.InnerText);
-                    c.pt = new PointPlus { X = x, Y = y, Conf = conf, };
-                    //get the angle node
-                    float theta = float.Parse(nodes[2].FirstChild.InnerText);
-                    //get the orientation node
-                    float theta1 = float.Parse(nodes[3].FirstChild.InnerText);
-                    //c.orientation = Angle.FromDegrees(theta1);
-                    t.V = c;
-                }
+                //if (nodes[0].Value == "Corner")
+                //{
+                //    Corner c = new();
+                //    //get a pointplus node
+                //    float x = float.Parse(nodes[1].FirstChild.InnerText);
+                //    float y = float.Parse(nodes[1].FirstChild.NextSibling.InnerText);
+                //    float conf = float.Parse(nodes[1].FirstChild.NextSibling.NextSibling.InnerText);
+                //    c.pt = new PointPlus { X = x, Y = y, Conf = conf, };
+                //    //get the angle node
+                //    float theta = float.Parse(nodes[2].FirstChild.InnerText);
+                //    //get the orientation node
+                //    float theta1 = float.Parse(nodes[3].FirstChild.InnerText);
+                //    //c.orientation = Angle.FromDegrees(theta1);
+                //    t.V = c;
+                //}
             }
         }
 

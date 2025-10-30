@@ -166,7 +166,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             mostRecent = mostRecent?.Relationships.FindFirst(x=>x.relType.Label == "is")?.target;
             if (child == mostRecent)
                 tviChild.Background = new SolidColorBrush(Colors.Pink);
-            if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
+            if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(5))
                 tviChild.Background = new SolidColorBrush(Colors.LightGreen);
             if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                 tviChild.Background = new SolidColorBrush(Colors.LightYellow);
@@ -374,10 +374,17 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         mi.Click += Mi_Click;
         mi.Header = "Make Root";
         menu.Items.Add(mi);
+
+        //mi = new();
+        //mi.Click += Mi_Click;
+        //mi.Header = "Fetch GPT Info";
+        //menu.Items.Add(mi);
+
         mi = new();
         mi.Click += Mi_Click;
-        mi.Header = "Fetch GPT Info";
+        mi.Header = "Fire";
         menu.Items.Add(mi);
+
         mi = new();
         mi.Header = "Parents:";
         if (t.Parents.Count == 0)
@@ -525,6 +532,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     parent.SetSavedDlgAttribute("ExpandAll", expandAll);
                     break;
                 case "Fetch GPT Info":
+                    //the following is an async call so an immediate refresh is not useful
+                    //ModuleGPTInfo.GetChatGPTData(t.Label);
+                    break;
+                case "Fire":
+                    t.SetFired();
                     //the following is an async call so an immediate refresh is not useful
                     //ModuleGPTInfo.GetChatGPTData(t.Label);
                     break;
