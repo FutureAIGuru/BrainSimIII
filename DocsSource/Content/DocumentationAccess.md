@@ -1,5 +1,0 @@
-# DocumentationAccess
-
-- Git
-- Github
-- Website

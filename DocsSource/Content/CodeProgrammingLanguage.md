@@ -1,4 +1,0 @@
-# CodeProgrammingLanguage
-
-- C#
-- Python

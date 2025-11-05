@@ -1,1 +1,0 @@
-| [Books](https://futureaisociety.org/resources/books/) | [FAQ](https://github.com/FutureAIGuru/BrainSimIII/blob/Documentation/FAQ.md) | [GitHub](https://github.com/FutureAIGuru/BrainSimIII/tree/Documentation?tab=readme-ov-file) | [Installation Guide](SoftwareInstallation.md) | [Website](https://futureaisociety.org/) | [Youtube](https://www.youtube.com/@FutureAISociety) |
