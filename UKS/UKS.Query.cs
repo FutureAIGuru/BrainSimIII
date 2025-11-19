@@ -1,5 +1,6 @@
-﻿using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+using System.Collections.Concurrent;
+
 
 namespace UKS;
 public partial class UKS
@@ -324,13 +325,7 @@ public partial class UKS
         {
             if (c.clauseType.Label.ToLower() != "if") continue;
             Relationship r1 = c.clause;
-            QueryRelationship q = new(r1);
-            //if (query.source != null && query.source.AncestorList().Contains(q.source))
-            //    q.source = query.source;
-            //if (query.source != null && query.source.AncestorList().Contains(q.target))
-            //    q.target = query.target;
-            //if (query.target != null && query.target.AncestorList().Contains(q.source))
-            //    q.source = query.target;
+            QueryRelationship q = new(r1);  //TODO: why is this not a plain relationships?
             var qResult = GetRelationship(q);
             if (qResult != null && qResult.Weight < 0.8)
                 return false;
@@ -362,14 +357,13 @@ public partial class UKS
         return succeededConditions;
     }
 
-    Dictionary<Thing, float> searchCandidates;
     /// <summary>
     /// Given that you have performed a search with SearchForClosestMatch, this returns the next-best result
     /// given the previous best.
     /// </summary>
     /// <param name="confidence">value representin the quality of the match</param>
     /// <returns></returns>
-    public Thing GetNextClosestMatch(ref float confidence)
+/*    public Thing GetNextClosestMatch(ref float confidence)
     {
         Thing bestThing = null;
         confidence = -1;
@@ -385,7 +379,7 @@ public partial class UKS
 
         //remove the item from the dictionary
         if (bestThing != null)
-            searchCandidates.Remove(bestThing);
+            searchCandidates.Remove(bestThing,out float value);
         return bestThing;
     }
 
@@ -401,7 +395,7 @@ public partial class UKS
                 retVal.Add(r.source);
         return retVal;
     }
-
+*/
     /// <summary>
     /// Search for the Thing which most closely resembles the target Thing based on the attributes of the target
     /// </summary>
@@ -415,7 +409,7 @@ public partial class UKS
         //initialize the search queues
         List<Thing> thingsToSearch = new();
         List<Thing> alreadySearched = new();
-        searchCandidates = new();
+        Dictionary<Thing, float> searchCandidates = new();
 
         //seed the search queue with the given parameters.
         foreach (Relationship r in queryThing.Relationships)
@@ -423,6 +417,7 @@ public partial class UKS
             foreach (Relationship r1 in r.target.RelationshipsFrom)
             {
                 if (r1.source == queryThing) continue;
+                if (r1.source.Label.StartsWith("theQuery")) continue;  //hack to avoid undeleted searches
                 var existing = thingsToSearch.FindFirst(x => x == r1.source);
                 if (r1.reltype.HasAncestor(r.reltype) && r1.target == r.target && existing == null)
                 {
@@ -430,6 +425,7 @@ public partial class UKS
                     if (!searchCandidates.ContainsKey(r1.source))
                         searchCandidates[r1.source] = 0; //initialize a new dictionary entry if needed
                     searchCandidates[r1.source] += r1.Weight * r.Weight;
+
                 }
                 else if (existing != null)
                 {
@@ -471,7 +467,7 @@ public partial class UKS
             foreach (Thing t1 in t.Ancestors)
             {
                 if (t1 != t && searchCandidates.ContainsKey(t1) && searchCandidates[t1] < 0)
-                    searchCandidates.Remove(t);
+                    searchCandidates.Remove(t,out float value);
             }
         }
 

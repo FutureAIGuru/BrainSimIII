@@ -6,13 +6,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Xml.Linq;
 using UKS;
 using static System.Math;
 
@@ -33,6 +30,15 @@ public partial class ModuleVision2 : ModuleBase
     bool isSingleDigit = false;
 
 
+    public bool[,] boundaryArray;
+    public int hSize = 5;
+    public int vSize = 5;
+    public int patchSize = 5;
+    public int stride = 1;
+    public int counter = 0;
+
+
+
     public string CurrentFilePath
     {
         get { return currentFilePath; }
@@ -51,7 +57,6 @@ public partial class ModuleVision2 : ModuleBase
 
     //fill this method in with code which will execute
     //once for each cycle of the engine
-    bool init = false;
     public override void Fire()
     {
         Init();  //be sure to leave this here
@@ -62,53 +67,156 @@ public partial class ModuleVision2 : ModuleBase
         previousFilePath = CurrentFilePath;
 
         LoadImageFileToPixelArray(CurrentFilePath);
+        FindBoundaries(imageArray);
 
         segments = new();
-        boundaryArray = new bool[28, 28];
+    }
+
+    Random rand = new();
+
+    public void Refresh()
+    {
+        //ClearBoundaryArray();
+        //DrawLine(p1, p2);
+        SearchAndLearn();
+    }
+
+    public void InitArray()
+    {
+        boundaryArray = new bool[hSize, vSize];
         theUKS.GetOrAddThing("boundaryPoint");
+        theUKS.GetOrAddThing("hasBoundary", "RelationshipType");
+        theUKS.GetOrAddThing("patch");
+
+        //initialize the boundary array
         for (int x = 0; x < boundaryArray.GetLength(0); x++)
             for (int y = 0; y < boundaryArray.GetLength(1); y++)
             {
                 string attrName = $"Pt_{x:D2}_{y:D2}";
-                theUKS.GetOrAddThing(attrName, "boundaryPoint").SetFired();
+                theUKS.GetOrAddThing(attrName, "boundaryPoint");
             }
-        Random rand = new();
 
-        if (!init)
-            InitHVLInes();
-        init = true;
+        //initialiize the patch array 
+        //create a Thing for each possible patch based on patchSize and stride
+        //set all the weights so that the center has the highest weight and weights decrease radially from the center
+        //TODO: set maximum weights for each relationship
+        int numPatchesX = (hSize - patchSize) / stride + 1;
+        int numPatchesY = (vSize - patchSize) / stride + 1;
+        int numPatchesPerPixel = patchSize * 2 - 2;
+
+        int half = patchSize / 2;
+        float minWeight = 0.1f;
+        float maxRadius = (float)Math.Sqrt(half * half + half * half);
+
+        for (int i = 0; i < numPatchesPerPixel; i++)
+            for (int patchX = 0; patchX < numPatchesX; patchX++)
+                for (int patchY = 0; patchY < numPatchesY; patchY++)
+                {
+                    int patchCenterX = patchX * stride + patchSize / 2;
+                    int patchCenterY = patchY * stride + patchSize / 2;
+                    string patchName = $"Patch_{patchCenterX:D2}_{patchCenterY:D2}_{i}";
+                    Thing patchThing = theUKS.GetOrAddThing(patchName, "patch");
+
+                    // this is the maximum weight at the center for this patch index i
+                    //float centerMaxWeight = (float)(patchSize - i * 0.1);
+                    float centerMaxWeight = 1f;
+
+                    for (int x = -half; x < half + 1; x++)
+                        for (int y = -half; y < half + 1; y++)
+                        {
+                            int imgX = patchCenterX + x;
+                            int imgY = patchCenterY + y;
+                            string attrName = $"Pt_{imgX:D2}_{imgY:D2}";
+
+                            // distance from center
+                            float dx = x;
+                            float dy = y;
+                            float r = (float)Math.Sqrt(dx * dx + dy * dy);
+
+                            // radial factor: 1 at center, ~0 at farthest corner
+                            float radial = (maxRadius > 0f) ? 1f - (r / maxRadius) : 1f;
+                            if (radial < 0f) radial = 0f;
+
+                            // interpolate between minWeight and centerMaxWeight based on distance
+                            float maxWeight = minWeight + (centerMaxWeight - minWeight) * radial;
+
+                            //float maxWeight = minWeight + (1.5f - minWeight) * radial;
+                            float initialWeight = maxWeight / 2;
+                            if (x == 0 && y == 0) initialWeight = centerMaxWeight;
+                            if (x == 0 && y == 0) maxWeight = centerMaxWeight;
+
+                            var rRel = patchThing.AddRelationship(attrName, "hasBoundary", true, initialWeight);
+                            if (rRel.target == null)
+                            {
+                                // handle missing target if needed
+                            }
+                            rRel.maxWeight = maxWeight;
+                        }
+                }
+
+        //InitHVLInes();
+    }
 
 
-        Point p1, p2;
-        p1 = new Point(1, 1);
-        p2 = new Point(20, counter*10);
-        counter++;
+    Point p1, p2;
+    public void SingteTestPattern()
+    {
+        do
+        {
+            p1 = new Point((int)(rand.NextDouble() * hSize), (int)(rand.NextDouble() * vSize));
+        } while (p1.X != 0 && p1.Y != 0);
+
+        float bias = .8f;
+        if (rand.NextDouble() < bias)
+        {
+            p2 = new Point(patchSize - 1 - p1.X, patchSize - 1 - p1.Y);
+        }
+        else
+            p2 = new Point((int)(rand.NextDouble() * hSize), (int)(rand.NextDouble() * vSize));
+
+        ClearBoundaryArray();
+
         DrawLine(p1, p2);
-        CreateBoundaryArray();
+
+
+        /*
+         * //build a sample arc for testing
+                ClearBoundaryArray();
+                boundaryArray[1, 0] = true;
+                boundaryArray[2, 1] = true;
+                boundaryArray[2, 2] = true;
+                boundaryArray[2, 3] = true;
+                boundaryArray[1, 4] = true;
+        */
+        SearchAndLearn();
+
+        //        SetBoundaryArrayFromImage();
+        //        SearchAndLearn();
 
         UpdateDialog();
+
     }
 
     private void InitHVLInes()
     {
-        Thing horiz = theUKS.GetOrAddThing("Horiz");
-        Thing vert = theUKS.GetOrAddThing("Vert");
-        Point p1 = new(5, 5);
-        Point p2 = new(15, 5);
-        for (int x = 0; x < 28; x++)
+        Point p1, p2;
+
+        //draw vertical lines
+        for (int x = 1; x < hSize; x++)
         {
             p1 = new Point(x, 0);
             p2 = new Point(x, 27);
             DrawLine(p1, p2);
-            CreateBoundaryArray(vert);
+            SearchAndLearn();
             ClearBoundaryArray();
         }
-        for (int y = 0; y < 28; y++)
+        //draw horizontallines
+        for (int y = 1; y < vSize; y++)
         {
             p1 = new Point(0, y);
             p2 = new Point(27, y);
             DrawLine(p1, p2);
-            CreateBoundaryArray(horiz);
+            SearchAndLearn();
             ClearBoundaryArray();
         }
     }
@@ -143,138 +251,155 @@ public partial class ModuleVision2 : ModuleBase
         }
     }
 
-    public bool[,] boundaryArray;
-
-    void ClearBoundaryArray()
+    public void ClearBoundaryArray()
     {
+        foreach (var t in theUKS.UKSList) t.confidence = 0;
+        foreach (var t in theUKS.UKSList) t.lastFiredTime = new DateTime(0);
         for (int x = 0; x < boundaryArray.GetLength(0); x++)
             for (int y = 0; y < boundaryArray.GetLength(1); y++)
                 boundaryArray[x, y] = false;
     }
 
-
-    public int squareSize = 5;
-    public int offset = 5;
-    public int counter = 0;
-    private void CreateBoundaryArray(Thing parent = null)
+    void SetBoundaryArrayFromImage()
     {
-        theUKS.GetOrAddThing("boundaryPoint", "Thing");
-        theUKS.GetOrAddThing("hasBoundary", "RelationshipType");
+        ClearBoundaryArray();
+        foreach (var pt in boundaryPoints)
+        {
+            int x = (int)pt.X;
+            int y = (int)pt.Y;
+            if (x < 0 || y < 0) continue;
+            if (x >= boundaryArray.GetLength(0)) continue;
+            if (y >= boundaryArray.GetLength(1)) continue;
+            boundaryArray[x, y] = true;
+        }
+    }
+
+    private void SearchAndLearn(Thing parent = null)
+    {
         //create an array of the boundary points at 10x the resolution of the original image.
         int sizeMultipler = 1;
 
-        int squareSize = 5;
-        int offset = 5;
-        for (int offsetX = 0; offsetX < boundaryArray.GetLength(0) - squareSize; offsetX += offset)
+        Thing queryThing = new Thing() { Label = "theQuery" };
+        //convert to parallel for speed 
+        for (int x = 0; x < boundaryArray.GetLength(0); x++)
+        //System.Threading.Tasks.Parallel.For(0, boundaryArray.GetLength(0) - patchSize, offsetX =>
         {
-            for (int offsetY = 0; offsetY < boundaryArray.GetLength(1) - squareSize; offsetY += offset)
+            for (int y = 0; y < boundaryArray.GetLength(1); y++)
             {
-                Thing queryThing = new Thing() { Label = "theQuery" };
-                for (int x = 0; x < squareSize; x++)
+                if (boundaryArray[x, y]) //is this a boundary point?
                 {
-                    for (int y = 0; y < squareSize; y++)
-                    {
-                        if (boundaryArray[offsetX + x, offsetY + y])
-                        {
-                            string attrName = $"Pt_{offsetX + x:D2}_{offsetY + y:D2}";
-                            queryThing.AddRelationship(attrName, "hasBoundary", true, 1);
-                            for (int dx = -1; dx <= 1; dx++)
-                            {
-                                for (int dy = -1; dy <= 1; dy++)
-                                {
-                                    // Skip the center point itself
-                                    if (dx == 0 && dy == 0)
-                                        continue;
-
-                                    int nx = x + dx + offsetX;
-                                    int ny = y + dy + offsetY;
-                                    if (nx < 0 || nx >= boundaryArray.GetLength(0)) continue;
-                                    if (ny < 0 || ny >= boundaryArray.GetLength(1)) continue;
-
-                                    attrName = $"Pt_{nx:D2}_{ny:D2}";
-                                    Relationship r = queryThing.HasRelationship(queryThing, "hasBoundary", attrName);
-                                    if (r == null || r.Weight < 1)
-                                        queryThing.AddRelationship(attrName, "hasBoundary", true, .5f);
-                                }
-                            }
-                        }
-                    }
-                }
-                if (queryThing.Relationships.Count > 1)
-                {
-                    var match = theUKS.SearchForClosestMatch(queryThing, "Thing");
-                    int pixelCount = queryThing.Relationships.Count(x => x.Weight == 1);
-                    if (match.Count == 0 || match[0].conf < pixelCount*1.5)
-                    {
-                        //learn this pattern
-                        lock (theUKS.UKSList)
-                        {
-                            theUKS.UKSList.Add(queryThing);
-                        }
-                        string boxName = $"Box_{offsetX:D2}_{offsetY:D2}_*";
-                        queryThing.Label = boxName;
-                        if (parent == null)
-                            queryThing.AddParent("UnknownObject");
-                        else
-                            queryThing.AddParent(parent);
-                        queryThing.SetFired();
-                        continue;
-                    }
-                    else
-                    {
-                        theUKS.DeleteThing(queryThing);
-                        if (match[0].conf < 5)
-                            continue;
-                        Thing t = match[0].t;
-                        if (t.lastFiredTime < DateTime.Now - TimeSpan.FromSeconds(10))
-                            match[0].t.SetFired();
-                    }
+                    string attrName = $"Pt_{x:D2}_{y:D2}";
+                    queryThing.AddRelationship(attrName, "hasBoundary");
                 }
             }
         }
+        if (queryThing.Relationships.Count > 1)
+        {
+            var match = theUKS.SearchForClosestMatch(queryThing, "Thing");
+
+            match.RemoveAll(x => x.t.Label.StartsWith("theQuery"));
+
+            if (match[0].conf < 1) return;
+
+            int pixelCount = queryThing.Relationships.Count(x => x.Weight == 1);
+
+            //mutual suppression
+            for (int i = 0; i < match.Count; i++)
+            {
+                Thing t0 = match[i].t;
+                if (match[i].conf <= .31) //remove low-value hits.
+                {
+                    match.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+                string l0 = t0.Label[..11];
+                for (int j = i + 1; j < match.Count; j++)
+                {
+                    Thing t1 = match[j].t;
+                    string l1 = t1.Label[..11];
+                    if (l1 == l0)
+                    {
+                        match.RemoveAt(j);
+                        j--;
+                    }
+                }
+            }
 
 
+            foreach (var item in match)
+            {
+                AdjustWeights(item.t, queryThing);
+                item.t.SetFired();
+            }
+
+            void AdjustWeights(Thing patch, Thing inputPattern)
+            {
+                string[] nameFields = patch.Label.Split("_");
+                int x = int.Parse(nameFields[1]);
+                int y = int.Parse(nameFields[2]);
+                string centerPtLabel = $"Pt_{x:D2}_{y:D2}";
 
 
+                patch.SetFired(); //this patch was the winner.
 
+                //first case, this is a previously unused patch
+                int countOfSetEdges = patch.Relationships.Count(x => x.Weight == .1f);
+
+                bool newSettings = false;
+                if (countOfSetEdges >= 8)
+                    newSettings = true; //this patch has never been used
+                                        //we are adjusting weights of an already-set patch
+                foreach (Relationship r in patch.Relationships)
+                {
+                    if (r.reltype.Label != "hasBoundary") continue;
+                    //do not adjust the center point
+                    if (r.target.Label == centerPtLabel) continue;
+
+
+                    Relationship rFound = inputPattern.Relationships.FindFirst(x => x.target == r.target);
+                    // targets: ON -> +1, OFF -> -0.5
+                    float tp = (rFound != null) ? r.maxWeight : -0.5f;
+                    float eta = (rFound != null) ? 0.06f : 0.03f; // example: smaller step for OFF
+                    r.Weight += eta * (tp - r.Weight);
+                    // clamp to keep things well-behaved
+                    if (r.Weight > r.maxWeight) r.Weight = r.maxWeight;
+                    if (r.Weight < -1f) r.Weight = -1f;
+                }
+            }
+        }
+        else
+        {
+            theUKS.DeleteThing(queryThing);
+        }
+        //});
     }
 
-    void FindSegments()
+
+    int count = 0;
+    public void Prune()
     {
-        segments = new();
-        for (int x = 0; x < imageArray.GetLength(0); x++)
+        ClearBoundaryArray();
+        Thing t = theUKS.GetOrAddThing("patch");
+        if (count >= t.Children.Count)
         {
-            for (int y = 0; y < imageArray.GetLength(1); y++)
-            {
-                if (x == 9 && y == 5)
-                { }
-                Color c = imageArray[x, y];
-                HSLColor hslC = new HSLColor(c);
-                if (hslC.luminance < .9) continue;
-                PointPlus start = new((float)x, (float)y);
-                for (Angle a1 = 0; a1 < Angle.FromDegrees(180); a1 += Angle.FromDegrees(10))
-                {
-                    PointPlus end = new(start);
-                    for (int i = 1; i < 20; i++)
-                    {
-                        PointPlus pos = new((float)(start.X + i * Cos(a1)), (float)(start.Y + i * Sin(a1)));
-                        int x1 = (int)Round(pos.X);
-                        int y1 = (int)Round(pos.Y);
-                        if (x1 < 0 || x1 >= imageArray.GetLength(0)) break;
-                        if (y1 < 0 || y1 >= imageArray.GetLength(1)) break;
-                        c = imageArray[x1, y1];
-                        hslC = new HSLColor(c);
-                        if (hslC.luminance < .75) break;
-                        end = pos;
-                    }
-                    IsSegmentCenteredBySum(start, end, boundaryPoints, out double score);
-                    if (a1 == 0 && (end - start).R > 4 && end.Y > 20)
-                    { }
-                    if ((end - start).R > 3 && score > .9)// && a1 == 0)
-                        segments.Add(new Segment(start, end));
-                }
-            }
+            count = 0;
         }
+        t.Children[count].SetFired();
+        count++;
+
+        ////for now, only things without children are pruneable
+        //for (int i = 0; i < theUKS.UKSList.Count; i++)
+        //{
+        //    Thing t = theUKS.UKSList[i];
+        //    if (t.Children.Count > 0) continue;
+        //    if (!t.HasAncestor("UnknownObject")) continue;
+        //    if (t.useCount == 1)
+        //    {
+        //        theUKS.DeleteThing(t);
+        //        i--;
+        //    }
+        //}
     }
 
     //interpolate the luminance in the image array givine a real-valued point
@@ -367,7 +492,7 @@ public partial class ModuleVision2 : ModuleBase
     {
         if (string.IsNullOrEmpty(filePath))
         {
-            imageArray = new Color[28, 28];
+            imageArray = new Color[hSize, vSize];
             return;
         }
         using (System.Drawing.Bitmap bitmap2 = new(CurrentFilePath))

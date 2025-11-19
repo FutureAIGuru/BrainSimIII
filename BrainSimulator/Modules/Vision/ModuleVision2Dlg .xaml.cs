@@ -4,17 +4,18 @@
 // © 2022 FutureAI, Inc., all rights reserved
 //
 
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Shapes;
-using static System.Math;
 using System.Windows.Threading;
-using static BrainSimulator.Modules.ModuleVision;
 using UKS;
+using static BrainSimulator.Modules.ModuleVision;
+using static System.Math;
 
 
 namespace BrainSimulator.Modules
@@ -41,14 +42,14 @@ namespace BrainSimulator.Modules
             {
                 labelProperties.Content = "Image: " + parent.imageArray.GetLength(0) + "x" + parent.imageArray.GetLength(1) +
                     "\r\nSegments: " + parent.segments?.Count +
-//                    "\r\nCorners: " + parent.corners?.Count +
+                    //                    "\r\nCorners: " + parent.corners?.Count +
                     "\r\nOutlines: " + parent.theUKS.Labeled("Outline")?.Children.Count;
             }
             catch { return false; }
 
             theCanvas.Children.Clear();
 
-            scale = (int)(theCanvas.ActualHeight / parent.imageArray.GetLength(1));
+            scale = (int)(theCanvas.ActualHeight / (parent.imageArray.GetLength(1) + 1));
             int pixelSize = scale - 2;
             if (pixelSize < 2) pixelSize = 2;
 
@@ -90,15 +91,15 @@ namespace BrainSimulator.Modules
                 //new showBoundaries (old version below)
                 if (cbShowBoundaries.IsChecked == true && parent.boundaryArray != null)
                 {
-                    for (int x = 0; x < parent.imageArray.GetLength(0); x++)
-                        for (int y = 0; y < parent.imageArray.GetLength(1); y++)
+                    for (int x = 0; x < parent.boundaryArray.GetLength(0); x++)
+                        for (int y = 0; y < parent.boundaryArray.GetLength(1); y++)
                         {
                             var pixel = parent.boundaryArray[x, y];
-                            
+
                             if (pixel == true)
                             {
-                                //pixel.luminance /= 2;
                                 SolidColorBrush b = new SolidColorBrush(Colors.White);
+                                string toolTipString = $"({(int)x},{(int)y}) ";
                                 Rectangle e = new()
                                 {
                                     Height = pixelSize,
@@ -106,67 +107,27 @@ namespace BrainSimulator.Modules
                                     Stroke = b,
                                     Fill = b,
                                     ToolTip = new System.Windows.Controls.ToolTip
-                                    { HorizontalOffset = 100, Content = $"({(int)x},{(int)y}) " },
+                                    { HorizontalOffset = 100, Content = toolTipString },
                                 };
                                 Canvas.SetLeft(e, x * scale + pixelSize / 2);
                                 Canvas.SetTop(e, y * scale + pixelSize / 2);
+                                e.Tag = toolTipString;
+                                e.MouseRightButtonDown += E_MouseRightButtonDown;
                                 theCanvas.Children.Add(e);
                             }
                         }
-                }
-
-                //draw the strokes
-                if (cbShowSrokes.IsChecked == true && parent.strokePoints != null)
-                {
-                    foreach (var pt in parent.strokePoints)
-                    {
-                        Rectangle e = new()
-                        {
-                            Height = pixelSize / 2,
-                            Width = pixelSize / 2,
-                            Stroke = Brushes.DarkGreen,
-                            Fill = Brushes.DarkGreen,
-                            ToolTip = new System.Windows.Controls.ToolTip
-                            {
-                                HorizontalOffset = 100,
-                                Content = $"({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")})"
-                            },
-                        };
-                        Canvas.SetLeft(e, pt.X * scale - pixelSize / 4);
-                        Canvas.SetTop(e, pt.Y * scale - pixelSize / 4);
-                        theCanvas.Children.Add(e);
-                    }
-                }
-                //draw the strokes
-                if (cbShowCenterPts.IsChecked == true && parent.CenterLinePts != null)
-                {
-                    foreach (var pt in parent.CenterLinePts)
-                    {
-                        Rectangle e = new()
-                        {
-                            Height = pixelSize / 2,
-                            Width = pixelSize / 2,
-                            Stroke = Brushes.DarkRed,
-                            Fill = Brushes.DarkRed,
-                            ToolTip = new System.Windows.Controls.ToolTip
-                            {
-                                HorizontalOffset = 100,
-                                Content = $"({pt.X.ToString("0.0")},{pt.Y.ToString("0.0")})"
-                            },
-                        };
-                        Canvas.SetLeft(e, pt.X * scale - pixelSize / 4);
-                        Canvas.SetTop(e, pt.Y * scale - pixelSize / 4);
-                        theCanvas.Children.Add(e);
-                    }
                 }
 
 
                 //draw the boxes & contents
                 if (cbShowBoxes.IsChecked == true && parent.boundaryArray != null)
                 {
-                    List<Thing> thingsRecentlyFired = theUKS.UKSList.FindAll(x => x.Label.StartsWith("Box") &&
-                        x.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(10));
-                    float[,] maxWeights = new float[parent.boundaryArray.GetLength(0), parent.boundaryArray.GetLength(1)];
+                    List<Thing> thingsRecentlyFired = theUKS.UKSList.FindAll(x => x.Label.StartsWith("Patch") &&
+                        x.lastFiredTime != new DateTime(0)); //> DateTime.Now - TimeSpan.FromSeconds(10));
+                    (float,float) [,] maxWeights = new (float,float)[parent.boundaryArray.GetLength(0), parent.boundaryArray.GetLength(1)];
+                    for (int i = 0; i < maxWeights.GetLength(0); i++)
+                        for (int j = 0; j < maxWeights.GetLength(1); j++)
+                            maxWeights[i, j] = (-1,-1);
 
                     foreach (Thing t in thingsRecentlyFired)
                     {
@@ -174,19 +135,22 @@ namespace BrainSimulator.Modules
                         int x = int.Parse(parts[1]);
                         int y = int.Parse(parts[2]);
                         SolidColorBrush b = new SolidColorBrush(Colors.Pink);
+                        string toolTipString = t.Parents[0].Label[0] + t.Label + " c:" + t.confidence;
                         Rectangle e = new()
                         {
-                            Height = pixelSize*(parent.squareSize+1),
-                            Width = pixelSize*(parent.squareSize+1),
+                            Height = pixelSize * (parent.patchSize - .3),
+                            Width = pixelSize * (parent.patchSize - .3),
                             Stroke = b,
-                            StrokeThickness=4,
-                            //Fill = b,
+                            StrokeThickness = 12,
+                            //Fill = new SolidColorBrush(Colors.Transparent),
                             ToolTip = new System.Windows.Controls.ToolTip
-                            { HorizontalOffset = 100, Content = t.Parents[0].Label[0]+ t.Label },
+                            { HorizontalOffset = 100, Content = toolTipString },
                         };
-                        Canvas.SetLeft(e, (x+.5f) * scale - pixelSize / 2);
-                        Canvas.SetTop(e, (y+.5f) * scale - pixelSize / 2);
+                        Canvas.SetLeft(e, (x + .65f - parent.patchSize / 2) * scale);
+                        Canvas.SetTop(e, (y + .65f - parent.patchSize / 2) * scale);
                         theCanvas.Children.Add(e);
+                        e.MouseRightButtonDown += E_MouseRightButtonDown;
+                        e.Tag = toolTipString;
 
                         foreach (Relationship pt in t.Relationships)
                         {
@@ -194,106 +158,50 @@ namespace BrainSimulator.Modules
                             parts = pt.target.Label.Split('_');
                             x = int.Parse(parts[1]);
                             y = int.Parse(parts[2]);
-                            if (pt.Weight > maxWeights[x, y]) 
-                                maxWeights[x, y] = pt.Weight;
+                            if (pt.Weight > maxWeights[x, y].Item1)
+                                maxWeights[x, y] = (pt.Weight,maxWeights[x,y].Item2);  //this is to handle overlapping patches
+                            if (pt.maxWeight > maxWeights[x, y].Item2)
+                                maxWeights[x, y] = (maxWeights[x, y].Item1,pt.maxWeight);  //this is to handle overlapping patches
                         }
                     }
 
                     for (int x = 0; x < maxWeights.GetLength(0); x++)
-                        for(int y = 0; y < maxWeights.GetLength(1); y++)
+                        for (int y = 0; y < maxWeights.GetLength(1); y++)
                         {
-                            float theWeight = maxWeights[x, y];
-                            if (theWeight != 0)
+                            float theWeight = maxWeights[x, y].Item1;
+                            float theMaxWeight = maxWeights[x, y].Item2;
+                            //if (theWeight != 0)
                             {
-                                SolidColorBrush b = new SolidColorBrush(Colors.Green);
-                                if (theWeight < 1) b = new SolidColorBrush(Colors.LightGreen);
+                                SolidColorBrush b = new SolidColorBrush(RainbowColorFromValue(theWeight));
+                                string toolTipString = $"({(int)x},{(int)y}) w: {theWeight:F2}  max: {theMaxWeight:F2}  ";
                                 Rectangle e = new()
                                 {
-                                    Height = pixelSize/2,
-                                    Width = pixelSize/2,
+                                    Height = pixelSize / 2,
+                                    Width = pixelSize / 2,
                                     Stroke = b,
                                     Fill = b,
                                     ToolTip = new System.Windows.Controls.ToolTip
-                                    { HorizontalOffset = 100, Content = $"({(int)x},{(int)y}) " },
+                                    { HorizontalOffset = 100, Content = toolTipString },
                                 };
-                                Canvas.SetLeft(e, x * scale + 3* pixelSize / 4);
-                                Canvas.SetTop(e, y * scale + 3*pixelSize / 4);
+                                Canvas.SetLeft(e, x * scale + 3 * pixelSize / 4);
+                                Canvas.SetTop(e, y * scale + 3 * pixelSize / 4);
                                 theCanvas.Children.Add(e);
+                                e.MouseRightButtonDown += E_MouseRightButtonDown;
+                                e.Tag = toolTipString;
                             }
                         }
                 }
 
-                ////draw the corners
-                //if (cbShowCorners.IsChecked == true && parent.corners != null && parent.corners.Count > 0)
-                //{
-                //    for (int i = 0; i < parent.corners.Count; i++)
-                //    {
-                //        var corner = parent.corners[i];
-                //        float size = 15;
-                //        Brush b = Brushes.LightBlue;
-                //        if (Abs(corner.angle.Degrees - 180) < .1 ||
-                //            Abs(corner.angle.Degrees - -180) < .1)
-                //            b = Brushes.Pink;
-                //        Ellipse e = new Ellipse()
-                //        {
-                //            Height = size,
-                //            Width = size,
-                //            Stroke = b,
-                //            Fill = b,
-                //            ToolTip = new ToolTip { HorizontalOffset = 100, Content = $"{i}", },
-                //        };
-                //        Canvas.SetTop(e, corner.pt.Y * scale - size / 2);
-                //        Canvas.SetLeft(e, corner.pt.X * scale - size / 2);
-                //        theCanvas.Children.Add(e);
-
-                //        //test out drawing little lines to represent the angle (then an elliptical arc, soon)
-                //        int i1 = 3;
-                //        PointPlus delta = corner.prevPt - corner.pt;
-                //        delta.R = i1;
-                //        PointPlus pt1 = corner.pt + delta;
-
-                //        if (!corner.curve)
-                //        {
-                //            ModuleVision2.Corner target = parent.corners.FindFirst(x => x.pt == corner.prevPt);
-                //            if (target != null && !target.curve)
-                //            {
-                //                Line l1 = new Line()
-                //                {
-                //                    X1 = corner.pt.X * scale,
-                //                    Y1 = corner.pt.Y * scale,
-                //                    X2 = corner.prevPt.X * scale,
-                //                    Y2 = corner.prevPt.Y * scale,
-                //                    Stroke = Brushes.DarkGray,
-                //                    StrokeThickness = 4,
-                //                };
-                //                theCanvas.Children.Add(l1);
-                //            }
-                //            delta = corner.nextPt - corner.pt;
-                //            delta.R = i1;
-                //            PointPlus pt2 = corner.pt + delta;
-
-                //            target = parent.corners.FindFirst(x => x.pt == corner.nextPt);
-                //            if (target != null && !target.curve)
-                //            {
-                //                Line l2 = new Line()
-                //                {
-                //                    X1 = corner.pt.X * scale,
-                //                    Y1 = corner.pt.Y * scale,
-                //                    X2 = corner.nextPt.X * scale,
-                //                    Y2 = corner.nextPt.Y * scale,
-                //                    Stroke = Brushes.DarkGray,
-                //                    StrokeThickness = 4,
-                //                };
-                //                theCanvas.Children.Add(l2);
-                //            }
-                //        }
-                //    }
-                //}
             }
             catch { }
             return true;
         }
 
+        private void E_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Rectangle r && r.Tag != null)
+                SetStatus(r.Tag.ToString());
+        }
 
         public Polyline DrawArc(PointPlus center, float radius, Angle startAngle, Angle endAngle)
         {
@@ -389,8 +297,35 @@ namespace BrainSimulator.Modules
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            ModuleVision2 parent = (ModuleVision2)base.ParentModule;
-            parent.previousFilePath = null;
+            if (sender is Button b)
+            {
+                ModuleVision2 parent = (ModuleVision2)base.ParentModule;
+                if (b.Content.ToString() == "Line")
+                {
+                        parent.SingteTestPattern();
+                }
+                if (b.Content.ToString() == "100")
+                {
+                    for (int i = 0; i < 1000; i++)
+                        parent.SingteTestPattern();
+                }
+                if (b.Content.ToString() == "Refresh")
+                {
+                    parent.Refresh();
+                }
+                if (b.Content.ToString() == "Prune")
+                {
+                    parent.Prune();
+                }
+                if (b.Content.ToString() == "Init")
+                {
+                    parent.InitArray();
+                }
+                if (b.Content.ToString() == "Clear")
+                {
+                    parent.ClearBoundaryArray();
+                }
+            }
         }
 
         private void ModuleBaseDlg_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -459,6 +394,60 @@ namespace BrainSimulator.Modules
             ModuleVision2 parent = (ModuleVision2)base.ParentModule;
             parent.previousFilePath = "";
         }
+
+
+        //helper to make rainbow colors
+        // Map a value to a rainbow color.
+        public static Color RainbowColorFromValue(float value) //value has a range -1,1
+        {
+            // Convert into a value between 0 and 1023.
+            int int_value = (int)(1023 * value);
+
+            if (int_value < -1022) //fully negative
+            {
+                return Colors.Black;
+            }
+            else if (int_value >= 1023) //fully positive
+            {
+                return Colors.White;
+            }
+            else if (int_value == 0) //0 (blue)
+            {
+                return Colors.Blue;
+            }
+            else if (int_value < 0) // -1,0 graysacle
+            {
+                int_value = (1024 - (Math.Abs(int_value) / 2) + 512) / 4;
+                return Color.FromRgb((byte)int_value, (byte)int_value, (byte)int_value);
+            }
+
+            int_value = 1023 - int_value;
+            // Map different color bands.
+            if (int_value < 256)
+            {
+                // Red to yellow. (255, 0, 0) to (255, 255, 0).
+                return Color.FromRgb(255, (byte)int_value, 0);
+            }
+            else if (int_value < 512)
+            {
+                // Yellow to green. (255, 255, 0) to (0, 255, 0).
+                int_value -= 256;
+                return Color.FromRgb((byte)(255 - int_value), 255, 0);
+            }
+            else if (int_value < 768)
+            {
+                // Green to aqua. (0, 255, 0) to (0, 255, 255).
+                int_value -= 512;
+                return Color.FromRgb(0, 255, (byte)int_value);
+            }
+            else
+            {
+                // Aqua to blue. (0, 255, 255) to (0, 0, 255).
+                int_value -= 768;
+                return Color.FromRgb(0, (byte)(255 - int_value), 255);
+            }
+        }
+
 
     }
 }

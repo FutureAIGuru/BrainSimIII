@@ -154,6 +154,7 @@ public class Relationship
             }
         }
     }
+    public float maxWeight;  //testing for vision system
 
     private int hits = 0;
     private int misses = 0;

@@ -143,10 +143,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         foreach (Relationship r in theChildren)
         {
             if (totalItemCount > 500) return;
+            //set up the label for the Thing
             Thing child = r.source;
-            //int descCount = child.GetDescendentsCount(); //this makes the system too slow
-            int descCount = 10;
-            string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
             string header = child.ToString();
             if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 
             if (r.Weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
@@ -154,7 +152,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (r.reltype.HasRelationship(null, null, UKS.theUKS.Labeled("not")) != null) //prepend ! for negative  children
                 header = "!" + header;
             if (detailsCB.IsChecked == true)
-                header += ":" + child.Children.Count + "," + descCountStr;
+                header += ":c" + child.Children.Count + ",u" + child.useCount;
             if (child.RelationshipsNoCount.Count > 0)
                 header = ChildHasReferences(UKS, child, header, depth);
 
@@ -600,7 +598,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private string ChildHasReferences(ModuleUKS UKS, Thing child, string header, int depth)
     {
-        int childCount = child.Children.Count;
+        int childCount = child.Parents.Count;
         int count = child.Relationships.Count - childCount;
         if (count > 0)
         {

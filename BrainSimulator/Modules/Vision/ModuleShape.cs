@@ -73,7 +73,7 @@ public class ModuleShape : ModuleBase
                 float bestSeqsScore = -1;
                 float angleOffset = 0; //degrees
                 int bestOffset = -1;
-                while (nextBest != null && foundShape != null)
+                while (nextBest != null && foundShape != null && foundShapes.Count > 0)
                 {
                     float score = theUKS.HasSequence(nextBest, shape, out int offset, true);
                     if (score > bestSeqsScore)
@@ -89,7 +89,9 @@ public class ModuleShape : ModuleBase
                         bestOffset = offset;
                         foundShape = nextBest;
                     }
-                    nextBest = theUKS.GetNextClosestMatch(ref bestValue);
+                    //conver to use list index instead of searching again
+                    foundShapes.RemoveAt(0);
+                    //nextBest = theUKS.GetNextClosestMatch(ref bestValue);
                 }
                 if (bestSeqsScore > 0.5 && foundShape != null)
                 {
