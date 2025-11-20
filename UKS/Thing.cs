@@ -64,6 +64,7 @@ public partial class Thing
     object value;
     public int useCount = 0;
     public DateTime lastFiredTime = new();
+    public float confidence = 0;
 
     /// <summary>
     /// Any serializable object can be attached to a Thing

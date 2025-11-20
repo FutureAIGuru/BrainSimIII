@@ -313,9 +313,9 @@ namespace BrainSimulator.Modules
                 {
                     parent.Refresh();
                 }
-                if (b.Content.ToString() == "Prune")
+                if (b.Content.ToString() == "Show")
                 {
-                    parent.Prune();
+                    parent.Show();
                 }
                 if (b.Content.ToString() == "Init")
                 {

@@ -99,7 +99,6 @@ public partial class ModuleVision2 : ModuleBase
         //initialiize the patch array 
         //create a Thing for each possible patch based on patchSize and stride
         //set all the weights so that the center has the highest weight and weights decrease radially from the center
-        //TODO: set maximum weights for each relationship
         int numPatchesX = (hSize - patchSize) / stride + 1;
         int numPatchesY = (vSize - patchSize) / stride + 1;
         int numPatchesPerPixel = patchSize * 2 - 2;
@@ -340,24 +339,18 @@ public partial class ModuleVision2 : ModuleBase
                 int y = int.Parse(nameFields[2]);
                 string centerPtLabel = $"Pt_{x:D2}_{y:D2}";
 
-
                 patch.SetFired(); //this patch was the winner.
 
-                //first case, this is a previously unused patch
-                int countOfSetEdges = patch.Relationships.Count(x => x.Weight == .1f);
-
-                bool newSettings = false;
-                if (countOfSetEdges >= 8)
-                    newSettings = true; //this patch has never been used
-                                        //we are adjusting weights of an already-set patch
+                //we are adjusting weights of an already-set patch
                 foreach (Relationship r in patch.Relationships)
                 {
                     if (r.reltype.Label != "hasBoundary") continue;
                     //do not adjust the center point
                     if (r.target.Label == centerPtLabel) continue;
 
-
+                    //did the input point fire?
                     Relationship rFound = inputPattern.Relationships.FindFirst(x => x.target == r.target);
+
                     // targets: ON -> +1, OFF -> -0.5
                     float tp = (rFound != null) ? r.maxWeight : -0.5f;
                     float eta = (rFound != null) ? 0.06f : 0.03f; // example: smaller step for OFF
@@ -377,7 +370,7 @@ public partial class ModuleVision2 : ModuleBase
 
 
     int count = 0;
-    public void Prune()
+    public void Show()
     {
         ClearBoundaryArray();
         Thing t = theUKS.GetOrAddThing("patch");

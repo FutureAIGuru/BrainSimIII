@@ -24,7 +24,7 @@
 
         <Button Content="Line" HorizontalAlignment="Left" Margin="254,0,0,82" Width="35" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
         <Button Content="100" HorizontalAlignment="Left" Margin="280,0,0,82" Width="35" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
-        <Button Content="Prune" HorizontalAlignment="Left" Margin="334,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
+        <Button Content="Show" HorizontalAlignment="Left" Margin="334,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
         <Button Content="Init" HorizontalAlignment="Left" Margin="414,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
         <Button Content="Clear" HorizontalAlignment="Left" Margin="494,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
         <Button Content="Refresh" HorizontalAlignment="Left" Margin="574,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
