@@ -126,33 +126,7 @@ public partial class ModuleVision2
         }
     }
 
-    private void MergeNearbyPoints (List<PointPlus>pts)
-    {
-        List<(int p1, int p2, float val)> distances = new();
-        for (int i = 0; i < pts.Count; i++)
-        {
-            for (int j = i+1; j < pts.Count; j++)
-            {
-                if (i == j) continue;
-                distances.Add(new (i,j,(pts[i] - pts[j]).R));
-            }
-        }
-        distances = distances.OrderBy(v=>v.val).ToList();
-        List<int> ptsToDelete = new();
-        for (int i = 0;i < distances.Count; i++)
-        {
-            if (distances[i].val >= 1) break;
-            pts[distances[i].p1].X = (pts[distances[i].p1].X + pts[distances[i].p2].X) / 2;
-            pts[distances[i].p1].Y = (pts[distances[i].p1].Y + pts[distances[i].p2].Y) / 2;
-            ptsToDelete.Add(distances[i].p2);
-        }
-        ptsToDelete = ptsToDelete.OrderByDescending(x=>x).Distinct().ToList();
-        foreach (int i in ptsToDelete)
-        {
-            pts.RemoveAt(i);
-        }
-    }
-
+  
     private void RemoveOrphanPoints(List<PointPlus> points)
     {
         //Remove orphan points which can be caused by curved edges
@@ -173,33 +147,6 @@ public partial class ModuleVision2
         neighborFound: continue;
         }
     }
-
-    //List<PointPlus> FindStrokeeCentersFromBoundaryPoints(List<PointPlus> points)
-    //{
-    //    List<PointPlus> strokeCenters = new List<PointPlus>();
-    //    foreach (PointPlus pt in points)
-    //    {
-    //        List<PointPlus> nearbyPts = GetNearbyPoints(pt, 5f, points);
-    //        foreach (PointPlus pt2 in nearbyPts)
-    //        {
-    //            if ((pt - pt2).R < 2f) continue;
-    //            PointPlus possibleStrokeCenter = (new Segment(pt2, pt).MidPoint);
-    //            List<PointPlus> nearbyPts2 = GetNearbyPoints(possibleStrokeCenter, 1f, points);
-    //            if (nearbyPts2.Count == 0 && GetLuminanceAtPoint(possibleStrokeCenter) > .8)
-    //            {
-    //                List<PointPlus> nearbyPts3 = GetNearbyPoints(possibleStrokeCenter, .7f, strokeCenters);
-    //                if (nearbyPts3.Count == 0)
-    //                    strokeCenters.Add(possibleStrokeCenter);
-    //                else
-    //                {
-    //                    //PointPlus averagePt = new PointPlus(nearbyPts3.Average(x=>x.X),nearbyPts3.Average(x=>x.Y) );
-    //                }
-
-    //            }
-    //        }
-    //    }
-    //    return strokeCenters;
-    //}
 
     private List<PointPlus> FindStrokePtsInRay(float sx, float sy, float dx, float dy, List<Color> rayThruImage)
     {
@@ -426,80 +373,7 @@ public partial class ModuleVision2
         return crossingPoint;
     }
 
-    private void FindBoundaryPtsInRay2(float sx, float sy, float dx, float dy, List<Color> rayThruImage)
-    {
-        //given a ray of color values through an image, find the boundaries
-        //todo: filter out noisy areas in the ray
-        if (sx == 21 || sy == 10)
-        { }
-
-        int start = -1;
-        for (int i = 0; i < rayThruImage.Count - 1; i++)
-        {
-            float boundaryPos = -1;
-            float diff = PixelDifference(rayThruImage[i], rayThruImage[i + 1]);
-
-            if (diff < 200)
-            {
-                //pixels are the same...move the start of a boundary
-                start = i;
-            }
-            else
-            {
-                //find the end of the boundary There are 2 pixels the same 
-                for (int j = start + 1; j < rayThruImage.Count - 1; j++)
-                {
-                    int end = j + 1;
-                    float diffEnd = PixelDifference(rayThruImage[j], rayThruImage[end]);
-                    if (diffEnd < 200)
-                    {
-                        //this will offset the boundary point based on the intensity of the intervening point
-                        List<HSLColor> colors = new List<HSLColor>();
-                        for (int k = start; k <= end; k++)
-                            colors.Add(new HSLColor(rayThruImage[k]));
-
-                        List<float> lums = new();
-                        for (int k = start; k <= end; k++)
-                        {
-                            lums.Add((new HSLColor(rayThruImage[k])).luminance);
-                        }
-
-
-                        boundaryPos = (i + j) / 2f;
-                        if (colors.Count == 4)
-                        { }
-                        else if (colors.Count == 5 || colors.Count == 6)
-                        {
-                            if (colors.Count == 6)
-                            {
-                                boundaryPos -= 0.25f;
-                                colors.RemoveAt(3);
-                            }
-                            float startingluminance = colors[0].luminance;
-                            float endingluminance = colors.Last().luminance;
-                            float centerluminance = colors[(int)colors.Count / 2].luminance;
-                            float t = 1 - (startingluminance - centerluminance) / (startingluminance - endingluminance);
-                            boundaryPos += t - 0.5f;
-                        }
-                        else boundaryPos = -1;
-                        i = j - 1;
-                        start = i;
-                        break;
-                    }
-                }
-            }
-            //boundaryPos = (start + end) / 2f;
-            if (boundaryPos < 0 || boundaryPos >= rayThruImage.Count) continue;
-            if (dx == 1 && dy == 0)
-                boundaryPoints.Add(new Point(boundaryPos, sy));
-            else if (dx == 0 && dy == 1)
-                boundaryPoints.Add(new Point(sx, boundaryPos));
-            else if (dx >= 0 && dy >= 0)
-                boundaryPoints.Add(new Point(boundaryPos + sx, boundaryPos + sy));
-            else
-                boundaryPoints.Add(new Point(sx - boundaryPos, boundaryPos + sy));
-        }
-    }
+   
 
     List<Color> LineThroughArray(float dx, float dy, int startX, int startY, Color[,] imageArray)
     {

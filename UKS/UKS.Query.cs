@@ -433,6 +433,8 @@ public partial class UKS
                 }
             }
         }
+
+        int inheritedValueCount = 0;
         //fan out from these seeds following all "inheritable" reverse connections.
         while (thingsToSearch.Count > 0)
         {
@@ -443,6 +445,7 @@ public partial class UKS
             {
                 if (!r.relType.HasProperty("inheritable")) continue;
                 if (r.source == queryThing) continue;
+                inheritedValueCount++;
                 AddToQueues(t, r.source);
                 //TODO fix this to handle isSimilarTo  (and transitive...?)
                 //var similarThings = GetListOfSimilarThings(r.source);
@@ -451,34 +454,30 @@ public partial class UKS
             }
         }
 
-        foreach (var key in searchCandidates.ToList())
+        if (inheritedValueCount > 0) //if you didn't inherit any attributes, you don't need to check for conflicts
         {
-            if (!ThingsHaveConflictingRelationship(key.Key, queryThing)) continue;
-            //searchCandidates.Remove(key.Key);
-            searchCandidates[key.Key] = searchCandidates[key.Key] - .5f;
-        }
-        if (searchCandidates.Count == 0)
-            return retVal;
-
-        // delete items which have ancestor in list too
-        for (int i = 0; i < searchCandidates.Keys.Count; i++)
-        {
-            Thing t = (Thing)searchCandidates.Keys.ToList()[i];
-            foreach (Thing t1 in t.Ancestors)
+            foreach (var key in searchCandidates.ToList())
             {
-                if (t1 != t && searchCandidates.ContainsKey(t1) && searchCandidates[t1] < 0)
-                    searchCandidates.Remove(t,out float value);
+                if (!ThingsHaveConflictingRelationship(key.Key, queryThing)) continue;
+                //searchCandidates.Remove(key.Key);
+                searchCandidates[key.Key] = searchCandidates[key.Key] - .5f;
+            }
+            if (searchCandidates.Count == 0)
+                return retVal;
+
+            // delete items which have ancestor in list too
+            for (int i = 0; i < searchCandidates.Keys.Count; i++)
+            {
+                Thing t = (Thing)searchCandidates.Keys.ToList()[i];
+                foreach (Thing t1 in t.Ancestors)
+                {
+                    if (t1 != t && searchCandidates.ContainsKey(t1) && searchCandidates[t1] < 0)
+                        searchCandidates.Remove(t, out float value);
+                }
             }
         }
 
-        ////normalize the confidences
-        //float max = searchCandidates.Max(x => x.Value);
-        //if (max < target.Relationships.Count) max = target.Relationships.Count;
-        //foreach (var v in searchCandidates)
-        //{
-        //    searchCandidates[v.Key] /= max;
-        //}
-
+        
         //create the output list
         var ordered = searchCandidates.OrderByDescending(kv => kv.Value);
         foreach (var kv in ordered)

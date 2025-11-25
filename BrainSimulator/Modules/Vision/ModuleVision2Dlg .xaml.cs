@@ -41,8 +41,6 @@ namespace BrainSimulator.Modules
             try
             {
                 labelProperties.Content = "Image: " + parent.imageArray.GetLength(0) + "x" + parent.imageArray.GetLength(1) +
-                    "\r\nSegments: " + parent.segments?.Count +
-                    //                    "\r\nCorners: " + parent.corners?.Count +
                     "\r\nOutlines: " + parent.theUKS.Labeled("Outline")?.Children.Count;
             }
             catch { return false; }
@@ -119,8 +117,8 @@ namespace BrainSimulator.Modules
                 }
 
 
-                //draw the boxes & contents
-                if (cbShowBoxes.IsChecked == true && parent.boundaryArray != null)
+                //draw the patches & contents
+                if (cbShowPatches.IsChecked == true && parent.boundaryArray != null)
                 {
                     List<Thing> thingsRecentlyFired = theUKS.UKSList.FindAll(x => x.Label.StartsWith("Patch") &&
                         x.lastFiredTime != new DateTime(0)); //> DateTime.Now - TimeSpan.FromSeconds(10));
@@ -191,7 +189,36 @@ namespace BrainSimulator.Modules
                             }
                         }
                 }
+                //draw the patch centers
+                if (cbShowCenterPts.IsChecked == true && parent.boundaryArray != null)
+                {
+                    List<Thing> patchesRecentlyFired = theUKS.UKSList.FindAll(x => x.Label.StartsWith("Patch") &&
+                        x.lastFiredTime != new DateTime(0)); //> DateTime.Now - TimeSpan.FromSeconds(10));
 
+                    foreach (Thing t in patchesRecentlyFired)
+                    {
+                        string[] parts = t.Label.Split('_');
+                        int x = int.Parse(parts[1]);
+                        int y = int.Parse(parts[2]);
+                        SolidColorBrush b = new SolidColorBrush(Colors.Pink);
+                        string toolTipString = t.Label + " c:" + t.confidence;
+                        Rectangle e = new()
+                        {
+                            Height = pixelSize * .5,
+                            Width = pixelSize * .5,
+                            Stroke = b,
+                            StrokeThickness = 12,
+                            //Fill = new SolidColorBrush(Colors.Transparent),
+                            ToolTip = new System.Windows.Controls.ToolTip
+                            { HorizontalOffset = 100, Content = toolTipString },
+                        };
+                        Canvas.SetLeft(e, (x + .75f) * scale);
+                        Canvas.SetTop(e, (y + .75f) * scale);
+                        theCanvas.Children.Add(e);
+                        e.MouseRightButtonDown += E_MouseRightButtonDown;
+                        e.Tag = toolTipString;
+                    }
+                }
             }
             catch { }
             return true;
@@ -200,7 +227,21 @@ namespace BrainSimulator.Modules
         private void E_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is Rectangle r && r.Tag != null)
+            {
                 SetStatus(r.Tag.ToString());
+                if (r.Tag.ToString().StartsWith("Patch"))
+                {
+                    ModuleVision2 parent = (ModuleVision2)base.ParentModule;
+                    var theUKS = parent.theUKS;
+                    foreach (var t1 in theUKS.UKSList) 
+                        if (t1.Label.StartsWith("Patch"))
+                            t1.lastFiredTime = new DateTime(0);
+                    var patchName = r.Tag.ToString().Split(' ')[0];
+                    var t=theUKS.Labeled(patchName);
+                    t?.SetFired();
+
+                }
+            }
         }
 
         public Polyline DrawArc(PointPlus center, float radius, Angle startAngle, Angle endAngle)
@@ -306,8 +347,10 @@ namespace BrainSimulator.Modules
                 }
                 if (b.Content.ToString() == "100")
                 {
-                    for (int i = 0; i < 1000; i++)
-                        parent.SingteTestPattern();
+                    System.Threading.Tasks.Parallel.For(0, 1000, i => parent.SingteTestPattern());
+
+                    //for (int i = 0; i < 1000; i++)
+                    //    parent.SingteTestPattern();
                 }
                 if (b.Content.ToString() == "Refresh")
                 {

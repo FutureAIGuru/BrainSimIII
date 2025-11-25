@@ -27,12 +27,11 @@ public partial class ModuleVision2 : ModuleBase
     public List<PointPlus> strokePoints = new();
     public List<PointPlus> CenterLinePts = null;
     public List<PointPlus> boundaryPoints = new();
-    bool isSingleDigit = false;
 
 
     public bool[,] boundaryArray;
-    public int hSize = 5;
-    public int vSize = 5;
+    public int hSize = 28;
+    public int vSize = 28;
     public int patchSize = 5;
     public int stride = 1;
     public int counter = 0;
@@ -66,10 +65,14 @@ public partial class ModuleVision2 : ModuleBase
         if (CurrentFilePath == previousFilePath) return;
         previousFilePath = CurrentFilePath;
 
+        if (imageArray == null)
+            imageArray = new Color[hSize, vSize];
+
+        if (boundaryArray == null) return;
+
         LoadImageFileToPixelArray(CurrentFilePath);
         FindBoundaries(imageArray);
-
-        segments = new();
+        SetBoundaryArrayFromImage();
     }
 
     Random rand = new();
@@ -114,7 +117,9 @@ public partial class ModuleVision2 : ModuleBase
                     int patchCenterX = patchX * stride + patchSize / 2;
                     int patchCenterY = patchY * stride + patchSize / 2;
                     string patchName = $"Patch_{patchCenterX:D2}_{patchCenterY:D2}_{i}";
-                    Thing patchThing = theUKS.GetOrAddThing(patchName, "patch");
+                    var grandParent = theUKS.GetOrAddThing($"Patch_{patchCenterX:D2}", "patch");
+                    var parent = theUKS.GetOrAddThing($"Patch_{patchCenterX:D2}_{patchCenterY:D2}", grandParent);
+                    Thing patchThing = theUKS.GetOrAddThing(patchName, parent);
 
                     // this is the maximum weight at the center for this patch index i
                     //float centerMaxWeight = (float)(patchSize - i * 0.1);
@@ -152,82 +157,55 @@ public partial class ModuleVision2 : ModuleBase
                             rRel.maxWeight = maxWeight;
                         }
                 }
-
-        //InitHVLInes();
     }
 
 
-    Point p1, p2;
     public void SingteTestPattern()
     {
+        PointPlus p1, p2, p3;
         do
         {
             p1 = new Point((int)(rand.NextDouble() * hSize), (int)(rand.NextDouble() * vSize));
         } while (p1.X != 0 && p1.Y != 0);
 
-        float bias = .8f;
-        if (rand.NextDouble() < bias)
+        do
         {
-            p2 = new Point(patchSize - 1 - p1.X, patchSize - 1 - p1.Y);
-        }
-        else
             p2 = new Point((int)(rand.NextDouble() * hSize), (int)(rand.NextDouble() * vSize));
-
+        } while (p2.X != hSize - 1 && p2.Y != vSize - 1);
         ClearBoundaryArray();
 
+        //p1 = new Point((int)(rand.NextDouble() * (hSize - 4) + 2), (int)(rand.NextDouble() * (vSize-4)+2));
+
+        //do
+        //{
+        //    p2 = new Point((int)(rand.NextDouble() * (hSize - 4) + 2), (int)(rand.NextDouble() * (vSize- 4) + 2));
+        //} while ((p2-p1).R < 5);
+
+        //var selector = rand.NextDouble();
+        //if (selector > .4)
+        //{
+        //    Angle a;
+        //    do
+        //    {
+        //        p3 = new Point((int)(rand.NextDouble() * hSize), (int)(rand.NextDouble() * vSize));
+        //        a = Abs((p3 - p2).Theta - (p2 - p1).Theta);
+        //    } while (a < Angle.FromDegrees(40) || a > Angle.FromDegrees(140));
+        //    DrawLine(p2, p3);
+        //}
+
         DrawLine(p1, p2);
-
-
-        /*
-         * //build a sample arc for testing
-                ClearBoundaryArray();
-                boundaryArray[1, 0] = true;
-                boundaryArray[2, 1] = true;
-                boundaryArray[2, 2] = true;
-                boundaryArray[2, 3] = true;
-                boundaryArray[1, 4] = true;
-        */
         SearchAndLearn();
-
-        //        SetBoundaryArrayFromImage();
-        //        SearchAndLearn();
-
         UpdateDialog();
-
     }
 
-    private void InitHVLInes()
-    {
-        Point p1, p2;
-
-        //draw vertical lines
-        for (int x = 1; x < hSize; x++)
-        {
-            p1 = new Point(x, 0);
-            p2 = new Point(x, 27);
-            DrawLine(p1, p2);
-            SearchAndLearn();
-            ClearBoundaryArray();
-        }
-        //draw horizontallines
-        for (int y = 1; y < vSize; y++)
-        {
-            p1 = new Point(0, y);
-            p2 = new Point(27, y);
-            DrawLine(p1, p2);
-            SearchAndLearn();
-            ClearBoundaryArray();
-        }
-    }
-
-    void DrawLine(Point p1, Point pt)
+    void DrawLine(Point p1, Point p2)
     {
 
         //create a line between p1 and pt in imageArray
         int x0 = (int)p1.X;
         int y0 = (int)p1.Y;
-        int x1 = (int)pt.X;
-        int y1 = (int)pt.Y;
+        int x1 = (int)p2.X;
+        int y1 = (int)p2.Y;
         int dx = Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
         int dy = -Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
         int err = dx + dy, e2; /* error value e_xy */
@@ -252,11 +230,18 @@ public partial class ModuleVision2 : ModuleBase
 
     public void ClearBoundaryArray()
     {
+        //hide any currently-displayed patches
+        bool dontClearBoundaryImage = false;
+        foreach (var t in theUKS.UKSList) if (t.confidence != 0) dontClearBoundaryImage = true;
+
         foreach (var t in theUKS.UKSList) t.confidence = 0;
         foreach (var t in theUKS.UKSList) t.lastFiredTime = new DateTime(0);
-        for (int x = 0; x < boundaryArray.GetLength(0); x++)
-            for (int y = 0; y < boundaryArray.GetLength(1); y++)
-                boundaryArray[x, y] = false;
+
+        //clear out the boundary
+        if (!dontClearBoundaryImage)
+            for (int x = 0; x < boundaryArray.GetLength(0); x++)
+                for (int y = 0; y < boundaryArray.GetLength(1); y++)
+                    boundaryArray[x, y] = false;
     }
 
     void SetBoundaryArrayFromImage()
@@ -272,7 +257,7 @@ public partial class ModuleVision2 : ModuleBase
             boundaryArray[x, y] = true;
         }
     }
-
+    //https://futureaisociety.org/mp-files/710.pptx/
     private void SearchAndLearn(Thing parent = null)
     {
         //create an array of the boundary points at 10x the resolution of the original image.
@@ -297,9 +282,13 @@ public partial class ModuleVision2 : ModuleBase
             var match = theUKS.SearchForClosestMatch(queryThing, "Thing");
 
             match.RemoveAll(x => x.t.Label.StartsWith("theQuery"));
+            match.RemoveAll(x => x.conf < 1.3);
 
-            if (match[0].conf < 1) return;
-
+            if (match.Count == 0)
+            {
+                theUKS.DeleteThing(queryThing);
+                return;
+            }
             int pixelCount = queryThing.Relationships.Count(x => x.Weight == 1);
 
             //mutual suppression
@@ -355,11 +344,13 @@ public partial class ModuleVision2 : ModuleBase
                     float tp = (rFound != null) ? r.maxWeight : -0.5f;
                     float eta = (rFound != null) ? 0.06f : 0.03f; // example: smaller step for OFF
                     r.Weight += eta * (tp - r.Weight);
+
                     // clamp to keep things well-behaved
                     if (r.Weight > r.maxWeight) r.Weight = r.maxWeight;
                     if (r.Weight < -1f) r.Weight = -1f;
                 }
             }
+            theUKS.DeleteThing(queryThing);
         }
         else
         {
@@ -374,13 +365,19 @@ public partial class ModuleVision2 : ModuleBase
     {
         ClearBoundaryArray();
         Thing t = theUKS.GetOrAddThing("patch");
-        if (count >= t.Children.Count)
-        {
+        var patches = t.DescendentsList();
+        if (count >= patches.Count)
             count = 0;
+
+        while (patches[count].Relationships.Count < patchSize * patchSize)
+        {
+            count++; 
+            if (count >= patches.Count) count = 0;
         }
-        t.Children[count].SetFired();
+        patches[count].SetFired();
         count++;
 
+        //this will form the "prune" function when implemented
         ////for now, only things without children are pruneable
         //for (int i = 0; i < theUKS.UKSList.Count; i++)
         //{

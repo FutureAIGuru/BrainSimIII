@@ -19,7 +19,7 @@
         <CheckBox x:Name="cbShowBoundaries" IsChecked="True" Content="Boundaries" HorizontalAlignment="Left" Margin="74,250,0,214" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom" />
         <CheckBox x:Name="cbShowSrokes" Content="Strokes" HorizontalAlignment="Left" Margin="180,250,0,214" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom" />
         <CheckBox x:Name="cbShowCenterPts" Content="CenterPts" HorizontalAlignment="Left" Margin="180,0,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom" />
-        <CheckBox x:Name="cbShowBoxes" IsChecked="True" Content="Boxes" HorizontalAlignment="Left" Margin="74,270,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="cbShowPatches" IsChecked="True" Content="Patches" HorizontalAlignment="Left" Margin="74,270,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <CheckBox x:Name="cbShowCorners" Content="Corners" HorizontalAlignment="Left" Margin="74,290,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
 
         <Button Content="Line" HorizontalAlignment="Left" Margin="254,0,0,82" Width="35" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>

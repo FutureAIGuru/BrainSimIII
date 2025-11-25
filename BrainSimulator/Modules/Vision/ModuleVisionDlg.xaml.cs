@@ -8,13 +8,12 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Shapes;
-using static System.Math;
 using System.Windows.Threading;
-using Microsoft.VisualBasic;
 using static BrainSimulator.Modules.ModuleVision;
+using static System.Math;
 
 
 namespace BrainSimulator.Modules

@@ -32,7 +32,6 @@ public partial class Thing
         //            throw new ArgumentNullException($"No Thing found with label: {label}");
         return t;
     }
-//    public static Thing HasChild { get => ThingLabels.GetThing("has-child"); }
     public static Thing IsA { get => ThingLabels.GetThing("is-a"); }
 
     private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
@@ -65,6 +64,8 @@ public partial class Thing
     public int useCount = 0;
     public DateTime lastFiredTime = new();
     public float confidence = 0;
+    //TODO consider max relationship count for all lists
+    const int maxTypeRelationships = 100;
 
     /// <summary>
     /// Any serializable object can be attached to a Thing
@@ -284,7 +285,6 @@ public partial class Thing
         for (int i = 0; i < retVal.Count; i++)
         {
             Thing t = retVal[i];
-            //IList<Relationship> relationshipsToFollow = followUpwards ? t.RelationshipsFrom : t.Relationships;
             IList<Relationship> relationshipsToFollow = followUpwards ? t.Relationships : t.RelationshipsFrom;
             foreach (Relationship r in relationshipsToFollow)
             {
@@ -356,7 +356,7 @@ public partial class Thing
                     {
                         RelationshipsWriteable.Add(r);
                         target.RelationshipsFromWriteable.Add(r);
-                        if (!relationshipType.RelationshipsAsTypeWriteable.Contains(r))
+                        if (relationshipType.RelationshipsAsTypeWriteable.Count < maxTypeRelationships && !relationshipType.RelationshipsAsTypeWriteable.Contains(r))
                             relationshipType.RelationshipsAsTypeWriteable.Add(r);
                     }
         }
@@ -373,7 +373,7 @@ public partial class Thing
                 lock (relationshipType.relationshipsAsType)
                 {
                     RelationshipsWriteable.Add(r);
-                    if (!relationshipType.RelationshipsAsTypeWriteable.Contains(r))
+                    if (relationshipType.RelationshipsAsTypeWriteable.Count < maxTypeRelationships && !relationshipType.RelationshipsAsTypeWriteable.Contains(r))
                         relationshipType.RelationshipsAsTypeWriteable.Add(r);
                 }
         }
