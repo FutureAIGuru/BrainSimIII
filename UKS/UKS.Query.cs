@@ -358,45 +358,6 @@ public partial class UKS
     }
 
     /// <summary>
-    /// Given that you have performed a search with SearchForClosestMatch, this returns the next-best result
-    /// given the previous best.
-    /// </summary>
-    /// <param name="confidence">value representin the quality of the match</param>
-    /// <returns></returns>
-/*    public Thing GetNextClosestMatch(ref float confidence)
-    {
-        Thing bestThing = null;
-        confidence = -1;
-        if (searchCandidates == null) return bestThing;
-
-        //find the best match with a value LESS THAN the previous best
-        foreach (var key in searchCandidates)
-            if (key.Value > confidence)
-            {
-                confidence = key.Value;
-                bestThing = key.Key;
-            }
-
-        //remove the item from the dictionary
-        if (bestThing != null)
-            searchCandidates.Remove(bestThing,out float value);
-        return bestThing;
-    }
-
-    //this will be expanded to transitive...
-    private List<Thing> GetListOfSimilarThings(Thing t)
-    {
-        List<Thing> retVal = new();
-        foreach (Relationship r in t.Relationships)
-            if (r.relType.Label == "isSimilarTo")
-                retVal.Add(r.target);
-        foreach (Relationship r in t.RelationshipsFrom)
-            if (r.relType.Label == "isSimilarTo" && !retVal.Contains(r.source))
-                retVal.Add(r.source);
-        return retVal;
-    }
-*/
-    /// <summary>
     /// Search for the Thing which most closely resembles the target Thing based on the attributes of the target
     /// </summary>
     /// <param name="queryThing">The Relationships of this Thing are the attributes to search on</param>

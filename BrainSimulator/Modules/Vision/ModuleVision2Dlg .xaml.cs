@@ -7,6 +7,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -120,7 +121,7 @@ namespace BrainSimulator.Modules
                 //draw the patches & contents
                 if (cbShowPatches.IsChecked == true && parent.boundaryArray != null)
                 {
-                    List<Thing> thingsRecentlyFired = theUKS.UKSList.FindAll(x => x.Label.StartsWith("Patch") &&
+                    List<Thing> thingsRecentlyFired = theUKS.UKSList.FindAll(x => x.Label.ToLower().StartsWith("patch") &&
                         x.lastFiredTime != new DateTime(0)); //> DateTime.Now - TimeSpan.FromSeconds(10));
                     (float,float) [,] maxWeights = new (float,float)[parent.boundaryArray.GetLength(0), parent.boundaryArray.GetLength(1)];
                     for (int i = 0; i < maxWeights.GetLength(0); i++)
@@ -347,10 +348,17 @@ namespace BrainSimulator.Modules
                 }
                 if (b.Content.ToString() == "100")
                 {
-                    System.Threading.Tasks.Parallel.For(0, 1000, i => parent.SingteTestPattern());
+                    //this doesn't work because everybody uses the same boundary array
+                    //System.Threading.Tasks.Parallel.For(0, 1000, i => parent.SingteTestPattern());
 
-                    //for (int i = 0; i < 1000; i++)
-                    //    parent.SingteTestPattern();
+                    //spawn the following as a separate thread so the UI can update
+                    Task backgroundTask = Task.Run(() =>
+                    {
+                        for (int i = 0; i < 1000; i++)
+                            parent.SingteTestPattern();
+                    });
+
+
                 }
                 if (b.Content.ToString() == "Refresh")
                 {
