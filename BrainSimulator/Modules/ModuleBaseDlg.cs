@@ -8,6 +8,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -99,11 +100,13 @@ public class ModuleBaseDlg : Window
             throw new DirectoryNotFoundException($"Root path not found: {rootPath}");
 
         // Enumerate all files recursively and compare names only
-        return Directory.EnumerateFiles(rootPath, "*", SearchOption.AllDirectories)
+        var x = Directory.EnumerateFiles(rootPath, "*", SearchOption.AllDirectories);
+        string? retVal = Directory.EnumerateFiles(rootPath, "*", SearchOption.AllDirectories)
                         .FirstOrDefault(f => string.Equals(
                             Path.GetFileName(f),
                             fileName,
                             StringComparison.OrdinalIgnoreCase));
+        return retVal;
     }
 
     private void SourceButton_Click(object sender, RoutedEventArgs e)
@@ -113,9 +116,17 @@ public class ModuleBaseDlg : Window
         cwd = cwd.ToLower().Replace("bin\\debug\\net8.0-windows", "") + @"modules\";
         string dlgFilePath = FindFile(cwd, theModuleType + ".xaml.cs");
         string csFilePath = FindFile(cwd,theModuleType.Substring(0,theModuleType.Length-3) + ".cs");
+        csFilePath = "\"" + csFilePath + "\"";
+        dlgFilePath = "\"" + dlgFilePath + "\"";
 
         //find visiaul studio
-        string taskFile = @"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe";
+        string taskFile = "";
+        if (!File.Exists(taskFile))
+            taskFile = @"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\devenv.exe";
+        if (!File.Exists(taskFile))
+            taskFile = @"C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\devenv.exe";
+        if (!File.Exists(taskFile))
+            taskFile = @"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe";
         if (!File.Exists(taskFile))
             taskFile = @"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe";
         if (!File.Exists(taskFile))

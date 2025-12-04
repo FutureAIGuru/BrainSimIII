@@ -4,7 +4,6 @@
 // © 2022 FutureAI, Inc., all rights reserved
 //
 
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using UKS;
-using static BrainSimulator.Modules.ModuleVision;
 using static System.Math;
 
 
@@ -122,78 +120,14 @@ namespace BrainSimulator.Modules
                 if (cbShowPatches.IsChecked == true && parent.boundaryArray != null)
                 {
                     List<Thing> thingsRecentlyFired = theUKS.UKSList.FindAll(x => x.Label.ToLower().StartsWith("patch") &&
-                        x.lastFiredTime != new DateTime(0)); //> DateTime.Now - TimeSpan.FromSeconds(10));
-                    (float,float) [,] maxWeights = new (float,float)[parent.boundaryArray.GetLength(0), parent.boundaryArray.GetLength(1)];
-                    for (int i = 0; i < maxWeights.GetLength(0); i++)
-                        for (int j = 0; j < maxWeights.GetLength(1); j++)
-                            maxWeights[i, j] = (-1,-1);
-
+                        x.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(10));
                     foreach (Thing t in thingsRecentlyFired)
-                    {
-                        string[] parts = t.Label.Split('_');
-                        int x = int.Parse(parts[1]);
-                        int y = int.Parse(parts[2]);
-                        SolidColorBrush b = new SolidColorBrush(Colors.Pink);
-                        string toolTipString = t.Parents[0].Label[0] + t.Label + " c:" + t.confidence;
-                        Rectangle e = new()
-                        {
-                            Height = pixelSize * (parent.patchSize - .3),
-                            Width = pixelSize * (parent.patchSize - .3),
-                            Stroke = b,
-                            StrokeThickness = 12,
-                            //Fill = new SolidColorBrush(Colors.Transparent),
-                            ToolTip = new System.Windows.Controls.ToolTip
-                            { HorizontalOffset = 100, Content = toolTipString },
-                        };
-                        Canvas.SetLeft(e, (x + .65f - parent.patchSize / 2) * scale);
-                        Canvas.SetTop(e, (y + .65f - parent.patchSize / 2) * scale);
-                        theCanvas.Children.Add(e);
-                        e.MouseRightButtonDown += E_MouseRightButtonDown;
-                        e.Tag = toolTipString;
-
-                        foreach (Relationship pt in t.Relationships)
-                        {
-                            if (pt.reltype.Label != "hasBoundary") continue;
-                            parts = pt.target.Label.Split('_');
-                            x = int.Parse(parts[1]);
-                            y = int.Parse(parts[2]);
-                            if (pt.Weight > maxWeights[x, y].Item1)
-                                maxWeights[x, y] = (pt.Weight,maxWeights[x,y].Item2);  //this is to handle overlapping patches
-                            if (pt.maxWeight > maxWeights[x, y].Item2)
-                                maxWeights[x, y] = (maxWeights[x, y].Item1,pt.maxWeight);  //this is to handle overlapping patches
-                        }
-                    }
-
-                    for (int x = 0; x < maxWeights.GetLength(0); x++)
-                        for (int y = 0; y < maxWeights.GetLength(1); y++)
-                        {
-                            float theWeight = maxWeights[x, y].Item1;
-                            float theMaxWeight = maxWeights[x, y].Item2;
-                            //if (theWeight != 0)
-                            {
-                                SolidColorBrush b = new SolidColorBrush(RainbowColorFromValue(theWeight));
-                                string toolTipString = $"({(int)x},{(int)y}) w: {theWeight:F2}  max: {theMaxWeight:F2}  ";
-                                Rectangle e = new()
-                                {
-                                    Height = pixelSize / 2,
-                                    Width = pixelSize / 2,
-                                    Stroke = b,
-                                    Fill = b,
-                                    ToolTip = new System.Windows.Controls.ToolTip
-                                    { HorizontalOffset = 100, Content = toolTipString },
-                                };
-                                Canvas.SetLeft(e, x * scale + 3 * pixelSize / 4);
-                                Canvas.SetTop(e, y * scale + 3 * pixelSize / 4);
-                                theCanvas.Children.Add(e);
-                                e.MouseRightButtonDown += E_MouseRightButtonDown;
-                                e.Tag = toolTipString;
-                            }
-                        }
+                        DrawAPatch(pixelSize, t);
                 }
                 //draw the patch centers
                 if (cbShowCenterPts.IsChecked == true && parent.boundaryArray != null)
                 {
-                    List<Thing> patchesRecentlyFired = theUKS.UKSList.FindAll(x => x.Label.StartsWith("Patch") &&
+                    List<Thing> patchesRecentlyFired = theUKS.UKSList.FindAll(x => x.Label.StartsWith("patch") &&
                         x.lastFiredTime != new DateTime(0)); //> DateTime.Now - TimeSpan.FromSeconds(10));
 
                     foreach (Thing t in patchesRecentlyFired)
@@ -220,9 +154,93 @@ namespace BrainSimulator.Modules
                         e.Tag = toolTipString;
                     }
                 }
+                //draw the corner content
+                if (cbShowCorners.IsChecked == true && parent.boundaryArray != null)
+                {
+                    List<Thing> cornersRecentlyFired = theUKS.UKSList.FindAll(x => x.Label.StartsWith("corner") &&
+                        x.lastFiredTime != new DateTime(0)); //> DateTime.Now - TimeSpan.FromSeconds(10));
+
+                    foreach (Thing t in cornersRecentlyFired)
+                    {
+                        string[] parts = t.Label.Split('_');
+                        int x = int.Parse(parts[1]);
+                        int y = int.Parse(parts[2]);
+                        SolidColorBrush b = new SolidColorBrush(Colors.Green);
+                        string toolTipString = t.Label + " c:" + t.confidence;
+                        Rectangle e = new()
+                        {
+                            Height = pixelSize * .5,
+                            Width = pixelSize * .5,
+                            Stroke = b,
+                            StrokeThickness = 12,
+                            //Fill = new SolidColorBrush(Colors.Transparent),
+                            ToolTip = new System.Windows.Controls.ToolTip
+                            { HorizontalOffset = 100, Content = toolTipString },
+                        };
+                        Canvas.SetLeft(e, (x + .75f) * scale);
+                        Canvas.SetTop(e, (y + .75f) * scale);
+                        theCanvas.Children.Add(e);
+                        e.MouseRightButtonDown += E_MouseRightButtonDown;
+                        e.Tag = toolTipString;
+                    }
+                }
             }
             catch { }
             return true;
+        }
+
+        private void DrawAPatch(int pixelSize, Thing t)
+        {
+            ModuleVision2 parent = (ModuleVision2)base.ParentModule;
+            //foreach (Thing t in patchToDisplay)
+            {
+                string[] parts = t.Label.Split('_');
+                int x = int.Parse(parts[1]);
+                int y = int.Parse(parts[2]);
+                SolidColorBrush b = new SolidColorBrush(Colors.Pink);
+                string toolTipString = t.Parents[0].Label[0] + t.Label + " c:" + t.confidence;
+                Rectangle e = new()
+                {
+                    Height = pixelSize * (parent.patchSize - .3),
+                    Width = pixelSize * (parent.patchSize - .3),
+                    Stroke = b,
+                    StrokeThickness = 12,
+                    //Fill = new SolidColorBrush(Colors.Transparent),
+                    ToolTip = new System.Windows.Controls.ToolTip
+                    { HorizontalOffset = 100, Content = toolTipString },
+                };
+                Canvas.SetLeft(e, (x + .65f - parent.patchSize / 2) * scale);
+                Canvas.SetTop(e, (y + .65f - parent.patchSize / 2) * scale);
+                theCanvas.Children.Add(e);
+                e.MouseRightButtonDown += E_MouseRightButtonDown;
+                e.Tag = toolTipString;
+
+             
+                foreach (Relationship pt in t.Relationships)
+                {
+                    if (pt.reltype.Label != "hasBoundary") continue;
+                    parts = pt.target.Label.Split('_');
+                    x = int.Parse(parts[1]);
+                    y = int.Parse(parts[2]);
+                    float theWeight = pt.Weight;
+                    b = new SolidColorBrush(RainbowColorFromValue(theWeight));
+                    toolTipString = $"({(int)x},{(int)y}) w: {theWeight:F2}  max: {pt.maxWeight:F2}  ";
+                    e = new()
+                    {
+                        Height = pixelSize / 2,
+                        Width = pixelSize / 2,
+                        Stroke = b,
+                        Fill = b,
+                        ToolTip = new System.Windows.Controls.ToolTip
+                        { HorizontalOffset = 100, Content = toolTipString },
+                    };
+                    Canvas.SetLeft(e, x * scale + 3 * pixelSize / 4);
+                    Canvas.SetTop(e, y * scale + 3 * pixelSize / 4);
+                    theCanvas.Children.Add(e);
+                    e.MouseRightButtonDown += E_MouseRightButtonDown;
+                    e.Tag = toolTipString;
+                }
+            }
         }
 
         private void E_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
@@ -230,7 +248,7 @@ namespace BrainSimulator.Modules
             if (sender is Rectangle r && r.Tag != null)
             {
                 SetStatus(r.Tag.ToString());
-                if (r.Tag.ToString().StartsWith("Patch"))
+                if (r.Tag.ToString().StartsWith("patch"))
                 {
                     ModuleVision2 parent = (ModuleVision2)base.ParentModule;
                     var theUKS = parent.theUKS;
@@ -342,7 +360,7 @@ namespace BrainSimulator.Modules
             if (sender is Button b)
             {
                 ModuleVision2 parent = (ModuleVision2)base.ParentModule;
-                if (b.Content.ToString() == "Line")
+                if (b.Content.ToString() == "Test")
                 {
                         parent.SingteTestPattern();
                 }
@@ -354,7 +372,7 @@ namespace BrainSimulator.Modules
                     //spawn the following as a separate thread so the UI can update
                     Task backgroundTask = Task.Run(() =>
                     {
-                        for (int i = 0; i < 1000; i++)
+                        for (int i = 0; i < 5000; i++)
                             parent.SingteTestPattern();
                     });
 

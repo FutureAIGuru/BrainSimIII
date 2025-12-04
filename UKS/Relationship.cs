@@ -293,7 +293,7 @@ public class Relationship
             retVal += ((retVal == "") ? "" : "->") + targ?.Label + ThingProperties(targ) + string.Join(", ", targetModifierString);
         else if (targetModifierString.Length > 0)
             retVal += targetModifierString;
-        retVal += $"[{Weight:F1}]";
+        retVal += $"[{Weight:F3}]";
         return retVal;
     }
 

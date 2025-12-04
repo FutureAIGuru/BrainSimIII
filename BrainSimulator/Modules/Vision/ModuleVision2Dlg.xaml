@@ -22,8 +22,8 @@
         <CheckBox x:Name="cbShowPatches" IsChecked="True" Content="Patches" HorizontalAlignment="Left" Margin="74,270,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <CheckBox x:Name="cbShowCorners" Content="Corners" HorizontalAlignment="Left" Margin="74,290,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
 
-        <Button Content="Line" HorizontalAlignment="Left" Margin="254,0,0,82" Width="35" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
-        <Button Content="100" HorizontalAlignment="Left" Margin="280,0,0,82" Width="35" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
+        <Button Content="Test" HorizontalAlignment="Left" Margin="254,0,0,82" Width="45" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
+        <Button Content="100" HorizontalAlignment="Left" Margin="295,0,0,82" Width="35" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
         <Button Content="Show" HorizontalAlignment="Left" Margin="334,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
         <Button Content="Init" HorizontalAlignment="Left" Margin="414,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>
         <Button Content="Clear" HorizontalAlignment="Left" Margin="494,0,0,82" Width="69" FontSize="16" Click="Button_Click" VerticalAlignment="Bottom"/>

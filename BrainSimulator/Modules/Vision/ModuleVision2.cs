@@ -1,7 +1,7 @@
 ﻿//
 // PROPRIETARY AND CONFIDENTIAL
 // Brain Simulator 3 v.1.0
-// © 2022 FutureAI, Inc., all rights reserved
+// © 2025 Charles Simon, all rights reserved
 //
 
 using System;
@@ -28,8 +28,8 @@ public partial class ModuleVision2 : ModuleBase
 
     //to hold the detected boundary points
     public bool[,] boundaryArray;
-    public int hSize = 10  ;
-    public int vSize = 10;
+    public int hSize = 15;
+    public int vSize = 15;
     public int patchSize = 5;
     public int stride = 1;
     public int counter = 0;
@@ -110,24 +110,73 @@ public partial class ModuleVision2 : ModuleBase
         string layerName = "patch";
 
         InitializeLayer(prevLayerName, numPatchesX, numPatchesY, numPatchesPerPixel, half, layerName);
-        InitializeLayer("patch", numPatchesX, numPatchesY, 16, 1, "corner");
+        //InitializeLayer("patch", numPatchesX, numPatchesY, 16, 1, "corner");
+        //TestCounterPatch();
+    }
+    void TestCounterPatch()
+    {
+        int half = 1;
+        Point center = new PointPlus(1, 1f);
+        Thing parent = theUKS.GetOrAddThing("counter");
+        Thing relType = theUKS.GetOrAddThing("count", "RelationshipType");
+        Thing notype = theUKS.GetOrAddThing("not", "RelationshipType");
+
+        //connections from lower levels
+        for (int i = 0; i < 8; i++)
+        {
+            Thing counter = theUKS.GetOrAddThing($"counter_{center.X:F0}_{center.Y:F0}_{i}", parent);
+            for (int x = -half; x < half + 1; x++)
+                for (int y = -half; y < half + 1; y++)
+                {
+                    float weight = (i == 0) ? 0 : .1f / (float)i;
+                    float centerWeight = (i == 0) ? 1.0f : .9f;
+                    if (x == 0 && y == 0) weight = centerWeight;
+                    string targetName = $"pt_{(int)(center.X + x):D2}_{((int)center.Y + y):D2}";
+                    Thing pt = theUKS.Labeled(targetName);
+                    if (pt == null) continue;
+                    Relationship r = counter.AddRelationship(pt, relType, true, weight);
+                }
+        }
+
+        //mutual suppression
+        for (int i = 7; i >= 0; i--)
+            for (int j = i - 1; j >= 0; j--)
+            {
+                if (i == j) continue;
+                string srcName = $"counter_{center.X:F0}_{center.Y:F0}_{i}";
+                string trgName = $"counter_{center.X:F0}_{center.Y:F0}_{j}";
+                theUKS.Labeled(srcName).AddRelationship(trgName, notype, true, -1.0f);
+            }
     }
 
     private void InitializeLayer(string prevLayerName, int numPatchesX, int numPatchesY, int numPatchesPerPixel, int half, string layerName)
     {
+        // allocate all the nodes            
         theUKS.GetOrAddThing(layerName);
+        for (int i = 0; i < numPatchesPerPixel; i++)
+            for (int patchX = 0; patchX < numPatchesX; patchX++)
+                for (int patchY = 0; patchY < numPatchesY; patchY++)
+                {
+
+                    int patchCenterX = patchX * stride + half;
+                    int patchCenterY = patchY * stride + half;
+                    string patchName = $"{layerName}_{patchCenterX:D2}_{patchCenterY:D2}_{i}";
+                    var grandParent = theUKS.GetOrAddThing($"{layerName}_{patchCenterX:D2}", layerName);
+                    var parent = theUKS.GetOrAddThing($"{layerName}_{patchCenterX:D2}_{patchCenterY:D2}", grandParent);
+                    Thing patchThing = theUKS.GetOrAddThing(patchName, parent);
+                }
+
+        // add the connections from the previous layer
         float minWeight = 0.1f;
         float maxRadius = (float)Math.Sqrt(half * half + half * half);
         for (int i = 0; i < numPatchesPerPixel; i++)
             for (int patchX = 0; patchX < numPatchesX; patchX++)
                 for (int patchY = 0; patchY < numPatchesY; patchY++)
                 {
-                    int patchCenterX = patchX * stride + patchSize / 2;
-                    int patchCenterY = patchY * stride + patchSize / 2;
+                    int patchCenterX = patchX * stride + half;
+                    int patchCenterY = patchY * stride + half;
                     string patchName = $"{layerName}_{patchCenterX:D2}_{patchCenterY:D2}_{i}";
-                    var grandParent = theUKS.GetOrAddThing($"{layerName}_{patchCenterX:D2}", layerName);
-                    var parent = theUKS.GetOrAddThing($"{layerName}_{patchCenterX:D2}_{patchCenterY:D2}", grandParent);
-                    Thing patchThing = theUKS.GetOrAddThing(patchName, parent);
+                    Thing patchThing = theUKS.GetOrAddThing(patchName);
 
                     // this is the maximum weight at the center for this patch index i
                     //float centerMaxWeight = (float)(patchSize - i * 0.1);
@@ -191,13 +240,14 @@ public partial class ModuleVision2 : ModuleBase
         PointPlus p1, p2, p3;
         ClearBoundaryArray();
 
-        int testMethod = 0;
-        if (testMethod == 0)
+        int testMethod = 2;
+        if (testMethod == 0)  //fixed little segment
         {
             p1 = new PointPlus(2, 2f);
             p2 = new PointPlus(2, 4f);
+            DrawLine(p1, p2);
         }
-        else if (testMethod == 1)
+        else if (testMethod == 1) //random line
         {
             do
             {
@@ -208,15 +258,16 @@ public partial class ModuleVision2 : ModuleBase
             {
                 p2 = new Point((int)(rand.NextDouble() * hSize), (int)(rand.NextDouble() * vSize));
             } while (p2.X != hSize - 1 && p2.Y != vSize - 1);
+            DrawLine(p1, p2);
         }
-        else
+        else if (testMethod == 2) //random corner
         {
             p1 = new Point((int)(rand.NextDouble() * (hSize - 4) + 2), (int)(rand.NextDouble() * (vSize - 4) + 2));
 
             do
             {
                 p2 = new Point((int)(rand.NextDouble() * (hSize - 4) + 2), (int)(rand.NextDouble() * (vSize - 4) + 2));
-            } while ((p2 - p1).R < 2);
+            } while ((p2 - p1).R < 5);
 
             var selector = rand.NextDouble();
             if (selector > .4)
@@ -226,11 +277,31 @@ public partial class ModuleVision2 : ModuleBase
                 {
                     p3 = new Point((int)(rand.NextDouble() * hSize), (int)(rand.NextDouble() * vSize));
                     a = Abs((p3 - p2).Theta - (p2 - p1).Theta);
-                } while (a < Angle.FromDegrees(40) || a > Angle.FromDegrees(140));
+                } while (a < Angle.FromDegrees(40) || a > Angle.FromDegrees(140) && (p3-p2).R < 5);
                 DrawLine(p2, p3);
             }
+            DrawLine(p1, p2);
         }
-        DrawLine(p1, p2);
+        else if (testMethod == 3) //random counter-test
+        {
+            int numPts = (int)(rand.NextDouble() * 9);
+            //int numPts = 2;
+
+            boundaryArray[1, 1] = true;
+
+            for (int i = 0; i < numPts; i++)
+            {
+                int x, y;
+                do
+                {
+                    x = (int)(rand.NextDouble() * 3);
+                    y = (int)(rand.NextDouble() * 3);
+                    if (x == 1 && y == 1)
+                    { }
+                } while (boundaryArray[x, y] || (x== 1 && y == 1));
+                boundaryArray[x, y] = true;
+            }
+        }
         SearchAndLearn();
         UpdateDialog();
     }
@@ -269,7 +340,7 @@ public partial class ModuleVision2 : ModuleBase
     {
         //hide any currently-displayed patches
         bool dontClearBoundaryImage = false;
-        foreach (var t in theUKS.UKSList) if (t.confidence != 0) dontClearBoundaryImage = true;
+        //foreach (var t in theUKS.UKSList) if (t.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(10)) dontClearBoundaryImage = true;
 
         foreach (var t in theUKS.UKSList) t.confidence = 0;
         foreach (var t in theUKS.UKSList) t.lastFiredTime = new DateTime(0);
@@ -298,7 +369,6 @@ public partial class ModuleVision2 : ModuleBase
     private void SearchAndLearn(Thing parent = null)
     {
         //Build the queryThing from the boundaryPoints Array
-        int sizeMultipler = 1;
 
         Thing queryThing = new Thing() { Label = "theQuery" };
         for (int x = 0; x < boundaryArray.GetLength(0); x++)
@@ -309,39 +379,45 @@ public partial class ModuleVision2 : ModuleBase
                 {
                     string attrName = $"Pt_{x:D2}_{y:D2}";
                     queryThing.AddRelationship(attrName, "hasBoundary");
+                    //queryThing.AddRelationship(attrName, "count");
                 }
             }
         }
 
         var resultl = LearnConnections(queryThing);
         theUKS.DeleteThing(queryThing);
-        queryThing = new Thing() { Label = "theQuery" };
+        //queryThing = new Thing() { Label = "theQuery" };
 
-        foreach (var v in resultl)
-        {
-            Relationship r = queryThing.AddRelationship(v.t, "hasBoundary");
-            r.Weight = v.conf;
-        }
-        var result2 = LearnConnections(queryThing);
-        theUKS.DeleteThing(queryThing);
+        //foreach (var v in resultl)
+        //{
+        //    Relationship r = queryThing.AddRelationship(v.t, "hasBoundary");
+        //    r.Weight = v.conf;
+        //}
+        //var result2 = LearnConnections(queryThing);
+        //theUKS.DeleteThing(queryThing);
     }
 
-    private List<(Thing t,float conf)> LearnConnections(Thing queryThing)
+    private List<(Thing t, float conf)> LearnConnections(Thing queryThing)
     {
-        List<(Thing t,float conf)> match = new();
-        if (queryThing.Relationships.Count > 1)
+        List<(Thing t, float conf)> match = new();
+        if (queryThing.Relationships.Count > 0)
         {
             match = theUKS.SearchForClosestMatch(queryThing, "Thing");
 
             match.RemoveAll(x => x.t.Label.StartsWith("theQuery"));
-            match.RemoveAll(x => x.conf < 1.3);
+            match.RemoveAll(x => x.conf < 1.3f);  //TODO this const changes with patch size  (patch 5 = 1.3f)
+            //match.RemoveAll(x => x.conf < .9999f);  //TODO this const changes with patch size  (patch 5 = 1.3f)
 
             if (match.Count == 0)
             {
                 theUKS.DeleteThing(queryThing);
                 return match;
             }
+            //
+            var bestHit = match.MinBy(x => x.conf);
+            bestHit.t.SetFired();
 
+   
             //mutual suppression
             for (int i = 0; i < match.Count; i++)
             {
@@ -358,7 +434,6 @@ public partial class ModuleVision2 : ModuleBase
                     }
                 }
             }
-
 
             foreach (var item in match)
             {
@@ -410,7 +485,7 @@ public partial class ModuleVision2 : ModuleBase
 
         while (patches[count].Relationships.Count < patchSize * patchSize)
         {
-            count++; 
+            count++;
             if (count >= patches.Count) count = 0;
         }
         patches[count].SetFired();

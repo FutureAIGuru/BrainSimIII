@@ -402,6 +402,15 @@ public partial class UKS
             var t = thingsToSearch[0];
             thingsToSearch.RemoveAt(0);
             alreadySearched.Add(t);
+            //"not" is a test of mutual suppression HACK?
+            foreach (Relationship r in t.Relationships)
+            {
+                if (r.relType.Label != "not") continue;
+                if (searchCandidates[r.source]>= .999f) //dubious thresholding (works in this case)
+                    searchCandidates[r.target] += r.Weight;
+            }
+
+            //search further
             foreach (Relationship r in t.RelationshipsFrom)
             {
                 if (!r.relType.HasProperty("inheritable")) continue;
@@ -452,7 +461,8 @@ public partial class UKS
             if (tNew == queryThing) return false;
             if (!searchCandidates.ContainsKey(tNew))
                 searchCandidates[tNew] = 0; //initialize a new dictionary entry if needed
-            searchCandidates[tNew] += searchCandidates[tPrev] * GetRelationshipWeight(tNew, tPrev);
+            float weight = GetRelationshipWeight(tNew, tPrev);
+            searchCandidates[tNew] += searchCandidates[tPrev] * weight;
             if (alreadySearched.FindFirst(x => x == tNew) != null) return false;
             if (thingsToSearch.FindFirst(x => x == tNew) != null) return false;
             thingsToSearch.Add(tNew);
