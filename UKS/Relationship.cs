@@ -10,7 +10,7 @@ using System.Windows;
 
 namespace UKS;
 
-//these are used so that relatinoship lists can be readOnly.
+//these are used so that relationship lists can be readOnly.
 //This prevents programmers from accidentally doing a (e.g.) relationships.Add() which will not handle reverse links properly
 //Why the IList doesn't have FindFirst, FindAll, and FindIndex is a ???
 public static class IListExtensions
@@ -64,25 +64,25 @@ public class Clause
     }
 };
 
-/// <summary>
-/// This is used internally during query processing
-/// </summary>
+///// <summary>
+///// This is used internally during query processing
+///// </summary>
 
-public class QueryRelationship : Relationship
-{
-    public List<Thing> typeProperties = new();
-    public List<Thing> sourceProperties = new();
-    public List<Thing> targetProperties = new();
-    public QueryRelationship() { }
-    public QueryRelationship(Relationship r)
-    {
-        source = r.source;
-        reltype = r.reltype;
-        target = r.target;
-        foreach (Clause c in r.Clauses)
-            Clauses.Add(c);
-    }
-}
+//public class QueryRelationship : Relationship
+//{
+//    public List<Thing> typeProperties = new();
+//    public List<Thing> sourceProperties = new();
+//    public List<Thing> targetProperties = new();
+//    public QueryRelationship() { }
+//    public QueryRelationship(Relationship r)
+//    {
+//        source = r.source;
+//        reltype = r.reltype;
+//        target = r.target;
+//        foreach (Clause c in r.Clauses)
+//            Clauses.Add(c);
+//    }
+//}
 
 /// <summary>
 /// In the lexicon of graphs, a Relationship is an "edge".

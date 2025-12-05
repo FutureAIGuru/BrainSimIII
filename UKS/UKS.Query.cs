@@ -324,13 +324,8 @@ public partial class UKS
         {
             if (c.clauseType.Label.ToLower() != "if") continue;
             Relationship r1 = c.clause;
-            QueryRelationship q = new(r1);
-            //if (query.source != null && query.source.AncestorList().Contains(q.source))
-            //    q.source = query.source;
-            //if (query.source != null && query.source.AncestorList().Contains(q.target))
-            //    q.target = query.target;
-            //if (query.target != null && query.target.AncestorList().Contains(q.source))
-            //    q.source = query.target;
+            Relationship q = new(r1);
+
             var qResult = GetRelationship(q);
             if (qResult != null && qResult.Weight < 0.8)
                 return false;
