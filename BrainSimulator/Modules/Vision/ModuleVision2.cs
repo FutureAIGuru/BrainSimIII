@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -111,7 +112,17 @@ public partial class ModuleVision2 : ModuleBase
 
         InitializeLayer(prevLayerName, numPatchesX, numPatchesY, numPatchesPerPixel, half, layerName);
         //InitializeLayer("patch", numPatchesX, numPatchesY, 16, 1, "corner");
-        //TestCounterPatch();
+        InitCornerPoints();
+    }
+    void InitCornerPoints()
+    {
+        theUKS.GetOrAddThing("corner");
+        for (int x = 0; x < boundaryArray.GetLength(0); x++)
+            for (int y = 0; y < boundaryArray.GetLength(1); y++)
+            {
+                string attrName = $"corner_{x:D2}_{y:D2}";
+                theUKS.GetOrAddThing(attrName, "corner");
+            }
     }
     void TestCounterPatch()
     {
@@ -198,6 +209,7 @@ public partial class ModuleVision2 : ModuleBase
 
                             // interpolate between minWeight and centerMaxWeight based on distance
                             float maxWeight = minWeight + (centerMaxWeight - minWeight) * radial;
+                            maxWeight *= .75f;  //reduces extraneous hits
 
                             //float maxWeight = minWeight + (1.5f - minWeight) * radial;
                             float initialWeight = maxWeight / 2;
@@ -233,31 +245,93 @@ public partial class ModuleVision2 : ModuleBase
                             rRel.maxWeight = maxWeight;
                         }
                 }
+
+        //add connections to nearest-neighbor patches which can be strengthened later to represent linear features
+        theUKS.GetOrAddThing("collinearWith", "RelationshipType");
+        for (int i = 0; i < numPatchesPerPixel; i++)
+            for (int patchX = 0; patchX < numPatchesX; patchX++)
+                for (int patchY = 0; patchY < numPatchesY; patchY++)
+                {
+                    int patchCenterX = patchX * stride + half;
+                    int patchCenterY = patchY * stride + half;
+                    string patchName = $"{layerName}_{patchCenterX:D2}_{patchCenterY:D2}_{i}";
+                    if (theUKS.Labeled(patchName) == null) continue;
+                    Thing patchThing = theUKS.GetOrAddThing(patchName);
+                    for (int x = -1; x < 2; x++)
+                        for (int y = -1; y < 2; y++)
+                        {
+                            if (x == 0 && y == 0) continue;
+                            int nnX = patchCenterX + x;
+                            int nnY = patchCenterY + y;
+                            if (nnX < 0 || nnY < 0 || nnX >= hSize || nnY >= vSize) continue;
+                            for (int j = 0; j < numPatchesPerPixel; j++)
+                            {
+                                string nnPatchName = $"{layerName}_{nnX:D2}_{nnY:D2}_{j}";
+                                if (theUKS.Labeled(nnPatchName) == null) continue;
+                                Thing nnPatchThing = theUKS.GetOrAddThing(nnPatchName);
+                                if (nnPatchThing != null)
+                                    patchThing.AddRelationship(nnPatchThing, "collinearWith", true, 0.1f);
+                            }
+                        }
+                }
+
+        //add relationships for nearly-collinear patches
+        theUKS.GetOrAddThing("nearlyCollinearWith", "RelationshipType");
+        for (int patchX = 2; patchX < numPatchesX-2; patchX++)
+            for (int patchY = 2; patchY < numPatchesY-2; patchY++)
+                for (int i = 0; i < numPatchesPerPixel; i++)
+                    for (int j = 0; j < numPatchesPerPixel; j++)
+                    {
+                        if (j == i) continue;
+                        string patchName1 = $"{layerName}_{patchX:D2}_{patchY:D2}_{i}";
+                        string patchName2 = $"{layerName}_{patchX:D2}_{patchY:D2}_{j}";
+                        Thing source = theUKS.Labeled(patchName1);
+                        source.AddRelationship(patchName2, "nearlyCollinearWith", true, .1f);
+                    }
     }
 
+    public int testMethod = 1;
     public void SingteTestPattern()
     {
         PointPlus p1, p2, p3;
         ClearBoundaryArray();
 
-        int testMethod = 2;
         if (testMethod == 0)  //fixed little segment
         {
-            p1 = new PointPlus(2, 2f);
-            p2 = new PointPlus(2, 4f);
+            p1 = new PointPlus(4, 3f);
+            p2 = new PointPlus(4, 7f);
+            DrawLine(p1, p2);
+            p1 = new PointPlus(9, 7f);
+            p2 = new PointPlus(4, 7f);
             DrawLine(p1, p2);
         }
         else if (testMethod == 1) //random line
         {
-            do
+            Point RandomBorderPoint()
             {
-                p1 = new Point((int)(rand.NextDouble() * hSize), (int)(rand.NextDouble() * vSize));
-            } while (p1.X != 0 && p1.Y != 0);
+                int perimeter = 2 * (hSize + vSize) - 4; // all edge points
+                int r = rand.Next(perimeter);
+
+                if (r < hSize)                     // top edge (x = 0..hSize-1, y = 0)
+                    return new Point(r, 0);
+
+                r -= hSize;
+                if (r < vSize - 1)                 // right edge (x = hSize-1, y = 1..vSize-1)
+                    return new Point(hSize - 1, r + 1);
+
+                r -= (vSize - 1);
+                if (r < hSize - 1)                 // bottom edge (x = hSize-2..0, y = vSize-1)
+                    return new Point(hSize - 2 - r, vSize - 1);
+
+                r -= (hSize - 1);                  // left edge (x = 0, y = vSize-2..1)
+                return new Point(0, vSize - 2 - r);
+            }
 
             do
             {
-                p2 = new Point((int)(rand.NextDouble() * hSize), (int)(rand.NextDouble() * vSize));
-            } while (p2.X != hSize - 1 && p2.Y != vSize - 1);
+                p1 = RandomBorderPoint();
+                p2 = RandomBorderPoint();
+            } while (p1 == p2);
             DrawLine(p1, p2);
         }
         else if (testMethod == 2) //random corner
@@ -270,14 +344,14 @@ public partial class ModuleVision2 : ModuleBase
             } while ((p2 - p1).R < 5);
 
             var selector = rand.NextDouble();
-            if (selector > .4)
+            //if (selector > .4)  //random mix with lines
             {
                 Angle a;
                 do
                 {
                     p3 = new Point((int)(rand.NextDouble() * hSize), (int)(rand.NextDouble() * vSize));
                     a = Abs((p3 - p2).Theta - (p2 - p1).Theta);
-                } while (a < Angle.FromDegrees(40) || a > Angle.FromDegrees(140) && (p3-p2).R < 5);
+                } while ((a < Angle.FromDegrees(40) || a > Angle.FromDegrees(140)) && (p3 - p2).R < 5);
                 DrawLine(p2, p3);
             }
             DrawLine(p1, p2);
@@ -298,7 +372,7 @@ public partial class ModuleVision2 : ModuleBase
                     y = (int)(rand.NextDouble() * 3);
                     if (x == 1 && y == 1)
                     { }
-                } while (boundaryArray[x, y] || (x== 1 && y == 1));
+                } while (boundaryArray[x, y] || (x == 1 && y == 1));
                 boundaryArray[x, y] = true;
             }
         }
@@ -399,25 +473,25 @@ public partial class ModuleVision2 : ModuleBase
 
     private List<(Thing t, float conf)> LearnConnections(Thing queryThing)
     {
+        List<(Thing t, float conf)> matchOrig = new();
         List<(Thing t, float conf)> match = new();
         if (queryThing.Relationships.Count > 0)
         {
-            match = theUKS.SearchForClosestMatch(queryThing, "Thing");
+            matchOrig = theUKS.SearchForClosestMatch(queryThing, "Thing");
 
-            match.RemoveAll(x => x.t.Label.StartsWith("theQuery"));
-            match.RemoveAll(x => x.conf < 1.3f);  //TODO this const changes with patch size  (patch 5 = 1.3f)
+
+            matchOrig.RemoveAll(x => x.t.Label.StartsWith("theQuery"));
+            matchOrig.RemoveAll(x => x.conf < 1.3);  //TODO this const changes with patch size  (patch 5 = 1.3f)
             //match.RemoveAll(x => x.conf < .9999f);  //TODO this const changes with patch size  (patch 5 = 1.3f)
 
-            if (match.Count == 0)
+            if (matchOrig.Count == 0)
             {
                 theUKS.DeleteThing(queryThing);
-                return match;
+                return matchOrig;
             }
-            //
-            var bestHit = match.MinBy(x => x.conf);
-            bestHit.t.SetFired();
 
-   
+            match = new(matchOrig);
+
             //mutual suppression
             for (int i = 0; i < match.Count; i++)
             {
@@ -435,10 +509,123 @@ public partial class ModuleVision2 : ModuleBase
                 }
             }
 
+            //adjust weights between layers
             foreach (var item in match)
             {
                 AdjustWeights(item.t, queryThing);
                 item.t.SetFired();
+            }
+
+            float etaPlus = 0.1f;    // LTP rate (co-active)
+            float etaMinus = 0.1f;
+            //adjust weights within layers
+            foreach (var item in match)
+            {
+                foreach (Relationship r in item.t.Relationships.Where(x => x.relType.Label == "collinearWith"))
+                {
+
+                    if (match.Any(x => x.t == r.target))
+                    {
+                        r.Weight += etaPlus * (1f - r.Weight);
+                        if (r.Weight > 1)
+                            r.Weight = 1;
+                    }
+                    else
+                    {
+                        r.Weight += -etaMinus * r.Weight;
+                        if (r.Weight < 0.001f)
+                            r.source.RemoveRelationship(r);
+                    }
+                    r.Fire();
+                }
+            }
+
+            //check for corners
+            foreach (var item in match)
+            {
+                int targetFiredCount = 0;
+                int lastX = -1; int lastY = -1;
+                foreach (Relationship r in item.t.Relationships.OrderBy(x=>x.target.Label).Where(x => x.relType.Label == "collinearWith"))
+                {
+                    string[] parts = r.target.Label.Split("_");
+                    int curX = int.Parse(parts[1]);
+                    int curY = int.Parse(parts[2]);
+                    if (curX == lastX && curY == lastY) continue;  //do not cuplicate count on the same point
+                    // if (r.target.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(10))
+                    if (matchOrig.FindAll(x=>x.t == r.target).Count > 0)
+                    {
+                        targetFiredCount++;
+                        lastX = curX;
+                        lastY = curY;
+                    }
+                }
+                if (item.t.Label.Contains("03_04")) //BREAKPOINT
+                { }
+                if (targetFiredCount < 2)
+                {
+                    string[] parts = item.t.Label.Split("_");
+                    string cornerLabel = $"corner_{parts[1]}_{parts[2]}";
+                    Thing corner = theUKS.GetOrAddThing(cornerLabel);
+                    corner.SetFired();
+                }
+            }
+
+            //set up nearlyCollinearWith Relationships
+            //foreach primary value (in match) get a list of all the others in matchOrig
+            foreach (var item in match)
+            {
+                List<(Thing t, float conf)> patchesAtThisPixel = matchOrig.Where(x =>
+                {
+                    string[] parts1 = item.t.Label.Split("_");
+                    string[] parts2 = x.t.Label.Split("_");
+                    return parts1[1] == parts2[1] && parts1[2] == parts2[2];
+                }).Select(x => (x.t, x.conf)).ToList();
+
+                //in this list, the primary patch is [0], while [1] and [2] are candidate for nearlyColinearWith
+                //this must be modified to work with 0, 1, or 2 results without indexing error
+                if (patchesAtThisPixel.Count < 2) continue;
+                Thing candidate1 = patchesAtThisPixel[1].t;
+                float value1 = patchesAtThisPixel[1].conf;
+                Thing candidate2 = null;
+                float value2 = -1; //dummy value
+                if (patchesAtThisPixel.Count > 2)
+                {
+                    candidate2 = patchesAtThisPixel[2].t;
+                    value2 = patchesAtThisPixel[2].conf;
+                }
+                Thing primary = item.t;
+                float primaryValue = item.conf;
+                foreach (Relationship r in primary.Relationships.Where(x => x.relType.Label == "nearlyCollinearWith"))
+                {
+                    //increase weight to candidate1 if it is sufficiently lower in value than primary
+                    if (r.target == candidate1)
+                    {
+                        //but not if the weights are nearly the same
+                        if (primaryValue - value1 / primaryValue > 0.2f) //far enough in value
+                        {
+                            float deltaWeight = (primaryValue - value1) / primaryValue;
+                            r.Weight += deltaWeight * 0.1f;
+                        }
+                    }
+                    else if (r.target == candidate2)
+                    {
+                        if (primaryValue - value1 / primaryValue > 0.2f) //far enough in value
+                        {
+                            float deltaWeight = (primaryValue - value1) / primaryValue;
+                            r.Weight += deltaWeight * 0.1f;
+                        }
+                    }
+                    else //lower the weight to other nearlyCollinearWith patches
+                    {
+                        float deltaWeight = -0.005f;
+                        r.Weight += deltaWeight;
+                    }
+                    //remove existing nearlyCollinearWith low weight relationships
+                    if (r.Weight < 0.05f)
+                    {
+                        r.source.RemoveRelationship(r);
+                    }
+                }
             }
 
             void AdjustWeights(Thing patch, Thing inputPattern)
@@ -460,13 +647,15 @@ public partial class ModuleVision2 : ModuleBase
                     Relationship rFound = inputPattern.Relationships.FindFirst(x => x.target == r.target);
 
                     // targets: ON -> +1, OFF -> -0.5
-                    float tp = (rFound != null) ? r.maxWeight : -0.5f;
+                    //float tp = (rFound != null) ? r.maxWeight : -r.maxWeight / 2f;
+                    float tp = (rFound != null) ? r.maxWeight : -.05f;
                     float eta = (rFound != null) ? 0.06f : 0.03f; // example: smaller step for OFF
                     r.Weight += eta * (tp - r.Weight);
 
                     // clamp to keep things well-behaved
                     if (r.Weight > r.maxWeight) r.Weight = r.maxWeight;
                     if (r.Weight < -1f) r.Weight = -1f;
+                    if (r.Weight < 0.0) r.source.RemoveRelationship(r);
                 }
             }
         }
@@ -715,41 +904,6 @@ public partial class ModuleVision2 : ModuleBase
 
     private void SetUpUKSEntries()
     {
-        //theUKS.AddStatement("Attribute", "is-a", "Thing");
-        //theUKS.AddStatement("Color", "is-a", "Attribute");
-        //theUKS.AddStatement("Size", "is-a", "Attribute");
-        //theUKS.AddStatement("Position", "is-a", "Attribute");
-        //theUKS.AddStatement("Rotation", "is-a", "Attribute");
-        //theUKS.AddStatement("Shape", "is-a", "Attribute");
-        //theUKS.AddStatement("Offset", "is-a", "Attribute");
-        //theUKS.AddStatement("Distance", "is-a", "Attribute");
-
-        //Set up angles and distances so they are near each other
-        Relationship r2 = null;
-        r2 = theUKS.AddStatement("isSimilarTo", "is-a", "relationshipType");
-        r2 = theUKS.AddStatement("isSimilarTo", "hasProperty", "isCommutative");
-        r2 = theUKS.AddStatement("isSimilarTo", "hasProperty", "isTransitive");
-
-        //for (int i = 1; i < 10; i++)
-        //{
-        //    theUKS.AddStatement("distance." + i, "is-a", "distance");
-        //    if (i < 9)
-        //        r2 = theUKS.AddStatement("distance." + i, "isSimilarTo", "distance." + (i + 1));
-        //    r2.Weight = 0.8f;
-        //}
-        //theUKS.AddStatement("distance1.0", "is-a", "distance");
-        //r2 = theUKS.AddStatement("distance1.0", "isSimilarTo", "distance.9");
-        //r2.Weight = 0.8f;
-
-        //for (int i = -17; i < 18; i++)
-        //{
-        //    theUKS.AddStatement("angle" + (i * 10), "is-a", "Rotation");
-        //    r2 = theUKS.AddStatement("angle" + (i * 10), "isSimilarTo", "angle" + ((i + 1) * 10));
-        //    r2.Weight = 0.8f;
-        //}
-        //r2 = theUKS.AddStatement("angle180", "is-a", "rotation");
-        //r2 = theUKS.AddStatement("angle180", "isSimilarTo", "angle-170");
-        //r2.Weight = 0.8f;
     }
 
     // called whenever the size of the module rectangle changes

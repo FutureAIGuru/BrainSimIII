@@ -397,7 +397,7 @@ public partial class UKS
 
         int inheritedValueCount = 0;
         //fan out from these seeds following all "inheritable" reverse connections.
-        while (thingsToSearch.Count > 0)
+        while (thingsToSearch.Count > 0 && false) // TEMP HACK for speed
         {
             var t = thingsToSearch[0];
             thingsToSearch.RemoveAt(0);

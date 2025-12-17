@@ -36,6 +36,7 @@ namespace BrainSimulator
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             theWindow = this;
+            _lastPos = new Point(Left, Top); //used for mainWindow location changes
 
             //setup the python support
             pythonPath = (string)Environment.GetEnvironmentVariable("PythonPath", EnvironmentVariableTarget.User);
@@ -354,5 +355,6 @@ namespace BrainSimulator
                     "", // empty = sort by the item itself (e.g., string)
                     System.ComponentModel.ListSortDirection.Ascending));
         }
+
     }
 }

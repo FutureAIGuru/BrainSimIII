@@ -302,6 +302,12 @@ namespace BrainSimulator.Modules
                 dlg.Draw(true);
         }
 
+        public void SetDlgPosition(Point newLoc)
+        {
+            dlg.Top = newLoc.Y;
+            dlg.Left = newLoc.X;
+        }
+
         //this is called to allow for any data massaging needed before saving the file
         public virtual void SetUpBeforeSave()
         { }

@@ -168,5 +168,21 @@ namespace BrainSimulator
             CloseAllModules();
             moduleHandler.ClosePythonEngine();
         }
+
+        private Point _lastPos;
+
+        private void Window_LocationChanged(object sender, EventArgs e)
+        {
+            double dx = Left - _lastPos.X;
+            double dy = Top - _lastPos.Y;
+            Vector delta = new(dx, dy);
+
+            //move all the module windows with the main window
+            foreach (var module in activeModules)
+            {
+                module.SetDlgPosition(module.dlgPos + delta);
+            }
+            _lastPos = new Point(Left, Top);
+        }
     }
 }

@@ -6,8 +6,7 @@
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
         Title="Vision" Height="500" Width="530" Background="Gray" ShowInTaskbar="False" 
-                     SizeChanged="ModuleBaseDlg_SizeChanged" PreviewKeyDown="ModuleBaseDlg_PreviewKeyDown"
-                     MouseWheel="ModuleBaseDlg_MouseWheel" MouseMove="ModuleBaseDlg_MouseMove" >
+                     SizeChanged="ModuleBaseDlg_SizeChanged" PreviewKeyDown="ModuleBaseDlg_PreviewKeyDown" >
     <Grid Name="theGrid" Margin="0,0,0,0" >
         <Canvas x:Name="theCanvas" ClipToBounds="True" Margin="27,17,10,267" Background="DarkGray" />
         <TextBox  x:Name="textBoxPath"               TabIndex="7"   FontSize="16"   Margin="78,320,120,131"  VerticalAlignment="Bottom" />
@@ -33,5 +32,12 @@
         <CheckBox Content="Vert" IsChecked="true" HorizontalAlignment="Left" Margin="297,255,0,214" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <CheckBox Content="45" IsChecked="false" HorizontalAlignment="Left" Margin="297,276,0,194" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
         <CheckBox Content="-45" IsChecked="false" HorizontalAlignment="Left" Margin="297,296,0,174" FontSize="16" Checked="cb_Checked" Unchecked="cb_Checked" VerticalAlignment="Bottom"/>
+        <ComboBox HorizontalAlignment="Left" Margin="252,0,0,55" Width="89" SelectionChanged="ComboBox_SelectionChanged" Height="22" VerticalAlignment="Bottom">
+            <ComboBoxItem Content="Seg"/>
+            <ComboBoxItem Content="Line"/>
+            <ComboBoxItem Content="Corner"/>
+            <ComboBoxItem Content="3x3"/>
+        </ComboBox>
+
     </Grid>
 </local:ModuleBaseDlg>
