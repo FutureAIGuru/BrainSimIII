@@ -601,7 +601,7 @@ public partial class ModuleVision2 : ModuleBase
                     if (r.target == candidate1)
                     {
                         //but not if the weights are nearly the same
-                        if (primaryValue - value1 / primaryValue > 0.2f) //far enough in value
+                        if (primaryValue - value1 / primaryValue > 0.15f) //far enough in value
                         {
                             float deltaWeight = (primaryValue - value1) / primaryValue;
                             r.Weight += deltaWeight * 0.1f;
@@ -609,7 +609,7 @@ public partial class ModuleVision2 : ModuleBase
                     }
                     else if (r.target == candidate2)
                     {
-                        if (primaryValue - value1 / primaryValue > 0.2f) //far enough in value
+                        if (primaryValue - value1 / primaryValue > 0.15f) //far enough in value
                         {
                             float deltaWeight = (primaryValue - value1) / primaryValue;
                             r.Weight += deltaWeight * 0.1f;

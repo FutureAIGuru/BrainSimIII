@@ -99,7 +99,7 @@ namespace BrainSimulator.Modules
 
                             if (pixel == true)
                             {
-                                SolidColorBrush b = new SolidColorBrush(Colors.White);
+                                SolidColorBrush b = new SolidColorBrush(Colors.Gray);
                                 string toolTipString = $"({(int)x},{(int)y}) ";
                                 Rectangle e = new()
                                 {
@@ -215,71 +215,6 @@ namespace BrainSimulator.Modules
             return true;
         }
 
-        private void DrawPatchRelative(Thing t, PointPlus center, int patchSize)
-        {
-            float tScale = scale * .75f;
-            string[] parts = t.Label.Split('_');
-            int patchX = int.Parse(parts[1]);
-            int patchY = int.Parse(parts[2]);
-            SolidColorBrush b = new SolidColorBrush(Colors.Pink);
-            Rectangle e = new()
-            {
-                Height = pixelSize * (patchSize - .3),
-                Width = pixelSize * (patchSize - .3),
-                Stroke = b,
-                StrokeThickness = 12,
-            };
-            Canvas.SetLeft(e, (center.X + .65f - patchSize / 2) * tScale);
-            Canvas.SetTop(e, (center.Y + .65f - patchSize / 2) * tScale);
-            theCanvas.Children.Add(e);
-
-
-
-            foreach (Relationship pt in t.Relationships.Where(x => x.relType.Label == "hasBoundary"))
-            {
-                parts = pt.target.Label.Split('_');
-                float x = int.Parse(parts[1]);
-                x = center.X - (patchX - x);
-                float y = int.Parse(parts[2]);
-                y = center.Y - (patchY - y);
-                float theWeight = pt.Weight;
-                b = new SolidColorBrush(RainbowColorFromValue(theWeight));
-                e = new()
-                {
-                    Height = pixelSize / 2,
-                    Width = pixelSize / 2,
-                    Stroke = b,
-                    Fill = b,
-                };
-                Canvas.SetLeft(e, x * tScale + 3 * pixelSize / 4);
-                Canvas.SetTop(e, y * tScale + 3 * pixelSize / 4);
-                theCanvas.Children.Add(e);
-            }
-            float val = GetPatchConfidence(t);
-            Label tb = new() { Content = $"{val:F2}", FontSize = 10, };
-            Canvas.SetLeft(tb, (center.X + 2 + .65f - patchSize / 2) * tScale);
-            Canvas.SetTop(tb, (center.Y + 2 + .65f - patchSize / 2) * tScale);
-            theCanvas.Children.Add(tb);
-        }
-
-        float GetPatchConfidence(Thing t)
-        {
-            if (!t.Label.StartsWith("patch")) return -1;
-            float val = 0;
-
-            foreach (Relationship r in t.Relationships.Where(x=>x.relType.Label == "hasBoundary"))
-            {
-                ModuleVision2 parent = (ModuleVision2)base.ParentModule;
-                string[] parts = r.target.Label.Split('_');
-                int x = int.Parse(parts[1]);
-                int y = int.Parse(parts[2]);
-                if (parent.boundaryArray[x, y])
-                    val += r.Weight;
-            }
-
-            return val;
-        }
-
         private void DrawAPatch(Thing t)
         {
             ModuleVision2 parent = (ModuleVision2)base.ParentModule;
@@ -356,13 +291,81 @@ namespace BrainSimulator.Modules
             //the arrow will point in the direction of the strongest weight sum and go through the center of the patch
             DrawPatchOrientation(t);
         }
-
-        void DrawPatchOrientation(Thing patch)
+        private void DrawPatchRelative(Thing t, PointPlus center, int patchSize)
         {
+            float tScale = scale * .75f;
+            string[] parts = t.Label.Split('_');
+            int patchX = int.Parse(parts[1]);
+            int patchY = int.Parse(parts[2]);
+            SolidColorBrush b = new SolidColorBrush(Colors.Orange);
+            Rectangle e = new()
+            {
+                Height = pixelSize * (patchSize - .9),
+                Width = pixelSize * (patchSize - .9),
+                Stroke = b,
+                StrokeThickness = 6,
+            };
+            Canvas.SetLeft(e, (center.X + .65f - patchSize / 2) * tScale);
+            Canvas.SetTop(e, (center.Y + .65f - patchSize / 2) * tScale);
+            theCanvas.Children.Add(e);
+
+            float offset = 3 * pixelSize / 4;
+            foreach (Relationship pt in t.Relationships.Where(x => x.relType.Label == "hasBoundary"))
+            {
+                parts = pt.target.Label.Split('_');
+                float x = int.Parse(parts[1]);
+                x = center.X - (patchX - x);
+                float y = int.Parse(parts[2]);
+                y = center.Y - (patchY - y);
+                float theWeight = pt.Weight;
+                b = new SolidColorBrush(RainbowColorFromValue(theWeight));
+                e = new()
+                {
+                    Height = pixelSize / 2,
+                    Width = pixelSize / 2,
+                    Stroke = b,
+                    Fill = b,
+                };
+                Canvas.SetLeft(e, x * tScale + offset);
+                Canvas.SetTop(e, y * tScale + offset);
+                theCanvas.Children.Add(e);
+            }
+            float val = GetPatchConfidence(t);
+            Label tb = new() { Content = $"{val:F2}", FontSize = 10, };
+            Canvas.SetLeft(tb, (center.X + 2 + .65f - patchSize / 2) * tScale);
+            Canvas.SetTop(tb, (center.Y + 2 + .65f - patchSize / 2) * tScale);
+            theCanvas.Children.Add(tb);
+            PointPlus drawCenter = new PointPlus(center.X*.76f, center.Y*.76f);
+            DrawPatchOrientation(t, drawCenter);
+        }
+
+        float GetPatchConfidence(Thing t)
+        {
+            if (!t.Label.StartsWith("patch")) return -1;
+            float val = 0;
+
+            foreach (Relationship r in t.Relationships.Where(x => x.relType.Label == "hasBoundary"))
+            {
+                ModuleVision2 parent = (ModuleVision2)base.ParentModule;
+                string[] parts = r.target.Label.Split('_');
+                int x = int.Parse(parts[1]);
+                int y = int.Parse(parts[2]);
+                if (parent.boundaryArray[x, y])
+                    val += r.Weight;
+            }
+
+            return val;
+        }
+        void DrawPatchOrientation(Thing patch, PointPlus drawCenter = null)
+        {
+            if (cbShowSrokes.IsChecked == false) return;
             // 1. accumulate weighted direction
             Thing centerT = patch.Relationships.FindFirst(x => x.Weight == 1 && x.relType.Label == "hasBoundary").target;
             string[] parts = centerT.Label.Split('_');
+
             PointPlus center = new PointPlus(int.Parse(parts[1]), (float)int.Parse(parts[2]));
+            if (drawCenter == null)
+                drawCenter = center;
 
             float Sxx = 0f, Syy = 0f, Sxy = 0f;
 
@@ -391,8 +394,10 @@ namespace BrainSimulator.Modules
             float dx2 = (float)Math.Cos(theta);
             float dy2 = (float)Math.Sin(theta);
 
-            var p1 = new Point(center.X - dx2 * L, center.Y - dy2 * L);
-            var p2 = new Point(center.X + dx2 * L, center.Y + dy2 * L);
+            //var p1 = new Point(center.X - dx2 * L, center.Y - dy2 * L);
+            //var p2 = new Point(center.X + dx2 * L, center.Y + dy2 * L);
+            var p1 = new Point(drawCenter.X - dx2 * L, drawCenter.Y - dy2 * L);
+            var p2 = new Point(drawCenter.X + dx2 * L, drawCenter.Y + dy2 * L);
 
             // 4. draw main line
             Brush b = new SolidColorBrush(Colors.Black);
@@ -435,11 +440,11 @@ namespace BrainSimulator.Modules
                             string thingLabel = $"patch_{parts[1]}_{parts[2]}_{i}";
                             Thing t1 = theUKS.Labeled(thingLabel);
                             if (t1 != null)
-                                DrawPatchRelative(t1, new PointPlus(20 + 5 * (i / 4), (float)(1 + 5 * (i % 4))), 5);
+                                DrawPatchRelative(t1, new PointPlus(22 + 6 * (i / 4), (float)(1 + 5.5 * (i % 4))), 5);
                         }
                     }
                 }
-                StatusLabel_MouseRightButtonDown(null, null);
+                StatusLabel_MouseRightButtonDown(null, null); //this makes the selected element appear in the UKS dialog too
             }
         }
 
