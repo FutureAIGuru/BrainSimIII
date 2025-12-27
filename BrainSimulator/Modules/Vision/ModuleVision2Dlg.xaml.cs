@@ -430,6 +430,7 @@ namespace BrainSimulator.Modules
                     {
                         //t.SetFired();
                         DrawAPatch(t);
+                        GetNearestOrder(t);
 
                         string[] parts = t.Label.Split('_');
                         int patchX = int.Parse(parts[1]);
@@ -446,6 +447,35 @@ namespace BrainSimulator.Modules
                 }
                 StatusLabel_MouseRightButtonDown(null, null); //this makes the selected element appear in the UKS dialog too
             }
+        }
+
+        void GetNearestOrder(Thing t)
+        {
+            List<Thing> orderList = new();
+            Thing currentThing = t;
+            orderList.Add(t);
+            while (currentThing != null)
+            {
+                bool found = false;
+                foreach (Relationship r in currentThing.Relationships.Where(x => x.relType.Label == "nearlyCollinearWith"))
+                {
+                    if (orderList.Contains(r.target)) continue;
+                    orderList.Add(r.target);
+                    currentThing = r.target;
+                    found = true;
+                    break;
+                }
+                if (found == false) currentThing = null;
+            }
+
+            string output = labelProperties.Content.ToString();
+            int i = output.IndexOf("Order");
+            if (i >= 0)
+                output = output.Substring(0, i);
+            output += "\nOrder:  ";
+            foreach (Thing t1 in orderList)
+                output += t1.Label[^2..] + ", ";
+            labelProperties.Content = output;
         }
 
         private void StatusLabel_MouseRightButtonDown(object sender, MouseButtonEventArgs e)

@@ -34,7 +34,7 @@ public partial class ModuleVision2 : ModuleBase
     public int patchSize = 5;
     public int stride = 1;
     public int counter = 0;
-
+    public int patchesPerPixel = 4;
 
 
     public string CurrentFilePath
@@ -104,13 +104,13 @@ public partial class ModuleVision2 : ModuleBase
         //set all the weights so that the center has the highest weight and weights decrease radially from the center
         int numPatchesX = (hSize - patchSize) / stride + 1;
         int numPatchesY = (vSize - patchSize) / stride + 1;
-        int numPatchesPerPixel = patchSize * 2 - 2;
+        //patchesPerPixel = patchSize * 2 - 2;
 
         int half = patchSize / 2;
 
         string layerName = "patch";
 
-        InitializeLayer(prevLayerName, numPatchesX, numPatchesY, numPatchesPerPixel, half, layerName);
+        InitializeLayer(prevLayerName, numPatchesX, numPatchesY, patchesPerPixel, half, layerName);
         //InitializeLayer("patch", numPatchesX, numPatchesY, 16, 1, "corner");
         InitCornerPoints();
     }
@@ -224,6 +224,7 @@ public partial class ModuleVision2 : ModuleBase
                             {
                                 foreach (Thing child in t.Children)
                                 {
+                                    theUKS.GetRelationship(patchThing, "hasBoundary", child);
                                     var rRel1 = patchThing.AddRelationship(child, "hasBoundary", true, initialWeight);
                                     if (rRel1.target == null)
                                     {
@@ -277,8 +278,8 @@ public partial class ModuleVision2 : ModuleBase
 
         //add relationships for nearly-collinear patches
         theUKS.GetOrAddThing("nearlyCollinearWith", "RelationshipType");
-        for (int patchX = 2; patchX < numPatchesX-2; patchX++)
-            for (int patchY = 2; patchY < numPatchesY-2; patchY++)
+        for (int patchX = 2; patchX < numPatchesX+2; patchX++)
+            for (int patchY = 2; patchY < numPatchesY+2; patchY++)
                 for (int i = 0; i < numPatchesPerPixel; i++)
                     for (int j = 0; j < numPatchesPerPixel; j++)
                     {
@@ -286,7 +287,10 @@ public partial class ModuleVision2 : ModuleBase
                         string patchName1 = $"{layerName}_{patchX:D2}_{patchY:D2}_{i}";
                         string patchName2 = $"{layerName}_{patchX:D2}_{patchY:D2}_{j}";
                         Thing source = theUKS.Labeled(patchName1);
-                        source.AddRelationship(patchName2, "nearlyCollinearWith", true, .1f);
+                        if (source == null) continue;
+                        Thing target = theUKS.Labeled(patchName2);
+                        if (target == null) continue;
+                        source.AddRelationship(target, "nearlyCollinearWith", true, .1f);
                     }
     }
 
@@ -655,7 +659,8 @@ public partial class ModuleVision2 : ModuleBase
                     // clamp to keep things well-behaved
                     if (r.Weight > r.maxWeight) r.Weight = r.maxWeight;
                     if (r.Weight < -1f) r.Weight = -1f;
-                    if (r.Weight < 0.0) r.source.RemoveRelationship(r);
+                    //if (r.Weight < 0.0) r.source.RemoveRelationship(r);
+                    if (r.Weight < 0.0) r.Weight = 0;
                 }
             }
         }

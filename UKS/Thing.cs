@@ -541,6 +541,7 @@ public partial class Thing
     /// <param name="t">If the Thing is not a parent, the function does nothing</param>
     public void RemoveParent(Thing t)
     {
+        //TODO handle the case where we are removing the last parent
         Relationship r = new() { source = this, reltype = IsA, target = t };
         t.RemoveRelationship(r);
     }
