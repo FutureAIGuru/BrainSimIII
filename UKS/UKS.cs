@@ -1,5 +1,4 @@
-﻿
-namespace UKS;
+﻿namespace UKS;
 using Pluralize.NET;
 
 
@@ -55,20 +54,20 @@ public partial class UKS
             {
                 Relationship r = transientRelationships[i];
                 //check to see if the relationship has expired
-                if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now)
+                if (r.TimeToLive != TimeSpan.MaxValue && r.LastFiredTime + r.TimeToLive < DateTime.Now)
                 {
-                    r.source.RemoveRelationship(r);
+                    r.Source.RemoveRelationship(r);
                     //if this leaves an orphan thing, delete the thing
-                    if (r.reltype.Label == "has-child" && r.target?.Parents.Count == 0)
+                    if (r.RelType.Label == "has-child" && r.Target?.Parents.Count == 0)
                     {
-                        r.target.AddParent(ThingLabels.GetThing("unknownObject"));
+                        r.Target.AddParent(ThingLabels.GetThing("unknownObject"));
                     }
                     transientRelationships.Remove(r);
                     //HACK
-                    if (r.reltype.Label == "has-child")
+                    if (r.RelType.Label == "has-child")
                     {
-                        DeleteAllChildren(r.target);
-                        DeleteThing(r.target);
+                        DeleteAllChildren(r.Target);
+                        DeleteThing(r.Target);
                     }
                 }
             }
@@ -114,7 +113,7 @@ public partial class UKS
         foreach (Relationship r in t.Relationships)
             t.RemoveRelationship(r);
         foreach (Relationship r in t.RelationshipsFrom)
-            r.source.RemoveRelationship(r);
+            r.Source.RemoveRelationship(r);
         ThingLabels.RemoveThingLabel(t.Label);
         lock (UKSList)
             UKSList.Remove(t);
@@ -146,13 +145,13 @@ public partial class UKS
         if (results == null) results = new();
         List<Relationship> targets = RelationshipTree(t, relType);
         foreach (Relationship r in targets)
-            if (r.reltype == relType)
+            if (r.RelType == relType)
             {
-                if (!results.Contains(r.target))
+                if (!results.Contains(r.Target))
                 {
-                    results.Add(r.target);
-                    results.AddRange(r.target.Descendents);
-                    GetTransitiveTargetChain(r.target, r.reltype, results);
+                    results.Add(r.Target);
+                    results.AddRange(r.Target.Descendents);
+                    GetTransitiveTargetChain(r.Target, r.RelType, results);
                 }
             }
         return results;
@@ -160,11 +159,11 @@ public partial class UKS
     List<Relationship> RelationshipTree(Thing t, Thing relType)
     {
         List<Relationship> results = new();
-        results.AddRange(t.Relationships.FindAll(x => x.reltype == relType));
+        results.AddRange(t.Relationships.FindAll(x => x.RelType == relType));
         foreach (Thing t1 in t.Ancestors)
-            results.AddRange(t1.Relationships.FindAll(x => x.reltype == relType));
+            results.AddRange(t1.Relationships.FindAll(x => x.RelType == relType));
         foreach (Thing t1 in t.Descendents)
-            results.AddRange(t1.Relationships.FindAll(x => x.reltype == relType));
+            results.AddRange(t1.Relationships.FindAll(x => x.RelType == relType));
         return results;
     }
     List<Thing> GetTransitiveSourceChain(Thing t, Thing relType, List<Thing> results = null)
@@ -172,13 +171,13 @@ public partial class UKS
         if (results == null) results = new();
         List<Relationship> targets = RelationshipsByTree(t, relType);
         foreach (Relationship r in targets)
-            if (r.reltype == relType)
+            if (r.RelType == relType)
             {
-                if (!results.Contains(r.source))
+                if (!results.Contains(r.Source))
                 {
-                    results.Add(r.source);
+                    results.Add(r.Source);
                     //results.AddRange(r.source.Ancestors);
-                    GetTransitiveSourceChain(r.source, r.reltype, results);
+                    GetTransitiveSourceChain(r.Source, r.RelType, results);
                 }
             }
         return results;
@@ -187,11 +186,11 @@ public partial class UKS
     {
         List<Relationship> results = new();
         if (t == null) return results;
-        results.AddRange(t.RelationshipsFrom.FindAll(x => x.reltype == relType));
+        results.AddRange(t.RelationshipsFrom.FindAll(x => x.RelType == relType));
         foreach (Thing t1 in t.Ancestors)
-            results.AddRange(t1.RelationshipsFrom.FindAll(x => x.reltype == relType));
+            results.AddRange(t1.RelationshipsFrom.FindAll(x => x.RelType == relType));
         foreach (Thing t1 in t.Descendents)
-            results.AddRange(t1.RelationshipsFrom.FindAll(x => x.reltype == relType));
+            results.AddRange(t1.RelationshipsFrom.FindAll(x => x.RelType == relType));
         return results;
     }
 
@@ -206,28 +205,28 @@ public partial class UKS
         //  is lessthan is greaterthan
         //  several other cases
 
-        if (r1.target != r2.target && (r1.target == null || r2.target == null)) return false;
-        if (r1.target == r2.target && r1.relType == r2.relType) return false;
+        if (r1.Target != r2.Target && (r1.Target == null || r2.Target == null)) return false;
+        if (r1.Target == r2.Target && r1.RelType == r2.RelType) return false;
 
         if (!r1.isStatement) return false;
         if (!r2.isStatement) return false;
 
-        if (r1.source == r2.source ||
-            r1.source.AncestorList().Contains(r2.source) ||
-            r2.source.AncestorList().Contains(r1.source) ||
-            FindCommonParents(r1.source, r1.source).Count() > 0)
+        if (r1.Source == r2.Source ||
+            r1.Source.AncestorList().Contains(r2.Source) ||
+            r2.Source.AncestorList().Contains(r1.Source) ||
+            FindCommonParents(r1.Source, r1.Source).Count() > 0)
         {
 
-            IList<Thing> r1RelProps = r1.reltype.GetAttributes();
-            IList<Thing> r2RelProps = r2.reltype.GetAttributes();
+            IList<Thing> r1RelProps = r1.RelType.GetAttributes();
+            IList<Thing> r2RelProps = r2.RelType.GetAttributes();
             //handle case with properties of the target
-            if (r1.target != null && r1.target == r2.target &&
-                (r1.target.AncestorList().Contains(r2.target) ||
-                r2.target.AncestorList().Contains(r1.target) ||
-                FindCommonParents(r1.target, r1.target).Count() > 0))
+            if (r1.Target != null && r1.Target == r2.Target &&
+                (r1.Target.AncestorList().Contains(r2.Target) ||
+                r2.Target.AncestorList().Contains(r1.Target) ||
+                FindCommonParents(r1.Target, r1.Target).Count() > 0))
             {
-                IList<Thing> r1TargetProps = r1.target.GetAttributes();
-                IList<Thing> r2TargetProps = r2.target.GetAttributes();
+                IList<Thing> r1TargetProps = r1.Target.GetAttributes();
+                IList<Thing> r2TargetProps = r2.Target.GetAttributes();
                 foreach (Thing t1 in r1TargetProps)
                     foreach (Thing t2 in r2TargetProps)
                     {
@@ -240,16 +239,16 @@ public partial class UKS
                     }
             }
             //handle case with conflicting targets
-            if (r1.target != null && r2.target != null)
+            if (r1.Target != null && r2.Target != null)
             {
-                List<Thing> commonParents = FindCommonParents(r1.target, r2.target);
+                List<Thing> commonParents = FindCommonParents(r1.Target, r2.Target);
                 foreach (Thing t3 in commonParents)
                 {
                     if (HasProperty(t3, "isexclusive") || HasProperty(t3, "allowMultiple"))
                         return true;
                 }
             }
-            if (r1.target == r2.target)
+            if (r1.Target == r2.Target)
             {
                 foreach (Thing t1 in r1RelProps)
                     foreach (Thing t2 in r2RelProps)
@@ -267,28 +266,28 @@ public partial class UKS
             // fido has leg -> fido has 1 leg  
             bool hasNumber1 = (r1RelProps.FindFirst(x => x.HasAncestorLabeled("number")) != null);
             bool hasNumber2 = (r2RelProps.FindFirst(x => x.HasAncestorLabeled("number")) != null);
-            if (r1.target == r2.target &&
+            if (r1.Target == r2.Target &&
                 (hasNumber1 || hasNumber2))
                 return true;
 
             //if one of the reltypes contains negation and not the other
             Thing r1Not = r1RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
             Thing r2Not = r2RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
-            if ((r1.source.Ancestors.Contains(r2.source) ||
-                r2.source.Ancestors.Contains(r1.source)) &&
-                r1.target == r2.target &&
+            if ((r1.Source.Ancestors.Contains(r2.Source) ||
+                r2.Source.Ancestors.Contains(r1.Source)) &&
+                r1.Target == r2.Target &&
                 (r1Not == null && r2Not != null || r1Not != null && r2Not == null))
                 return true;
         }
         else
         {
             //this appears to duplicate code at line 226
-            List<Thing> commonParents = FindCommonParents(r1.target, r2.target);
+            List<Thing> commonParents = FindCommonParents(r1.Target, r2.Target);
             foreach (Thing t3 in commonParents)
             {
                 if (HasProperty(t3, "isexclusive"))
                     return true;
-                if (HasProperty(t3, "allowMultiple") && r1.source != r2.source)
+                if (HasProperty(t3, "allowMultiple") && r1.Source != r2.Source)
                     return true;
             }
 
@@ -298,11 +297,11 @@ public partial class UKS
 
     private bool RelationshipTypesAreExclusive(Relationship r1, Relationship r2)
     {
-        IList<Thing> r1RelProps = r1.reltype.GetAttributes();
-        IList<Thing> r2RelProps = r2.reltype.GetAttributes();
+        IList<Thing> r1RelProps = r1.RelType.GetAttributes();
+        IList<Thing> r2RelProps = r2.RelType.GetAttributes();
         Thing r1Not = r1RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
         Thing r2Not = r2RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
-        if (r1.target == r2.target &&
+        if (r1.Target == r2.Target &&
             (r1Not == null && r2Not != null || r1Not != null && r2Not == null))
             return true;
         return false;
@@ -313,7 +312,7 @@ public partial class UKS
         if (t == null) return false;
         foreach (Relationship r in t.Relationships)
         {
-            if (r.reltype != null && r.reltype.Label == "is" && r.target.Label == name)
+            if (r.RelType != null && r.RelType.Label == "is" && r.Target.Label == name)
                 return true;
         }
         return false;
@@ -323,16 +322,16 @@ public partial class UKS
     {
         if (t == null) return false;
         var v = t.Relationships;
-        if (v.FindFirst(x => x.target?.Label.ToLower() == propertyName.ToLower() && x.reltype.Label == "hasProperty") != null) return true;
+        if (v.FindFirst(x => x.Target?.Label.ToLower() == propertyName.ToLower() && x.RelType.Label == "hasProperty") != null) return true;
         return false;
     }
 
     bool RelationshipsAreEqual(Relationship r1, Relationship r2, bool ignoreSource = true)
     {
         if (
-            (r1.source == r2.source || ignoreSource) &&
-            r1.target == r2.target &&
-            r1.relType == r2.relType &&
+            (r1.Source == r2.Source || ignoreSource) &&
+            r1.Target == r2.Target &&
+            r1.RelType == r2.RelType &&
             r1.isStatement == r2.isStatement
           ) return true;
         return false;
@@ -342,13 +341,13 @@ public partial class UKS
     {
         if (source == null) return null;
         //create a temporary relationship
-        Relationship r = new() { source = source, relType = relType, target = target };
+        Relationship r = new() { Source = source, RelType = relType, Target = target };
         //see if it already exists
         return GetRelationship(r);
     }
     public Relationship GetRelationship(Relationship r)
     {
-        foreach (Relationship r1 in r.source.Relationships)
+        foreach (Relationship r1 in r.Source.Relationships)
         {
             if (RelationshipsAreEqual(r, r1)) return r1;
         }
@@ -518,7 +517,7 @@ public partial class UKS
             if (source != null)
             {
                 int digit = 0;
-                while (source.Relationships.FindFirst(x => x.reltype.Label == baseLabel + digit) != null) digit++;
+                while (source.Relationships.FindFirst(x => x.RelType.Label == baseLabel + digit) != null) digit++;
                 Thing labeled = ThingLabels.GetThing(baseLabel + digit);
                 if (labeled != null)
                     return labeled;
@@ -589,8 +588,8 @@ public partial class UKS
     {
         //does this relation/clause already exist?
         //rTemp is an orpan...not a real linked-up relationship
-        Relationship rTemp = new() { source = source, reltype = relType, target = target, Weight = .9f, isStatement = false };
-        foreach (Thing t in r1.source.Children)
+        Relationship rTemp = new() { Source = source, RelType = relType, Target = target, Weight = .9f, isStatement = false };
+        foreach (Thing t in r1.Source.Children)
         {
             foreach (Relationship r in t.Relationships)
             {
@@ -610,16 +609,16 @@ public partial class UKS
         if (newInstanceNeeded)
         {
             // Create a new instances of the source
-            Thing newInstance = GetOrAddThing(r1.source.Label + "*", r1.source);
+            Thing newInstance = GetOrAddThing(r1.Source.Label + "*", r1.Source);
             //move the existing relationship down
             rRoot = new();
-            r1.source.RemoveRelationship(r1);
-            rRoot.source = newInstance;
-            rRoot = rRoot.source.AddRelationship(r1.target, r1.relType, false);
-            AddStatement(rRoot.source.Label, "hasProperty", "isInstance");
+            r1.Source.RemoveRelationship(r1);
+            rRoot.Source = newInstance;
+            rRoot = rRoot.Source.AddRelationship(r1.Target, r1.RelType, false);
+            AddStatement(rRoot.Source.Label, "hasProperty", "isInstance");
         }
         //make rTemp into a real relationship
-        rTemp = rTemp.source.AddRelationship(rTemp.target, rTemp.relType, r1.isStatement);
+        rTemp = rTemp.Source.AddRelationship(rTemp.Target, rTemp.RelType, r1.isStatement);
 
 
         //add the clause

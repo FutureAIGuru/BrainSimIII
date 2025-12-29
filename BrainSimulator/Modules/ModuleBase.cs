@@ -193,9 +193,9 @@ namespace BrainSimulator.Modules
             if (thisDlg == null) return null;   
             foreach (var r in thisDlg.Relationships)
             {
-                if (r.reltype.Label == "hasAttribute" && r.target.Label.StartsWith(attribName))
+                if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith(attribName))
                 {
-                    string retVal = (string)r.target.V;
+                    string retVal = (string)r.Target.V;
                     return retVal;
                 }
             }
@@ -208,14 +208,14 @@ namespace BrainSimulator.Modules
             if (thisDlg == null) { return; }
             foreach (var r in thisDlg.Relationships)
             {
-                if (r.reltype.Label == "hasAttribute" && r.target.Label.StartsWith(attribName))
+                if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith(attribName))
                 {
                     if (attribValue == null)
                     {
-                        theUKS.DeleteThing(r.target);
+                        theUKS.DeleteThing(r.Target);
                         return;
                     }
-                    r.target.V = attribValue;
+                    r.Target.V = attribValue;
                     return;
                 }
             }
@@ -225,7 +225,7 @@ namespace BrainSimulator.Modules
             Thing hasAttribute = theUKS.GetOrAddThing("hasAttribute", "RelationshipType");
             thisDlg.AddRelationship(dlgInfo,hasAttribute);
             dlgInfo.V = attribValue;
-            dlgInfo.SetFired();
+            dlgInfo.Fire();
         }
         string GetDlgWindow()
         {

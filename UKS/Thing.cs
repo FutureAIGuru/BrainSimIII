@@ -32,7 +32,7 @@ public partial class Thing
         //            throw new ArgumentNullException($"No Thing found with label: {label}");
         return t;
     }
-//    public static Thing HasChild { get => ThingLabels.GetThing("has-child"); }
+    //    public static Thing HasChild { get => ThingLabels.GetThing("has-child"); }
     public static Thing IsA { get => ThingLabels.GetThing("is-a"); }
 
     private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
@@ -63,7 +63,7 @@ public partial class Thing
     private string label = "";
     object value;
     public int useCount = 0;
-    public DateTime lastFiredTime = new();
+    public DateTime LastFiredTime = new();
 
     /// <summary>
     /// Any serializable object can be attached to a Thing
@@ -103,7 +103,7 @@ public partial class Thing
         {
             retVal += " {";
             foreach (Relationship l in Relationships)
-                retVal += l.target?.label + ",";
+                retVal += l.Target?.label + ",";
             retVal += "}";
         }
         return retVal;
@@ -131,8 +131,8 @@ public partial class Thing
             lock (relationships)
             {
                 foreach (Relationship r in relationships)
-                    if (r.relType != null && r.relType == relType && r.source == this)
-                        retVal.Add(r.target);
+                    if (r.RelType != null && r.RelType == relType && r.Source == this)
+                        retVal.Add(r.Target);
             }
         }
         else
@@ -140,8 +140,8 @@ public partial class Thing
             lock (relationshipsFrom)
             {
                 foreach (Relationship r in relationshipsFrom)
-                    if (r.relType != null && r.relType == relType && r.target == this)
-                        retVal.Add(r.source);
+                    if (r.RelType != null && r.RelType == relType && r.Target == this)
+                        retVal.Add(r.Source);
             }
         }
         return retVal;
@@ -187,8 +187,8 @@ public partial class Thing
         {
             lock (relationships)
             {
-                foreach (Relationship r in relationships)
-                    r.Misses++;
+                //foreach (Relationship r in relationships)
+                //    r.Misses++;
                 return new List<Relationship>(relationships.AsReadOnly());
             }
         }
@@ -288,8 +288,8 @@ public partial class Thing
             foreach (Relationship r in relationshipsToFollow)
             {
                 //Thing thingToAdd = followUpwards ? r.source : r.target;
-                Thing thingToAdd = followUpwards ? r.target : r.source;
-                if (r.reltype == relType)
+                Thing thingToAdd = followUpwards ? r.Target : r.Source;
+                if (r.RelType == relType)
                 {
                     if (!retVal.Contains(thingToAdd))
                         retVal.Add(thingToAdd);
@@ -305,9 +305,9 @@ public partial class Thing
     /// <summary>
     /// Updates the last-fired time on a Thing
     /// </summary>
-    public void SetFired()
+    public void Fire()
     {
-        lastFiredTime = DateTime.Now;
+        LastFiredTime = DateTime.Now;
         useCount++;
     }
 
@@ -320,7 +320,7 @@ public partial class Thing
     /// <param name="target">Target Thing</param>
     /// <param name="relationshipType">RelatinoshipType Thing</param>
     /// <returns>the new or existing Relationship</returns>
-    public Relationship AddRelationship(Thing target, Thing relationshipType,bool isStatement = true)
+    public Relationship AddRelationship(Thing target, Thing relationshipType, bool isStatement = true)
     {
         if (relationshipType == null)  //NULL relationship types could be allowed in search Thingys Parameter?
         {
@@ -328,7 +328,7 @@ public partial class Thing
         }
 
         //does the relationship already exist?
-        Relationship r = HasRelationship(target, relationshipType,isStatement);
+        Relationship r = HasRelationship(target, relationshipType, isStatement);
         if (r != null)
         {
             //AdjustRelationship(r.T);
@@ -336,9 +336,9 @@ public partial class Thing
         }
         r = new Relationship()
         {
-            relType = relationshipType,
-            source = this,
-            target = target,
+            RelType = relationshipType,
+            Source = this,
+            Target = target,
             isStatement = isStatement
         };
         if (target != null && relationshipType != null)
@@ -378,7 +378,7 @@ public partial class Thing
         for (int i = 0; i < relationships.Count; i++)
         {
             Relationship r = relationships[i];
-            if (r.source == this && r.reltype == relationshipType)
+            if (r.Source == this && r.RelType == relationshipType)
             {
                 RemoveRelationship(r);
                 i--;
@@ -391,8 +391,7 @@ public partial class Thing
     {
         foreach (Relationship r in relationships)
         {
-            if (r.source == this && r.target == target && r.reltype == relationshipType && r.isStatement == isStatement)
-
+            if (r.Source == this && r.Target == target && r.RelType == relationshipType && r.isStatement == isStatement)
                 return r;
         }
         return null;
@@ -404,39 +403,40 @@ public partial class Thing
     public void RemoveRelationship(Relationship r)
     {
         if (r == null) return;
-        if (r.reltype == null) return;
-        if (r.source == null)
+        if (r.RelType == null) return;
+        if (r.Source == null)
         {
-            lock (r.relType.RelationshipsFromWriteable)
+            lock (r.RelType.RelationshipsFromWriteable)
             {
-                lock (r.target.RelationshipsFromWriteable)
+                lock (r.Target.RelationshipsFromWriteable)
                 {
-                    r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);
-                    r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);
+                    r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
+                    r.Target.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
                 }
             }
         }
-        else if (r.target == null)
+        else if (r.Target == null)
         {
-            lock (r.source.RelationshipsWriteable)
+            lock (r.Source.RelationshipsWriteable)
             {
-                lock (r.relType.RelationshipsFromWriteable)
+                lock (r.RelType.RelationshipsFromWriteable)
                 {
-                    r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement); ;
-                    r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);                }
+                    r.Source.RelationshipsWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement); ;
+                    r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
+                }
             }
         }
         else
         {
-            lock (r.source.RelationshipsWriteable)
+            lock (r.Source.RelationshipsWriteable)
             {
-                lock (r.relType.RelationshipsFromWriteable)
+                lock (r.RelType.RelationshipsFromWriteable)
                 {
-                    lock (r.target.RelationshipsFromWriteable)
+                    lock (r.Target.RelationshipsFromWriteable)
                     {
-                        r.source.RelationshipsWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);
-                        r.relType.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);
-                        r.target.RelationshipsFromWriteable.RemoveAll(x => x.source == r.source && x.reltype == r.reltype && x.target == r.target && x.isStatement == r.isStatement);
+                        r.Source.RelationshipsWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
+                        r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
+                        r.Target.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
                     }
                 }
             }
@@ -449,16 +449,16 @@ public partial class Thing
     {
         if (source == null && relType == null && targett == null) return null;
         foreach (Relationship r in Relationships)
-            if ((source == null || r.source == source) &&
-                (relType == null || r.relType == relType) &&
-                (targett == null || r.target == targett)) return r;
+            if ((source == null || r.Source == source) &&
+                (relType == null || r.RelType == relType) &&
+                (targett == null || r.Target == targett)) return r;
         return null;
     }
 
     public Thing HasRelationshipWithParent(Thing t)
     {
         foreach (Relationship L in Relationships)
-            if (L.target.Parents.Contains(t)) return L.target;
+            if (L.Target.Parents.Contains(t)) return L.Target;
         return null;
     }
 
@@ -466,11 +466,11 @@ public partial class Thing
     {
         foreach (Relationship L in Relationships)
         {
-            if (L.target != null)
+            if (L.Target != null)
             {
-                Thing t = L.target.AncestorList().FindFirst(x => x.Label.ToLower() == s.ToLower());
+                Thing t = L.Target.AncestorList().FindFirst(x => x.Label.ToLower() == s.ToLower());
                 if (t != null)
-                    return L.target;
+                    return L.Target;
             }
         }
         return null;
@@ -479,7 +479,7 @@ public partial class Thing
 
     public Relationship RemoveRelationship(Thing t2, Thing relationshipType)
     {
-        Relationship r = new() { source = this, reltype = relationshipType, target = t2 };
+        Relationship r = new() { Source = this, RelType = relationshipType, Target = t2 };
         RemoveRelationship(r);
         return r;
     }
@@ -493,12 +493,12 @@ public partial class Thing
         {
             for (int i = 0; i < Relationships.Count; i++)
             {
-                if (Relationships[i].target != null && Relationships[i].target.HasAncestor(t))
+                if (Relationships[i].Target != null && Relationships[i].Target.HasAncestor(t))
                 {
                     retVal.Add(Relationships[i]);
                 }
             }
-            return retVal.OrderBy(x => -x.Value).ToList();
+            return retVal.OrderBy(x => -x.Weight).ToList();
         }
     }
 
@@ -507,12 +507,12 @@ public partial class Thing
         List<Relationship> retVal = new List<Relationship>();
         for (int i = 0; i < relationshipsFrom.Count; i++)
         {
-            if (relationshipsFrom[i].source.HasAncestor(t))
+            if (relationshipsFrom[i].Source.HasAncestor(t))
             {
                 retVal.Add(relationshipsFrom[i]);
             }
         }
-        return retVal.OrderBy(x => -x.Value).ToList();
+        return retVal.OrderBy(x => -x.Weight).ToList();
     }
     /// <summary>
     /// Addsa a parent to a Thing
@@ -526,7 +526,7 @@ public partial class Thing
             //newParent.AddRelationship(this, IsA);
             return AddRelationship(newParent, IsA);
         }
-        return Relationships.FindFirst(x => x.target == newParent && x.relType == IsA);
+        return Relationships.FindFirst(x => x.Target == newParent && x.RelType == IsA);
     }
     /// <summary>
     /// Remove a parent from a Thing
@@ -534,7 +534,7 @@ public partial class Thing
     /// <param name="t">If the Thing is not a parent, the function does nothing</param>
     public void RemoveParent(Thing t)
     {
-        Relationship r = new() { source = this, reltype = IsA, target = t };
+        Relationship r = new() { Source = this, RelType = IsA, Target = t };
         t.RemoveRelationship(r);
     }
 
@@ -545,15 +545,15 @@ public partial class Thing
 
     public void RemoveChild(Thing t)
     {
-        Relationship r = new() { source = t, reltype = IsA, target = this };
+        Relationship r = new() { Source = t, RelType = IsA, Target = this };
         RemoveRelationship(r);
     }
 
     public Thing AttributeOfType(string label)
     {
         foreach (Relationship r in Relationships)
-            if (r.reltype.HasAncestorLabeled(label))
-                return r.target;
+            if (r.RelType.HasAncestorLabeled(label))
+                return r.Target;
         return null;
     }
 
@@ -561,9 +561,9 @@ public partial class Thing
     {
         foreach (Relationship r in Relationships)
         {
-            if (r.relType.Label != "hasAttribute" && r.relType.Label != "is") continue;
-            if (r.target != null && r.target.HasAncestor(t))
-                return r.target;
+            if (r.RelType.Label != "hasAttribute" && r.RelType.Label != "is") continue;
+            if (r.Target != null && r.Target.HasAncestor(t))
+                return r.Target;
         }
         return null;
     }
@@ -572,8 +572,8 @@ public partial class Thing
         List<Thing> retVal = new();
         foreach (Relationship r in Relationships)
         {
-            if (r.relType.Label != "hasAttribute" && r.relType.Label != "is") continue;
-            retVal.Add(r.target);
+            if (r.RelType.Label != "hasAttribute" && r.RelType.Label != "is") continue;
+            retVal.Add(r.Target);
         }
         return retVal;
     }
@@ -585,7 +585,7 @@ public partial class Thing
     public bool HasProperty(Thing t)
     {
         foreach (Relationship r in Relationships)
-            if (r.reltype.Label.ToLower() == "hasproperty" && r.target == t)
+            if (r.RelType.Label.ToLower() == "hasproperty" && r.Target == t)
                 return true;
         foreach (Thing t1 in Parents)
         {

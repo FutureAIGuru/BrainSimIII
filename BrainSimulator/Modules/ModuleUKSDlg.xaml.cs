@@ -131,27 +131,27 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         List<Relationship> theChildren = new();
         foreach (Relationship r in t.RelationshipsFrom)
         {
-            if (r.relType?.Label.StartsWith("is-a") == true && r.target != null)
+            if (r.RelType?.Label.StartsWith("is-a") == true && r.Target != null)
             {
                 theChildren.Add(r);
             }
         }
-        theChildren = theChildren.OrderBy(x => x.source.Label).ToList();
+        theChildren = theChildren.OrderBy(x => x.Source.Label).ToList();
 
         ModuleUKS UKS = (ModuleUKS)ParentModule;
 
         foreach (Relationship r in theChildren)
         {
             if (totalItemCount > 500) return;
-            Thing child = r.source;
+            Thing child = r.Source;
             //int descCount = child.GetDescendentsCount(); //this makes the system too slow
             int descCount = 10;
             string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
             string header = child.ToString();
             if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 
             if (r.Weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
-                header = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
-            if (r.reltype.HasRelationship(null, null, UKS.theUKS.Labeled("not")) != null) //prepend ! for negative  children
+                header = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastFiredTime + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
+            if (r.RelType.HasRelationship(null, null, UKS.theUKS.Labeled("not")) != null) //prepend ! for negative  children
                 header = "!" + header;
             if (detailsCB.IsChecked == true)
                 header += ":" + child.Children.Count + "," + descCountStr;
@@ -163,17 +163,17 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             //change color of things which just fired or are about to expire
             tviChild.SetValue(ThingObjectProperty, child);
             Thing mostRecent = UKS.theUKS.Labeled("mostRecent");
-            mostRecent = mostRecent?.Relationships.FindFirst(x=>x.relType.Label == "is")?.target;
+            mostRecent = mostRecent?.Relationships.FindFirst(x=>x.RelType.Label == "is")?.Target;
             if (child == mostRecent)
                 tviChild.Background = new SolidColorBrush(Colors.Pink);
-            if (child.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
+            if (child.LastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
                 tviChild.Background = new SolidColorBrush(Colors.LightGreen);
-            if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+            if (r.TimeToLive != TimeSpan.MaxValue && r.LastFiredTime + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                 tviChild.Background = new SolidColorBrush(Colors.LightYellow);
 
             if (expandedItems.Contains("|" + parentLabel + "|" + LeftOfColon(header)))
                 tviChild.IsExpanded = true;
-            if (r.source.AncestorList().Contains(expandAll) &&
+            if (r.Source.AncestorList().Contains(expandAll) &&
                 (child.Label == "" || !parentLabel.Contains("|" + child.Label)))
                 tviChild.IsExpanded = true;
 
@@ -230,16 +230,16 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         tvi.Items.Add(tviRefLabel);
 
         totalItemCount++;
-        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => x.relType?.Label).ToList();
+        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => x.RelType?.Label).ToList();
         foreach (Relationship r in sortedReferences)
         {
-            if (r.relType?.Label == "is-a") continue;
+            if (r.RelType?.Label == "is-a") continue;
             if (!r.isStatement && showConditionals.IsChecked != true) continue; //hide conditionals
             //special case for values 
-            if (r.target != null && r.target.HasAncestorLabeled("Value"))
+            if (r.Target != null && r.Target.HasAncestorLabeled("Value"))
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r) };
-                tviRef.ContextMenu = GetContextMenu(r.target, tviRef);
+                tviRef.ContextMenu = GetContextMenu(r.Target, tviRef);
                 tviRefLabel.Items.Add(tviRef);
                 totalItemCount++;
             }
@@ -247,12 +247,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             {
                 TreeViewItem tviRef = new() { Header = GetRelationshipString(r), };
                 if (!r.isStatement) tviRef.Header = "*" + tviRef.Header;
-                if (r.source != t) tviRef.Header = r.source?.Label + "->" + tviRef.Header;
+                if (r.Source != t) tviRef.Header = r.Source?.Label + "->" + tviRef.Header;
                 tviRef.ContextMenu = GetRelationshipContextMenu(r);
                 tviRefLabel.Items.Add(tviRef);
-                if (r.LastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
+                if (r.LastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
                     tviRef.Background = new SolidColorBrush(Colors.LightGreen);
-                if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+                if (r.TimeToLive != TimeSpan.MaxValue && r.LastFiredTime + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                     tviRef.Background = new SolidColorBrush(Colors.LightYellow);
                 totalItemCount++;
             }
@@ -277,15 +277,15 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         foreach (Relationship r in t.RelationshipsFrom)
         {
-            if (r.relType?.Label == "has-child") continue;
+            if (r.RelType?.Label == "has-child") continue;
             TreeViewItem tviRef;
             string headerstring1 = GetRelationshipString(r);
             tviRef = new TreeViewItem { Header = headerstring1 };
             tviRef.ContextMenu = GetRelationshipContextMenu(r);
             tviRefLabel.Items.Add(tviRef);
-            if (r.LastUsed > DateTime.Now - TimeSpan.FromSeconds(2))
+            if (r.LastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
                 tviRef.Background = new SolidColorBrush(Colors.LightGreen);
-            if (r.TimeToLive != TimeSpan.MaxValue && r.LastUsed + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+            if (r.TimeToLive != TimeSpan.MaxValue && r.LastFiredTime + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                 tviRef.Background = new SolidColorBrush(Colors.LightYellow);
             totalItemCount++;
         }
@@ -436,7 +436,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             {
                 t.Label = tb.Text;
                 //clear any time-to-live on this new image
-                t.RelationshipsFrom.FindFirst(x => x.reltype.Label == "is-a")?.TimeToLive = TimeSpan.MaxValue;
+                t.RelationshipsFrom.FindFirst(x => x.RelType.Label == "is-a")?.TimeToLive = TimeSpan.MaxValue;
                 cm.IsOpen = false;
             }
             if (e.Key == Key.Escape)
@@ -461,20 +461,20 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
         mi = new();
         mi.Click += Mi_Click;
-        mi.Header = "    " + r.source.Label;
-        mi.SetValue(ThingObjectProperty, r.source);
+        mi.Header = "    " + r.Source.Label;
+        mi.SetValue(ThingObjectProperty, r.Source);
         menu.Items.Add(mi);
 
         mi = new();
         mi.Click += Mi_Click;
-        mi.Header = "    " + r.relType.Label;
-        mi.SetValue(ThingObjectProperty, r.relType);
+        mi.Header = "    " + r.RelType.Label;
+        mi.SetValue(ThingObjectProperty, r.RelType);
         menu.Items.Add(mi);
 
         mi = new();
         mi.Click += Mi_Click;
-        mi.Header = "    " + r.target?.Label;
-        mi.SetValue(ThingObjectProperty, r.target);
+        mi.Header = "    " + r.Target?.Label;
+        mi.SetValue(ThingObjectProperty, r.Target);
         menu.Items.Add(mi);
 
         foreach (var c in r.Clauses)
@@ -502,7 +502,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (t == null)
             {
                 Relationship r = (Relationship)m.GetValue(RelationshipObjectProperty);
-                (r.source as Thing).RemoveRelationship(r);
+                (r.Source as Thing).RemoveRelationship(r);
                 //force a repaint
                 Refresh();
                 return;
@@ -602,10 +602,10 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private string GetRelationshipString(Relationship r)
     {
         string retVal = "";
-        if (r.relType is null || r.relType.Label != "has-child")
+        if (r.RelType is null || r.RelType.Label != "has-child")
             retVal = r.ToString() + " ";
         if (detailsCB.IsChecked == true)
-            retVal = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastUsed + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
+            retVal = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastFiredTime + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
         return retVal;
     }
 
@@ -623,7 +623,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     int CountNonChildRelationships(IList<Relationship> list)
     {
-        return list.Count - list.Count(x => x.relType?.Label == "is-a");
+        return list.Count - list.Count(x => x.RelType?.Label == "is-a");
     }
 
 

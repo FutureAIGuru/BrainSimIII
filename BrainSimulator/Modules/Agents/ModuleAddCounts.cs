@@ -65,20 +65,20 @@ public class ModuleAddCounts : ModuleBase
         for (int j = 0; j < t.Relationships.Count; j++)
         {
             Relationship r = t.Relationships[j];
-            if (r.reltype == Thing.IsA) continue;
-            Thing useRelType = ModuleAttributeBubble.GetInstanceType(r.reltype);
+            if (r.RelType == Thing.IsA) continue;
+            Thing useRelType = ModuleAttributeBubble.GetInstanceType(r.RelType);
 
             //get the counts of targets and/or their ancestors
-            List<Thing> targets = t.Relationships.FindAll(x => ModuleAttributeBubble.GetInstanceType(x.reltype) == useRelType).Select(x => x.target).ToList();
+            List<Thing> targets = t.Relationships.FindAll(x => ModuleAttributeBubble.GetInstanceType(x.RelType) == useRelType).Select(x => x.Target).ToList();
             List<(Thing tMatch, int bestCount)> bestMatches = GetAttributeCounts(targets);
             foreach (var match in bestMatches)
             {
-                Relationship existingRelationship = theUKS.GetRelationship(r.source, useRelType.ToString() + "." + match.bestCount.ToString(), match.tMatch);
+                Relationship existingRelationship = theUKS.GetRelationship(r.Source, useRelType.ToString() + "." + match.bestCount.ToString(), match.tMatch);
                 if (existingRelationship == null)
                 {
                     string newRelLabel = useRelType.ToString() + "." + match.bestCount.ToString();
                     Thing newRelType = theUKS.GetOrAddThing(newRelLabel, useRelType.Parents[0]);
-                    Relationship rAdded = theUKS.AddStatement(r.source.Label, newRelType, match.tMatch);
+                    Relationship rAdded = theUKS.AddStatement(r.Source.Label, newRelType, match.tMatch);
                     debugString += $"Added: {rAdded}\n";
                 }
             }

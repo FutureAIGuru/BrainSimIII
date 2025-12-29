@@ -48,11 +48,11 @@ public partial class ModuleUKSClauseDlg : ModuleBaseDlg
         Relationship r1 = null;
         if (rBase != null)
         {
-            if (GetInstanceRoot(rBase.source) != source ||
-                GetInstanceRoot(rBase.target) != target ||
-                GetInstanceRoot(rBase.relType) != relType)
+            if (GetInstanceRoot(rBase.Source) != source ||
+                GetInstanceRoot(rBase.Target) != target ||
+                GetInstanceRoot(rBase.RelType) != relType)
                 rBase = null;
-            if (rBase != null && !rBase.source.Relationships.Contains(rBase))
+            if (rBase != null && !rBase.Source.Relationships.Contains(rBase))
                 rBase = null;
             if (rBase != null)
                 r1 = rBase;
@@ -67,7 +67,7 @@ public partial class ModuleUKSClauseDlg : ModuleBaseDlg
         Thing target2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetText2.Text, false);
         Relationship rAdded = UKSClause.theUKS.AddClause(r1, theClauseType, source2, type2, target2);
 
-        SetUpRelComboBox(GetInstanceRoot(r1.source),rAdded);
+        SetUpRelComboBox(GetInstanceRoot(r1.Source),rAdded);
     }
 
     private Thing GetInstanceRoot(Thing t)
@@ -105,10 +105,10 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
                 if (t != sourceThing && !t.HasProperty("isInstance")) continue;
                 foreach (Relationship r in t.Relationships)
                 {
-                    if (r.reltype.Label == "has-child") continue;
-                    if (r.reltype.Label == "hasProperty") continue;
+                    if (r.RelType.Label == "has-child") continue;
+                    if (r.RelType.Label == "hasProperty") continue;
                     var cbi = new ComboBoxItem();
-                    cbi.Content = r.target.Label;
+                    cbi.Content = r.Target.Label;
                     cbi.ToolTip = r.ToString();
                     cbi.SetValue(theRelationship, r);
                     SourceDisambiguation.Items.Add(cbi);
@@ -139,8 +139,8 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
             {
                 ComboBoxItem cbi = (ComboBoxItem)cb.SelectedItem;
                 Relationship r = (Relationship)cbi.GetValue(theRelationship);
-                relationshipText.Text = r.relType.Label;
-                targetText.Text = r.target.Label;
+                relationshipText.Text = r.RelType.Label;
+                targetText.Text = r.Target.Label;
                 rBase = r;
                 SetStatus(r.ToString(), Colors.Yellow);
             }

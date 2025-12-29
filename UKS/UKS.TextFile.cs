@@ -36,29 +36,29 @@ public partial class UKS
                 {
                     //don't save extra clause baggage.
                     if (!r.isStatement && r.Clauses.Count == 0) continue;
-                    if (r.reltype.Label == "hasProperty" && r.target.Label == "isInstance") continue;
-                    if (r.reltype.Label == "is-a" && r.source.HasProperty("isInstance"))
+                    if (r.RelType.Label == "hasProperty" && r.Target.Label == "isInstance") continue;
+                    if (r.RelType.Label == "is-a" && r.Source.HasProperty("isInstance"))
                     {
-                        if (seenThings.Add(r.source.Label)) q.Enqueue((r.source, depth + 1));
-                        if (seenThings.Add(r.target.Label)) q.Enqueue((r.target, depth + 1));
+                        if (seenThings.Add(r.Source.Label)) q.Enqueue((r.Source, depth + 1));
+                        if (seenThings.Add(r.Target.Label)) q.Enqueue((r.Target, depth + 1));
                         continue;
                     }
 
-                    Thing theSource = GetNonInstance(r.source);
-                    var line = $"[{theSource.Label},{r.relType.Label},{r.target.Label},{r.Weight.ToString("0.00")}]";
+                    Thing theSource = GetNonInstance(r.Source);
+                    var line = $"[{theSource.Label},{r.RelType.Label},{r.Target.Label},{r.Weight.ToString("0.00")}]";
                     writer.Write(line);
 
                     foreach (Clause c in r.Clauses)
                     {
-                        var clause = $" {c.clauseType.Label} [{c.clause.source.Label},{c.clause.reltype.Label},{c.clause.target.Label},{c.clause.Weight.ToString("0.00")}] ";
+                        var clause = $" {c.clauseType.Label} [{c.clause.Source.Label},{c.clause.RelType.Label},{c.clause.Target.Label},{c.clause.Weight.ToString("0.00")}] ";
                         writer.Write(clause);
                     }
 
                     writer.WriteLine();
                     if (depth < maxDepth)
                     {
-                        if (seenThings.Add(r.source.Label)) q.Enqueue((r.source, depth + 1));
-                        if (seenThings.Add(r.target.Label)) q.Enqueue((r.target, depth + 1));
+                        if (seenThings.Add(r.Source.Label)) q.Enqueue((r.Source, depth + 1));
+                        if (seenThings.Add(r.Target.Label)) q.Enqueue((r.Target, depth + 1));
                     }
                 }
             }
@@ -138,11 +138,11 @@ public partial class UKS
                 t = AddThing(relTypeConnector, "ClauseType");
             Relationship r1 = new()
             {
-                source = GetOrAddThing(stmt.S),
-                reltype = GetOrAddThing(stmt.R),
-                target = GetOrAddThing(stmt.O)
+                Source = GetOrAddThing(stmt.S),
+                RelType = GetOrAddThing(stmt.R),
+                Target = GetOrAddThing(stmt.O)
             };
-            Relationship r2 = AddClause(r, t, r1.source, r1.reltype, r1.target);
+            Relationship r2 = AddClause(r, t, r1.Source, r1.RelType, r1.Target);
             //r.isStatement = isStatement;
         }
 

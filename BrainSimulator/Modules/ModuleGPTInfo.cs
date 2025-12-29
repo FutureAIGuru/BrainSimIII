@@ -95,7 +95,7 @@ namespace BrainSimulator.Modules
                         Relationship r = MainWindow.theUKS.GetRelationship(parent, "has-child", child);
                         if (r != null)
                         {
-                            r.GPTVerified = true;
+//                            r.GPTVerified = true;
                             Debug.WriteLine($"Relationship: {child} is-a {parent} has verified. ");
                         }
                     }
@@ -378,7 +378,7 @@ is-part-of-speech, ";
                     Relationship r = theUKS.AddStatement(englishWord, "means", textIn + "*");
 
                     // Make the disambiguated term a child of the parent.
-                    theUKS.AddStatement(r.target, "is-a", newParent);
+                    theUKS.AddStatement(r.Target, "is-a", newParent);
 
                     // Increment count to see how many disambiguous items there are.
                     count++;
@@ -620,7 +620,7 @@ is-part-of-speech, ";
                         ///
                         foreach (Thing t in theUKS.UKSList)
                             foreach (Relationship r in t.Relationships)
-                                if (r.reltype == null)
+                                if (r.RelType == null)
                                 {
                                     t.RemoveRelationship(r);
                                 }
@@ -643,17 +643,17 @@ is-part-of-speech, ";
                 foreach (Relationship meaning in word.Relationships)
                 {
                     // Find the parents of each target in the realtionship.
-                    foreach (Thing parent in meaning.target.Parents)
+                    foreach (Thing parent in meaning.Target.Parents)
                     {
                         // Continue if the parent is the word itself, (.rock and rock), instead of an actual abstract parent.
-                        if ("." + parent.Label == meaning.source.Label)
+                        if ("." + parent.Label == meaning.Source.Label)
                         {
                             continue;
                         }
                         // If the parent already exists, remove it.
                         if (uniqueParents.Contains(parent))
                         {
-                            thingsToRemove.Add(meaning.target);
+                            thingsToRemove.Add(meaning.Target);
                         }
                         // Else if the parent does not exist, add it.
                         else

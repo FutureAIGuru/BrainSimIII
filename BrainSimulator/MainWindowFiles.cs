@@ -97,7 +97,7 @@ namespace BrainSimulator
                 for (int i = 0; i < t.Relationships.Count; i++)
                 {
                     Relationship r = t.Relationships[i];
-                    theUKS.DeleteThing(r.target);
+                    theUKS.DeleteThing(r.Target);
                     t.RemoveRelationship(r);
                 }
                 theUKS.DeleteThing(t);

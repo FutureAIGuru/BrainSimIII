@@ -202,14 +202,14 @@ public partial class UKS
 
         SRelationship sR = new SRelationship()
         {
-            source = UKSList.FindIndex(x => x == l.source),
-            target = UKSList.FindIndex(x => x == l.target),
-            relationshipType = UKSList.FindIndex(x => x == l.relType),
+            source = UKSList.FindIndex(x => x == l.Source),
+            target = UKSList.FindIndex(x => x == l.Target),
+            relationshipType = UKSList.FindIndex(x => x == l.RelType),
             weight = l.Weight,
-            hits = l.Hits,
-            misses = l.Misses,
-            count = l.count,
-            GPTVerified = l.GPTVerified,
+            //hits = l.Hits,
+            //misses = l.Misses,
+            //count = l.count,
+            //GPTVerified = l.GPTVerified,
             clauses = clauseList,
         };
         return sR;
@@ -260,10 +260,10 @@ public partial class UKS
             {
                 Relationship r = UnConvertRelationship(p, new List<SRelationship>());
                 if (r != null)
-                    if (r.reltype.Label != "is-a") //swap has-child for is-a
+                    if (r.RelType.Label != "is-a") //swap has-child for is-a
                         UKSList[i].RelationshipsWriteable.Add(r);
                     else
-                        r.source.RelationshipsWriteable.Add(r);
+                        r.Source.RelationshipsWriteable.Add(r);
             }
         }
         //rebuild all the reverse linkages
@@ -271,13 +271,13 @@ public partial class UKS
         {
             foreach (Relationship r in t.Relationships)
             {
-                Thing t1 = r.target;
+                Thing t1 = r.Target;
                 if (t1 != null)
                     if (!t1.RelationshipsFromWriteable.Contains(r))
                         t1.RelationshipsFromWriteable.Add(r);
-                if (r.relType != null)
-                    if (!r.relType.RelationshipsAsTypeWriteable.Contains(r))
-                        r.relType.RelationshipsAsTypeWriteable.Add(r);
+                if (r.RelType != null)
+                    if (!r.RelType.RelationshipsAsTypeWriteable.Contains(r))
+                        r.RelType.RelationshipsAsTypeWriteable.Add(r);
                 AddClauses(r, new List<Relationship>());
             }
         }
@@ -322,14 +322,14 @@ public partial class UKS
 
         Relationship r = new()
         {
-            source = source,
-            target = target,
-            relType = relationshipType,
-            Hits = p.hits,
-            Misses = p.misses,
+            Source = source,
+            Target = target,
+            RelType = relationshipType,
+            //Hits = p.hits,
+            //Misses = p.misses,
             Weight = p.weight,
-            GPTVerified = p.GPTVerified,
-            count = p.count,
+            //GPTVerified = p.GPTVerified,
+            //count = p.count,
             //sentencetype = p.sentencetype as SentenceType,
         };
         if (p.clauses != null)

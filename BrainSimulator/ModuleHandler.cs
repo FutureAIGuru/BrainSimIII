@@ -59,7 +59,7 @@ public class ModuleHandler
         for (int i = 0; i < t.Relationships.Count; i++)
         {
             Relationship r = t.Relationships[i];
-            theUKS.DeleteThing(r.target);
+            theUKS.DeleteThing(r.Target);
         }
         theUKS.DeleteThing(t);
 

@@ -56,8 +56,8 @@ public class ModuleAttributeBubble : ModuleBase
         { }
         public RelDest(Relationship r)
         {
-            relType = r.relType;
-            target = r.target;
+            relType = r.RelType;
+            target = r.Target;
             relationships.Add(r);
         }
         public override string ToString()
@@ -90,13 +90,13 @@ public class ModuleAttributeBubble : ModuleBase
         {
             foreach (Relationship r in t1.Relationships)
             {
-                if (r.reltype == Thing.IsA) continue;
-                Thing useRelType = GetInstanceType(r.reltype);
+                if (r.RelType == Thing.IsA) continue;
+                Thing useRelType = GetInstanceType(r.RelType);
 
-                RelDest foundItem = itemCounts.FindFirst(x => x.relType == useRelType && x.target == r.target);
+                RelDest foundItem = itemCounts.FindFirst(x => x.relType == useRelType && x.target == r.Target);
                 if (foundItem == null)
                 {
-                    foundItem = new RelDest { relType = useRelType, target = r.target };
+                    foundItem = new RelDest { relType = useRelType, target = r.Target };
                     itemCounts.Add(foundItem);
                 }
                 foundItem.relationships.Add(r);

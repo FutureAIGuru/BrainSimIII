@@ -43,9 +43,9 @@ namespace BrainSimulator.Modules
             if (uksDlg != null)
                 foreach (var r in uksDlg.Relationships)
                 {
-                    if (r.reltype.Label == "hasAttribute" && r.target.Label.StartsWith("Root"))
+                    if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith("Root"))
                     {
-                        root = (string)r.target.V;
+                        root = (string)r.Target.V;
                     }
                 }
 
@@ -61,11 +61,11 @@ namespace BrainSimulator.Modules
             {
                 foreach (Relationship r in t.Relationships)
                 {
-                    if (r.source == theRoot) continue;
-                    string label = r.reltype.Label;
+                    if (r.Source == theRoot) continue;
+                    string label = r.RelType.Label;
                     foreach (Clause c in r.Clauses)
-                        label += $"\n{c.clauseType.Label} {c.clause.source.Label} {c.clause.reltype.Label} {c.clause.target.Label}";
-                    var e = g.AddEdge(t.Label, label, r.target.Label);
+                        label += $"\n{c.clauseType.Label} {c.clause.Source.Label} {c.clause.RelType.Label} {c.clause.Target.Label}";
+                    var e = g.AddEdge(t.Label, label, r.Target.Label);
                     e.Attr.Color = Microsoft.Msagl.Drawing.Color.Yellow;
                     e.Label.FontColor = Microsoft.Msagl.Drawing.Color.White;
                     e.Label.FontSize = 6;

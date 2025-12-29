@@ -142,9 +142,9 @@ Follow has ONLY if called out in type
             for (int i = 0; i < relationships.Count; i++)
             {
                 Relationship r = relationships[i];
-                if (targetList.Count > 0 && target != "" && !r.target.HasAncestor(targetList[0]))
+                if (targetList.Count > 0 && target != "" && !r.Target.HasAncestor(targetList[0]))
                 { relationships.RemoveAt(i); i--; continue; }
-                if (r.reltype != null && relType != "" && !r.relType.HasAncestorLabeled(relType))
+                if (r.RelType != null && relType != "" && !r.RelType.HasAncestorLabeled(relType))
                 { relationships.RemoveAt(i); i--; continue; }
             }
 

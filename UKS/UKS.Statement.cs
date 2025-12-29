@@ -20,28 +20,28 @@ public partial class UKS
     /// <param name="sTarget">string or Thing (or null)</param>
     /// <param name="isStatement">Boolean indicating if this is a true statement or part of a conditional</param>
     /// <returns>The primary relationship which was created (others may be created for given attributes</returns>
-    public Relationship AddStatement(string  sSource, string sRelationshipType, string sTarget,bool isStatement = true)
+    public Relationship AddStatement(string sSource, string sRelationshipType, string sTarget, bool isStatement = true)
     {
         Thing source = ThingFromObject(sSource);
         Thing relationshipType = ThingFromObject(sRelationshipType, "RelationshipType", source);
         Thing target = ThingFromObject(sTarget);
 
-        Relationship theRelationship = AddStatement(source, relationshipType, target,isStatement);
+        Relationship theRelationship = AddStatement(source, relationshipType, target, isStatement);
         return theRelationship;
     }
-/// <summary>
-/// Adds a relationship between the specified source, relationship type, and target. No new Things are created.
-/// </summary>
-/// <remarks>If a relationship with the same source, relationship type, and target already exists, the existing
-/// relationship  is returned after being activated. Otherwise, a new relationship is created and added. If the
-/// relationship type  has the "isCommutative" property, a reverse relationship is also created. Additionally, any
-/// extraneous parent  relationships for the source, target, or relationship type are cleared.</remarks>
-/// <param name="source">The source <see cref="Thing"/> of the relationship. Cannot be <see langword="null"/>.</param>
-/// <param name="relType">The relationship type <see cref="Thing"/>. Cannot be <see langword="null"/>.</param>
-/// <param name="target">The target <see cref="Thing"/> of the relationship.</param>
-/// <param name="isStatement">A value indicating whether the relationship is considered a statement.  The default value is <see langword="true"/>.</param>
-/// <returns>The created or existing <see cref="Relationship"/> object that represents the relationship.  Returns <see
-/// langword="null"/> if <paramref name="source"/> or <paramref name="relType"/> is <see langword="null"/>.</returns>
+    /// <summary>
+    /// Adds a relationship between the specified source, relationship type, and target. No new Things are created.
+    /// </summary>
+    /// <remarks>If a relationship with the same source, relationship type, and target already exists, the existing
+    /// relationship  is returned after being activated. Otherwise, a new relationship is created and added. If the
+    /// relationship type  has the "isCommutative" property, a reverse relationship is also created. Additionally, any
+    /// extraneous parent  relationships for the source, target, or relationship type are cleared.</remarks>
+    /// <param name="source">The source <see cref="Thing"/> of the relationship. Cannot be <see langword="null"/>.</param>
+    /// <param name="relType">The relationship type <see cref="Thing"/>. Cannot be <see langword="null"/>.</param>
+    /// <param name="target">The target <see cref="Thing"/> of the relationship.</param>
+    /// <param name="isStatement">A value indicating whether the relationship is considered a statement.  The default value is <see langword="true"/>.</param>
+    /// <returns>The created or existing <see cref="Relationship"/> object that represents the relationship.  Returns <see
+    /// langword="null"/> if <paramref name="source"/> or <paramref name="relType"/> is <see langword="null"/>.</returns>
     public Relationship AddStatement(Thing source, Thing relType, Thing target, bool isStatement = true)
     {
         if (source == null || relType == null) return null;
@@ -62,18 +62,18 @@ public partial class UKS
         WeakenConflictingRelationships(source, r);
 
         WriteTheRelationship(r);
-        if (r.relType != null && HasProperty(r.relType, "isCommutative"))
+        if (r.RelType != null && HasProperty(r.RelType, "isCommutative"))
         {
             Relationship rReverse = new Relationship(r);
-            (rReverse.source, rReverse.target) = (rReverse.target, rReverse.source);
+            (rReverse.Source, rReverse.Target) = (rReverse.Target, rReverse.Source);
             rReverse.Clauses.Clear();
             WriteTheRelationship(rReverse);
         }
 
         //if this is adding a child relationship, remove any unknownObject parent
-        ClearExtraneousParents(r.source);
-        ClearExtraneousParents(r.target);
-        ClearExtraneousParents(r.relType);
+        ClearExtraneousParents(r.Source);
+        ClearExtraneousParents(r.Target);
+        ClearExtraneousParents(r.RelType);
 
         return r;
     }
@@ -106,11 +106,11 @@ public partial class UKS
         //CREATE new subclasses if needed
 
         Relationship r = new Relationship()
-        { source = source, reltype = relType, target = target };
+        { Source = source, RelType = relType, Target = target };
 
-        r.source?.SetFired();
-        r.target?.SetFired();
-        r.relType?.SetFired();
+        r.Source?.Fire();
+        r.Target?.Fire();
+        r.RelType?.Fire();
 
         return r;
     }
@@ -130,7 +130,7 @@ public partial class UKS
             else if (RelationshipsAreExclusive(newRelationship, existingRelationship))
             {
                 //special cases for "not" so we delete rather than weakening
-                if (newRelationship.reltype.Children.Contains(existingRelationship.relType) && HasAttribute(existingRelationship.relType, "not"))
+                if (newRelationship.RelType.Children.Contains(existingRelationship.RelType) && HasAttribute(existingRelationship.RelType, "not"))
                 {
                     existingRelationship.isStatement = false;
                     Thing after = GetOrAddThing("AFTER", "ClauseType");
@@ -138,13 +138,13 @@ public partial class UKS
                     //                    newSource.RemoveRelationship(existingRelationship);
                     //                    i--;
                 }
-                if (existingRelationship.reltype.Children.Contains(newRelationship.relType) && HasAttribute(newRelationship.relType, "not"))
+                if (existingRelationship.RelType.Children.Contains(newRelationship.RelType) && HasAttribute(newRelationship.RelType, "not"))
                 {
                     existingRelationship.isStatement = false;
                     Thing after = GetOrAddThing("AFTER", "ClauseType");
                     newRelationship.AddClause(after, existingRelationship);
-//                    newSource.RemoveRelationship(existingRelationship);
-//                    i--;
+                    //                    newSource.RemoveRelationship(existingRelationship);
+                    //                    i--;
                 }
                 else
                 {
@@ -194,8 +194,8 @@ public partial class UKS
         var existingRelationships = t.Relationships;
         foreach (Relationship r in existingRelationships)
         {
-            if (attrs.Contains(r.target)) attrs.Remove(r.target);
-            if (attrs.Contains(r.relType)) attrs.Remove(r.relType);
+            if (attrs.Contains(r.Target)) attrs.Remove(r.Target);
+            if (attrs.Contains(r.RelType)) attrs.Remove(r.RelType);
         }
 
         //t already has these attributes
@@ -213,8 +213,8 @@ public partial class UKS
         List<Thing> retVal = new();
         foreach (Relationship r in t.Relationships)
         {
-            if (r.reltype.Label == "is")
-                retVal.Add(r.target);
+            if (r.RelType.Label == "is")
+                retVal.Add(r.Target);
         }
         return retVal;
     }
@@ -271,7 +271,7 @@ public partial class UKS
         foreach (Thing t1 in attributes)
         {
             Relationship r1 = new Relationship()
-            { source = retVal, reltype = ThingLabels.GetThing("is"), target = t1 };
+            { Source = retVal, RelType = ThingLabels.GetThing("is"), Target = t1 };
             WriteTheRelationship(r1);
         }
         return retVal;
@@ -280,8 +280,8 @@ public partial class UKS
     private Thing CheckForInverse(Thing relationshipType)
     {
         if (relationshipType == null) return null;
-        Relationship inverse = relationshipType.Relationships.FindFirst(x => x.reltype.Label == "inverseOf");
-        if (inverse != null) return inverse.target;
+        Relationship inverse = relationshipType.Relationships.FindFirst(x => x.RelType.Label == "inverseOf");
+        if (inverse != null) return inverse.Target;
         //use the below if inverses are 2-way.  Without this, there is a one-way translation
         //inverse = relationshipType.RelationshipsBy.FindFirst(x => x.reltype.Label == "inverseOf");
         //if (inverse != null) return inverse.source;
@@ -297,46 +297,44 @@ public partial class UKS
     }
     public static void WriteTheRelationship(Relationship r)
     {
-        if (r.source == null && r.target == null) return;
-        if (r.reltype == null) return;
-        if (r.target == null)
+        if (r.Source == null && r.Target == null) return;
+        if (r.RelType == null) return;
+        if (r.Target == null)
         {
-            lock (r.source.RelationshipsWriteable)
-                lock (r.relType.RelationshipsFromWriteable)
+            lock (r.Source.RelationshipsWriteable)
+                lock (r.RelType.RelationshipsFromWriteable)
                 {
-                    if (!r.source.RelationshipsWriteable.Contains(r))
-                        r.source.RelationshipsWriteable.Add(r);
-                    if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
-                        r.reltype.RelationshipsAsTypeWriteable.Add(r);
+                    if (!r.Source.RelationshipsWriteable.Contains(r))
+                        r.Source.RelationshipsWriteable.Add(r);
+                    if (!r.RelType.RelationshipsAsTypeWriteable.Contains(r))
+                        r.RelType.RelationshipsAsTypeWriteable.Add(r);
                 }
         }
-        else if (r.source == null)
+        else if (r.Source == null)
         {
-            lock (r.target.RelationshipsWriteable)
-                lock (r.relType.RelationshipsFromWriteable)
+            lock (r.Target.RelationshipsWriteable)
+                lock (r.RelType.RelationshipsFromWriteable)
                 {
-                    if (!r.target.RelationshipsWriteable.Contains(r))
-                        r.target.RelationshipsFromWriteable.Add(r);
-                    if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
-                        r.reltype.RelationshipsAsTypeWriteable.Add(r);
+                    if (!r.Target.RelationshipsWriteable.Contains(r))
+                        r.Target.RelationshipsFromWriteable.Add(r);
+                    if (!r.RelType.RelationshipsAsTypeWriteable.Contains(r))
+                        r.RelType.RelationshipsAsTypeWriteable.Add(r);
                 }
         }
         else
         {
-            lock (r.source.RelationshipsWriteable)
-                lock (r.target.RelationshipsFromWriteable)
-                    lock (r.relType.RelationshipsFromWriteable)
+            lock (r.Source.RelationshipsWriteable)
+                lock (r.Target.RelationshipsFromWriteable)
+                    lock (r.RelType.RelationshipsFromWriteable)
                     {
-                        if (!r.source.RelationshipsWriteable.Contains(r))
-                            r.source.RelationshipsWriteable.Add(r);
-                        if (!r.target.RelationshipsWriteable.Contains(r))
-                            r.target.RelationshipsFromWriteable.Add(r);
-                        if (!r.reltype.RelationshipsAsTypeWriteable.Contains(r))
-                            r.reltype.RelationshipsAsTypeWriteable.Add(r);
+                        if (!r.Source.RelationshipsWriteable.Contains(r))
+                            r.Source.RelationshipsWriteable.Add(r);
+                        if (!r.Target.RelationshipsWriteable.Contains(r))
+                            r.Target.RelationshipsFromWriteable.Add(r);
+                        if (!r.RelType.RelationshipsAsTypeWriteable.Contains(r))
+                            r.RelType.RelationshipsAsTypeWriteable.Add(r);
 
                     }
         }
     }
-
-
 }

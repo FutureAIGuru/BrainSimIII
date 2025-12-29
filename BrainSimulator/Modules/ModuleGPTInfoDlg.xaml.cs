@@ -276,11 +276,11 @@ namespace BrainSimulator.Modules
             if (t == null) return;
             foreach (Relationship r in t.Relationships)
             {
-                if (r.GPTVerified) continue;
-                if (r.reltype.Label != "has-child") continue;
+                //if (r.GPTVerified) continue;
+                if (r.RelType.Label != "has-child") continue;
 
                 count++;
-                ModuleGPTInfo.GetChatGPTVerifyParentChild(r.target.Label, t.Label);
+                ModuleGPTInfo.GetChatGPTVerifyParentChild(r.Target.Label, t.Label);
             }
         }
 

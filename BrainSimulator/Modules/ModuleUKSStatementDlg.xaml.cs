@@ -49,7 +49,7 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
                     SetStatus("'This' is not defined at this time");
                     return;
                 }
-                Thing mostRecentTarget = mostRecent.Relationships.FindFirst(x => x.relType.Label == "is").target;
+                Thing mostRecentTarget = mostRecent.Relationships.FindFirst(x => x.RelType.Label == "is").Target;
                 mostRecentTarget.Label = targetThing;
             }
             return;

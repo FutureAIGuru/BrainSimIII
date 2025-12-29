@@ -74,16 +74,16 @@ public class ModuleClassCreate : ModuleBase
         {
             foreach (Relationship r in t1.Relationships)
             {
-                if (r.reltype == Thing.IsA) continue;
-                Thing useRelType = GetInstanceType(r.reltype);
+                if (r.RelType == Thing.IsA) continue;
+                Thing useRelType = GetInstanceType(r.RelType);
 
-                RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.target);
+                RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.Target);
                 if (foundItem == null)
                 {
-                    foundItem = new RelDest { relType = useRelType, target = r.target };
+                    foundItem = new RelDest { relType = useRelType, target = r.Target };
                     attributes.Add(foundItem);
                 }
-                if (foundItem.relationships.FindFirst(x=>x.source == r.source && x.target == r.target) == null)
+                if (foundItem.relationships.FindFirst(x=>x.Source == r.Source && x.Target == r.Target) == null)
                     foundItem.relationships.Add(r);
             }
         }
@@ -97,7 +97,7 @@ public class ModuleClassCreate : ModuleBase
                 debugString += "Created new subclass " + newParent;
                 foreach (Relationship r in key.relationships)
                 {
-                    Thing tChild = (Thing)r.source;
+                    Thing tChild = (Thing)r.Source;
                     tChild.AddParent(newParent);
                     tChild.RemoveParent(t);
                 }

@@ -132,9 +132,9 @@ namespace BrainSimulator.Modules
                 if (uksDlg != null) 
                 foreach (var r in uksDlg.Relationships)
                 {
-                    if (r.reltype.Label == "hasAttribute" && r.target.Label.StartsWith("Root"))
+                    if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith("Root"))
                     {
-                        root = (string)r.target.V;
+                        root = (string)r.Target.V;
                     }
                 }
                 await Task.Run(() => parent.theUKS.ExportTextFile(root, path));

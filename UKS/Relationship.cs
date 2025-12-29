@@ -3,11 +3,6 @@
 // Contains confidential and  proprietary information and programs which may not be distributed without a separate license
 //  
 
-using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Windows;
-
 namespace UKS;
 
 //these are used so that relationship lists can be readOnly.
@@ -90,36 +85,36 @@ public class Clause
 /// properties are used to track the usage of a Relationship which is used to help determine the most likely result of a query.
 /// Each relationship also maintains a list of "Clause"s which are relationships to other Relationships. 
 /// </summary>
-public class Relationship
+public class Relationship : Thing
 {
-    public Thing s;
+    public Thing _source;
     /// <summary>
     /// the Relationship Source
     /// </summary>
-    public Thing source
+    public Thing Source
     {
-        get => s;
-        set { s = value; }
+        get => _source;
+        set { _source = value; }
     }
-    public Thing reltype;
+    private Thing _relType;
     /// <summary>
     /// The Relationship Type
     /// </summary>
-    public Thing relType
+    public Thing RelType
     {
-        get { return reltype; }
+        get { return _relType; }
         set
         {
-            reltype = value;
+            _relType = value;
         }
     }
-    private Thing targ;
-    public Thing target
+    private Thing _target;
+    public Thing Target
     {
-        get { /*Hits++; lastUsed = DateTime.Now;*/ return targ; }
+        get { /*Hits++; lastUsed = DateTime.Now;*/ return _target; }
         set
         {
-            targ = value;
+            _target = value;
         }
     }
 
@@ -133,49 +128,39 @@ public class Relationship
     /// </summary>
     public List<Relationship> clausesFrom = new();
 
-    private float weight = 1;
+    private float _weight = 1;
     public float Weight
     {
         get
         {
-            return weight;
+            return _weight;
         }
         set
         {
-            weight = value;
+            _weight = value;
             //if this is a commutative relationship, also set the weight on the reverse
-            if (relType?.HasProperty("IsCommutative") == true)
+            if (RelType?.HasProperty("IsCommutative") == true)
             {
-                Relationship rReverse = target.Relationships.FindFirst(x => x.reltype == relType && x.target == source);
+                Relationship rReverse = Target.Relationships.FindFirst(x => x._relType == RelType && x.Target == Source);
                 if (rReverse != null)
                 {
-                    rReverse.weight = weight;
+                    rReverse._weight = _weight;
                 }
             }
         }
     }
 
-    private int hits = 0;
-    private int misses = 0;
-    /// <summary>
-    /// Used internally to calculate the Weight
-    /// </summary>
-    public int Hits { get => hits; set => hits = value; }
-    /// <summary>
-    /// Used internally to calculate the Weight
-    /// </summary>
-    public int Misses { get => misses; set => misses = value; }
+    //private int hits = 0;
+    //private int misses = 0;
+    ///// <summary>
+    ///// Used internally to calculate the Weight
+    ///// </summary>
+    //public int Hits { get => hits; set => hits = value; }
+    ///// <summary>
+    ///// Used internally to calculate the Weight
+    ///// </summary>
+    //public int Misses { get => misses; set => misses = value; }
 
-    private DateTime lastUsed = DateTime.Now;
-    /// <summary>
-    /// Time when this Relationship was last accessed at the result of a query. This is used
-    /// to help determine the importance of this relationship
-    /// </summary>
-    public DateTime LastUsed { get => lastUsed; set => lastUsed = value; }
-    /// <summary>
-    /// Time when this relationship was created.
-    /// </summary>
-    public DateTime created = DateTime.Now;
 
     private TimeSpan timeToLive = TimeSpan.MaxValue;
     /// <summary>
@@ -191,28 +176,28 @@ public class Relationship
                 AddToTransientList();
         }
     }
-    public bool GPTVerified = false;
+    //public bool GPTVerified = false;
     public bool isStatement = true;
 
     public Relationship()
     { }
 
-    public void Fire()
-    {
-        lastUsed = DateTime.Now;
-    }
+    //public void Fire()
+    //{
+    //    lastUsed = DateTime.Now;
+    //}
     /// <summary>
     /// Copy Constructor
     /// </summary>
     /// <param name="r"></param>
     public Relationship(Relationship r)
     {
-        count = r.count;
-        Misses = r.Misses;
-        relType = r.relType;
-        source = r.source;
-        Hits = r.Hits++;
-        targ = r.targ;
+        //count = r.count;
+        //Misses = r.Misses;
+        RelType = r.RelType;
+        Source = r.Source;
+        //Hits = r.Hits++;
+        Target = r.Target;
         Weight = r.Weight;
         if (r.Clauses == null) Clauses = new();
         else Clauses = new(r.Clauses);
@@ -220,20 +205,20 @@ public class Relationship
         else clausesFrom = new(r.clausesFrom);
     }
 
-    public void ClearHits()
-    {
-        Hits = 0;
-    }
-    public void ClearAccessCount()
-    {
-        Misses = 0;
-    }
+    //public void ClearHits()
+    //{
+    //    Hits = 0;
+    //}
+    //public void ClearAccessCount()
+    //{
+    //    Misses = 0;
+    //}
 
-    public int count
-    {
-        get => -1;
-        set { }
-    }
+    //public int count
+    //{
+    //    get => -1;
+    //    set { }
+    //}
     /// <summary>
     /// Add a clusse to this Relationship
     /// </summary>
@@ -284,12 +269,12 @@ public class Relationship
 
     private string BasicRelationshipToString(string retVal, string sourceModifierString, string typeModifierString, string targetModifierString)
     {
-        if (!string.IsNullOrEmpty(source?.Label))
-            retVal += source?.Label + sourceModifierString;
-        if (!string.IsNullOrEmpty(relType?.Label))
-            retVal += ((retVal == "") ? "" : "->") + relType?.Label + ThingProperties(relType) + typeModifierString;
-        if (!string.IsNullOrEmpty(targ?.Label))
-            retVal += ((retVal == "") ? "" : "->") + targ?.Label + ThingProperties(targ) + string.Join(", ", targetModifierString);
+        if (!string.IsNullOrEmpty(Source?.Label))
+            retVal += Source?.Label + sourceModifierString;
+        if (!string.IsNullOrEmpty(RelType?.Label))
+            retVal += ((retVal == "") ? "" : "->") + RelType?.Label + ThingProperties(RelType) + typeModifierString;
+        if (!string.IsNullOrEmpty(_target?.Label))
+            retVal += ((retVal == "") ? "" : "->") + _target?.Label + ThingProperties(_target) + string.Join(", ", targetModifierString);
         else if (targetModifierString.Length > 0)
             retVal += targetModifierString;
         return retVal;
@@ -300,13 +285,13 @@ public class Relationship
         string retVal = null;
         foreach (Relationship r in t.Relationships)
         {
-            if (r.reltype == Thing.IsA) continue;
-            if (t.Label.Contains("." + r.targ?.Label)) continue;
-            if (r.relType?.Label == "is")
+            if (r._relType == Thing.IsA) continue;
+            if (t.Label.Contains("." + r._target?.Label)) continue;
+            if (r.RelType?.Label == "is")
             {
                 if (retVal == null) retVal += "(";
                 else retVal += ", ";
-                retVal += r.targ?.Label;
+                retVal += r._target?.Label;
             }
         }
         if (retVal != null)
@@ -320,7 +305,7 @@ public class Relationship
             return true;
         if (a is null || b is null)
             return false;
-        if (a.targ == b.targ && a.source == b.source && a.relType == b.relType && a.isStatement == b.isStatement)
+        if (a._target == b._target && a.Source == b.Source && a.RelType == b.RelType && a.isStatement == b.isStatement)
             return true;
         return false;
     }
@@ -329,7 +314,7 @@ public class Relationship
     {
         if (obj is Relationship a)
         {
-            if (a.targ == targ && a.source == source && a.relType == relType && a.isStatement == isStatement)
+            if (a._target == _target && a.Source == Source && a.RelType == RelType && a.isStatement == isStatement)
                 return true;
         }
         return false;
@@ -341,7 +326,7 @@ public class Relationship
             return false;
         if (a is null || b is null)
             return true;
-        if (a.target == b.target && a.source == b.source && a.relType == b.relType) return false;
+        if (a.Target == b.Target && a.Source == b.Source && a.RelType == b.RelType) return false;
         return true;
     }
     public override int GetHashCode()
@@ -349,22 +334,15 @@ public class Relationship
         return base.GetHashCode();
     }
 
-    public float Value
-    {
-        get
-        {
-            //need a way to track how confident we should be
-            float retVal = Weight;
-            if (Hits != 0 && Misses != 0)
-            {
-                //replace with more robust algorithm
-                float denom = Misses;
-                if (denom == 0) denom = .1f;
-                retVal = Hits / denom;
-            }
-            return retVal;
-        }
-    }
+    //public float Weight
+    //{
+    //    get
+    //    {
+    //        //need a way to track how confident we should be
+    //        float retVal = Weight;
+    //        return retVal;
+    //    }
+    //}
 
     private void AddToTransientList()
     {
@@ -386,11 +364,11 @@ public class SRelationship
 {
     public int source = -1;
     public int target = -1;
-    public int hits = 0;
-    public int misses = 0;
+    //public int hits = 0;
+    //public int misses = 0;
     public float weight = 0;
     public int relationshipType = -1;
-    public int count = -1;
-    public bool GPTVerified = false;
+    //public int count = -1;
+    //public bool GPTVerified = false;
     public List<SClauseType>? clauses = new();
 }

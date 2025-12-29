@@ -278,7 +278,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         bool bubbleNeeded = false;
         foreach (var r in missingAttributes)
         {
-            var r1 = topResult.AddRelationship(r.target, r.relType);
+            var r1 = topResult.AddRelationship(r.Target, r.RelType);
             r1.Weight = r.Weight;
             bubbleNeeded = true;
         }
@@ -346,11 +346,11 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         for (int i = 0; i < queryThing.Relationships.Count; i++)
         {
             Relationship r = queryThing.Relationships[i];
-            if (r.reltype.Label == "is-a") continue;
+            if (r.RelType.Label == "is-a") continue;
             bool relationshipIsCommonToAllParents = true;
             foreach (Thing parent in queryThing.Parents)
             {
-                if (parent.HasRelationship(parent, r.reltype, r.target) == null)
+                if (parent.HasRelationship(parent, r.RelType, r.Target) == null)
                 {
                     relationshipIsCommonToAllParents = false;
                     break;
@@ -358,7 +358,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
             }
             if (relationshipIsCommonToAllParents)
             {
-                queryThing.RemoveRelationship(r.target, r.relType);
+                queryThing.RemoveRelationship(r.Target, r.RelType);
                 i--;
                 //Thread.Sleep(1000);
             }
@@ -374,7 +374,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         var inheritableRelationships = theUKS.GetAllRelationships(new List<Thing> { foundThing });
         foreach (Relationship r in queryThing.Relationships)
         {
-            if (inheritableRelationships.FindFirst(x => x.relType == r.relType && x.target == r.target) == null)
+            if (inheritableRelationships.FindFirst(x => x.RelType == r.RelType && x.Target == r.Target) == null)
                 missingAttributes.Add(r);
         }
         return missingAttributes;
@@ -423,7 +423,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         bool allMatch = true;
         foreach (Relationship r in queryThing.Relationships)
         {
-            if (topResult.HasRelationship(topResult, r.relType, r.target) == null)
+            if (topResult.HasRelationship(topResult, r.RelType, r.Target) == null)
             {
                 //not the same
                 allMatch = false;
@@ -486,7 +486,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
                 newParent.AddRelationship(key.target, key.relType);
                 foreach (Relationship r in key.relationships)
                 {
-                    Thing tChild = (Thing)r.source;
+                    Thing tChild = (Thing)r.Source;
                     Relationship rp = tChild.AddParent(newParent);
                     rp.Weight = .9f;
                     if (tChild.Parents[0] != newParent)
@@ -502,16 +502,16 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
     {
         foreach (Relationship r in tExisting.Relationships)
         {
-            if (r.reltype == Thing.IsA) continue;
-            Thing useRelType = GetInstanceType(r.reltype);
+            if (r.RelType == Thing.IsA) continue;
+            Thing useRelType = GetInstanceType(r.RelType);
 
-            RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.target);
+            RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.Target);
             if (foundItem == null)
             {
-                foundItem = new RelDest { relType = useRelType, target = r.target };
+                foundItem = new RelDest { relType = useRelType, target = r.Target };
                 attributes.Add(foundItem);
             }
-            if (foundItem.relationships.FindFirst(x => x.source == r.source && x.target == r.target) == null)
+            if (foundItem.relationships.FindFirst(x => x.Source == r.Source && x.Target == r.Target) == null)
                 foundItem.relationships.Add(r);
         }
     }
@@ -530,15 +530,15 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
                 if (r1 is Relationship r2)
                 {
                     if (noSource && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
-                        resultString += $"{r2.relType?.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                        resultString += $"{r2.RelType?.ToString()} {r2.Target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                     else if (noTarget && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
-                        resultString += $"{r2.source.ToString()} {r2.relType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                        resultString += $"{r2.Source.ToString()} {r2.RelType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                     else
                     {
-                        Thing theSource = UKS.UKS.GetNonInstance(r2.source);
+                        Thing theSource = UKS.UKS.GetNonInstance(r2.Source);
                         if (fullCB.IsChecked == true)
                             resultString += $"{theSource.Label} ";
-                        resultString += $"{r2.relType.ToString()} {r2.target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                        resultString += $"{r2.RelType.ToString()} {r2.Target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                     }
                 }
                 else
