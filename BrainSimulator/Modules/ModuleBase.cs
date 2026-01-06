@@ -304,6 +304,10 @@ namespace BrainSimulator.Modules
 
         public void SetDlgPosition(Point newLoc)
         {
+            if (dlg == null)
+            {
+                return;
+            }
             dlg.Top = newLoc.Y;
             dlg.Left = newLoc.X;
         }

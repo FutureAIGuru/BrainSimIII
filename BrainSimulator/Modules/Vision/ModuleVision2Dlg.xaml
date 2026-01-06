@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BrainSimulator.Modules"
         mc:Ignorable="d"
-        Title="Vision" Height="500" Width="530" Background="Gray" ShowInTaskbar="False" 
+        Title="Vision" Height="506" Width="776" Background="Gray" ShowInTaskbar="False" 
                      SizeChanged="ModuleBaseDlg_SizeChanged" PreviewKeyDown="ModuleBaseDlg_PreviewKeyDown" >
     <Grid Name="theGrid" Margin="0,0,0,0" >
         <Canvas x:Name="theCanvas" ClipToBounds="True" Margin="27,17,10,267" Background="DarkGray" />

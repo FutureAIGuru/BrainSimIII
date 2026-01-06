@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Windows;
@@ -34,7 +35,14 @@ public partial class ModuleVision2 : ModuleBase
     public int patchSize = 5;
     public int stride = 1;
     public int counter = 0;
+    // Original value: 4
     public int patchesPerPixel = 4;
+    // Original Weights: etaOn = 0.06f, etaOff = 0.03f, tpOff = -0.05f, tpOnWeight = 1
+    public float etaOn = 0.06f;
+    public float etaOff = 0.03f;
+    public float tpOff = -0.05f;
+    public float tpOnWeight = 1;
+
 
 
     public string CurrentFilePath
@@ -386,6 +394,9 @@ public partial class ModuleVision2 : ModuleBase
 
     void DrawLine(Point p1, Point p2)
     {
+        if (boundaryArray == null) {
+            return;
+        }
 
         //create a line between p1 and pt in imageArray
         int x0 = (int)p1.X;
@@ -423,11 +434,15 @@ public partial class ModuleVision2 : ModuleBase
         foreach (var t in theUKS.UKSList) t.confidence = 0;
         foreach (var t in theUKS.UKSList) t.lastFiredTime = new DateTime(0);
 
-        //clear out the boundary
-        if (!dontClearBoundaryImage)
-            for (int x = 0; x < boundaryArray.GetLength(0); x++)
-                for (int y = 0; y < boundaryArray.GetLength(1); y++)
-                    boundaryArray[x, y] = false;
+        if (dontClearBoundaryImage || boundaryArray == null)
+            return;
+
+        // Debug.WriteLine("Boundary Array: " + boundaryArray);
+
+        for (int x = 0; x < boundaryArray.GetLength(0); x++)
+            for (int y = 0; y < boundaryArray.GetLength(1); y++)
+                boundaryArray[x, y] = false;
+
     }
 
     void SetBoundaryArrayFromImage()
@@ -446,7 +461,14 @@ public partial class ModuleVision2 : ModuleBase
 
     private void SearchAndLearn(Thing parent = null)
     {
+        // Check if boundary array exists to prevent errors.
+        if (boundaryArray == null)
+        {
+            return;
+        }
+
         //Build the queryThing from the boundaryPoints Array
+
 
         Thing queryThing = new Thing() { Label = "theQuery" };
         for (int x = 0; x < boundaryArray.GetLength(0); x++)
@@ -652,8 +674,8 @@ public partial class ModuleVision2 : ModuleBase
 
                     // targets: ON -> +1, OFF -> -0.5
                     //float tp = (rFound != null) ? r.maxWeight : -r.maxWeight / 2f;
-                    float tp = (rFound != null) ? r.maxWeight : -.05f;
-                    float eta = (rFound != null) ? 0.06f : 0.03f; // example: smaller step for OFF
+                    float tp = (rFound != null) ? r.maxWeight * tpOnWeight : tpOff;
+                    float eta = (rFound != null) ? etaOn : etaOff; // example: smaller step for OFF
                     r.Weight += eta * (tp - r.Weight);
 
                     // clamp to keep things well-behaved
@@ -671,6 +693,10 @@ public partial class ModuleVision2 : ModuleBase
     int count = 0;
     public void Show()
     {
+        if (boundaryArray == null)
+        {
+            return;
+        }
         ClearBoundaryArray();
         Thing t = theUKS.GetOrAddThing("patch");
         var patches = t.DescendentsList();

@@ -1,0 +1,11 @@
+Vision Weights Test, 1/5/2026
+Author: William Weinberger
+
+Weights to experiment with (in progress)
+
+Current: η_on=0.06, η_off=0.03, tp_off=−0.05
+Conservative: η_on=0.03, η_off=0.01, tp_off=−0.02
+Fast learn: η_on=0.12, η_off=0.03, tp_off=−0.05
+More forgetting: η_on=0.06, η_off=0.06, tp_off=−0.05
+Less saturation: tp_on=0.8*maxWeight, η_on=0.06, η_off=0.03, tp_off=−0.05
+(Optional) Inhibitory: allow negatives; tp_off=−0.5*maxWeight, η_on=0.06, η_off=0.03
