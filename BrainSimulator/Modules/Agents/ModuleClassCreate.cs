@@ -53,9 +53,9 @@ public class ModuleClassCreate : ModuleBase
     public void DoTheWork()
     {
         debugString = "Agent Started\n";
-        for (int i = 0; i < theUKS.UKSList.Count; i++)
+        for (int i = 0; i < theUKS.AllThings.Count; i++)
         {
-            Thing t = theUKS.UKSList[i];
+            Thing t = theUKS.AllThings[i];
             if (t.HasAncestor("Object") && !t.Label.Contains(".") && !t.Label.Contains("unknown"))
             {
                 HandleClassWithCommonAttributes(t);

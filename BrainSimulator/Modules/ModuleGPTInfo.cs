@@ -441,7 +441,7 @@ is-part-of-speech, ";
 
                 Thing theClauseType = GetClauseType(clauseType);
 
-                r1.AddClause(theClauseType, r2);
+                //r1.AddClause(theClauseType, r2);
 
                 ModuleGPTInfoDlg.relationshipCount += 1;
             }
@@ -618,7 +618,7 @@ is-part-of-speech, ";
                         }
                         ///////   null reltypes? This was a safety check
                         ///
-                        foreach (Thing t in theUKS.UKSList)
+                        foreach (Thing t in theUKS.AllThings)
                             foreach (Relationship r in t.Relationships)
                                 if (r.RelType == null)
                                 {

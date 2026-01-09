@@ -164,7 +164,7 @@ namespace BrainSimulator
 
         public void CreateEmptyUKS()
         {
-            theUKS.UKSList.Clear();
+            theUKS.AllThings.Clear();
             theUKS = new UKS.UKS();
             theUKS.AddThing("BrainSim", null);
             theUKS.GetOrAddThing("AvailableModule", "BrainSim");

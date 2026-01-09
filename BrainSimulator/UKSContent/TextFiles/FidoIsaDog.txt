@@ -1,0 +1,6 @@
+[Fido,is,brown,0.90]
+[[Fido->play->outside]->IF->[weather->is->sunny],IF,[weather->is->sunny],1.00]
+[[Fido->play->outside]->IF->[weather->is->sunny],hasProperty,isResult,1.00]
+[[weather->is->sunny],hasProperty,isCondition,1.00]
+[Rel2,IF,R0,1.00]
+[Rel2,hasProperty,isResult,1.00]

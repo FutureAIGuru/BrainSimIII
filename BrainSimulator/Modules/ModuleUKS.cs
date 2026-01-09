@@ -79,14 +79,6 @@ public partial class ModuleUKS : ModuleBase
         }
     }
 
-
-    //this is needed for the dialog treeview
-    public List<Thing> GetTheUKS()
-    {
-        return new List<Thing>();
-//        return theUKS.UKSList;
-    }
-
 }
     
  

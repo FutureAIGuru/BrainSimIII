@@ -20,13 +20,13 @@ public partial class UKS
     /// <param name="sTarget">string or Thing (or null)</param>
     /// <param name="isStatement">Boolean indicating if this is a true statement or part of a conditional</param>
     /// <returns>The primary relationship which was created (others may be created for given attributes</returns>
-    public Relationship AddStatement(string sSource, string sRelationshipType, string sTarget, bool isStatement = true)
+    public Relationship AddStatement(string sSource, string sRelationshipType, string sTarget)
     {
         Thing source = ThingFromObject(sSource);
         Thing relationshipType = ThingFromObject(sRelationshipType, "RelationshipType", source);
         Thing target = ThingFromObject(sTarget);
 
-        Relationship theRelationship = AddStatement(source, relationshipType, target, isStatement);
+        Relationship theRelationship = AddStatement(source, relationshipType, target);
         return theRelationship;
     }
     /// <summary>
@@ -39,20 +39,18 @@ public partial class UKS
     /// <param name="source">The source <see cref="Thing"/> of the relationship. Cannot be <see langword="null"/>.</param>
     /// <param name="relType">The relationship type <see cref="Thing"/>. Cannot be <see langword="null"/>.</param>
     /// <param name="target">The target <see cref="Thing"/> of the relationship.</param>
-    /// <param name="isStatement">A value indicating whether the relationship is considered a statement.  The default value is <see langword="true"/>.</param>
     /// <returns>The created or existing <see cref="Relationship"/> object that represents the relationship.  Returns <see
     /// langword="null"/> if <paramref name="source"/> or <paramref name="relType"/> is <see langword="null"/>.</returns>
-    public Relationship AddStatement(Thing source, Thing relType, Thing target, bool isStatement = true)
+    public Relationship AddStatement(Thing source, Thing relType, Thing target)
     {
         if (source == null || relType == null) return null;
 
         //create the relationship but don't add it to the UKS
         Relationship r = CreateTheRelationship(source, relType, target);
-        r.isStatement = isStatement;
 
         //does this relationship already exist (without conditions)?
         Relationship existing = GetRelationship(r);
-        if (existing != null)
+        if (existing != null && existing.Relationships.Count == 0)
         {
             WeakenConflictingRelationships(source, existing);
             existing.Fire();
@@ -66,7 +64,7 @@ public partial class UKS
         {
             Relationship rReverse = new Relationship(r);
             (rReverse.Source, rReverse.Target) = (rReverse.Target, rReverse.Source);
-            rReverse.Clauses.Clear();
+            //rReverse.Clauses.Clear();
             WriteTheRelationship(rReverse);
         }
 
@@ -132,17 +130,20 @@ public partial class UKS
                 //special cases for "not" so we delete rather than weakening
                 if (newRelationship.RelType.Children.Contains(existingRelationship.RelType) && HasAttribute(existingRelationship.RelType, "not"))
                 {
-                    existingRelationship.isStatement = false;
                     Thing after = GetOrAddThing("AFTER", "ClauseType");
-                    newRelationship.AddClause(after, existingRelationship);
+                    AddClause(newRelationship, "AFTER", existingRelationship);
+                    existingRelationship.Source.RemoveRelationship(existingRelationship);
+                    //newRelationship.AddClause(after, existingRelationship);
                     //                    newSource.RemoveRelationship(existingRelationship);
                     //                    i--;
                 }
-                if (existingRelationship.RelType.Children.Contains(newRelationship.RelType) && HasAttribute(newRelationship.RelType, "not"))
+                else if (existingRelationship.RelType.Children.Contains(newRelationship.RelType) && HasAttribute(newRelationship.RelType, "not"))
                 {
-                    existingRelationship.isStatement = false;
                     Thing after = GetOrAddThing("AFTER", "ClauseType");
-                    newRelationship.AddClause(after, existingRelationship);
+                    AddClause(newRelationship, "AFTER", existingRelationship);
+                    existingRelationship.Source.RemoveRelationship(existingRelationship);
+
+                    //newRelationship.AddClause(after, existingRelationship);
                     //                    newSource.RemoveRelationship(existingRelationship);
                     //                    i--;
                 }

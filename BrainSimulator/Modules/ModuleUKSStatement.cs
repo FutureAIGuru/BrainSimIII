@@ -4,9 +4,10 @@
 // © 2022 FutureAI, Inc., all rights reserved
 //
 
+using Pluralize.NET;
+using System;
 using System.Collections.Generic;
 using UKS;
-using Pluralize.NET;
 
 namespace BrainSimulator.Modules;
 
@@ -65,8 +66,21 @@ public class ModuleUKSStatement : ModuleBase
 
         Thing tSource = theUKS.CreateThingFromMultipleAttributes(source, false);
         Thing tRelType = theUKS.CreateThingFromMultipleAttributes(relationshipType, true);
-        Thing tTarget = theUKS.CreateThingFromMultipleAttributes(target, false);
 
+        if (target.StartsWith("*"))
+        {
+            List<Thing> targets = new();
+            string[] tempStringArray = target[1..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            foreach (string label in tempStringArray)
+            {
+                Thing t = theUKS.GetOrAddThing(label);
+                targets.Add(t);
+            }
+            Relationship r1 = theUKS.AddSequence(tSource, tRelType, targets);
+            return r1;
+        }
+
+        Thing tTarget = theUKS.CreateThingFromMultipleAttributes(target, false);
         if (target == "" && relationshipType == "is-a")
         {
             if (target == "" && source != "")
@@ -74,7 +88,7 @@ public class ModuleUKSStatement : ModuleBase
             return null;
         }
 
-        Relationship r = theUKS.AddStatement(tSource, tRelType, tTarget, true);
+        Relationship r = theUKS.AddStatement(tSource, tRelType, tTarget);
         return r;
     }
 
@@ -94,18 +108,7 @@ public class ModuleUKSStatement : ModuleBase
             if (t == null) return retVal;
             retVal.Add(t);
         }
-        ////is this a sequence?
-        //List<Thing> tSequence = MainWindow.theUKS.HasSequence(retVal);
-        //if (tSequence != null && tSequence.Count > 0)
-        //{
-        //    retVal = tSequence;
-        //}
-        //else if (retVal.Count > 1) //do things represent a list of attributes
-        //{
-        //    //retVal = MainWindow.theUKS.FindThingsWithAttributes(retVal);
-        //}
 
         return retVal;
     }
-
 }

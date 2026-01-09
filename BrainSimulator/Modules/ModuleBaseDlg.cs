@@ -112,10 +112,18 @@ public class ModuleBaseDlg : Window
         string cwd = System.IO.Directory.GetCurrentDirectory();
         cwd = cwd.ToLower().Replace("bin\\debug\\net8.0-windows", "") + @"modules\";
         string dlgFilePath = FindFile(cwd, theModuleType + ".xaml.cs");
-        string csFilePath = FindFile(cwd,theModuleType.Substring(0,theModuleType.Length-3) + ".cs");
+        string csFilePath = FindFile(cwd, theModuleType.Substring(0, theModuleType.Length - 3) + ".cs");
+        csFilePath = "\"" + csFilePath + "\"";
+        dlgFilePath = "\"" + dlgFilePath + "\"";
 
         //find visiaul studio
-        string taskFile = @"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe";
+        string taskFile = "";
+        if (!File.Exists(taskFile))
+            taskFile = @"C:\Program Files\Microsoft Visual Studio\18\Professional\Common7\IDE\devenv.exe";
+        if (!File.Exists(taskFile))
+            taskFile = @"C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\devenv.exe";
+        if (!File.Exists(taskFile))
+            taskFile = @"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe";
         if (!File.Exists(taskFile))
             taskFile = @"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe";
         if (!File.Exists(taskFile))

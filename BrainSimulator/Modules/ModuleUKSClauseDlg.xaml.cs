@@ -57,15 +57,18 @@ public partial class ModuleUKSClauseDlg : ModuleBaseDlg
             if (rBase != null)
                 r1 = rBase;
         }
-        if (r1 == null) 
-            r1 = UKSClause.theUKS.AddStatement (source,relType,target, false);
+        if (r1 == null) //enable appending clause to existing Relationships
+            r1 = UKSClause.theUKS.AddStatement (source,relType,target);
 
         Thing theClauseType = UKSClause.theUKS.GetOrAddThing(clauseLabel,"ClauseType");
 
         Thing source2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(sourceText2.Text, false);
-        Thing type2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationshipText2.Text, true);
+        Thing relType2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationshipText2.Text, true);
         Thing target2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetText2.Text, false);
-        Relationship rAdded = UKSClause.theUKS.AddClause(r1, theClauseType, source2, type2, target2);
+
+        Relationship rClause = UKSClause.theUKS.AddStatement(source2, relType2, target2);
+
+        Relationship rAdded = UKSClause.theUKS.AddClause(r1, theClauseType, rClause);
 
         SetUpRelComboBox(GetInstanceRoot(r1.Source),rAdded);
     }

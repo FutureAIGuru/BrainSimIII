@@ -42,22 +42,22 @@ public static class IListExtensions
 /// In the same way a Relationship relates 2 Things (the "source" and the "target") with a relationship type, a Clause relates two Relationsips 
 /// with a clauseType. Every Relationship has a list of clauses with the Relationship representing source and the Clause containing its type and target.
 /// </summary>
-public class Clause
-{
-    /// <summary>
-    /// The type of dependency between two clauses
-    /// </summary>
-    public Thing clauseType;
-    /// <summary>
-    /// The target Relationship. The "Source" is the owner of the list of clauses
-    /// </summary>
-    public Relationship clause;
-    public Clause(Thing theType, Relationship clause1)
-    {
-        clauseType = theType;
-        clause = clause1;
-    }
-};
+//public class Clause
+//{
+//    /// <summary>
+//    /// The type of dependency between two clauses
+//    /// </summary>
+//    public Thing clauseType;
+//    /// <summary>
+//    /// The target Relationship. The "Source" is the owner of the list of clauses
+//    /// </summary>
+//    public Relationship clause;
+//    public Clause(Thing theType, Relationship clause1)
+//    {
+//        clauseType = theType;
+//        clause = clause1;
+//    }
+//};
 
 ///// <summary>
 ///// This is used internally during query processing
@@ -87,46 +87,16 @@ public class Clause
 /// </summary>
 public class Relationship : Thing
 {
-    public Thing _source;
-    /// <summary>
-    /// the Relationship Source
-    /// </summary>
-    public Thing Source
-    {
-        get => _source;
-        set { _source = value; }
-    }
-    private Thing _relType;
-    /// <summary>
-    /// The Relationship Type
-    /// </summary>
-    public Thing RelType
-    {
-        get { return _relType; }
-        set
-        {
-            _relType = value;
-        }
-    }
-    private Thing _target;
-    public Thing Target
-    {
-        get { /*Hits++; lastUsed = DateTime.Now;*/ return _target; }
-        set
-        {
-            _target = value;
-        }
-    }
 
-    private List<Clause> clauses = new();
+    //private List<Clause> clauses = new();
     /// <summary>
     /// List of Clauses for which this is the Source Relationship
     /// </summary>
-    public List<Clause> Clauses { get => clauses; set => clauses = value; }
+    //public List<Clause> Clauses { get => clauses; set => clauses = value; }
     /// <summary>
     /// The list of Clauses for which this is the Target Relationship
     /// </summary>
-    public List<Relationship> clausesFrom = new();
+    //public List<Relationship> clausesFrom = new();
 
     private float _weight = 1;
     public float Weight
@@ -141,7 +111,7 @@ public class Relationship : Thing
             //if this is a commutative relationship, also set the weight on the reverse
             if (RelType?.HasProperty("IsCommutative") == true)
             {
-                Relationship rReverse = Target.Relationships.FindFirst(x => x._relType == RelType && x.Target == Source);
+                Relationship rReverse = Target.Relationships.FindFirst(x => x.RelType == RelType && x.Target == Source);
                 if (rReverse != null)
                 {
                     rReverse._weight = _weight;
@@ -177,32 +147,39 @@ public class Relationship : Thing
         }
     }
     //public bool GPTVerified = false;
-    public bool isStatement = true;
+    //public bool isStatement = true;
 
     public Relationship()
-    { }
+    {
+    }
 
-    //public void Fire()
-    //{
-    //    lastUsed = DateTime.Now;
-    //}
+    public Relationship AddToUKS()
+    {
+        if (string.IsNullOrEmpty(this.Label))
+            Label = "R*";
+        this.AddParent("Relationship");
+        this.Source.AddRelationship(this.Target, this.RelType);
+        lock (UKS.theUKS.AllThings)
+        {
+            UKS.theUKS.AllThings.Add(this);
+        }
+        return this;
+    }
+
     /// <summary>
     /// Copy Constructor
     /// </summary>
     /// <param name="r"></param>
     public Relationship(Relationship r)
     {
-        //count = r.count;
-        //Misses = r.Misses;
         RelType = r.RelType;
         Source = r.Source;
-        //Hits = r.Hits++;
         Target = r.Target;
         Weight = r.Weight;
-        if (r.Clauses == null) Clauses = new();
-        else Clauses = new(r.Clauses);
-        if (r.clausesFrom == null) clausesFrom = new();
-        else clausesFrom = new(r.clausesFrom);
+        //if (r.Clauses == null) Clauses = new();
+        //else Clauses = new(r.Clauses);
+        //if (r.clausesFrom == null) clausesFrom = new();
+        //else clausesFrom = new(r.clausesFrom);
     }
 
     //public void ClearHits()
@@ -225,39 +202,27 @@ public class Relationship : Thing
     /// <param name="clauseType"></param>
     /// <param name="r2"></param>
     /// <returns></returns>
-    public Relationship AddClause(Thing clauseType, Relationship r2)
-    {
-        Clause theClause = new(clauseType,r2);
+    //public Relationship AddClause(Thing clauseType, Relationship r2)
+    //{
+    //    Clause theClause = new(clauseType,r2);
 
-        if (Clauses.FindFirst(x => x.clauseType == theClause.clauseType && x.clause == r2) == null)
-        {
-            Clauses.Add(theClause);
-            r2.clausesFrom.Add(this);
-        }
+    //    if (Clauses.FindFirst(x => x.clauseType == theClause.clauseType && x.clause == r2) == null)
+    //    {
+    //        Clauses.Add(theClause);
+    //        r2.clausesFrom.Add(this);
+    //    }
 
-        return this;
-    }
+    //    return this;
+    //}
 
     public string ToString(List<Relationship> stack)
     {
-        if (stack.Contains(this))
+        if (stack.Contains(this))  //looping block
             return "";
         stack.Add(this);
         string retVal = "";
-        string sourceModifierString = "";
-        string typeModifierString = "";
-        string targetModifierString = "";
-        string allModifierString = "";
 
-        retVal = BasicRelationshipToString(retVal, sourceModifierString, typeModifierString, targetModifierString);
-
-        //handle Clauses
-        foreach (Clause c in Clauses)
-            allModifierString += $"({c.clauseType?.Label} {c.clause.ToString(stack)}) ";
-
-        if (allModifierString != "")
-            retVal += " " + allModifierString;
-
+        retVal = BasicRelationshipToString(retVal);
         return retVal;
     }
 
@@ -267,37 +232,19 @@ public class Relationship : Thing
         return retVal;
     }
 
-    private string BasicRelationshipToString(string retVal, string sourceModifierString, string typeModifierString, string targetModifierString)
+    private string BasicRelationshipToString(string retVal)
     {
-        if (!string.IsNullOrEmpty(Source?.Label))
-            retVal += Source?.Label + sourceModifierString;
-        if (!string.IsNullOrEmpty(RelType?.Label))
-            retVal += ((retVal == "") ? "" : "->") + RelType?.Label + ThingProperties(RelType) + typeModifierString;
-        if (!string.IsNullOrEmpty(_target?.Label))
-            retVal += ((retVal == "") ? "" : "->") + _target?.Label + ThingProperties(_target) + string.Join(", ", targetModifierString);
-        else if (targetModifierString.Length > 0)
-            retVal += targetModifierString;
+        retVal += Label+"[";
+        if (!string.IsNullOrEmpty(Source?.ToString()))
+            retVal += Source?.ToString();
+        if (!string.IsNullOrEmpty(RelType?.ToString()))
+            retVal += ((retVal == "") ? "" : "->") + RelType?.ToString();
+        if (!string.IsNullOrEmpty(Target?.ToString()))
+            retVal += ((retVal == "") ? "" : "->") + Target?.ToString();
+        retVal += "]";
         return retVal;
     }
 
-    string ThingProperties(Thing t)
-    {
-        string retVal = null;
-        foreach (Relationship r in t.Relationships)
-        {
-            if (r._relType == Thing.IsA) continue;
-            if (t.Label.Contains("." + r._target?.Label)) continue;
-            if (r.RelType?.Label == "is")
-            {
-                if (retVal == null) retVal += "(";
-                else retVal += ", ";
-                retVal += r._target?.Label;
-            }
-        }
-        if (retVal != null)
-            retVal += ")";
-        return retVal;
-    }
 
     public static bool operator ==(Relationship? a, Relationship? b)
     {
@@ -305,7 +252,7 @@ public class Relationship : Thing
             return true;
         if (a is null || b is null)
             return false;
-        if (a._target == b._target && a.Source == b.Source && a.RelType == b.RelType && a.isStatement == b.isStatement)
+        if (a.Target == b.Target && a.Source == b.Source && a.RelType == b.RelType)
             return true;
         return false;
     }
@@ -314,7 +261,10 @@ public class Relationship : Thing
     {
         if (obj is Relationship a)
         {
-            if (a._target == _target && a.Source == Source && a.RelType == RelType && a.isStatement == isStatement)
+            if (a.Target == Target && 
+                a.Source == Source && 
+                a.RelType == RelType &&
+                a.Relationships.Count == Relationships.Count)
                 return true;
         }
         return false;
@@ -334,16 +284,7 @@ public class Relationship : Thing
         return base.GetHashCode();
     }
 
-    //public float Weight
-    //{
-    //    get
-    //    {
-    //        //need a way to track how confident we should be
-    //        float retVal = Weight;
-    //        return retVal;
-    //    }
-    //}
-
+ 
     private void AddToTransientList()
     {
         if (!UKS.transientRelationships.Contains(this))
@@ -351,24 +292,4 @@ public class Relationship : Thing
     }
 
 
-}
-
-//this is a non-pointer representation of a relationship needed for XML storage
-public class SClauseType
-{
-    public int clauseType = -1;
-    public SRelationship r;
-}
-
-public class SRelationship
-{
-    public int source = -1;
-    public int target = -1;
-    //public int hits = 0;
-    //public int misses = 0;
-    public float weight = 0;
-    public int relationshipType = -1;
-    //public int count = -1;
-    //public bool GPTVerified = false;
-    public List<SClauseType>? clauses = new();
 }

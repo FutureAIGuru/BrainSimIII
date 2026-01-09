@@ -1,4 +1,5 @@
 ﻿namespace UKS;
+
 using Pluralize.NET;
 
 
@@ -7,6 +8,7 @@ using Pluralize.NET;
 /// </summary>
 public partial class UKS
 {
+
     //This is the actual internal Universal Knowledge Store
     static private List<Thing> uKSList = new() { Capacity = 1000000, };
 
@@ -19,21 +21,22 @@ public partial class UKS
     /// Occasionally a list of all the Things in the UKS is needed. This is READ ONLY.
     /// There is only one (shared) list for the App.
     /// </summary>
-    public IList<Thing> UKSList { get => uKSList; }
+    public IList<Thing> AllThings { get => uKSList; }
 
     //TimeToLive processing for relationships
     static public List<Relationship> transientRelationships = new List<Relationship>();
     static Timer stateTimer;
 
+    public static UKS theUKS = new UKS();
 
     /// <summary>
     /// Creates a new reference to the UKS and initializes it if it is the first reference. 
     /// </summary>
     public UKS(bool clear = false)
     {
-        if (UKSList.Count == 0 || clear)
+        if (AllThings.Count == 0 || clear)
         {
-            UKSList.Clear();
+            AllThings.Clear();
             ThingLabels.ClearLabelList();
             CreateInitialStructure();
         }
@@ -93,9 +96,9 @@ public partial class UKS
         {
             newThing.AddParent(parent);
         }
-        lock (UKSList)
+        lock (AllThings)
         {
-            UKSList.Add(newThing);
+            AllThings.Add(newThing);
         }
 
         return newThing;
@@ -115,8 +118,8 @@ public partial class UKS
         foreach (Relationship r in t.RelationshipsFrom)
             r.Source.RemoveRelationship(r);
         ThingLabels.RemoveThingLabel(t.Label);
-        lock (UKSList)
-            UKSList.Remove(t);
+        lock (AllThings)
+            AllThings.Remove(t);
 
     }
 
@@ -207,9 +210,11 @@ public partial class UKS
 
         if (r1.Target != r2.Target && (r1.Target == null || r2.Target == null)) return false;
         if (r1.Target == r2.Target && r1.RelType == r2.RelType) return false;
-
-        if (!r1.isStatement) return false;
-        if (!r2.isStatement) return false;
+        //TODO Verify this:
+        if (r1.HasProperty("isResult")) return false;
+        if (r1.HasProperty("isCondition")) return false;
+        if (r2.HasProperty("isResult")) return false;
+        if (r2.HasProperty("isCondition")) return false;
 
         if (r1.Source == r2.Source ||
             r1.Source.AncestorList().Contains(r2.Source) ||
@@ -328,11 +333,19 @@ public partial class UKS
 
     bool RelationshipsAreEqual(Relationship r1, Relationship r2, bool ignoreSource = true)
     {
+        //special case if these contain other relationships
+        if (r1.Source is Relationship rt1 && r2.Source is Relationship rt2)
+        {
+            if (!RelationshipsAreEqual(rt1, rt2)) return false;
+            if (r1.Target is Relationship rt3 && r2.Target is Relationship rt4)
+                if (!RelationshipsAreEqual(rt3, rt4)) return false;
+            if (r1.RelType != r2.RelType) return false;
+            return true;
+        }
         if (
             (r1.Source == r2.Source || ignoreSource) &&
             r1.Target == r2.Target &&
-            r1.RelType == r2.RelType &&
-            r1.isStatement == r2.isStatement
+            r1.RelType == r2.RelType
           ) return true;
         return false;
     }
@@ -349,22 +362,10 @@ public partial class UKS
     {
         foreach (Relationship r1 in r.Source.Relationships)
         {
+            if (r1.HasProperty("isCondition") || r1.HasProperty("isResult")) continue;
             if (RelationshipsAreEqual(r, r1)) return r1;
         }
         return null;
-    }
-
-
-    private List<Thing> ThingListFromStringList(List<string> modifiers, string defaultParent)
-    {
-        if (modifiers == null) return null;
-        List<Thing> retVal = new();
-        foreach (string s in modifiers)
-        {
-            Thing t = ThingFromString(s, defaultParent);
-            if (t != null) retVal.Add(t);
-        }
-        return retVal;
     }
 
     private Thing ThingFromString(string label, string defaultParent, Thing source = null)
@@ -398,39 +399,6 @@ public partial class UKS
         else
             return null;
     }
-    private List<Thing> ThingListFromString(string s, string parentLabel = "unknownObject")
-    {
-        List<Thing> retVal = new List<Thing>();
-        string[] multiString = s.Split("|");
-        foreach (string s1 in multiString)
-        {
-            Thing t = ThingFromString(s1.Trim(), parentLabel);
-            if (t != null)
-                retVal.Add(t);
-        }
-        return retVal;
-    }
-    //temporarily public for testing
-    public List<Thing> ThingListFromObject(object o, string parentLabel = "unknownObject")
-    {
-        if (o is List<string> sl)
-            return ThingListFromStringList(sl, parentLabel);
-        else if (o is string s)
-            return ThingListFromString(s, parentLabel);
-        else if (o is Thing t)
-            return new() { t };
-        else if (o is List<Thing> tl)
-            return tl;
-        else if (o is null)
-            return new();
-        else if (o is string[] array)
-            return ThingListFromStringList(array.ToList(), parentLabel);
-        else
-            throw new ArgumentException("invalid arg type in AddStatement: " + o.GetType());
-    }
-
-
-
 
     /// <summary>
     /// Recursively removes all the descendants of a Thing. If these descendants have no other parents, they will be deleted as well
@@ -482,7 +450,7 @@ public partial class UKS
         {
             string[] attribs = label.Split(".");
             Thing baseThing = Labeled(attribs[0]);
-            if (baseThing == null) baseThing = AddThing(attribs[0], "unknownObject"); 
+            if (baseThing == null) baseThing = AddThing(attribs[0], "unknownObject");
             Thing instanceThing = Labeled(label);
             if (instanceThing == null)
             {
@@ -491,7 +459,7 @@ public partial class UKS
             for (int i = 1; i < attribs.Length; i++)
             {
                 Thing attrib = Labeled(attribs[i]);
-                if (attrib == null) 
+                if (attrib == null)
                     attrib = AddThing(attribs[i], "unknownObject");
                 instanceThing.AddRelationship(attrib, "is");
             }
@@ -554,7 +522,7 @@ public partial class UKS
     {
         IPluralize pluralizer = new Pluralizer();
         label = label.Trim();
-        string[] tempStringArray = label.Split(' ',StringSplitOptions.RemoveEmptyEntries);
+        string[] tempStringArray = label.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (tempStringArray.Length == 0 || tempStringArray[0].Length == 0) return null;
 
         for (int i = 0; i < tempStringArray.Length; i++)
@@ -584,46 +552,27 @@ public partial class UKS
 
 
 
-    public Relationship AddClause(Relationship r1, Thing clauseType, Thing source, Thing relType, Thing target)
+    public Relationship AddClause(Relationship rBase, Thing clauseType, Relationship rClause)
     {
+        //rNew is an orhpan...not a real linked-up relationship, yet
+        Relationship rNew = new() { Source = rBase, RelType = clauseType, Target = rClause, Weight = .9f };
+
         //does this relation/clause already exist?
-        //rTemp is an orpan...not a real linked-up relationship
-        Relationship rTemp = new() { Source = source, RelType = relType, Target = target, Weight = .9f, isStatement = false };
-        foreach (Thing t in r1.Source.Children)
+        var r = GetRelationship(rNew);
+        if (r != null) return r;
+
+        rBase.AddRelationship(rNew.Target, rNew.RelType);
+
+        if (clauseType.Label == "IF")
         {
-            foreach (Relationship r in t.Relationships)
-            {
-                Clause? c = r.Clauses.FindFirst(x => x?.clauseType == clauseType && x?.clause == rTemp);
-                if (c != null)
-                    return r;
-            }
+            rBase.AddRelationship("isResult", "hasProperty");
+            rClause.AddRelationship("isCondition", "hasProperty");
+
+            //THIS needs to be fixed
+            if (rBase.Label == "") rBase.AddToUKS();
+            if (rClause.Label == "") rClause.AddToUKS();
+            if (rNew.Label == "") rNew.AddToUKS();
         }
-
-        //figure out if a new instance is needed
-        bool newInstanceNeeded = false;
-        if (clauseType.Label.ToLower() == "if" && r1.isStatement) newInstanceNeeded = true;
-        if (clauseType.Label.ToLower() == "because") r1.isStatement = true;
-
-        Relationship rRoot = r1;
-
-        if (newInstanceNeeded)
-        {
-            // Create a new instances of the source
-            Thing newInstance = GetOrAddThing(r1.Source.Label + "*", r1.Source);
-            //move the existing relationship down
-            rRoot = new();
-            r1.Source.RemoveRelationship(r1);
-            rRoot.Source = newInstance;
-            rRoot = rRoot.Source.AddRelationship(r1.Target, r1.RelType, false);
-            AddStatement(rRoot.Source.Label, "hasProperty", "isInstance");
-        }
-        //make rTemp into a real relationship
-        rTemp = rTemp.Source.AddRelationship(rTemp.Target, rTemp.RelType, r1.isStatement);
-
-
-        //add the clause
-        rRoot.AddClause(clauseType, rTemp);
-        rRoot.isStatement = r1.isStatement;
-        return rRoot;
+        return rNew;
     }
 }

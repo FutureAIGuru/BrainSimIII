@@ -12,9 +12,9 @@ public partial class UKS
     public void CreateInitialStructure()
     {
         //this hack is needed to preserve the info relating to module layout
-        for (int i = 0; i < UKSList.Count; i++)
+        for (int i = 0; i < AllThings.Count; i++)
         {
-            Thing t = UKSList[i];
+            Thing t = AllThings[i];
             if (t.HasAncestorLabeled("BrainSim"))
                 continue;
             if (t.Label == "is-a") continue;
@@ -27,6 +27,10 @@ public partial class UKS
                 i--;
             }
         }
+
+        ThingLabels.ClearLabelList();
+        foreach (Thing t in AllThings)
+            ThingLabels.AddThingLabel(t.Label,t);
 
         if (Labeled("Thing") == null)
             AddThing("Thing", null);
@@ -43,6 +47,7 @@ public partial class UKS
         GetOrAddThing("Object", "Thing");
         GetOrAddThing("Action", "Thing");
         GetOrAddThing("RelationshipType", "Thing");
+        GetOrAddThing("Relationship", "Thing");
         GetOrAddThing("unknownObject", "Object");
         GetOrAddThing("is-a", "RelationshipType");
         GetOrAddThing("inverseOf", "RelationshipType");
@@ -68,22 +73,24 @@ public partial class UKS
         AddStatement("isCommutative", "is-a", "Property");
         AddStatement("allowMultiple", "is-a", "Property");
         AddStatement("inheritable", "is-a", "Property");
+        AddStatement("isCondition", "is-a", "Property");
+        AddStatement("isResult", "is-a", "Property");
 
 
-        //colors
-        AddStatement("color", "is-a", "object");
-        AddStatement("color", "hasProperty", "isExclusive");
-        AddStatement("red", "is-a", "color");
-        AddStatement("orange", "is-a", "color");
-        AddStatement("yellow", "is-a", "color");
-        AddStatement("green", "is-a", "color");
-        AddStatement("blue", "is-a", "color");
-        AddStatement("purple", "is-a", "color");
-        AddStatement("brown", "is-a", "color");
-        AddStatement("pink", "is-a", "color");
-        AddStatement("black", "is-a", "color");
-        AddStatement("white", "is-a", "color");
-        AddStatement("gray", "is-a", "color");
+        ////colors
+        //AddStatement("color", "is-a", "object");
+        //AddStatement("color", "hasProperty", "isExclusive");
+        //AddStatement("red", "is-a", "color");
+        //AddStatement("orange", "is-a", "color");
+        //AddStatement("yellow", "is-a", "color");
+        //AddStatement("green", "is-a", "color");
+        //AddStatement("blue", "is-a", "color");
+        //AddStatement("purple", "is-a", "color");
+        //AddStatement("brown", "is-a", "color");
+        //AddStatement("pink", "is-a", "color");
+        //AddStatement("black", "is-a", "color");
+        //AddStatement("white", "is-a", "color");
+        //AddStatement("gray", "is-a", "color");
 
         //underlying properties
         AddStatement("is-a", "hasProperty", "isTransitive");
@@ -95,6 +102,11 @@ public partial class UKS
         AddStatement("ClauseType", "is-a", "RelationshipType");
         AddStatement("IF", "is-a", "ClauseType");
         AddStatement("BECAUSE", "is-a", "ClauseType");
+        AddStatement("AFTER", "is-a", "ClauseType");
+        AddStatement("NEXT", "is-a", "ClauseType");
+        AddStatement("VALUE", "is-a", "ClauseType");
+        AddStatement("SOURCE", "is-a", "ClauseType");
+
 
 
 
@@ -104,6 +116,7 @@ public partial class UKS
 
     public void SetupNumbers()
     {
+        return;
         GetOrAddThing("number", "Object");
         AddStatement("Comparison", "is-a", "RelationshipType");
         AddStatement("greaterThan", "is-a", "Comparison");
@@ -161,57 +174,68 @@ public partial class UKS
     /// <summary>
     /// /////////////////////////////////////////////////////////// XML file load/save
     /// </summary>
+    /// 
+    //this is a modification of Thing which is used to store and retrieve the KB in XML
+    //it eliminates circular references by replacing Thing references with int indexed into an array and makes things much more compact
+    public class SThing
+    {
+        public string label = ""; //this is just for convenience in debugging and should not be used
+        public List<SThing> relationships = new();
+        //object value;
+        //public object V { get => value; set => this.value = value; }
+        //public int useCount;
+
+        public int source = -1;
+        public int target = -1;
+        public int relationshipType = -1;
+        public float weight = 0;
+        public object V;
+    }
+
 
     private void FormatContentForSaving()
     {
         UKSTemp.Clear();
 
         // TODO: Wipe transient data ...
-        foreach (Thing t in UKSList)
+        foreach (Thing t in AllThings)
         {
             SThing st = new()
             {
                 label = t.Label,
                 V = t.V,
-                useCount = t.useCount
+                //useCount = t.useCount
             };
             foreach (Relationship l in t.Relationships)
             {
-                SRelationship sR = ConvertRelationship(l, new List<Relationship>());
+                SThing sR = ConvertRelationship(l, new List<Relationship>());
                 st.relationships.Add(sR);
             }
             UKSTemp.Add(st);
         }
     }
 
-    private SRelationship ConvertRelationship(Relationship l, List<Relationship> stack)
+    private SThing ConvertRelationship(Relationship l, List<Relationship> stack)
     {
+        if (l.Source.Label == "Fido")
+        { }
+
         if (stack.Contains(l)) return null;
         stack.Add(l);
-        List<SClauseType>? clauseList = null;
-        if (l.Clauses.Count > 0)
-        {
-            clauseList = new();
-            foreach (Clause c in l.Clauses)
-            {
-                int clauseType = UKSList.FindIndex(x => x == c.clauseType);
-                SClauseType ct = new() { clauseType = clauseType, r = ConvertRelationship(c.clause, stack) };
-                clauseList.Add(ct);
-            }
-        }
 
-        SRelationship sR = new SRelationship()
+        SThing sR = new SThing()
         {
-            source = UKSList.FindIndex(x => x == l.Source),
-            target = UKSList.FindIndex(x => x == l.Target),
-            relationshipType = UKSList.FindIndex(x => x == l.RelType),
+            source = AllThings.FindIndex(x => x == l.Source),
+            target = AllThings.FindIndex(x => x == l.Target),
+            relationshipType = AllThings.FindIndex(x => x == l.RelType),
             weight = l.Weight,
-            //hits = l.Hits,
-            //misses = l.Misses,
-            //count = l.count,
-            //GPTVerified = l.GPTVerified,
-            clauses = clauseList,
         };
+
+        foreach (Relationship r1 in l.Relationships)
+        {
+            sR.relationships.Add(ConvertRelationship(r1, stack));
+        }
+        stack.RemoveAt(stack.Count-1);
         return sR;
     }
 
@@ -226,14 +250,14 @@ public partial class UKS
                 {
                     Label = st.label,
                     V = st.V,
-                    useCount = st.useCount
+                    //useCount = st.useCount
                 };
-                UKSList.Add(t);
+                AllThings.Add(t);
             }
         }
         foreach (SThing v in UKSTemp)
         {
-            foreach (SRelationship p in v.relationships)
+            foreach (SThing p in v.relationships)
             {
                 AddStatement(UKSTemp[p.source].label, UKSTemp[p.relationshipType].label, UKSTemp[p.target].label);
             }
@@ -242,32 +266,37 @@ public partial class UKS
 
     private void DeFormatContentAfterLoading()
     {
-        UKSList.Clear();
+        AllThings.Clear();
         ThingLabels.ClearLabelList();
+        //get all the things
         foreach (SThing st in UKSTemp)
         {
             Thing t = new()
             {
                 Label = st.label,
                 V = st.V,
-                useCount = st.useCount
+                //useCount = st.useCount
             };
-            UKSList.Add(t);
+            AllThings.Add(t);
         }
+        //handle relationships
         for (int i = 0; i < UKSTemp.Count; i++)
         {
-            foreach (SRelationship p in UKSTemp[i].relationships)
+            SThing sT = UKSTemp[i];
+            foreach (SThing p in sT.relationships)
             {
-                Relationship r = UnConvertRelationship(p, new List<SRelationship>());
+                Relationship r = UnConvertRelationship(p, new List<SThing>());
                 if (r != null)
+                {
                     if (r.RelType.Label != "is-a") //swap has-child for is-a
-                        UKSList[i].RelationshipsWriteable.Add(r);
+                        AllThings[i].RelationshipsWriteable.Add(r);
                     else
                         r.Source.RelationshipsWriteable.Add(r);
+                }
             }
         }
         //rebuild all the reverse linkages
-        foreach (Thing t in UKSList)
+        foreach (Thing t in AllThings)
         {
             foreach (Relationship r in t.Relationships)
             {
@@ -278,24 +307,11 @@ public partial class UKS
                 if (r.RelType != null)
                     if (!r.RelType.RelationshipsAsTypeWriteable.Contains(r))
                         r.RelType.RelationshipsAsTypeWriteable.Add(r);
-                AddClauses(r, new List<Relationship>());
             }
         }
     }
 
-    private void AddClauses(Relationship r, List<Relationship> stack)
-    {
-        if (stack.Contains(r)) return;
-        stack.Add(r);
-        foreach (Clause c in r.Clauses)
-        {
-            if (!c.clause.clausesFrom.Contains(r))
-                c.clause.clausesFrom.Add(r);
-            AddClauses(c.clause, stack);
-        }
-    }
-
-    private Relationship UnConvertRelationship(SRelationship p, List<SRelationship> stack)
+    private Relationship UnConvertRelationship(SThing p, List<SThing> stack)
     {
         if (p == null)
             return null;
@@ -304,13 +320,15 @@ public partial class UKS
         stack.Add(p);
         Thing source = null;
         if (p.source != -1)
-            source = UKSList[p.source];
+            source = AllThings[p.source];
+        else
+            return null;
         Thing relationshipType = null;
         if (p.relationshipType != -1)
-            relationshipType = UKSList[p.relationshipType];
+            relationshipType = AllThings[p.relationshipType];
         Thing target = null;
         if (p.target != -1)
-            target = UKSList[p.target];
+            target = AllThings[p.target];
 
         //conversion for files using has-child to is-a
         if (relationshipType?.Label == "has-child")
@@ -325,22 +343,16 @@ public partial class UKS
             Source = source,
             Target = target,
             RelType = relationshipType,
-            //Hits = p.hits,
-            //Misses = p.misses,
             Weight = p.weight,
-            //GPTVerified = p.GPTVerified,
-            //count = p.count,
-            //sentencetype = p.sentencetype as SentenceType,
         };
-        if (p.clauses != null)
+        if (r.Source.Label == "Fido")
+        { }
+        foreach (SThing st in p.relationships)
         {
-            foreach (SClauseType sc in p.clauses)
-            {
-                Clause ct = new Clause(UKSList[sc.clauseType], UnConvertRelationship(sc.r, stack));
-                if (ct.clause != null)
-                    r.Clauses.Add(ct);
-            }
+            r.RelationshipsWriteable.Add(UnConvertRelationship(st, stack));
         }
+        stack.RemoveAt(stack.Count - 1);
+
         return r;
     }
 
@@ -415,7 +427,7 @@ public partial class UKS
             XmlSerializer writer = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());
             writer.Serialize(file, UKSTemp);
             file.Close();
-            File.Copy(tempFilePath, fullPath,overwrite: true);
+            File.Copy(tempFilePath, fullPath, overwrite: true);
         }
         catch (Exception e)
         {
@@ -544,7 +556,7 @@ public partial class UKS
             isA.AddRelationship("inheritable", "hasProperty");
             isA.AddRelationship("isTransitive", "hasProperty");
             isA.RemoveRelationship("has-child", "inverseOf");
-            isA.RemoveRelationship(null,"hasProperty");
+            isA.RemoveRelationship(null, "hasProperty");
         }
         Thing has = Labeled("has");
         if (has != null)

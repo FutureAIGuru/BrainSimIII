@@ -51,9 +51,9 @@ public class ModuleAddCounts : ModuleBase
     public void DoTheWork()
     {
         debugString = "Agent Started\n";
-        for (int i = 0; i < theUKS.UKSList.Count; i++)
+        for (int i = 0; i < theUKS.AllThings.Count; i++)
         {
-            Thing t = theUKS.UKSList[i];
+            Thing t = theUKS.AllThings[i];
             AddCountRelationships(t);
         }
         debugString += "Agent  Finished\n";

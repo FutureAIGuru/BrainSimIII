@@ -22,7 +22,7 @@ public class ModuleHandler
 
 
     public List<(string, dynamic)> activePythonModules = new();
-    public UKS.UKS theUKS = new();
+    public UKS.UKS theUKS = UKS.UKS.theUKS;
 
     string pythonPath = "";
     public string PythonPath { get => pythonPath; set => pythonPath = value; }

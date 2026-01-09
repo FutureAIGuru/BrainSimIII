@@ -13,58 +13,24 @@ public partial class UKS
     public void ExportTextFile(string root, string path, int maxDepth = 12)
     {
         if (string.IsNullOrWhiteSpace(root)) throw new ArgumentException("Start label is required.", nameof(root));
+        Thing Root = theUKS.Labeled(root);
+        if (Root == null) return;
 
         using (var writer = new StreamWriter(path))
         {
             if (writer is null) throw new ArgumentNullException(nameof(writer));
-            if (maxDepth < 0) maxDepth = 0;
-
-            var start = Labeled(root) ?? throw new InvalidOperationException($"Thing '{root}' not found.");
-
-            var q = new Queue<(Thing t, int d)>();
-            var seenThings = new HashSet<string>(StringComparer.Ordinal);
-
-            q.Enqueue((start, 0));
-            seenThings.Add(start.Label);
-
-            while (q.Count > 0)
+            foreach (Thing t in Root.Descendants)
             {
-                var (t, depth) = q.Dequeue();
-                if (depth > maxDepth) continue;
-
-                foreach (Relationship r in t.RelationshipsFrom)
+                foreach (Relationship r in t.RecursiveRelationships)
                 {
-                    //don't save extra clause baggage.
-                    if (!r.isStatement && r.Clauses.Count == 0) continue;
-                    if (r.RelType.Label == "hasProperty" && r.Target.Label == "isInstance") continue;
-                    if (r.RelType.Label == "is-a" && r.Source.HasProperty("isInstance"))
-                    {
-                        if (seenThings.Add(r.Source.Label)) q.Enqueue((r.Source, depth + 1));
-                        if (seenThings.Add(r.Target.Label)) q.Enqueue((r.Target, depth + 1));
-                        continue;
-                    }
-
-                    Thing theSource = GetNonInstance(r.Source);
-                    var line = $"[{theSource.Label},{r.RelType.Label},{r.Target.Label},{r.Weight.ToString("0.00")}]";
-                    writer.Write(line);
-
-                    foreach (Clause c in r.Clauses)
-                    {
-                        var clause = $" {c.clauseType.Label} [{c.clause.Source.Label},{c.clause.RelType.Label},{c.clause.Target.Label},{c.clause.Weight.ToString("0.00")}] ";
-                        writer.Write(clause);
-                    }
-
-                    writer.WriteLine();
-                    if (depth < maxDepth)
-                    {
-                        if (seenThings.Add(r.Source.Label)) q.Enqueue((r.Source, depth + 1));
-                        if (seenThings.Add(r.Target.Label)) q.Enqueue((r.Target, depth + 1));
-                    }
+                    //var line = $"[{r.Source.ToString()},{r.RelType.ToString()},{r.Target.ToString()},{r.Weight.ToString("0.00")}]";
+                    writer.WriteLine(r.ToString() + r.Weight.ToString("0.00"));
                 }
             }
             writer.Flush();
         }
     }
+
 
     public static Thing GetNonInstance(Thing source)
     {
@@ -78,12 +44,11 @@ public partial class UKS
 
     /// <summary>
     /// Text file format format:
-    /// A line is one or more bracketed statements [S,R,O] or [S,R,O,N] (N weight),
-    /// optionally chained by RELTYPE connector tokens between them.
+    /// A line represents a relationsship of the form LABEL[S->T->O]Weight,
+    /// S,T,&O may themseves be bracketed relatisnips.
     /// Examples:
-    ///   [Dog,has.4,leg]
-    ///   [Fido,plays,outside] IF [weather,is,sunny]
-    ///   [A,rel,B] WITH [C,rel,D] BECAUSE [E,rel,F]
+    ///   [Dog->has.4->leg]0.90
+    ///   R23[Fido,plays,outside] IF [weather,is,sunny]1.00
     /// Comments (# or //) allowed outside quotes/brackets.
     /// </summary>
     public void ImportTextFile(string filePath)
@@ -94,89 +59,82 @@ public partial class UKS
         foreach (var raw in File.ReadLines(filePath))
         {
             lineNo++;
-            bool flowControl = ParseOneLine(lineNo, raw);
-            if (!flowControl)
+            string code = StripEolComment(raw);
+            if (string.IsNullOrWhiteSpace(code)) continue;
+
+            var tokens = TokenizeTopLevel(code); // bracket tokens + connector tokens
+            if (tokens.Count == 0) continue;
+
+            var stmt = ParseBracketStmt(tokens[1], lineNo);
+            Relationship r = AddRelStmt(tokens[0], stmt, tokens[2]);
+        }
+    }
+
+
+    // Parse "[S->R->O]" or "[S,R,O,N]" (comma separated, quotes allowed around items)
+    private static List<string> ParseBracketStmt(string s, int lineNo)
+    {
+        s = s.Substring(1, s.Length - 2); // drop initialFinal [ ]
+        var result = new List<string>();
+        var sb = new StringBuilder();
+        int bracketDepth = 0;
+
+        for (int i = 0; i < s.Length; i++)
+        {
+            if (s[i] == '[') bracketDepth++;
+            if (s[i] == ']') bracketDepth--;
+
+            if (bracketDepth == 0 &&
+                i + 1 < s.Length &&
+                s[i] == '-' &&
+                s[i + 1] == '>')
             {
+                result.Add(sb.ToString());
+                sb.Clear();
+                i++; // skip '>'
                 continue;
             }
-        }
-    }
 
-    public bool ParseOneLine(int lineNo, string raw)
-    {
-        string code = StripEolComment(raw);
-        if (string.IsNullOrWhiteSpace(code)) return false;
-
-        var tokens = TokenizeTopLevel(code); // bracket tokens + connector tokens
-        if (tokens.Count == 0) return false;
-
-        // Validate pattern: must start with [ ... ], alternate connector, [ ... ], ...
-        if (tokens.Count % 2 == 0)
-            throw new FormatException($"Line {lineNo}: expected odd number of tokens ([S,R,O] (REL [S,R,O])*)");
-
-        for (int i = 0; i < tokens.Count; i += 2)
-            if (!IsBracket(tokens[i]))
-                throw new FormatException($"Line {lineNo}: token {i + 1} must be a [S,R,O] statement.");
-
-        // Build relationships for each [S,R,O(,N)?]
-        var rels = new List<Relationship>();
-        bool isStatement = tokens.Count < 3;
-
-        var stmt = ParseBracketStmt(tokens[0], lineNo);
-        Relationship r = AddRelStmt(stmt);
-        r.isStatement = isStatement;
-
-        // Connect adjacent relationships with AddClause(connector)
-        for (int i = 1, relIndex = 0; i < tokens.Count; i += 2, relIndex++)
-        {
-            string relTypeConnector = tokens[i];
-            stmt = ParseBracketStmt(tokens[i + 1], lineNo);
-            if (relTypeConnector == "AFTER")
-            { }
-            Thing t = Labeled(relTypeConnector);
-            if (t == null)
-                t = AddThing(relTypeConnector, "ClauseType");
-            Relationship r1 = new()
-            {
-                Source = GetOrAddThing(stmt.S),
-                RelType = GetOrAddThing(stmt.R),
-                Target = GetOrAddThing(stmt.O)
-            };
-            Relationship r2 = AddClause(r, t, r1.Source, r1.RelType, r1.Target);
-            //r.isStatement = isStatement;
+            sb.Append(s[i]);
         }
 
-        return true;
-    }
-
-    private static bool IsNumeric(string s) => NumericRegex.IsMatch(s);
-    private static bool IsBracket(string s) => s.Length >= 2 && s[0] == '[' && s[^1] == ']';
-
-    private sealed record BrStmt(string S, string R, string O, string? N);
-
-    // Parse "[S,R,O]" or "[S,R,O,N]" (comma separated, quotes allowed around items)
-    private static BrStmt ParseBracketStmt(string bracketToken, int lineNo)
-    {
-        var inner = bracketToken.Substring(1, bracketToken.Length - 2); // drop [ ]
-        var parts = SplitCsvLike(inner); // returns unquoted, trimmed items
-
-        if (parts.Count == 3)
-            return new BrStmt(parts[0], parts[1], parts[2], null);
-
-        if (parts.Count == 4 && IsNumeric(parts[3]))
-            return new BrStmt(parts[0], parts[1], parts[2], parts[3]);
-
-        throw new FormatException(
-            $"Line {lineNo}: bracket must be [S,R,O] or [S,R,O,N] with numeric N. Got: [{inner}]");
+        result.Add(sb.ToString());
+        return result;
     }
 
     // Adds a relationship, honoring numeric sugar (N → R.N + has-value + number typing)
-    private Relationship AddRelStmt(BrStmt s)
+    private Relationship AddRelStmt(string label, List<string> ss,string sWeight)
     {
-        Relationship r = AddStatement(s.S, s.R, s.O);
-        if (s.N is { } n)
+        Relationship r = null;
+        if (label != "")
+            r = (Relationship)Labeled(label);
+        if (r == null)
         {
-            if (float.TryParse(s.N, out float weight))
+            object r1 = ss[0];
+            object r2 = ss[2];
+            if (ss[0].Contains("->"))
+            {
+                var stmtContent = TokenizeTopLevel(ss[0]);
+                var stmtContent1 = ParseBracketStmt(stmtContent[1], -1);
+                r1 = AddRelStmt(stmtContent[0], stmtContent1, stmtContent[2]);
+                r1 = ((Thing)r1).Label;
+            }
+            if (ss[2].Contains("->"))
+            {
+                var stmtContent = TokenizeTopLevel(ss[2]);
+                var stmtContent1 = ParseBracketStmt(stmtContent[1], -1);
+                r2 = AddRelStmt(stmtContent[0], stmtContent1, stmtContent[2]);
+                r2 = ((Thing)r2).Label;
+            }
+
+            //if (r1 or r2 are set, use them instead here
+            r = AddStatement((string)r1, ss[1], (string)r2);
+            if (label != "")
+                r.Label = label;
+        }
+        if (sWeight is { } n)
+        {
+            if (float.TryParse(n, out float weight))
                 r.Weight = weight;
         }
         return r;
@@ -226,72 +184,19 @@ public partial class UKS
         var tokens = new List<string>();
         if (string.IsNullOrWhiteSpace(code)) return tokens;
 
-        int i = 0, n = code.Length;
-        while (i < n)
-        {
-            // skip whitespace
-            while (i < n && char.IsWhiteSpace(code[i])) i++;
-            if (i >= n) break;
+        int leftBracketPos = code.IndexOf("[");
+        int rightBrackedPos = code.LastIndexOf("]")+1;
+        if (leftBracketPos == -1 || rightBrackedPos == -1) return tokens;
 
-            if (code[i] == '[')
-            {
-                int start = i++;
-                int depth = 1;
-                bool esc = false;
+        string label = code[..leftBracketPos];
+        string weight = code[rightBrackedPos..];
+        string body = code[leftBracketPos..rightBrackedPos];
 
-                for (; i < n; i++)
-                {
-                    char c = code[i];
-                    if (c == '[') { depth++; continue; }
-                    if (c == ']')
-                    {
-                        depth--;
-                        if (depth == 0) { i++; break; }
-                        continue;
-                    }
-                }
-
-                if (depth != 0)
-                    throw new FormatException("Unclosed bracketed statement.");
-
-                tokens.Add(code.Substring(start, i - start)); // inclusive [ ... ]
-                continue;
-            }
-
-            // connector token until next whitespace
-            int j = i;
-            while (j < n && !char.IsWhiteSpace(code[j])) j++;
-            tokens.Add(code.Substring(i, j - i));
-            i = j;
-        }
+        tokens.Add(label);
+        tokens.Add(body);
+        tokens.Add(weight);
 
         return tokens;
-    }
-
-    // Split comma-separated content (not top-level), supporting quotes and escapes, then trim and unquote items
-    private static List<string> SplitCsvLike(string s)
-    {
-        var items = new List<string>();
-        var sb = new StringBuilder();
-        bool inQuotes = false;
-        bool esc = false;
-
-        void Flush()
-        {
-            var raw = sb.ToString().Trim();
-            items.Add(raw);
-            sb.Clear();
-        }
-
-        for (int i = 0; i < s.Length; i++)
-        {
-            char c = s[i];
-            if (c == ',') { Flush(); continue; }
-            sb.Append(c);
-        }
-
-        Flush();
-        return items;
     }
 }
 

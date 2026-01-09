@@ -34,8 +34,8 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
     private void RequeryTimer_Tick(object sender, EventArgs e)
     {
-        QueryForAttributes();
-        QueryByAttributes();
+//        QueryForAttributes();
+  //      QueryByAttributes();
     }
 
     //List<Relationship> result = new();
@@ -206,9 +206,9 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         if (allResults.Count == 0)
         {
             //case 1: no results, create a new Thing
-            lock (theUKS.UKSList)
+            lock (theUKS.AllThings)
             {
-                theUKS.UKSList.Add(queryThing);
+                theUKS.AllThings.Add(queryThing);
             }
             queryThing.Label = "Unl*";
             queryThing.AddParent("UnknownObject");
@@ -230,9 +230,9 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         if (matchingTopEntries > 1)
         {
             //add the thing to UKS
-            lock (theUKS.UKSList)
+            lock (theUKS.AllThings)
             {
-                theUKS.UKSList.Add(queryThing);
+                theUKS.AllThings.Add(queryThing);
             }
             queryThing.Label = "Unl*";
             for (i = 0; i < matchingTopEntries; i++)
@@ -262,8 +262,8 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
             }
             if (newChildNeeded)
             {
-                lock (theUKS.UKSList)
-                    theUKS.UKSList.Add(queryThing);
+                lock (theUKS.AllThings)
+                    theUKS.AllThings.Add(queryThing);
                 queryThing.Label = "Unl*";
                 Relationship r1 = queryThing.AddParent(topResult);
                 r1.Weight = .9f;
@@ -441,9 +441,9 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         {
             //case 1: no results
             //add the thing to UKS
-            lock (theUKS.UKSList)
+            lock (theUKS.AllThings)
             {
-                theUKS.UKSList.Add(queryThing);
+                theUKS.AllThings.Add(queryThing);
             }
             queryThing.Label = "Unl*";
             queryThing.AddParent("UnknownObject");
@@ -529,9 +529,9 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
             {
                 if (r1 is Relationship r2)
                 {
-                    if (noSource && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
+                    if (noSource && /*r2.Clauses.Count == 0 && */fullCB.IsChecked == false)
                         resultString += $"{r2.RelType?.ToString()} {r2.Target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
-                    else if (noTarget && r2.Clauses.Count == 0 && fullCB.IsChecked == false)
+                    else if (noTarget && /*r2.Clauses.Count == 0 && */fullCB.IsChecked == false)
                         resultString += $"{r2.Source.ToString()} {r2.RelType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                     else
                     {

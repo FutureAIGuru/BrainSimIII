@@ -69,7 +69,7 @@ public class ModuleAttributeBubble : ModuleBase
     public void DoTheWork()
     {
         debugString = "Bubbler Started\n";
-        foreach (Thing t in theUKS.UKSList)
+        foreach (Thing t in theUKS.AllThings)
         {
             if (t.Label == "Animal")
             { }

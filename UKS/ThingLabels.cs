@@ -9,7 +9,6 @@ using System.Collections.Concurrent;
 
 namespace UKS;
 
-
 public class ThingLabels
 {
     static ConcurrentDictionary<string, Thing> labelList = new ConcurrentDictionary<string, Thing>();
@@ -20,7 +19,8 @@ public class ThingLabels
     {
         if (label == null || label == "") return null;
         Thing retVal = null;
-        if (labelList.TryGetValue(label.ToLower(), out retVal)) { }
+        if (labelList.TryGetValue(label.ToLower(), out retVal)) 
+        { }  //breakpoint?
         return retVal;
     }
     public static string AddThingLabel(string newLabel, Thing t)
@@ -62,18 +62,4 @@ public class ThingLabels
         labelList.Remove(existingLabel.ToLower(), out Thing oldThing);
     }
 
-}
-
-
-
-
-//this is a modification of Thing which is used to store and retrieve the KB in XML
-//it eliminates circular references by replacing Thing references with int indexed into an array and makes things much more compact
-public class SThing
-{
-    public string label = ""; //this is just for convenience in debugging and should not be used
-    public List<SRelationship> relationships = new();
-    object value;
-    public object V { get => value; set => this.value = value; }
-    public int useCount;
 }

@@ -41,7 +41,7 @@ public partial class Thing
     /// <summary>
     /// Only used by the tree control
     /// </summary>
-    public IList<Relationship> RelationshipsNoCount { get { lock (relationships) { return new List<Relationship>(relationships.AsReadOnly()); } } }
+//    public IList<Relationship> RelationshipsNoCount { get { lock (relationships) { return new List<Relationship>(relationships.AsReadOnly()); } } }
     /// <summary>
     /// Get an "unsafe" writeable list of a Thing's Relationships.
     /// This list may change while it is in use and so should not be used as a foreach iterator
@@ -62,8 +62,42 @@ public partial class Thing
 
     private string label = "";
     object value;
-    public int useCount = 0;
+    //public int useCount = 0;
     public DateTime LastFiredTime = new();
+
+
+    //NEEDED for Relationships
+    public Thing _source;
+    /// <summary>
+    /// the Relationship Source
+    /// </summary>
+    public Thing Source
+    {
+        get => _source;
+        set { _source = value; }
+    }
+    private Thing _relType;
+    /// <summary>
+    /// The Relationship Type
+    /// </summary>
+    public Thing RelType
+    {
+        get { return _relType; }
+        set
+        {
+            _relType = value;
+        }
+    }
+    private Thing _target;
+    public Thing Target
+    {
+        get { /*Hits++; lastUsed = DateTime.Now;*/ return _target; }
+        set
+        {
+            _target = value;
+        }
+    }
+
 
     /// <summary>
     /// Any serializable object can be attached to a Thing
@@ -89,26 +123,6 @@ public partial class Thing
             retVal += " V: " + V.ToString();
         return retVal;
     }
-    /// <summary>
-    /// Formats a displayable Thing as a string
-    /// </summary>
-    /// <param name="showProperties">Appends a parenthetical list of relationships to the label</param>
-    /// <returns>The string to display</returns>
-    public string ToString(bool showProperties = false)
-    {
-        string retVal = label;// + ": " + useCount;
-        if (V != null)
-            retVal += " V: " + V.ToString();
-        if (Relationships.Count > 0 && showProperties)
-        {
-            retVal += " {";
-            foreach (Relationship l in Relationships)
-                retVal += l.Target?.label + ",";
-            retVal += "}";
-        }
-        return retVal;
-    }
-
     /// <summary>
     /// Manages a Thing's label and maintais a hash table
     /// </summary>
@@ -217,6 +231,34 @@ public partial class Thing
             }
         }
     }
+
+    public IEnumerable<Thing> Descendants
+    {
+        get
+        {
+            foreach (var child in this.Children)
+            {
+                yield return child;
+
+                foreach (var descendant in child.Descendants)
+                    yield return descendant;
+            }
+        }
+    }
+    public IEnumerable<Relationship> RecursiveRelationships
+    {
+        get
+        {
+            foreach (var r in this.Relationships)
+            {
+                yield return r;
+
+                foreach (var r1 in r.RecursiveRelationships)
+                    yield return r1;
+            }
+        }
+    }
+
     /// <summary>
     /// Determines whether a Thing has a specific ancestor
     /// </summary>
@@ -308,7 +350,7 @@ public partial class Thing
     public void Fire()
     {
         LastFiredTime = DateTime.Now;
-        useCount++;
+        //useCount++;
     }
 
 
@@ -320,7 +362,7 @@ public partial class Thing
     /// <param name="target">Target Thing</param>
     /// <param name="relationshipType">RelatinoshipType Thing</param>
     /// <returns>the new or existing Relationship</returns>
-    public Relationship AddRelationship(Thing target, Thing relationshipType, bool isStatement = true)
+    public Relationship AddRelationship(Thing target, Thing relationshipType)
     {
         if (relationshipType == null)  //NULL relationship types could be allowed in search Thingys Parameter?
         {
@@ -328,7 +370,7 @@ public partial class Thing
         }
 
         //does the relationship already exist?
-        Relationship r = HasRelationship(target, relationshipType, isStatement);
+        Relationship r = HasRelationship(target, relationshipType);
         if (r != null)
         {
             //AdjustRelationship(r.T);
@@ -339,7 +381,6 @@ public partial class Thing
             RelType = relationshipType,
             Source = this,
             Target = target,
-            isStatement = isStatement
         };
         if (target != null && relationshipType != null)
         {
@@ -387,11 +428,11 @@ public partial class Thing
     }
 
     //TODO reverse the parameters so it's type,target
-    private Relationship HasRelationship(Thing target, Thing relationshipType, bool isStatement = true)
+    private Relationship HasRelationship(Thing target, Thing relationshipType)
     {
         foreach (Relationship r in relationships)
         {
-            if (r.Source == this && r.Target == target && r.RelType == relationshipType && r.isStatement == isStatement)
+            if (r.Source == this && r.Target == target && r.RelType == relationshipType)
                 return r;
         }
         return null;
@@ -410,8 +451,8 @@ public partial class Thing
             {
                 lock (r.Target.RelationshipsFromWriteable)
                 {
-                    r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
-                    r.Target.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
+                    r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
+                    r.Target.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
                 }
             }
         }
@@ -421,8 +462,8 @@ public partial class Thing
             {
                 lock (r.RelType.RelationshipsFromWriteable)
                 {
-                    r.Source.RelationshipsWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement); ;
-                    r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
+                    r.Source.RelationshipsWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target); ;
+                    r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
                 }
             }
         }
@@ -434,15 +475,15 @@ public partial class Thing
                 {
                     lock (r.Target.RelationshipsFromWriteable)
                     {
-                        r.Source.RelationshipsWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
-                        r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
-                        r.Target.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target && x.isStatement == r.isStatement);
+                        r.Source.RelationshipsWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
+                        r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
+                        r.Target.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
                     }
                 }
             }
         }
-        foreach (Clause c in r.Clauses)
-            RemoveRelationship(c.clause);
+        //foreach (Clause c in r.Clauses)
+        //    RemoveRelationship(c.clause);
     }
 
     public Relationship HasRelationship(Thing source, Thing relType, Thing targett)
@@ -582,10 +623,10 @@ public partial class Thing
         return AddRelationship(attributeValue, "hasAttribute");
     }
 
-    public bool HasProperty(Thing t)
+    public bool HasProperty(Thing t)  //with inheritance
     {
         foreach (Relationship r in Relationships)
-            if (r.RelType.Label.ToLower() == "hasproperty" && r.Target == t)
+            if (r.RelType.Label == "hasProperty" && r.Target == t)
                 return true;
         foreach (Thing t1 in Parents)
         {

@@ -9,23 +9,23 @@ using System.Collections.Generic;
 using System.Linq;
 using UKS;
 
-namespace BrainSimulator.Modules
-{
-    public class ModuleUKSQuery : ModuleBase
-    {
-        public ModuleUKSQuery()
-        {
-        }
-        public override void Fire()
-        {
-            Init();  //be sure to leave this here
-        }
-        public override void Initialize()
-        {
-        }
+namespace BrainSimulator.Modules;
 
-        /*
-        Conventions [hard-coded relationships]:
+public class ModuleUKSQuery : ModuleBase
+{
+    public ModuleUKSQuery()
+    {
+    }
+    public override void Fire()
+    {
+        Init();  //be sure to leave this here
+    }
+    public override void Initialize()
+    {
+    }
+
+    /*
+    Conventions [hard-coded relationships]:
 
 All Thing labels are sigularized unless they start with a capital letter. Case is preserved but all searches are case-insensitive.
 is-a = has parent of (inverse of has-child)
@@ -60,109 +60,106 @@ Target only (handled as source)
 Always follow is-a relationships for inheritance
 Follow has ONLY if called out in type
 
-         */
+     */
 
-        public void QueryUKS(string sourceIn, string relTypeIn, string targetIn,
-                string filter, out List<Thing> thingResult, out List<Relationship> relationships)
+    public void QueryUKS(string sourceIn, string relTypeIn, string targetIn,
+            string filter, out List<Thing> thingResult, out List<Relationship> relationships)
+    {
+        thingResult = new();
+        relationships = new();
+        GetUKS();
+        if (theUKS == null) return;
+        string source = sourceIn.Trim();
+        string relType = relTypeIn.Trim();
+        string target = targetIn.Trim();
+
+        bool reverse = false;
+        //if (source == "" && target == "") return;
+        int paramCount = 0;
+        if (source != "") paramCount++;
+        if (relType != "") paramCount++;
+        if (target != "") paramCount++;
+
+        if (source == "")
         {
-            thingResult = new();
-            relationships = new();
-            GetUKS();
-            if (theUKS == null) return;
-            string source = sourceIn.Trim();
-            string relType = relTypeIn.Trim();
-            string target = targetIn.Trim();
-
-            bool reverse = false;
-            //if (source == "" && target == "") return;
-            int paramCount = 0;
-            if (source != "") paramCount++;
-            if (relType != "") paramCount++;
-            if (target != "") paramCount++;
-
-            if (source == "")
-            {
-                (source, target) = (target, source);
-                reverse = true;
-            }
-
-            List<Thing> sourceList = ModuleUKSStatement.ThingListFromString(source);
-            //if (sourceList.Count == 0) return;
-            List<Thing> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
-            List<Thing> targetList = ModuleUKSStatement.ThingListFromString(target);
-
-
-            //Handle is-a queries as a special case
-            if (relType.Contains("is-a") && reverse ||
-                relType.Contains("has-child") && !reverse)
-            {
-                if (sourceList.Count > 0)
-                    thingResult = sourceList[0].Children.ToList();
-                return;
-            }
-            if (relType.Contains("is-a") && !reverse ||
-                relType.Contains("has-child") && reverse)
-            {
-                if (sourceList.Count > 0)
-                    thingResult = sourceList[0].Ancestors.ToList();
-                return;
-            }
-
-            //check for target sequence
-            if (sourceList.Count > 1)
-            {
-                float confidence = 0.0f;
-                Thing target1 = new Thing() { Label = "searchPattern" };
-                foreach (Thing t in sourceList)
-                    target1.AddRelationship(t, (relTypeList.Count > 0) ? relTypeList[0] : null);
-                var result = theUKS.SearchForClosestMatch(target1, "Thing");
-                if (result.Count > 0)
-                {
-                    float confidence1 = theUKS.HasSequence(target1, result[0].t, out int offset);
-                    if (confidence1 > 0.0f)
-                        thingResult.Add(result[0].t);
-                }
-                theUKS.DeleteThing(target1);
-            }
-
-            relationships = theUKS.GetAllRelationships(sourceList);
-
-            //unreverse the source and target
-            if (reverse)
-            {
-                (source, target) = (target, source);
-                (sourceList, targetList) = (targetList, sourceList);
-            }
-
-            //handle compound relationship types
-            if (relTypeList.Count > 0)
-                relType = relTypeList[0].Label;
-
-            //filter the relationships
-            for (int i = 0; i < relationships.Count; i++)
-            {
-                Relationship r = relationships[i];
-                if (targetList.Count > 0 && target != "" && !r.Target.HasAncestor(targetList[0]))
-                { relationships.RemoveAt(i); i--; continue; }
-                if (r.RelType != null && relType != "" && !r.RelType.HasAncestorLabeled(relType))
-                { relationships.RemoveAt(i); i--; continue; }
-            }
-
-            if (filter != "")
-            {
-                List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
-                relationships = theUKS.FilterResults(relationships, filterThings).ToList();
-            }
-
-            //if (paramCount == 2)
-            //{
-            //    foreach (Relationship r in relationships)
-            //    {
-            //        if (sourceIn == "") thingResult.Add(r.source);
-            //        if (targetIn == "") thingResult.Add(r.target);
-            //        if (relTypeIn == "") thingResult.Add(r.relType);
-            //    }
-            //}
+            (source, target) = (target, source);
+            reverse = true;
         }
+
+        List<Thing> sourceList = ModuleUKSStatement.ThingListFromString(source);
+        //if (sourceList.Count == 0) return;
+        List<Thing> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
+        List<Thing> targetList = ModuleUKSStatement.ThingListFromString(target);
+
+
+        //Handle is-a queries as a special case
+        if (relType.Contains("is-a") && reverse ||
+            relType.Contains("has-child") && !reverse)
+        {
+            if (sourceList.Count > 0)
+                thingResult = sourceList[0].Children.ToList();
+            return;
+        }
+        if (relType.Contains("is-a") && !reverse ||
+            relType.Contains("has-child") && reverse)
+        {
+            if (sourceList.Count > 0)
+                thingResult = sourceList[0].Ancestors.ToList();
+            return;
+        }
+
+        //check for target sequence
+        if (sourceList.Count > 1)
+        {
+            float confidence = 0.0f;
+            List<Thing> targets = new();
+            foreach (Thing t in sourceList)
+                targets.Add(t);
+            var results1 = theUKS.HasSequence(targets, null);
+            foreach (var result in results1)
+            {
+                relationships.Add(result.r);
+            }
+            return;
+        }
+
+        relationships = theUKS.GetAllRelationships(sourceList);
+
+        //unreverse the source and target
+        if (reverse)
+        {
+            (source, target) = (target, source);
+            (sourceList, targetList) = (targetList, sourceList);
+        }
+
+        //handle compound relationship types
+        if (relTypeList.Count > 0)
+            relType = relTypeList[0].Label;
+
+        //filter the relationships
+        for (int i = 0; i < relationships.Count; i++)
+        {
+            Relationship r = relationships[i];
+            if (targetList.Count > 0 && target != "" && !r.Target.HasAncestor(targetList[0]))
+            { relationships.RemoveAt(i); i--; continue; }
+            if (r.RelType != null && relType != "" && !r.RelType.HasAncestorLabeled(relType))
+            { relationships.RemoveAt(i); i--; continue; }
+        }
+
+        if (filter != "")
+        {
+            List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
+            relationships = theUKS.FilterResults(relationships, filterThings).ToList();
+        }
+
+        //if (paramCount == 2)
+        //{
+        //    foreach (Relationship r in relationships)
+        //    {
+        //        if (sourceIn == "") thingResult.Add(r.source);
+        //        if (targetIn == "") thingResult.Add(r.target);
+        //        if (relTypeIn == "") thingResult.Add(r.relType);
+        //    }
+        //}
     }
 }

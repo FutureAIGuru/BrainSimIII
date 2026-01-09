@@ -61,7 +61,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         Thing t = null;
         try
         {
-            foreach (Thing t1 in parent.theUKS.UKSList)
+            foreach (Thing t1 in parent.theUKS.AllThings)
             {
                 t = t1;
                 childCount += t1.Children.Count;
@@ -74,7 +74,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             //you might get this exception if there is a collision
             return;
         }
-        statusLabel.Content = parent.theUKS.UKSList.Count + " Things  " + (childCount + refCount) + " Rels.";
+        statusLabel.Content = parent.theUKS.AllThings.Count + " Things  " + (childCount + refCount) + " Rels.";
         Title = "The Universal Knowledgs Store (UKS)  --  File: " + Path.GetFileNameWithoutExtension(parent.theUKS.FileName);
     }
 
@@ -111,7 +111,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             try //ignore problems of collection modified
             {
-                foreach (Thing t1 in parent.theUKS.UKSList)
+                foreach (Thing t1 in parent.theUKS.AllThings)
                 {
                     if (t1.Parents.Count == 0)
                     {
@@ -128,14 +128,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         if (totalItemCount > 500) return;
 
-        List<Relationship> theChildren = new();
-        foreach (Relationship r in t.RelationshipsFrom)
-        {
-            if (r.RelType?.Label.StartsWith("is-a") == true && r.Target != null)
-            {
-                theChildren.Add(r);
-            }
-        }
+        List<Relationship> theChildren = t.RelationshipsFrom.Where(x => x.RelType.Label.StartsWith("is-a") && x.Target != null).ToList();
         theChildren = theChildren.OrderBy(x => x.Source.Label).ToList();
 
         ModuleUKS UKS = (ModuleUKS)ParentModule;
@@ -143,19 +136,16 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         foreach (Relationship r in theChildren)
         {
             if (totalItemCount > 500) return;
-            Thing child = r.Source;
-            //int descCount = child.GetDescendentsCount(); //this makes the system too slow
-            int descCount = 10;
-            string descCountStr = (descCount < 5000) ? descCount.ToString() : "****";
+            var child = r.Source;
             string header = child.ToString();
-            if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, you can never right-click 
+            if (header == "") header = "\u25A1"; //put in a small empty box--if the header is completely empty, or you can never right-click 
             if (r.Weight != 1 && detailsCB.IsChecked == true) //prepend weight for probabilistic children
                 header = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastFiredTime + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + header;
             if (r.RelType.HasRelationship(null, null, UKS.theUKS.Labeled("not")) != null) //prepend ! for negative  children
                 header = "!" + header;
             if (detailsCB.IsChecked == true)
-                header += ":" + child.Children.Count + "," + descCountStr;
-            if (child.RelationshipsNoCount.Count > 0)
+                header += ":" + child.Children.Count;
+            if (child.Relationships.Count > 0)
                 header = ChildHasReferences(UKS, child, header, depth);
 
             TreeViewItem tviChild = new() { Header = header };
@@ -163,7 +153,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             //change color of things which just fired or are about to expire
             tviChild.SetValue(ThingObjectProperty, child);
             Thing mostRecent = UKS.theUKS.Labeled("mostRecent");
-            mostRecent = mostRecent?.Relationships.FindFirst(x=>x.RelType.Label == "is")?.Target;
+            mostRecent = mostRecent?.Relationships.FindFirst(x => x.RelType.Label == "is")?.Target;
             if (child == mostRecent)
                 tviChild.Background = new SolidColorBrush(Colors.Pink);
             if (child.LastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
@@ -184,7 +174,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (depth < maxDepth)
             {
                 int childCount = child.Children.Count;
-                int relCount = CountNonChildRelationships(child.RelationshipsNoCount);
+                int relCount = CountNonChildRelationships(child.Relationships);
                 int relFromCount = CountNonChildRelationships(child.RelationshipsFrom);
                 if (tviChild.IsExpanded)
                 {
@@ -195,7 +185,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                         AddRelationshipsFrom(child, tviChild, parentLabel);
                 }
                 else if (child.Children.Count > 0 ||
-                    CountNonChildRelationships(child.RelationshipsNoCount) > 0
+                    CountNonChildRelationships(child.Relationships) > 0
                     || CountNonChildRelationships(child.RelationshipsFrom) > 0)
                 {
                     // don't load those that aren't expanded, put in a dummy instead so there is an expander-handle
@@ -214,48 +204,67 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private void AddRelationships(Thing t, TreeViewItem tvi, string parentLabel)
     {
-        if (CountNonChildRelationships(t.RelationshipsNoCount) == 0) return;
-        TreeViewItem tviRefLabel = new() { Header = "Relationships: " };
+        if (CountNonChildRelationships(t.Relationships) == 0)
+        {
+            //Possible IMPROVEMENT to be able to see other relationships of unlabeled relationships
+            //if (t.Source is Relationship r)
+              //  AddRelationships(r, tvi, parentLabel);
+            //if (t.Target is Relationship r1)
+            //    AddRelationships(r1, tvi, parentLabel);
+            if (t.Source == null && t.Target == null)
+                return;
+        }
+        TreeViewItem tviRelationshipsHeader = new() { Header = "Relationships: " };
         if (detailsCB.IsChecked == true)
-            tviRefLabel.Header += CountNonChildRelationships(t.RelationshipsNoCount).ToString();
+            tviRelationshipsHeader.Header += CountNonChildRelationships(t.Relationships).ToString();
 
-        string fullString = "|" + parentLabel + "|" + t.Label + "|:Relationships";
+        //add the "Relationships:" entry
+        string fullString = "|" + parentLabel + "|" + t.ToString() + "|Relationships:";
         fullString = fullString.Replace("||", "|"); //needed to make top level work
         if (expandedItems.Contains(fullString))
-            tviRefLabel.IsExpanded = true;
+            tviRelationshipsHeader.IsExpanded = true;
         if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
-            tviRefLabel.IsExpanded = true;
+            tviRelationshipsHeader.IsExpanded = true;
         if (t.Children.Count == 0)
-            tviRefLabel.IsExpanded = true;
-        tvi.Items.Add(tviRefLabel);
-
+            tviRelationshipsHeader.IsExpanded = true;
+        tvi.Items.Add(tviRelationshipsHeader);
         totalItemCount++;
-        IList<Relationship> sortedReferences = t.RelationshipsNoCount.OrderBy(x => x.RelType?.Label).ToList();
-        foreach (Relationship r in sortedReferences)
+
+        //add each of the relationships as a "child" of the "Relationships:" entry    
+        IList<Relationship> sortedRelationships = t.Relationships.OrderBy(x => x.RelType?.Label).ToList();
+        foreach (Relationship r in sortedRelationships)
         {
             if (r.RelType?.Label == "is-a") continue;
-            if (!r.isStatement && showConditionals.IsChecked != true) continue; //hide conditionals
-            //special case for values 
-            if (r.Target != null && r.Target.HasAncestorLabeled("Value"))
-            {
-                TreeViewItem tviRef = new() { Header = GetRelationshipString(r) };
-                tviRef.ContextMenu = GetContextMenu(r.Target, tviRef);
-                tviRefLabel.Items.Add(tviRef);
-                totalItemCount++;
-            }
-            else 
-            {
-                TreeViewItem tviRef = new() { Header = GetRelationshipString(r), };
-                if (!r.isStatement) tviRef.Header = "*" + tviRef.Header;
-                if (r.Source != t) tviRef.Header = r.Source?.Label + "->" + tviRef.Header;
-                tviRef.ContextMenu = GetRelationshipContextMenu(r);
-                tviRefLabel.Items.Add(tviRef);
-                if (r.LastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
-                    tviRef.Background = new SolidColorBrush(Colors.LightGreen);
-                if (r.TimeToLive != TimeSpan.MaxValue && r.LastFiredTime + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
-                    tviRef.Background = new SolidColorBrush(Colors.LightYellow);
-                totalItemCount++;
-            }
+            if (showConditionals.IsChecked != true && ( r.HasProperty("isCondition") || r.HasProperty("isResult"))) continue; //hide conditionals
+
+            TreeViewItem tviRel = new() { Header = GetRelationshipString(r), };
+            if (t.HasProperty("isCondition") || t.HasProperty("isResult")) 
+                tviRel.Header = "*" + tviRel.Header;
+            else if (r.HasProperty("isCondition") || r.HasProperty("isResult")) 
+                tviRel.Header = "*" + tviRel.Header;
+            if (r.Source != t) tviRel.Header = r.Source?.Label + "->" + tviRel.Header;
+            //context menu
+            tviRel.ContextMenu = GetRelationshipContextMenu(r);
+            tviRelationshipsHeader.Items.Add(tviRel);
+
+            //special colors
+            if (r.LastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
+                tviRel.Background = new SolidColorBrush(Colors.LightGreen);
+            if (r.TimeToLive != TimeSpan.MaxValue && r.LastFiredTime + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
+                tviRel.Background = new SolidColorBrush(Colors.LightYellow);
+            totalItemCount++;
+
+            //is this item expanded
+            string tempString = fullString + "|" + tviRel.Header;
+            if (expandedItems.Contains(tempString))
+                tviRel.IsExpanded = true;
+
+            //make this relationship expandable
+            tviRel.SetValue(ThingObjectProperty, r);
+            tviRel.Expanded += EmptyChild_Expanded;
+
+            AddRelationships(r, tviRel, fullString);
+            //AddRelationships(r.Target, tviRef, fullString);
         }
     }
 
@@ -263,30 +272,34 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void AddRelationshipsFrom(Thing t, TreeViewItem tvi, string parentLabel)
     {
         if (CountNonChildRelationships(t.RelationshipsFrom) == 0) return;
-        TreeViewItem tviRefLabel = new() { Header = "RelationshipsFrom: " };
+        TreeViewItem tveRelationshipHeader = new() { Header = "RelationshipsFrom: " };
         if (detailsCB.IsChecked == true)
-            tviRefLabel.Header += CountNonChildRelationships(t.RelationshipsFrom).ToString();
+            tveRelationshipHeader.Header += CountNonChildRelationships(t.RelationshipsFrom).ToString();
 
         string fullString = "|" + parentLabel + "|" + t.Label + "|:RelationshipsFrom";
         fullString = fullString.Replace("||", "|"); //needed to make top level work
         if (expandedItems.Contains(fullString))
-            tviRefLabel.IsExpanded = true;
+            tveRelationshipHeader.IsExpanded = true;
         if (t.AncestorList().Contains(ThingLabels.GetThing(expandAll)))
-            tviRefLabel.IsExpanded = true;
-        tvi.Items.Add(tviRefLabel);
+            tveRelationshipHeader.IsExpanded = true;
+        tvi.Items.Add(tveRelationshipHeader);
 
         foreach (Relationship r in t.RelationshipsFrom)
         {
             if (r.RelType?.Label == "has-child") continue;
-            TreeViewItem tviRef;
             string headerstring1 = GetRelationshipString(r);
-            tviRef = new TreeViewItem { Header = headerstring1 };
-            tviRef.ContextMenu = GetRelationshipContextMenu(r);
-            tviRefLabel.Items.Add(tviRef);
+            TreeViewItem tviRel = new TreeViewItem { Header = headerstring1 };
+            if (t.HasProperty("isCondition") || t.HasProperty("isResult"))
+                tviRel.Header = "*" + tviRel.Header;
+            else if (r.HasProperty("isCondition") || r.HasProperty("isResult"))
+                tviRel.Header = "*" + tviRel.Header;
+
+            tviRel.ContextMenu = GetRelationshipContextMenu(r);
+            tveRelationshipHeader.Items.Add(tviRel);
             if (r.LastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
-                tviRef.Background = new SolidColorBrush(Colors.LightGreen);
+                tviRel.Background = new SolidColorBrush(Colors.LightGreen);
             if (r.TimeToLive != TimeSpan.MaxValue && r.LastFiredTime + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
-                tviRef.Background = new SolidColorBrush(Colors.LightYellow);
+                tviRel.Background = new SolidColorBrush(Colors.LightYellow);
             totalItemCount++;
         }
         totalItemCount++;
@@ -309,14 +322,17 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             string name = tvi.Header.ToString(); // to help debug
             Thing t = (Thing)tvi.GetValue(ThingObjectProperty);
-            string parentLabel = "|" + t.Label;
+            string parentLabel = "|" + t.ToString();
             TreeViewItem tvi1 = tvi;
             int depth = 0;
             while (tvi1.Parent != null && tvi1.Parent is TreeViewItem tvi2)
             {
                 tvi1 = tvi2;
                 Thing t1 = (Thing)tvi1.GetValue(ThingObjectProperty);
-                parentLabel = "|" + t1.Label + parentLabel;
+                if (t1 != null)
+                    parentLabel = "|" + t1.ToString() + parentLabel;
+                else
+                    parentLabel = "|" + "Relationships:" + parentLabel;
                 depth++;
             }
             if (!expandedItems.Contains(parentLabel))
@@ -338,7 +354,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         menu.SetValue(ThingObjectProperty, t);
         menu.SetValue(TreeViewItemProperty, tvi);
         ModuleUKS parent = (ModuleUKS)ParentModule;
-        int ID = parent.theUKS.UKSList.IndexOf(t);
+        int ID = parent.theUKS.AllThings.IndexOf(t);
         MenuItem mi = new();
         string thingLabel = "___";
         if (t != null)
@@ -477,11 +493,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         mi.SetValue(ThingObjectProperty, r.Target);
         menu.Items.Add(mi);
 
-        foreach (var c in r.Clauses)
-        {
-
-        }
-
         return menu;
     }
 
@@ -557,7 +568,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     public static string LeftOfColon(string s)
     {
         int i = s.IndexOf(':');
-        if (i != -1)
+        i++;
+        if (i != 0)
             s = s[..i];
         return s;
     }
@@ -569,17 +581,17 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             if (tvi1.IsExpanded)
             {
-                if (!tvi1.Header.ToString().Contains("Relationships", StringComparison.CurrentCulture))
+                if (!tvi1.Header.ToString().Contains("Relationships:", StringComparison.CurrentCulture))
                 {
                     expandedItems.Add(parentLabel + "|" + LeftOfColon(tvi1.Header.ToString()));
                 }
                 else if (tvi1.Header.ToString().IndexOf("RelationshipsFrom") != -1)
                 {
-                    expandedItems.Add(parentLabel + "|" + ":RelationshipsFrom");
+                    expandedItems.Add(parentLabel + "|" + "RelationshipsFrom:");
                 }
-                else if (tvi1.Header.ToString().IndexOf("Relationships") != -1)
+                else if (tvi1.Header.ToString().IndexOf("Relationships:") != -1)
                 {
-                    expandedItems.Add(parentLabel + "|" + ":Relationships");
+                    expandedItems.Add(parentLabel + "|" + "Relationships:");
                 }
             }
             FindExpandedItems(tvi1.Items, parentLabel + "|" + LeftOfColon(tvi1.Header.ToString()));
@@ -601,9 +613,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private string GetRelationshipString(Relationship r)
     {
-        string retVal = "";
-        if (r.RelType is null || r.RelType.Label != "has-child")
-            retVal = r.ToString() + " ";
+        string retVal = r.ToString();
+//        if (r.RelType is null || r.RelType.Label != "has-child")
+//            retVal = r.ToString() + " ";
         if (detailsCB.IsChecked == true)
             retVal = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastFiredTime + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
         return retVal;
@@ -637,13 +649,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void TextBoxRoot_KeyDown(object sender, KeyEventArgs e)
     {
         // Allow text changes when keys like backspace, delete are pressed
-       if (e.Key == Key.Back || e.Key == Key.Delete)
+        if (e.Key == Key.Back || e.Key == Key.Delete)
         {
             _isTextChangingInternally = true;
             int caretIndex = textBoxRoot.CaretIndex;
             if (e.Key == Key.Back) caretIndex--;
             if (caretIndex < 0) caretIndex = 0;
-            textBoxRoot.Text = textBoxRoot.Text.Substring(0,caretIndex);
+            textBoxRoot.Text = textBoxRoot.Text.Substring(0, caretIndex);
             textBoxRoot.CaretIndex = caretIndex;
             e.Handled = true;
             _isTextChangingInternally = false;
@@ -790,7 +802,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         expandAll = parent.GetSavedDlgAttribute("ExpandAll");
         if (expandAll == null) expandAll = "";
         string root = parent.GetSavedDlgAttribute("Root");
-        if (string.IsNullOrEmpty(root)) 
+        if (string.IsNullOrEmpty(root))
             root = "Thing";
         textBoxRoot.Text = root;
         Refresh();
@@ -903,7 +915,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             //get the root to save the contents of from the UKS dialog root
             string root = parent.GetSavedDlgAttribute("Root");
             await Task.Run(() => parent.theUKS.ExportTextFile(root, path));
-            SetStatus("Success")    ;
+            SetStatus("Success");
         }
         catch (Exception ex)
         {

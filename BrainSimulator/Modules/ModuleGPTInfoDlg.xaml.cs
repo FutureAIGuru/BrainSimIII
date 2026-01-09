@@ -255,12 +255,12 @@ namespace BrainSimulator.Modules
             count = 0;
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
             SetOutputText("Verifying all is-a relationships");
-            foreach (Thing t in mf.theUKS.UKSList)
+            foreach (Thing t in mf.theUKS.AllThings)
             {
                 if (t.Parents.FindFirst(x => x.Label == "unknownObject") != null) continue;
                 if (!t.Label.StartsWith('.')) continue;
                 if (t.Label == ".") continue;
-                if (t == mf.theUKS.UKSList.Last())
+                if (t == mf.theUKS.AllThings.Last())
                     await VerifyAsync(t.Label);
                 else
                     VerifyAsync(t.Label);

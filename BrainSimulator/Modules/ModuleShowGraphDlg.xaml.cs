@@ -63,8 +63,8 @@ namespace BrainSimulator.Modules
                 {
                     if (r.Source == theRoot) continue;
                     string label = r.RelType.Label;
-                    foreach (Clause c in r.Clauses)
-                        label += $"\n{c.clauseType.Label} {c.clause.Source.Label} {c.clause.RelType.Label} {c.clause.Target.Label}";
+                    //foreach (Clause c in r.Clauses)
+                    //    label += $"\n{c.clauseType.Label} {c.clause.Source.Label} {c.clause.RelType.Label} {c.clause.Target.Label}";
                     var e = g.AddEdge(t.Label, label, r.Target.Label);
                     e.Attr.Color = Microsoft.Msagl.Drawing.Color.Yellow;
                     e.Label.FontColor = Microsoft.Msagl.Drawing.Color.White;

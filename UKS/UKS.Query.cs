@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 
 namespace UKS;
+
 public partial class UKS
 {
     //keeps track of the conditions of the previous query in order to answer "Why?" or "Why not?"
@@ -164,6 +165,8 @@ public partial class UKS
                 else
                 {
                     Relationship r1 = new Relationship(r);
+                    foreach (Relationship r3 in r.Relationships)
+                        r1.AddRelationship(r3.Target, r3.RelType);
                     r1.Weight *= thingsToExamine[i].weight;
                     result.Add(r1);
                 }
@@ -209,6 +212,7 @@ public partial class UKS
         for (int i = 0; i < result.Count; i++)
         {
             Relationship r1 = result[i];
+            if (!r1.HasProperty("isResult")) continue;
             if (!ConditionsAreMet(r1))
             {
                 failedConditions.Add(r1);
@@ -260,82 +264,20 @@ public partial class UKS
         return retVal;
     }
 
-    //TODO add concept of "near" Things
-    //TODO add option to require first and/or last entries to match
-    /// <summary>
-    /// This determines how well two Things match in terms of the order of their ordered attributes.
-    /// </summary>
-    /// <param name="pattern">This is the pattern we are searching for</param>
-    /// <param name="candidate">This is the item suggested as a possible sequence match< (the stored pattern)</param>
-    /// <param name="bestOffset">Return value of offset into the candidate where the pattern match begins.</param>
-    /// <param name="relType">If specified, specifees the relationship type to follow, otherwise all sequential relTypes are matched</param>
-    /// <param name="circularSearch">If true, circularizes the search of the candidate (for visuals)</param>
-    /// <returns>Confidence that the pattern exists in the candidate</returns>
-    public float HasSequence(Thing pattern, Thing candidate, out int bestOffset, bool circularSearch = false, Thing relType = null)
-    {
-        bestOffset = -1;
-        if (candidate == null) return -1;
-        if (pattern == null) return -1;
-        if (candidate.Relationships.Count == 0) return -1;
-        if (pattern.Relationships.Count == 0) return -1;
 
-        //get the needed relationships and put them in the order specified by the relationshipType digits
-        float bestScore = -1;
-        List<Relationship> patternRelationships = new(pattern.Relationships);
-        patternRelationships = patternRelationships.FindAll(
-            x => x.RelType == null || Regex.IsMatch(x.RelType.Label, @"\d+") && (relType == null || x.RelType.Parents.Contains(relType)));
-        patternRelationships = patternRelationships.OrderBy(s => (s.RelType == null) ? 0 : int.Parse(Regex.Match(s.RelType.Label, @"\d+").Value)).ToList();
-        List<Relationship> candidateRelationships = new(candidate.Relationships);
-        candidateRelationships = candidateRelationships.FindAll(
-            x => x.RelType == null || Regex.IsMatch(x.RelType.Label, @"\d+") && (relType == null || x.RelType.Parents.Contains(relType)));
-        candidateRelationships = candidateRelationships.OrderBy(s => (s.RelType == null) ? 0 : int.Parse(Regex.Match(s.RelType.Label, @"\d+").Value)).ToList();
-
-        //offset is the number of rels to skip at the beginning of the stored pattern
-        for (int offset = 0; offset < patternRelationships.Count; offset++)
-        {
-            float score = 0;
-            for (int i = 0; i < candidateRelationships.Count; i++)
-            {
-                //if circular search is requested and the offset is off the end of the candidate, loop back
-                if (!circularSearch && offset + i >= candidateRelationships.Count) break;
-                int index = (offset + i) % patternRelationships.Count;
-                if (candidateRelationships[i].Target == patternRelationships[index].Target)
-                {
-                    score += patternRelationships[index].Weight;
-                }
-            }
-            if (score > bestScore)
-            {
-                bestScore = score;
-                bestOffset = offset;
-            }
-        }
-
-        bestScore /= patternRelationships.Count;
-        return bestScore;
-    }
-
+  
 
     bool ConditionsAreMet(Relationship r)
     {
-        if (r.Clauses.Count == 0 && r.isStatement) return true;
-        //if (StackContains("ConditionsAreMet",1)) return true;
-        foreach (Clause c in r.Clauses)
+        foreach (Relationship r1 in r.Relationships)
         {
-            if (c.clauseType.Label.ToLower() != "if") continue;
-            Relationship r1 = c.clause;
-            Relationship q = new(r1);
+            if (!r1.Source.HasProperty("isResult")) continue;
+            if (!r1.Target.HasProperty("isCondition")) continue;
 
-            var qResult = GetRelationship(q);
-            if (qResult != null && qResult.Weight < 0.8)
+            Relationship r2 = (Relationship)r1.Target;
+            //is r1 true?
+            if (GetRelationship(r2) == null)
                 return false;
-            if (qResult == null)
-            {
-                failedConditions.Add(q);
-                return false;
-            }
-            else
-                succeededConditions.Add(q);
         }
         return true;
     }
