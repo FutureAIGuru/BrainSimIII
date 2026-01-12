@@ -276,11 +276,25 @@ public partial class UKS
 
             Relationship r2 = (Relationship)r1.Target;
             //is r1 true?
-            if (GetRelationship(r2) == null)
+            if (GetUnconditionalRelationship(r2) == null)
                 return false;
         }
         return true;
     }
+    Relationship GetUnconditionalRelationship(Relationship r)
+    {
+        foreach (Relationship r1 in r.Source.Relationships)
+        {
+            if (RelationshipsAreEqual(r, r1))
+            {
+                if (!r1.HasProperty("isCondition"))
+                   return r1;
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>
     /// Returns a list of Relationships which were false in the previous query
     /// </summary>

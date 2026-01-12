@@ -217,7 +217,7 @@ public class Relationship : Thing
 
     public string ToString(List<Relationship> stack)
     {
-        if (stack.Contains(this))  //looping block
+        if (stack.Contains(this))  //looping block protect from circular references
             return "";
         stack.Add(this);
         string retVal = "";
@@ -234,14 +234,29 @@ public class Relationship : Thing
 
     private string BasicRelationshipToString(string retVal)
     {
-        retVal += Label+"[";
-        if (!string.IsNullOrEmpty(Source?.ToString()))
+        //for convience show any value in singls quotes
+        bool showBrackets = true;
+        //var value = this.Relationships.FindFirst(x => x.RelType.Label == "VLU")?.Target;
+        //if (value != null)
+        //{
+        //    retVal += "'" + value.ToString() + "'";
+        //    showBrackets = false;
+        //}
+        //else
+            retVal += Label;
+        if (showBrackets) retVal += "[";
+        if (Source != this && !string.IsNullOrEmpty(Source?.ToString()))
+        {
             retVal += Source?.ToString();
+        }
         if (!string.IsNullOrEmpty(RelType?.ToString()))
             retVal += ((retVal == "") ? "" : "->") + RelType?.ToString();
         if (!string.IsNullOrEmpty(Target?.ToString()))
-            retVal += ((retVal == "") ? "" : "->") + Target?.ToString();
-        retVal += "]";
+        {
+            retVal += ((retVal == "") ? "" : "->");
+            retVal += Target?.ToString();
+        }
+        if (showBrackets) retVal += "]";
         return retVal;
     }
 
@@ -261,8 +276,8 @@ public class Relationship : Thing
     {
         if (obj is Relationship a)
         {
-            if (a.Target == Target && 
-                a.Source == Source && 
+            if (a.Target == Target &&
+                a.Source == Source &&
                 a.RelType == RelType &&
                 a.Relationships.Count == Relationships.Count)
                 return true;
@@ -284,7 +299,7 @@ public class Relationship : Thing
         return base.GetHashCode();
     }
 
- 
+
     private void AddToTransientList()
     {
         if (!UKS.transientRelationships.Contains(this))

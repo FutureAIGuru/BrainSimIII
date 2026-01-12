@@ -134,8 +134,8 @@ namespace BrainSimulator.Modules
                 string userText = $"Provide commonsense classification answer the request which is appropriate for a 5 year old: What is-a {textIn}";
                 string systemText = 
 $@"This is a classification request. Examples: horse is-a | animal, mammal \n\r chimpanzee is-a | primate, mammal
-Answer is formatted: is-a | VALUE, VALUE, VALUE with no more than 3 values and VAIUES are 1 or 2 words.
-Answer should ONLY contain VALUEs where it is reasonable to say: '{textIn} is-a VALUE' and exclude: 'VALUE is-a {textIn}' 
+Answer is formatted: is-a | VLU, VLU, VLU with no more than 3 values and VAIUES are 1 or 2 words.
+Answer should ONLY contain VALUEs where it is reasonable to say: '{textIn} is-a VLU' and exclude: 'VLU is-a {textIn}' 
 Never include {textIn} in the result.";
 
                 answerString = await GPT.GetGPTResult(userText, systemText);
@@ -168,13 +168,13 @@ Never include {textIn} in the result.";
                 string userText = $"Provide commonsense facts to answer the request: what is a {textIn}";
                 string systemText = 
 @"Provide answers that are common sense to a 10 year old. 
-Each Answer in the formatted: VALUE-NAME | VALUE, VALUE, VALUE
+Each Answer in the formatted: VLU-NAME | VLU, VLU, VLU
 **Individual ANSWERS should contain no more than 3 values**
-**Individual VALUE should be ONE or TWO words.**
+**Individual VLU should be ONE or TWO words.**
 Example for dog: is-a | animal, pet
-Example for numerical VALUE: contains (with counts) always contains parts | 2 eyes, 4 legs, 1 tail
-Use any VALUE only once. 
-Use the following VALUE-NAMEs if appropriate: 
+Example for numerical VLU: contains (with counts) always contains parts | 2 eyes, 4 legs, 1 tail
+Use any VLU only once. 
+Use the following VLU-NAMEs if appropriate: 
 is-a (where each value is a physical thing), 
 can, 
 always contains parts (with counts),

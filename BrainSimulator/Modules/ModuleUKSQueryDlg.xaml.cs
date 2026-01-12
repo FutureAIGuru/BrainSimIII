@@ -11,8 +11,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using UKS;
@@ -34,8 +32,8 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
     private void RequeryTimer_Tick(object sender, EventArgs e)
     {
-//        QueryForAttributes();
-  //      QueryByAttributes();
+        QueryForAttributes();
+        QueryByAttributes();
     }
 
     //List<Relationship> result = new();
@@ -84,9 +82,13 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         List<Thing> things;
         List<Relationship> relationships;
         ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-        UKSQuery.QueryUKS(source, type, target, filter, out things, out relationships);
+        var results1 = UKSQuery.QueryUKS(source, type, target, filter, out things, out relationships);
 
-        if (things.Count > 0)
+        if (results1 != null)
+        {
+            OutputResults(results1, target == "", source == "");
+        }
+        else if (things.Count > 0)
             OutputResults(things);
         else
             OutputResults(relationships, target == "", source == "");
@@ -224,7 +226,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         int matchingTopEntries = 1;
         int i = 1;
         float matchingTopConfidence = allResults[0].conf;
-        while (i < allResults.Count && allResults[i++].conf== matchingTopConfidence)
+        while (i < allResults.Count && allResults[i++].conf == matchingTopConfidence)
             matchingTopEntries++;
 
         if (matchingTopEntries > 1)
@@ -254,11 +256,11 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         {
             foreach (var child in topResult.Children)
             {
-                if (theUKS.ThingsHaveSimilarRelationship(queryThing,child))
+                if (theUKS.ThingsHaveSimilarRelationship(queryThing, child))
                 {
                     newChildNeeded = true;
                     break;
-                }    
+                }
             }
             if (newChildNeeded)
             {
@@ -527,11 +529,26 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         {
             foreach (var r1 in r)
             {
-                if (r1 is Relationship r2)
+                if (r1 is ValueTuple<Relationship, float> tuple)
                 {
-                    if (noSource && /*r2.Clauses.Count == 0 && */fullCB.IsChecked == false)
+                    var r3 = tuple.Item1;
+                    var conf = tuple.Item2;
+                    if (r3.Target?.RelType?.Label == "NXT")
+                    {
+                        ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
+                        var theUKS = UKSQuery.theUKS;
+                        var seq = theUKS.FlattenSequence(r3.Target);
+                        foreach (Thing t in seq) resultString += t.Label + " ";
+                        resultString += $"{conf.ToString("0.00")}\n";
+                    }
+                    else
+                        resultString += $"{r3.Source.ToString()} {r3.RelType.ToString()} {r3.Target.ToString()}  ({conf.ToString("0.00")})\n";
+                }
+                else if (r1 is Relationship r2)
+                {
+                    if (noSource && fullCB.IsChecked == false)
                         resultString += $"{r2.RelType?.ToString()} {r2.Target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
-                    else if (noTarget && /*r2.Clauses.Count == 0 && */fullCB.IsChecked == false)
+                    else if (noTarget && fullCB.IsChecked == false)
                         resultString += $"{r2.Source.ToString()} {r2.RelType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                     else
                     {

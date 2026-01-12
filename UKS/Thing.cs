@@ -121,6 +121,8 @@ public partial class Thing
         string retVal = label;
         if (V != null)
             retVal += " V: " + V.ToString();
+        retVal += Target?.ToString();
+
         return retVal;
     }
     /// <summary>
@@ -259,6 +261,23 @@ public partial class Thing
         }
     }
 
+    public IEnumerable<Thing> SequenceNodes()
+    {
+        var current = this;
+
+        while (current != null)
+        {
+            yield return current;  // Return this node, pause, wait for next request
+
+            var nextRel = current.Relationships.FirstOrDefault(r => r.RelType?.Label == "NXT");
+
+            if (nextRel == null) yield break;  // No more nodes, stop iteration
+
+            if (nextRel.Target == this) yield break;  // Reached source, sequence complete
+
+            current = nextRel.Target;
+        }
+    }
     /// <summary>
     /// Determines whether a Thing has a specific ancestor
     /// </summary>

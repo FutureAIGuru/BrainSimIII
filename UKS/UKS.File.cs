@@ -103,9 +103,12 @@ public partial class UKS
         AddStatement("IF", "is-a", "ClauseType");
         AddStatement("BECAUSE", "is-a", "ClauseType");
         AddStatement("AFTER", "is-a", "ClauseType");
-        AddStatement("NEXT", "is-a", "ClauseType");
-        AddStatement("VALUE", "is-a", "ClauseType");
-        AddStatement("SOURCE", "is-a", "ClauseType");
+        AddStatement("NXT", "is-a", "ClauseType");
+        AddStatement("VLU", "is-a", "ClauseType");
+        AddStatement("AND", "is-a", "ClauseType");
+        AddStatement("OR", "is-a", "ClauseType");
+        AddStatement("NOT", "is-a", "ClauseType");
+        AddStatement("FRST", "is-a", "ClauseType");
 
 
 

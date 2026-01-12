@@ -362,7 +362,6 @@ public partial class UKS
     {
         foreach (Relationship r1 in r.Source.Relationships)
         {
-            if (r1.HasProperty("isCondition") || r1.HasProperty("isResult")) continue;
             if (RelationshipsAreEqual(r, r1)) return r1;
         }
         return null;

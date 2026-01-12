@@ -7,6 +7,8 @@
 using Pluralize.NET;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Intrinsics.Arm;
+using System.Windows.Documents;
 using UKS;
 
 namespace BrainSimulator.Modules;
@@ -55,7 +57,7 @@ public class ModuleUKSStatement : ModuleBase
 
     }
 
-  
+
     public Relationship AddRelationship(string source, string target, string relationshipType)
     {
         GetUKS();
@@ -64,14 +66,28 @@ public class ModuleUKSStatement : ModuleBase
         if (pluralizer.IsPlural(source) && pluralizer.IsPlural(target) && relationshipType == "are")
             relationshipType = "is-a";
 
-        Thing tSource = theUKS.CreateThingFromMultipleAttributes(source, false);
+        //Figure out the source
+        var sourceParts = Singular(source.Split(" "));
+        Thing tSource = null;
+        if (sourceParts.Length == 3)
+            tSource = theUKS.AddStatement(sourceParts[0], sourceParts[1], sourceParts[2]);
+        if (tSource == null)
+        {
+            tSource = theUKS.CreateThingFromMultipleAttributes(source, false);
+        }
+        //figure out the RelType
         Thing tRelType = theUKS.CreateThingFromMultipleAttributes(relationshipType, true);
+
+
+        //Figure out the target
+        var targetParts = Singular(target.Split(" "));
+        Thing tTarget = null;
 
         if (target.StartsWith("*"))
         {
             List<Thing> targets = new();
-            string[] tempStringArray = target[1..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            foreach (string label in tempStringArray)
+            targetParts = target[1..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            foreach (string label in targetParts)
             {
                 Thing t = theUKS.GetOrAddThing(label);
                 targets.Add(t);
@@ -80,7 +96,10 @@ public class ModuleUKSStatement : ModuleBase
             return r1;
         }
 
-        Thing tTarget = theUKS.CreateThingFromMultipleAttributes(target, false);
+        if (targetParts.Length == 3)
+            tTarget = theUKS.AddStatement(targetParts[0], targetParts[1], targetParts[2]);
+        if (tTarget == null)
+            tTarget = theUKS.CreateThingFromMultipleAttributes(target, false);
         if (target == "" && relationshipType == "is-a")
         {
             if (target == "" && source != "")
@@ -88,8 +107,26 @@ public class ModuleUKSStatement : ModuleBase
             return null;
         }
 
+        //Create the relationship
         Relationship r = theUKS.AddStatement(tSource, tRelType, tTarget);
+
+        if (tRelType.Label == "IF")
+        {
+            tSource.AddRelationship("isResult", "hasProperty");
+            tTarget.AddRelationship("isCondition", "hasProperty");
+        }
         return r;
+    }
+
+    string[] Singular(string[] s)
+    {
+        IPluralize pluralizer = new Pluralizer();
+        for (int i = 0; i < s.Length; i++)
+        {
+            if (!char.IsUpper(s[i][0]) && s[i].Length > 2)
+                s[i] = pluralizer.Singularize(s[i]);
+        }
+        return s;
     }
 
     public static List<Thing> ThingListFromString(string source)
@@ -102,7 +139,7 @@ public class ModuleUKSStatement : ModuleBase
         for (int i = 0; i < tempStringArray.Length; i++)
         {
             if (tempStringArray[i] == "") continue;
-            if (!char.IsUpper(tempStringArray[i][0]))
+            if (!char.IsUpper(tempStringArray[i][0]) && tempStringArray[i].Length > 2)
                 tempStringArray[i] = pluralizer.Singularize(tempStringArray[i]);
             Thing t = ThingLabels.GetThing(tempStringArray[i]);
             if (t == null) return retVal;

@@ -62,13 +62,13 @@ Follow has ONLY if called out in type
 
      */
 
-    public void QueryUKS(string sourceIn, string relTypeIn, string targetIn,
+    public List<(Relationship r, float confidence)> QueryUKS(string sourceIn, string relTypeIn, string targetIn,
             string filter, out List<Thing> thingResult, out List<Relationship> relationships)
     {
         thingResult = new();
         relationships = new();
         GetUKS();
-        if (theUKS == null) return;
+        if (theUKS == null) return null;
         string source = sourceIn.Trim();
         string relType = relTypeIn.Trim();
         string target = targetIn.Trim();
@@ -98,14 +98,14 @@ Follow has ONLY if called out in type
         {
             if (sourceList.Count > 0)
                 thingResult = sourceList[0].Children.ToList();
-            return;
+            return null;
         }
         if (relType.Contains("is-a") && !reverse ||
             relType.Contains("has-child") && reverse)
         {
             if (sourceList.Count > 0)
                 thingResult = sourceList[0].Ancestors.ToList();
-            return;
+            return null;
         }
 
         //check for target sequence
@@ -116,11 +116,13 @@ Follow has ONLY if called out in type
             foreach (Thing t in sourceList)
                 targets.Add(t);
             var results1 = theUKS.HasSequence(targets, null);
-            foreach (var result in results1)
+            Thing tDict = theUKS.Labeled("location");
+            if (tDict != null)
             {
-                relationships.Add(result.r);
+                var seq = tDict.Relationships.Where(x => x.RelType.Label == "spelled").ToList()[0].Target;
+                var testing = theUKS.FlattenSequence(seq);
             }
-            return;
+            return results1;
         }
 
         relationships = theUKS.GetAllRelationships(sourceList);
@@ -161,5 +163,6 @@ Follow has ONLY if called out in type
         //        if (relTypeIn == "") thingResult.Add(r.relType);
         //    }
         //}
+        return null;
     }
 }

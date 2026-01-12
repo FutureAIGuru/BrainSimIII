@@ -204,6 +204,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private void AddRelationships(Thing t, TreeViewItem tvi, string parentLabel)
     {
+        if (t.Label.StartsWith("cat-s"))
+            { }
         if (CountNonChildRelationships(t.Relationships) == 0)
         {
             //Possible IMPROVEMENT to be able to see other relationships of unlabeled relationships
@@ -708,12 +710,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         if ((Keyboard.GetKeyStates(Key.LeftCtrl) & KeyStates.Down | Keyboard.GetKeyStates(Key.RightCtrl) & KeyStates.Down) != 0)
         {
-            if (e.Delta > 0)
+            if (e.Delta < 0)
             {
-                if (theTreeView.FontSize > 1)
+                if (theTreeView.FontSize > 2)
                     theTreeView.FontSize -= 1;
             }
-            else if (e.Delta < 0)
+            else if (e.Delta > 0)
             {
                 theTreeView.FontSize += 1;
             }
