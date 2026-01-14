@@ -38,10 +38,7 @@ public partial class Thing
     private List<Relationship> relationships = new List<Relationship>(); //synapses to "has", "is", others
     private List<Relationship> relationshipsFrom = new List<Relationship>(); //synapses from
     private List<Relationship> relationshipsAsType = new List<Relationship>(); //nodes which use this as a relationshipType
-    /// <summary>
-    /// Only used by the tree control
-    /// </summary>
-//    public IList<Relationship> RelationshipsNoCount { get { lock (relationships) { return new List<Relationship>(relationships.AsReadOnly()); } } }
+
     /// <summary>
     /// Get an "unsafe" writeable list of a Thing's Relationships.
     /// This list may change while it is in use and so should not be used as a foreach iterator
@@ -278,6 +275,7 @@ public partial class Thing
             current = nextRel.Target;
         }
     }
+
     /// <summary>
     /// Determines whether a Thing has a specific ancestor
     /// </summary>
@@ -289,6 +287,7 @@ public partial class Thing
         if (t == null) return false;
         return HasAncestor(label);
     }
+
     /// <summary>
     /// Determines whether a Thing has a specific ancestor
     /// </summary>
@@ -308,6 +307,7 @@ public partial class Thing
     {
         return DescendentsList().Count;
     }
+
     /// <summary>
     /// Returns a list of all of a thing's descendandants.
     /// CAUTION: this may be large and time-consuming
@@ -456,6 +456,7 @@ public partial class Thing
         }
         return null;
     }
+
     /// <summary>
     /// Removes a relationship. 
     /// </summary>
@@ -494,15 +495,16 @@ public partial class Thing
                 {
                     lock (r.Target.RelationshipsFromWriteable)
                     {
-                        r.Source.RelationshipsWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
-                        r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
-                        r.Target.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
+                        r.Source.RelationshipsWriteable.Remove(r);
+                        r.RelType.RelationshipsFromWriteable.Remove(r);
+                        r.Target.RelationshipsFromWriteable.Remove(r);
+                        //r.Source.RelationshipsWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
+                        //r.RelType.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
+                        //r.Target.RelationshipsFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
                     }
                 }
             }
         }
-        //foreach (Clause c in r.Clauses)
-        //    RemoveRelationship(c.clause);
     }
 
     public Relationship HasRelationship(Thing source, Thing relType, Thing targett)
@@ -574,6 +576,7 @@ public partial class Thing
         }
         return retVal.OrderBy(x => -x.Weight).ToList();
     }
+
     /// <summary>
     /// Addsa a parent to a Thing
     /// </summary>
@@ -588,6 +591,7 @@ public partial class Thing
         }
         return Relationships.FindFirst(x => x.Target == newParent && x.RelType == IsA);
     }
+
     /// <summary>
     /// Remove a parent from a Thing
     /// </summary>

@@ -16,7 +16,7 @@ public partial class UKS
         if (string.IsNullOrWhiteSpace(root)) throw new ArgumentException("Start label is required.", nameof(root));
         Thing Root = theUKS.Labeled(root);
         if (Root == null) return;
-        HashSet<string> alreadyDon = new();
+        HashSet<string> alreadyWritten = new();
 
         using (var writer = new StreamWriter(path))
         {
@@ -25,23 +25,26 @@ public partial class UKS
             {
                 foreach (Relationship r in t.RecursiveRelationships)
                 {
-
+                    if (r.Label == "" && r.Relationships.Where(x => x?.RelType.Label != "is-a").Count() > 0)
+                        r.Label = "r*";
                     string s = r.ToString() + r.Weight.ToString("0.00");
-                    if (!alreadyDon.Contains(s))
+                    if (!alreadyWritten.Contains(s))
                     {
                         writer.WriteLine(s);
-                        alreadyDon.Add(s);
+                        alreadyWritten.Add(s);
                     }
 
                     //hack to follow sequences
                     foreach (Thing t1 in r.Target.SequenceNodes())
                         foreach (Relationship r1 in t1.Relationships.Where(x => x.RelType.Label != "is-a"))
                         {
+                            if (r1.Label == "" && r1.Relationships.Where(x => x?.RelType.Label != "is-a").Count() > 0)
+                                r1.Label = "r*";
                             s = r1.ToString() + r1.Weight.ToString("0.00");
-                            if (!alreadyDon.Contains(s))
+                            if (!alreadyWritten.Contains(s))
                             {
                                 writer.WriteLine(s);
-                                alreadyDon.Add(s);
+                                alreadyWritten.Add(s);
                             }
                         }
                 }
@@ -139,8 +142,8 @@ public partial class UKS
                 var stmtContent = TokenizeTopLevel(ss[0]);
                 var stmtContent1 = ParseBracketStmt(stmtContent[1], -1);
                 r1 = AddRelStmt(stmtContent[0], stmtContent1, stmtContent[2]);
-                if (string.IsNullOrEmpty(((Relationship)r1).Label))
-                    ((Relationship)r1).Label = "r*";
+                //if (string.IsNullOrEmpty(((Relationship)r1).Label))
+                //    ((Relationship)r1).Label = "r*";
                 r1 = ((Thing)r1).Label;
             }
             if (ss[2].Contains("->"))

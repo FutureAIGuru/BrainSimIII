@@ -67,7 +67,7 @@ public class ModuleUKSStatement : ModuleBase
             relationshipType = "is-a";
 
         //Figure out the source
-        var sourceParts = Singular(source.Split(" "));
+        var sourceParts = Singular(source.Split(" ", StringSplitOptions.RemoveEmptyEntries));
         Thing tSource = null;
         if (sourceParts.Length == 3)
             tSource = theUKS.AddStatement(sourceParts[0], sourceParts[1], sourceParts[2]);
@@ -80,7 +80,7 @@ public class ModuleUKSStatement : ModuleBase
 
 
         //Figure out the target
-        var targetParts = Singular(target.Split(" "));
+        var targetParts = Singular(target.Split(" ", StringSplitOptions.RemoveEmptyEntries));
         Thing tTarget = null;
 
         if (target.StartsWith("*"))

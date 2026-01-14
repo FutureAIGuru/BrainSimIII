@@ -148,6 +148,10 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (child.Relationships.Count > 0)
                 header = ChildHasReferences(UKS, child, header, depth);
 
+            if (showConditionals.IsChecked == true && r.RelType?.Label == "is-a") //hack to show conditions on is-a relationships
+                foreach (Relationship r1 in r.Relationships)
+                    header += "  " + r1.ToString();
+
             TreeViewItem tviChild = new() { Header = header };
 
             //change color of things which just fired or are about to expire
@@ -205,12 +209,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private void AddRelationships(Thing t, TreeViewItem tvi, string parentLabel)
     {
         if (t.Label.StartsWith("cat-s"))
-            { }
+        { }
         if (CountNonChildRelationships(t.Relationships) == 0)
         {
             //Possible IMPROVEMENT to be able to see other relationships of unlabeled relationships
             //if (t.Source is Relationship r)
-              //  AddRelationships(r, tvi, parentLabel);
+            //  AddRelationships(r, tvi, parentLabel);
             //if (t.Target is Relationship r1)
             //    AddRelationships(r1, tvi, parentLabel);
             if (t.Source == null && t.Target == null)
@@ -237,12 +241,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         foreach (Relationship r in sortedRelationships)
         {
             if (r.RelType?.Label == "is-a") continue;
-            if (showConditionals.IsChecked != true && ( r.HasProperty("isCondition") || r.HasProperty("isResult"))) continue; //hide conditionals
+            if (showConditionals.IsChecked != true && (r.HasProperty("isCondition") || r.HasProperty("isResult"))) continue; //hide conditionals
 
             TreeViewItem tviRel = new() { Header = GetRelationshipString(r), };
-            if (t.HasProperty("isCondition") || t.HasProperty("isResult")) 
+            if (t.HasProperty("isCondition") || t.HasProperty("isResult"))
                 tviRel.Header = "*" + tviRel.Header;
-            else if (r.HasProperty("isCondition") || r.HasProperty("isResult")) 
+            else if (r.HasProperty("isCondition") || r.HasProperty("isResult"))
                 tviRel.Header = "*" + tviRel.Header;
             if (r.Source != t) tviRel.Header = r.Source?.Label + "->" + tviRel.Header;
             //context menu
@@ -616,8 +620,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     private string GetRelationshipString(Relationship r)
     {
         string retVal = r.ToString();
-//        if (r.RelType is null || r.RelType.Label != "has-child")
-//            retVal = r.ToString() + " ";
+        //        if (r.RelType is null || r.RelType.Label != "has-child")
+        //            retVal = r.ToString() + " ";
         if (detailsCB.IsChecked == true)
             retVal = "<" + r.Weight.ToString("f2") + "," + (r.TimeToLive == TimeSpan.MaxValue ? "∞" : (r.LastFiredTime + r.TimeToLive - DateTime.Now).ToString(@"mm\:ss")) + "> " + retVal;
         return retVal;

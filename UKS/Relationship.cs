@@ -120,17 +120,6 @@ public class Relationship : Thing
         }
     }
 
-    //private int hits = 0;
-    //private int misses = 0;
-    ///// <summary>
-    ///// Used internally to calculate the Weight
-    ///// </summary>
-    //public int Hits { get => hits; set => hits = value; }
-    ///// <summary>
-    ///// Used internally to calculate the Weight
-    ///// </summary>
-    //public int Misses { get => misses; set => misses = value; }
-
 
     private TimeSpan timeToLive = TimeSpan.MaxValue;
     /// <summary>
@@ -146,8 +135,6 @@ public class Relationship : Thing
                 AddToTransientList();
         }
     }
-    //public bool GPTVerified = false;
-    //public bool isStatement = true;
 
     public Relationship()
     {
@@ -182,38 +169,6 @@ public class Relationship : Thing
         //else clausesFrom = new(r.clausesFrom);
     }
 
-    //public void ClearHits()
-    //{
-    //    Hits = 0;
-    //}
-    //public void ClearAccessCount()
-    //{
-    //    Misses = 0;
-    //}
-
-    //public int count
-    //{
-    //    get => -1;
-    //    set { }
-    //}
-    /// <summary>
-    /// Add a clusse to this Relationship
-    /// </summary>
-    /// <param name="clauseType"></param>
-    /// <param name="r2"></param>
-    /// <returns></returns>
-    //public Relationship AddClause(Thing clauseType, Relationship r2)
-    //{
-    //    Clause theClause = new(clauseType,r2);
-
-    //    if (Clauses.FindFirst(x => x.clauseType == theClause.clauseType && x.clause == r2) == null)
-    //    {
-    //        Clauses.Add(theClause);
-    //        r2.clausesFrom.Add(this);
-    //    }
-
-    //    return this;
-    //}
 
     public string ToString(List<Relationship> stack)
     {
@@ -279,7 +234,7 @@ public class Relationship : Thing
             if (a.Target == Target &&
                 a.Source == Source &&
                 a.RelType == RelType &&
-                a.Relationships.Count == Relationships.Count)
+                a.Relationships.SequenceEqual(Relationships))
                 return true;
         }
         return false;

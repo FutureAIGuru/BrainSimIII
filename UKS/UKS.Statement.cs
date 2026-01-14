@@ -50,12 +50,14 @@ public partial class UKS
 
         //does this relationship already exist (without conditions)?
         Relationship existing = GetRelationship(r);
-        if (existing != null && existing.Relationships.Count == 0)
+        if (existing != null && existing.Equals(r))
         {
             WeakenConflictingRelationships(source, existing);
             existing.Fire();
             return existing;
         }
+        else if (existing != null && existing.Label == "")
+            existing.Label = "r*";
 
         WeakenConflictingRelationships(source, r);
 
@@ -133,19 +135,12 @@ public partial class UKS
                     Thing after = GetOrAddThing("AFTER", "ClauseType");
                     AddClause(newRelationship, "AFTER", existingRelationship);
                     existingRelationship.Source.RemoveRelationship(existingRelationship);
-                    //newRelationship.AddClause(after, existingRelationship);
-                    //                    newSource.RemoveRelationship(existingRelationship);
-                    //                    i--;
                 }
                 else if (existingRelationship.RelType.Children.Contains(newRelationship.RelType) && HasAttribute(newRelationship.RelType, "not"))
                 {
                     Thing after = GetOrAddThing("AFTER", "ClauseType");
                     AddClause(newRelationship, "AFTER", existingRelationship);
                     existingRelationship.Source.RemoveRelationship(existingRelationship);
-
-                    //newRelationship.AddClause(after, existingRelationship);
-                    //                    newSource.RemoveRelationship(existingRelationship);
-                    //                    i--;
                 }
                 else
                 {
