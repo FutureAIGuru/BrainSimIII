@@ -17,40 +17,53 @@ public partial class UKS
         Thing Root = theUKS.Labeled(root);
         if (Root == null) return;
         HashSet<string> alreadyWritten = new();
-
-        using (var writer = new StreamWriter(path))
+        try
         {
-            if (writer is null) throw new ArgumentNullException(nameof(writer));
-            foreach (Thing t in Root.Descendants)
+            using (var writer = new StreamWriter(path))
             {
-                foreach (Relationship r in t.RecursiveRelationships)
+                if (writer is null) throw new ArgumentNullException(nameof(writer));
+                foreach (Thing t in Root.Descendants)
                 {
-                    if (r.Label == "" && r.Relationships.Where(x => x?.RelType.Label != "is-a").Count() > 0)
-                        r.Label = "r*";
-                    string s = r.ToString() + r.Weight.ToString("0.00");
-                    if (!alreadyWritten.Contains(s))
+                    foreach (Relationship r in t.RecursiveRelationships)
                     {
-                        writer.WriteLine(s);
-                        alreadyWritten.Add(s);
-                    }
-
-                    //hack to follow sequences
-                    foreach (Thing t1 in r.Target.SequenceNodes())
-                        foreach (Relationship r1 in t1.Relationships.Where(x => x.RelType.Label != "is-a"))
+                        string s = r.SingleToString() + r.Weight.ToString("0.00");
+                        if (!alreadyWritten.Contains(s))
                         {
-                            if (r1.Label == "" && r1.Relationships.Where(x => x?.RelType.Label != "is-a").Count() > 0)
-                                r1.Label = "r*";
-                            s = r1.ToString() + r1.Weight.ToString("0.00");
-                            if (!alreadyWritten.Contains(s))
+                            writer.WriteLine(s);
+                            alreadyWritten.Add(s);
+                        }
+
+                        //hack to follow sequences
+                        if (r?.RelType?.Label == "is-a") continue;
+
+                        foreach (Thing t1 in r.Target.SequenceNodes())
+                        {
+                            if (t1 is Relationship r1)
                             {
-                                writer.WriteLine(s);
-                                alreadyWritten.Add(s);
+                                s = r1.SingleToString() + r1.Weight.ToString("0.00");
+                                if (!alreadyWritten.Contains(s))
+                                {
+                                    writer.WriteLine(s);
+                                    alreadyWritten.Add(s);
+                                }
+                            }
+                            foreach (Relationship r2 in t1.Relationships.Where(x => x.RelType.Label != "is-a"))
+                            {
+                                s = r2.SingleToString() + r2.Weight.ToString("0.00");
+                                if (!alreadyWritten.Contains(s))
+                                {
+                                    writer.WriteLine(s);
+                                    alreadyWritten.Add(s);
+                                }
                             }
                         }
+                    }
                 }
+                writer.Flush();
             }
-            writer.Flush();
         }
+        catch(Exception ex)
+        { }
     }
 
 

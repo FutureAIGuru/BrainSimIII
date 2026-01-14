@@ -110,7 +110,7 @@ public class ModuleUKSStatement : ModuleBase
         //Create the relationship
         Relationship r = theUKS.AddStatement(tSource, tRelType, tTarget);
 
-        if (tRelType.Label == "IF")
+        if (tRelType.Label == "IF")  //this is a HACK which must be fixed later
         {
             tSource.AddRelationship("isResult", "hasProperty");
             tTarget.AddRelationship("isCondition", "hasProperty");

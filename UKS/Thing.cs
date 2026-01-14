@@ -266,13 +266,14 @@ public partial class Thing
         {
             yield return current;  // Return this node, pause, wait for next request
 
-            var nextRel = current.Relationships.FirstOrDefault(r => r.RelType?.Label == "NXT");
+            Thing nextRel = null;
+            if (current.RelType?.Label == "NXT") nextRel = current.Target;
 
             if (nextRel == null) yield break;  // No more nodes, stop iteration
 
             if (nextRel.Target == this) yield break;  // Reached source, sequence complete
 
-            current = nextRel.Target;
+            current = nextRel;
         }
     }
 

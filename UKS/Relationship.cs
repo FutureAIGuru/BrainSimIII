@@ -163,10 +163,6 @@ public class Relationship : Thing
         Source = r.Source;
         Target = r.Target;
         Weight = r.Weight;
-        //if (r.Clauses == null) Clauses = new();
-        //else Clauses = new(r.Clauses);
-        //if (r.clausesFrom == null) clausesFrom = new();
-        //else clausesFrom = new(r.clausesFrom);
     }
 
 
@@ -177,7 +173,7 @@ public class Relationship : Thing
         stack.Add(this);
         string retVal = "";
 
-        retVal = BasicRelationshipToString(retVal);
+        retVal = RecursiveToString(retVal);
         return retVal;
     }
 
@@ -186,18 +182,37 @@ public class Relationship : Thing
         string retVal = this.ToString(new List<Relationship>());
         return retVal;
     }
+    public string SingleToString()
+    {
+        string retVal = Label;
+        retVal += "[";
+        if (!string.IsNullOrEmpty(Source?.ToString()))
+        {
+            retVal += Source?.Label;
+        }
+        if (!string.IsNullOrEmpty(RelType?.ToString()))
+            retVal += ((retVal == "") ? "" : "->") + RelType?.ToString();
+        if (!string.IsNullOrEmpty(Target?.ToString()))
+        {
+            retVal += ((retVal == "") ? "" : "->");
+            retVal += Target?.Label;
+        }
+        retVal += "]";
+        return retVal;
+    }
 
-    private string BasicRelationshipToString(string retVal)
+
+    private string RecursiveToString(string retVal)
     {
         //for convience show any value in singls quotes
         bool showBrackets = true;
-        //var value = this.Relationships.FindFirst(x => x.RelType.Label == "VLU")?.Target;
-        //if (value != null)
-        //{
-        //    retVal += "'" + value.ToString() + "'";
-        //    showBrackets = false;
-        //}
-        //else
+        var value = this.Relationships.FindFirst(x => x.RelType.Label == "VLU")?.Target;
+        if (value != null)
+        {
+            retVal += "'" + value.ToString() + "'";
+            showBrackets = false;
+        }
+        else
             retVal += Label;
         if (showBrackets) retVal += "[";
         if (Source != this && !string.IsNullOrEmpty(Source?.ToString()))
