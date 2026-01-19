@@ -26,7 +26,7 @@ public partial class UKS
                 {
                     foreach (Relationship r in t.RecursiveRelationships)
                     {
-                        string s = r.SingleToString() + r.Weight.ToString("0.00");
+                        string s = r.ToString() + r.Weight.ToString("0.00");
                         if (!alreadyWritten.Contains(s))
                         {
                             writer.WriteLine(s);
@@ -34,11 +34,11 @@ public partial class UKS
                         }
 
                         //hack to follow sequences
-                        if (r?.RelType?.Label == "is-a") continue;
+                        //if (r?.RelType?.Label == "is-a") continue;
 
                         foreach (Thing t1 in r.Target.SequenceNodes())
                         {
-                            if (t1 is Relationship r1)
+                            if (t1 is Relationship r1 && r1.RelType != null)
                             {
                                 s = r1.SingleToString() + r1.Weight.ToString("0.00");
                                 if (!alreadyWritten.Contains(s))
@@ -141,11 +141,7 @@ public partial class UKS
     private Relationship AddRelStmt(string label, List<string> ss, string sWeight)
     {
         Relationship r = null;
-        if (label != "")
-            r = (Relationship)Labeled(label);
-        if (r == null)
-        {
-        }
+        if (ss.Count < 3) return null;
         if (r == null)
         {
             object r1 = ss[0];
@@ -155,8 +151,6 @@ public partial class UKS
                 var stmtContent = TokenizeTopLevel(ss[0]);
                 var stmtContent1 = ParseBracketStmt(stmtContent[1], -1);
                 r1 = AddRelStmt(stmtContent[0], stmtContent1, stmtContent[2]);
-                //if (string.IsNullOrEmpty(((Relationship)r1).Label))
-                //    ((Relationship)r1).Label = "r*";
                 r1 = ((Thing)r1).Label;
             }
             if (ss[2].Contains("->"))

@@ -40,6 +40,7 @@ public partial class UKS
             prevElement.Target = newNode;
             prevElement = newNode;
         }
+        prevElement.RelType = (Thing)"NXT";
         return retVal;
     }
 

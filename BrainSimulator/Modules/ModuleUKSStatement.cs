@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Runtime.Intrinsics.Arm;
 using System.Windows.Documents;
 using UKS;
+using static BrainSimulator.Modules.ModuleOnlineInfo;
 
 namespace BrainSimulator.Modules;
 
@@ -95,7 +96,7 @@ public class ModuleUKSStatement : ModuleBase
             Relationship r1 = theUKS.AddSequence(tSource, tRelType, targets);
             return r1;
         }
-
+ 
         if (targetParts.Length == 3)
             tTarget = theUKS.AddStatement(targetParts[0], targetParts[1], targetParts[2]);
         if (tTarget == null)
@@ -149,3 +150,4 @@ public class ModuleUKSStatement : ModuleBase
         return retVal;
     }
 }
+

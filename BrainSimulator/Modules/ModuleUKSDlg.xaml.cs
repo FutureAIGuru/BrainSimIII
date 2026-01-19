@@ -920,7 +920,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             ModuleUKS parent = (ModuleUKS)base.ParentModule;
             //get the root to save the contents of from the UKS dialog root
             string root = parent.GetSavedDlgAttribute("Root");
-            await Task.Run(() => parent.theUKS.ExportTextFile(root, path));
+            await Task.Run(() =>    parent.theUKS.ExportTextFile(root, path));
             SetStatus("Success");
         }
         catch (Exception ex)

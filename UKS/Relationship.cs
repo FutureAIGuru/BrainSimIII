@@ -38,46 +38,6 @@ public static class IListExtensions
     }
 }
 
-/// <summary>
-/// In the same way a Relationship relates 2 Things (the "source" and the "target") with a relationship type, a Clause relates two Relationsips 
-/// with a clauseType. Every Relationship has a list of clauses with the Relationship representing source and the Clause containing its type and target.
-/// </summary>
-//public class Clause
-//{
-//    /// <summary>
-//    /// The type of dependency between two clauses
-//    /// </summary>
-//    public Thing clauseType;
-//    /// <summary>
-//    /// The target Relationship. The "Source" is the owner of the list of clauses
-//    /// </summary>
-//    public Relationship clause;
-//    public Clause(Thing theType, Relationship clause1)
-//    {
-//        clauseType = theType;
-//        clause = clause1;
-//    }
-//};
-
-///// <summary>
-///// This is used internally during query processing
-///// </summary>
-
-//public class QueryRelationship : Relationship
-//{
-//    public List<Thing> typeProperties = new();
-//    public List<Thing> sourceProperties = new();
-//    public List<Thing> targetProperties = new();
-//    public QueryRelationship() { }
-//    public QueryRelationship(Relationship r)
-//    {
-//        source = r.source;
-//        reltype = r.reltype;
-//        target = r.target;
-//        foreach (Clause c in r.Clauses)
-//            Clauses.Add(c);
-//    }
-//}
 
 /// <summary>
 /// In the lexicon of graphs, a Relationship is an "edge".
@@ -87,17 +47,6 @@ public static class IListExtensions
 /// </summary>
 public class Relationship : Thing
 {
-
-    //private List<Clause> clauses = new();
-    /// <summary>
-    /// List of Clauses for which this is the Source Relationship
-    /// </summary>
-    //public List<Clause> Clauses { get => clauses; set => clauses = value; }
-    /// <summary>
-    /// The list of Clauses for which this is the Target Relationship
-    /// </summary>
-    //public List<Relationship> clausesFrom = new();
-
     private float _weight = 1;
     public float Weight
     {
