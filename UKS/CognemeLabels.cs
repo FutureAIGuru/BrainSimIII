@@ -9,25 +9,25 @@ using System.Collections.Concurrent;
 
 namespace UKS;
 
-public class ThingLabels
+public class CognemeLabels
 {
-    static ConcurrentDictionary<string, Thing> labelList = new ConcurrentDictionary<string, Thing>();
+    static ConcurrentDictionary<string, Cogneme> labelList = new ConcurrentDictionary<string, Cogneme>();
 
-    public static ConcurrentDictionary<string, Thing> LabelList { get => labelList;}
+    public static ConcurrentDictionary<string, Cogneme> LabelList { get => labelList;}
 
-    public static Thing GetThing(string label)
+    public static Cogneme GetThing(string label)
     {
-        if (label == null || label == "") return null;
-        Thing retVal = null;
+        if (label is null || label == "") return null;
+        Cogneme retVal = null;
         if (labelList.TryGetValue(label.ToLower(), out retVal)) 
         { }  //breakpoint?
         return retVal;
     }
-    public static string AddThingLabel(string newLabel, Thing t)
+    public static string AddThingLabel(string newLabel, Cogneme t)
     {
         //sets a label and appends/increments trailing digits in the event of collisions
         if (newLabel == "") return newLabel; //don't index empty lables
-        labelList.TryRemove(t.Label.ToLower(), out Thing dummy);
+        labelList.TryRemove(t.Label.ToLower(), out Cogneme dummy);
         int curDigits = -1;
         string baseString = newLabel;
         //This code allows you to put a * at the end of a label and it will auto-increment
@@ -50,16 +50,16 @@ public class ThingLabels
     {
         labelList.Clear();
     }
-    public static List<Thing> AllThingsInLabelList()
+    public static List<Cogneme> AllThingsInLabelList()
     {
-        List<Thing> retVal = new();
-        foreach (Thing thing in labelList.Values) { retVal.Add(thing); }
+        List<Cogneme> retVal = new();
+        foreach (Cogneme thing in labelList.Values) { retVal.Add(thing); }
         return retVal;
     }
     public static void RemoveThingLabel(string existingLabel)
     {
         if (existingLabel == "") return;
-        labelList.Remove(existingLabel.ToLower(), out Thing oldThing);
+        labelList.Remove(existingLabel.ToLower(), out Cogneme oldThing);
     }
 
 }

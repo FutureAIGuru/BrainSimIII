@@ -82,7 +82,7 @@ namespace BrainSimulator.Modules
                         using (StreamReader reader = new StreamReader(filePath))
                         {
                             string line;
-                            while ((line = reader.ReadLine()) != null)
+                            while ((line = reader.ReadLine()) is not null)
                             {
                                 // Break if we are over word max (set to 50 by default) for testing.
                                 if (words.Count >= wordMax)
@@ -147,7 +147,7 @@ namespace BrainSimulator.Modules
                         using (StreamReader reader = new StreamReader(filePath))
                         {
                             string line;
-                            while ((line = reader.ReadLine()) != null)
+                            while ((line = reader.ReadLine()) is not null)
                             {
                                 // Break if we are over word max (set to 50 by default) for testing.
                                 if (words.Count >= wordMax)
@@ -255,9 +255,9 @@ namespace BrainSimulator.Modules
             count = 0;
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
             SetOutputText("Verifying all is-a relationships");
-            foreach (Thing t in mf.theUKS.AllThings)
+            foreach (Cogneme t in mf.theUKS.AllThings)
             {
-                if (t.Parents.FindFirst(x => x.Label == "unknownObject") != null) continue;
+                if (t.Parents.FindFirst(x => x.Label == "unknownObject") is not null) continue;
                 if (!t.Label.StartsWith('.')) continue;
                 if (t.Label == ".") continue;
                 if (t == mf.theUKS.AllThings.Last())
@@ -272,9 +272,9 @@ namespace BrainSimulator.Modules
         {
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
             if (!label.StartsWith(".")) label = "." + label;
-            UKS.Thing t = mf.theUKS.Labeled(label);
-            if (t == null) return;
-            foreach (Relationship r in t.Relationships)
+            UKS.Cogneme t = mf.theUKS.Labeled(label);
+            if (t is null) return;
+            foreach (Cogneme r in t.Relationships)
             {
                 //if (r.GPTVerified) continue;
                 if (r.RelType.Label != "has-child") continue;

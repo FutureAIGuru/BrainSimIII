@@ -17,7 +17,7 @@ namespace BrainSimulator
         public void CreateContextMenu(ModuleBase nr, FrameworkElement r, ContextMenu cm = null) //for a selection
         {
             cmCancelled = false;
-            if (cm == null)
+            if (cm is null)
                 cm = new ContextMenu();
             cm.SetValue(moduleNameProperty, nr.Label);
 
@@ -59,16 +59,16 @@ namespace BrainSimulator
             ModuleBase m = activeModules.FindFirst(x => x.Label == nr.Label);
             int i = activeModules.IndexOf(m);
 
-            if (activeModules[i] != null)
+            if (activeModules[i] is not null)
             {
                 var t = activeModules[i].GetType();
                 Type t1 = Type.GetType(t.ToString() + "Dlg");
-                while (t1 == null && t.BaseType.Name != "ModuleBase")
+                while (t1 is null && t.BaseType.Name != "ModuleBase")
                 {
                     t = t.BaseType;
                     t1 = Type.GetType(t.ToString() + "Dlg");
                 }
-                if (t1 != null)
+                if (t1 is not null)
                 {
                     cm.Items.Add(new MenuItem { Header = "Show Dialog" });
                     ((MenuItem)cm.Items[cm.Items.Count - 1]).Click += Mi_Click;
@@ -164,7 +164,7 @@ namespace BrainSimulator
                 if (cc is TextBox tb2)
                     int.TryParse(tb2.Text, out height);
                 cc = Utils.FindByName(cm, "AreaType");
-                if (cc is ComboBox cb && cb.SelectedValue != null)
+                if (cc is ComboBox cb && cb.SelectedValue is not null)
                 {
                     theModuleTypeStr = "Module" + (string)cb.SelectedValue;
                     if (theModuleTypeStr == "") return;//something went wrong
@@ -183,7 +183,7 @@ namespace BrainSimulator
 
                 //did we change the module type?
                 Type t1x = Type.GetType("BrainSimulator.Modules." + theModuleTypeStr);
-                if (t1x != null && (activeModules[i] == null || activeModules[i].GetType() != t1x))
+                if (t1x is not null && (activeModules[i] is null || activeModules[i].GetType() != t1x))
                 {
                     activeModules[i] = (ModuleBase)Activator.CreateInstance(t1x);
                     activeModules[i].Label = theModuleTypeStr;

@@ -128,8 +128,8 @@ namespace BrainSimulator.Modules
 
                 //get the root to save the contents of from the UKS dialog root
                 string root = "Object";
-                Thing uksDlg = parent.theUKS.Labeled("ModuleUKS0");
-                if (uksDlg != null) 
+                Cogneme uksDlg = parent.theUKS.Labeled("ModuleUKS0");
+                if (uksDlg is not null) 
                 foreach (var r in uksDlg.Relationships)
                 {
                     if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith("Root"))

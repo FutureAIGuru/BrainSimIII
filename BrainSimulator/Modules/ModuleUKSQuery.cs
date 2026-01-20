@@ -62,13 +62,13 @@ Follow has ONLY if called out in type
 
      */
 
-    public List<(Relationship r, float confidence)> QueryUKS(string sourceIn, string relTypeIn, string targetIn,
-            string filter, out List<Thing> thingResult, out List<Relationship> relationships)
+    public List<(Cogneme r, float confidence)> QueryUKS(string sourceIn, string relTypeIn, string targetIn,
+            string filter, out List<Cogneme> thingResult, out List<Cogneme> relationships)
     {
         thingResult = new();
         relationships = new();
         GetUKS();
-        if (theUKS == null) return null;
+        if (theUKS is null) return null;
         string source = sourceIn.Trim();
         string relType = relTypeIn.Trim();
         string target = targetIn.Trim();
@@ -86,10 +86,10 @@ Follow has ONLY if called out in type
             reverse = true;
         }
 
-        List<Thing> sourceList = ModuleUKSStatement.ThingListFromString(source);
+        List<Cogneme> sourceList = ModuleUKSStatement.ThingListFromString(source);
         //if (sourceList.Count == 0) return;
-        List<Thing> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
-        List<Thing> targetList = ModuleUKSStatement.ThingListFromString(target);
+        List<Cogneme> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
+        List<Cogneme> targetList = ModuleUKSStatement.ThingListFromString(target);
 
 
         //Handle is-a queries as a special case
@@ -112,12 +112,12 @@ Follow has ONLY if called out in type
         if (sourceList.Count > 1)
         {
             float confidence = 0.0f;
-            List<Thing> targets = new();
-            foreach (Thing t in sourceList)
+            List<Cogneme> targets = new();
+            foreach (Cogneme t in sourceList)
                 targets.Add(t);
             var results1 = theUKS.HasSequence(targets, null);
-            Thing tDict = theUKS.Labeled("location");
-            if (tDict != null)
+            Cogneme tDict = theUKS.Labeled("location");
+            if (tDict is not null)
             {
                 var seq = tDict.Relationships.Where(x => x.RelType.Label == "spelled").ToList()[0].Target;
                 var testing = theUKS.FlattenSequence(seq);
@@ -141,22 +141,22 @@ Follow has ONLY if called out in type
         //filter the relationships
         for (int i = 0; i < relationships.Count; i++)
         {
-            Relationship r = relationships[i];
+            Cogneme r = relationships[i];
             if (targetList.Count > 0 && target != "" && !r.Target.HasAncestor(targetList[0]))
             { relationships.RemoveAt(i); i--; continue; }
-            if (r.RelType != null && relType != "" && !r.RelType.HasAncestorLabeled(relType))
+            if (r.RelType is not null && relType != "" && !r.RelType.HasAncestorLabeled(relType))
             { relationships.RemoveAt(i); i--; continue; }
         }
 
         if (filter != "")
         {
-            List<Thing> filterThings = ModuleUKSStatement.ThingListFromString(filter);
+            List<Cogneme> filterThings = ModuleUKSStatement.ThingListFromString(filter);
             relationships = theUKS.FilterResults(relationships, filterThings).ToList();
         }
 
         //if (paramCount == 2)
         //{
-        //    foreach (Relationship r in relationships)
+        //    foreach (Thing r in relationships)
         //    {
         //        if (sourceIn == "") thingResult.Add(r.source);
         //        if (targetIn == "") thingResult.Add(r.target);

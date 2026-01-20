@@ -82,7 +82,7 @@ namespace BrainSimulator.Modules
 
             UpdateDialog();
 
-            if (dlg == null && dlgIsOpen)
+            if (dlg is null && dlgIsOpen)
             {
                 ShowDialog();
                 dlgIsOpen = true;
@@ -95,7 +95,7 @@ namespace BrainSimulator.Modules
         }
         public void CloseDlg()
         {
-            if (dlg != null)
+            if (dlg is not null)
             {
                 Application.Current.Dispatcher.Invoke((Action)delegate
                 {
@@ -109,7 +109,7 @@ namespace BrainSimulator.Modules
         {
             if (GetSavedDlgAttribute("Open") != "True") return;
             string infoString = GetDlgWindow();
-            if ( infoString != null)
+            if ( infoString is not null)
             {
                 if (string.IsNullOrEmpty(infoString)) return;
                 string[] info = infoString.Split('+', 'x');
@@ -126,21 +126,21 @@ namespace BrainSimulator.Modules
             if (aps != ApartmentState.STA) return;
             Type t = this.GetType();
             Type t1 = Type.GetType(t.ToString() + "Dlg");
-            while (t1 == null && t.BaseType.Name != "ModuleBase")
+            while (t1 is null && t.BaseType.Name != "ModuleBase")
             {
                 t = t.BaseType;
                 t1 = Type.GetType(t.ToString() + "Dlg");
             }
-            if (t1 == null) return;
-            //if (dlg != null) dlg.Close();
-            if (!allowMultipleDialogs && dlg != null) dlg.Close();
-            if (allowMultipleDialogs && dlg != null)
+            if (t1 is null) return;
+            //if (dlg is not null) dlg.Close();
+            if (!allowMultipleDialogs && dlg is not null) dlg.Close();
+            if (allowMultipleDialogs && dlg is not null)
             {
                 dlgPos.X += 10;
                 dlgPos.Y += 10;
             }
             dlg = (ModuleBaseDlg)Activator.CreateInstance(t1);
-            if (dlg == null) return;
+            if (dlg is null) return;
             dlg.ParentModule = (ModuleBase)this;
             dlg.Closed += Dlg_Closed;
             dlg.Closing += Dlg_Closing;
@@ -189,8 +189,8 @@ namespace BrainSimulator.Modules
 
         public  string GetSavedDlgAttribute(string attribName)
         {
-            Thing thisDlg = theUKS.Labeled(Label);
-            if (thisDlg == null) return null;   
+            Cogneme thisDlg = theUKS.Labeled(Label);
+            if (thisDlg is null) return null;   
             foreach (var r in thisDlg.Relationships)
             {
                 if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith(attribName))
@@ -204,13 +204,13 @@ namespace BrainSimulator.Modules
         public void SetSavedDlgAttribute(string attribName, string attribValue)
         {
             if (string.IsNullOrEmpty(attribName)) { return; }
-            Thing thisDlg = theUKS.Labeled(Label);
-            if (thisDlg == null) { return; }
+            Cogneme thisDlg = theUKS.Labeled(Label);
+            if (thisDlg is null) { return; }
             foreach (var r in thisDlg.Relationships)
             {
                 if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith(attribName))
                 {
-                    if (attribValue == null)
+                    if (attribValue is null)
                     {
                         theUKS.DeleteThing(r.Target);
                         return;
@@ -219,10 +219,10 @@ namespace BrainSimulator.Modules
                     return;
                 }
             }
-            if (attribName == null) return;
-            Thing dlgAttribParent = theUKS.GetOrAddThing("DlgAttrib", "BrainSim");
-            Thing dlgInfo = theUKS.AddThing(attribName, dlgAttribParent);
-            Thing hasAttribute = theUKS.GetOrAddThing("hasAttribute", "RelationshipType");
+            if (attribName is null) return;
+            Cogneme dlgAttribParent = theUKS.GetOrAddThing("DlgAttrib", "BrainSim");
+            Cogneme dlgInfo = theUKS.AddThing(attribName, dlgAttribParent);
+            Cogneme hasAttribute = theUKS.GetOrAddThing("hasAttribute", "RelationshipType");
             thisDlg.AddRelationship(dlgInfo,hasAttribute);
             dlgInfo.V = attribValue;
             dlgInfo.Fire();
@@ -234,7 +234,7 @@ namespace BrainSimulator.Modules
         void SetDlgWindow()
         {
             string infoString = "";
-            if (dlg != null)
+            if (dlg is not null)
                 infoString = dlg.Width + "x" + dlg.Height + "+" + dlg.Left + "+" + dlg.Top;
             SetSavedDlgAttribute("DlgWindow", infoString);
 
@@ -255,7 +255,7 @@ namespace BrainSimulator.Modules
 
         private void Dlg_Closed(object sender, EventArgs e)
         {
-            if (dlg == null)
+            if (dlg is null)
                 dlgIsOpen = false;
             SetSavedDlgAttribute("Open", "True");
         }
@@ -275,7 +275,7 @@ namespace BrainSimulator.Modules
             if (ts < DialogLockSpan)
             {
                 //if we're not drawing this time, start a timer which will do a final draw
-                if (timer == null)
+                if (timer is null)
                 {
                     timer = new DispatcherTimer();
                     timer.Interval = new TimeSpan(0, 0, 0, 0, 100);
@@ -286,9 +286,9 @@ namespace BrainSimulator.Modules
                 return;
             }
             dt = DateTime.Now;
-            if (timer != null) timer.Stop();
+            if (timer is not null) timer.Stop();
 
-            if (dlg != null)
+            if (dlg is not null)
                 Application.Current.Dispatcher.InvokeAsync(new Action(() =>
                 {
                     dlg?.Draw(true);
@@ -297,8 +297,8 @@ namespace BrainSimulator.Modules
         public void Timer_Tick(object sender, EventArgs e)
         {
             timer.Stop();
-            if (Application.Current == null) return;
-            if (dlg != null)
+            if (Application.Current is null) return;
+            if (dlg is not null)
                 dlg.Draw(true);
         }
 

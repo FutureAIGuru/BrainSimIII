@@ -63,7 +63,7 @@ namespace BrainSimulator
         public ModuleBase CreateNewModule(string moduleTypeLabel, string moduleLabel = "")
         {
             Type t = Type.GetType("BrainSimulator.Modules." + moduleTypeLabel);
-            if (t == null) 
+            if (t is null) 
                 return null;
             ModuleBase theModule = (Modules.ModuleBase)Activator.CreateInstance(t);
 
@@ -84,7 +84,7 @@ namespace BrainSimulator
         {
             if (sender is ComboBox cb)
             {
-                if (cb.SelectedItem != null)
+                if (cb.SelectedItem is not null)
                 {
 
 //                    string moduleName = ((Label)cb.SelectedItem).Content.ToString();

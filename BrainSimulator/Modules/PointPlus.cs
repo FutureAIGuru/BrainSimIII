@@ -159,7 +159,7 @@ namespace BrainSimulator.Modules
         }
         public override bool Equals(object p1)
         {
-            if (p1 != null && p1 is PointPlus p2)
+            if (p1 is not null && p1 is PointPlus p2)
             {
                 return (p2.P.X == P.X && p2.P.Y == P.Y);
 
@@ -233,7 +233,7 @@ namespace BrainSimulator.Modules
             double max_Y = ysize / 2.0;
             Phi = -y / max_Y * maxPhi;
 
-            if (currentPosition == null)
+            if (currentPosition is null)
             {
                 //                      real height (mm) * image height (pixels) 
                 // distance estimate = -------------------------------------------
@@ -326,7 +326,7 @@ namespace BrainSimulator.Modules
 
         public bool NearBy(Point3DPlus otherPoint, double maxDistance)
         {
-            if (otherPoint == null) return false;
+            if (otherPoint is null) return false;
             double deltaX = Math.Abs((double)X - (double)otherPoint.X);
             double deltaY = Math.Abs((double)Y - (double)otherPoint.Y);
             double deltaZ = Math.Abs((double)Z - (double)otherPoint.Z);
@@ -402,7 +402,7 @@ namespace BrainSimulator.Modules
         }
         public override bool Equals(object p1)
         {
-            if (p1 != null && p1 is Point3DPlus p2)
+            if (p1 is not null && p1 is Point3DPlus p2)
             {
                 return (p2.P.X == P.X && p2.P.Y == P.Y && p2.P.Z == P.Z);
             }
@@ -536,7 +536,7 @@ namespace BrainSimulator.Modules
         private float theAngle = 0;
         public Angle() { this.theAngle = 0; }  // Don't remove, needed to save Angles to XML!
         public Angle(float angle) { this.theAngle = angle; }
-        public static implicit operator float(Angle a) => (a != null) ? a.theAngle : 0;
+        public static implicit operator float(Angle a) => (a is not null) ? a.theAngle : 0;
         public static implicit operator Angle(float a) => new Angle(a);
         public static implicit operator Angle(double a) => new Angle((float)a);
         public static Angle operator -(Angle a, Angle b)

@@ -80,13 +80,13 @@ namespace BrainSimulator.Modules
 
             for (int i = 0; i < maxOuter; i++)
             {
-                Thing parent = MainWindow.theUKS.GetOrAddThing("A" + i.ToString());
+                Cogneme parent = MainWindow.theUKS.GetOrAddThing("A" + i.ToString());
                 for (int j = 0; j < 100; j++)
                 {
-                    Thing parent0 = MainWindow.theUKS.GetOrAddThing("B" + i.ToString() + j.ToString(), parent);
+                    Cogneme parent0 = MainWindow.theUKS.GetOrAddThing("B" + i.ToString() + j.ToString(), parent);
                     for (int k = 0; k < 10; k++)
                     {
-                        Thing parent1 = MainWindow.theUKS.GetOrAddThing("C" + i.ToString() + j.ToString() + k.ToString(), parent0);
+                        Cogneme parent1 = MainWindow.theUKS.GetOrAddThing("C" + i.ToString() + j.ToString() + k.ToString(), parent0);
                     }
 
                 }

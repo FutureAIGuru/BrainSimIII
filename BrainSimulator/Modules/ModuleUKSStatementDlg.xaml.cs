@@ -43,13 +43,13 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         {
             if (relationType.ToLower().Contains("called"))
             {
-                Thing mostRecent = UKSStatement.theUKS.Labeled("mostRecent");
-                if (mostRecent == null)
+                Cogneme mostRecent = UKSStatement.theUKS.Labeled("mostRecent");
+                if (mostRecent is null)
                 {
                     SetStatus("'This' is not defined at this time");
                     return;
                 }
-                Thing mostRecentTarget = mostRecent.Relationships.FindFirst(x => x.RelType.Label == "is").Target;
+                Cogneme mostRecentTarget = mostRecent.Relationships.FindFirst(x => x.RelType.Label == "is").Target;
                 mostRecentTarget.Label = targetThing;
             }
             return;
@@ -70,8 +70,8 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         }
         float confidence = (float)confidenceSlider.Value;
 
-        Relationship r1 = UKSStatement.AddRelationship(newThing, targetThing, relationType);
-        if (r1 != null && setConfCB.IsChecked == true)
+        Cogneme r1 = UKSStatement.AddRelationship(newThing, targetThing, relationType);
+        if (r1 is not null && setConfCB.IsChecked == true)
         {
             r1.Weight = confidence;
             r1.TimeToLive = duration;
@@ -95,8 +95,8 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
                 SetStatus("Source and type cannot be empty");
                 return false;
             }
-            List<Thing> tl = ModuleUKSStatement.ThingListFromString(text);
-            if (tl == null || tl.Count == 0)
+            List<Cogneme> tl = ModuleUKSStatement.ThingListFromString(text);
+            if (tl is null || tl.Count == 0)
             {
                 tb.Background = new SolidColorBrush(Colors.LemonChiffon);
                 SetStatus("OK");

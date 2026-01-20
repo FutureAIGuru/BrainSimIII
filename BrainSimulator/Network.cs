@@ -25,7 +25,7 @@ namespace BrainSimulator
         public static UdpClient UDPBroadcast {
             get
             {
-                if (_UDPBroadcast == null || _UDPBroadcast.Client == null )
+                if (_UDPBroadcast is null || _UDPBroadcast.Client is null )
                 {
                     _UDPBroadcast = new UdpClient
                     {
@@ -40,7 +40,7 @@ namespace BrainSimulator
         public static UdpClient UDPReceive {
             get
             {
-                if (_UDPReceive == null || _UDPReceive.Client == null)
+                if (_UDPReceive is null || _UDPReceive.Client is null)
                 {
                     _UDPReceive = new UdpClient(UDPReceivePort);
                     _UDPReceive.Client.ReceiveBufferSize = 10000000;
@@ -53,7 +53,7 @@ namespace BrainSimulator
         {
             get
             {
-                if (_receiveSubscribedMessages == null || _receiveSubscribedMessages.Client == null)
+                if (_receiveSubscribedMessages is null || _receiveSubscribedMessages.Client is null)
                 {
                     _receiveSubscribedMessages = new UdpClient(9090);
                     _receiveSubscribedMessages.Client.ReceiveBufferSize = 10000000;
@@ -72,7 +72,7 @@ namespace BrainSimulator
         {
             get
             {
-                if (_UDPAudioBroadcast == null || _UDPAudioBroadcast.Client == null)
+                if (_UDPAudioBroadcast is null || _UDPAudioBroadcast.Client is null)
                 {
                     _UDPAudioBroadcast = new UdpClient
                     {
@@ -88,7 +88,7 @@ namespace BrainSimulator
         {
             get
             {
-                if (_UDPAudioReceive == null || _UDPAudioReceive.Client == null)
+                if (_UDPAudioReceive is null || _UDPAudioReceive.Client is null)
                 {
                     _UDPAudioReceive = new UdpClient(UDPAudioReceivePort);
                     _UDPAudioReceive.Client.ReceiveBufferSize = 10000000;
@@ -100,7 +100,7 @@ namespace BrainSimulator
         public static void Broadcast(string message)
         {
             //Debug.WriteLine("Broadcast: " + message);
-            if (broadcastAddress == null) SetBroadcastAddress();
+            if (broadcastAddress is null) SetBroadcastAddress();
             byte[] datagram = Encoding.UTF8.GetBytes(message);
             IPEndPoint ipEnd = new(broadcastAddress, UDPSendPort);
 
@@ -108,7 +108,7 @@ namespace BrainSimulator
         }        
         public static bool UDP_Send(string message,IPAddress ipToSend, int udpPort)
         {
-            if (ipToSend == null) return false;
+            if (ipToSend is null) return false;
             byte[] datagram = Encoding.UTF8.GetBytes(message);
             IPEndPoint ipEnd = new IPEndPoint(ipToSend, udpPort);
             UDPBroadcast.SendAsync(datagram, datagram.Length, ipEnd);                        
@@ -116,7 +116,7 @@ namespace BrainSimulator
         }
         public static bool UDP_Setup_Send(string message, IPAddress ipToSend, int udpPort)
         {
-            if (ipToSend == null) return false;
+            if (ipToSend is null) return false;
             byte[] datagram = Encoding.UTF8.GetBytes(message);
             IPEndPoint ipEnd = new IPEndPoint(ipToSend, udpPort);
             //UDPBroadcast.SendAsync(datagram, datagram.Length, ipEnd);            
@@ -133,11 +133,11 @@ namespace BrainSimulator
             IPAddress deviceIp = IPAddress.Parse(podIPString);
             try
             {
-                if (tcpClient != null)
+                if (tcpClient is not null)
                 {
                     tcpClient.Close();
                 }
-                if ( server != null )
+                if ( server is not null )
                 {
                     server.Stop();
                 }
@@ -195,7 +195,7 @@ namespace BrainSimulator
         public static void SendStringToPodTCP(string msg)
         {
             if ( !podPaired) return;
-            if (theTcpStreamOut == null) return;
+            if (theTcpStreamOut is null) return;
             msg += " \n";
             Byte[] data = System.Text.Encoding.ASCII.GetBytes(msg);
             try

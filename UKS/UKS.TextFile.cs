@@ -9,22 +9,22 @@ public partial class UKS
     /// <summary>
     /// Export a neighborhood starting from <paramref name="root"/> to the bracketed txt file format.
     /// Emits facts as [S,R,O] (or [S,R,O,N] when R is a numeric specialization like "has.4").
-    /// Optionally emits simple clause pairs if Relationship exposes a Clauses collection.
+    /// Optionally emits simple clause pairs if Thing exposes a Clauses collection.
     /// </summary>
     public void ExportTextFile(string root, string path, int maxDepth = 12)
     {
         if (string.IsNullOrWhiteSpace(root)) throw new ArgumentException("Start label is required.", nameof(root));
-        Thing Root = theUKS.Labeled(root);
-        if (Root == null) return;
+        Cogneme Root = theUKS.Labeled(root);
+        if (Root is null) return;
         HashSet<string> alreadyWritten = new();
         try
         {
             using (var writer = new StreamWriter(path))
             {
                 if (writer is null) throw new ArgumentNullException(nameof(writer));
-                foreach (Thing t in Root.Descendants)
+                foreach (Cogneme t in Root.Descendants)
                 {
-                    foreach (Relationship r in t.RecursiveRelationships)
+                    foreach (Cogneme r in t.RecursiveRelationships)
                     {
                         string s = r.ToString() + r.Weight.ToString("0.00");
                         if (!alreadyWritten.Contains(s))
@@ -36,9 +36,9 @@ public partial class UKS
                         //hack to follow sequences
                         //if (r?.RelType?.Label == "is-a") continue;
 
-                        foreach (Thing t1 in r.Target.SequenceNodes())
+                        foreach (Cogneme t1 in r.Target.SequenceNodes())
                         {
-                            if (t1 is Relationship r1 && r1.RelType != null)
+                            if (t1 is Cogneme r1 && r1.RelType is not null)
                             {
                                 s = r1.SingleToString() + r1.Weight.ToString("0.00");
                                 if (!alreadyWritten.Contains(s))
@@ -47,7 +47,7 @@ public partial class UKS
                                     alreadyWritten.Add(s);
                                 }
                             }
-                            foreach (Relationship r2 in t1.Relationships.Where(x => x.RelType.Label != "is-a"))
+                            foreach (Cogneme r2 in t1.Relationships.Where(x => x.RelType.Label != "is-a"))
                             {
                                 s = r2.SingleToString() + r2.Weight.ToString("0.00");
                                 if (!alreadyWritten.Contains(s))
@@ -67,9 +67,9 @@ public partial class UKS
     }
 
 
-    public static Thing GetNonInstance(Thing source)
+    public static Cogneme GetNonInstance(Cogneme source)
     {
-        Thing theSource = source;
+        Cogneme theSource = source;
         while (theSource.HasProperty("isInstance")) theSource = theSource.Parents[0];
         return theSource;
     }
@@ -88,7 +88,7 @@ public partial class UKS
     /// </summary>
     public void ImportTextFile(string filePath)
     {
-        if (filePath == null) throw new ArgumentNullException(nameof(filePath));
+        if (filePath is null) throw new ArgumentNullException(nameof(filePath));
 
         int lineNo = 0;
         foreach (var raw in File.ReadLines(filePath))
@@ -101,7 +101,7 @@ public partial class UKS
             if (tokens.Count == 0) continue;
 
             var stmt = ParseBracketStmt(tokens[1], lineNo);
-            Relationship r = AddRelStmt(tokens[0], stmt, tokens[2]);
+            Cogneme r = AddRelStmt(tokens[0], stmt, tokens[2]);
         }
     }
 
@@ -138,11 +138,11 @@ public partial class UKS
     }
 
     // Adds a relationship, honoring numeric sugar (N → R.N + has-value + number typing)
-    private Relationship AddRelStmt(string label, List<string> ss, string sWeight)
+    private Cogneme AddRelStmt(string label, List<string> ss, string sWeight)
     {
-        Relationship r = null;
+        Cogneme r = null;
         if (ss.Count < 3) return null;
-        if (r == null)
+        if (r is null)
         {
             object r1 = ss[0];
             object r2 = ss[2];
@@ -151,14 +151,14 @@ public partial class UKS
                 var stmtContent = TokenizeTopLevel(ss[0]);
                 var stmtContent1 = ParseBracketStmt(stmtContent[1], -1);
                 r1 = AddRelStmt(stmtContent[0], stmtContent1, stmtContent[2]);
-                r1 = ((Thing)r1).Label;
+                r1 = ((Cogneme)r1).Label;
             }
             if (ss[2].Contains("->"))
             {
                 var stmtContent = TokenizeTopLevel(ss[2]);
                 var stmtContent1 = ParseBracketStmt(stmtContent[1], -1);
                 r2 = AddRelStmt(stmtContent[0], stmtContent1, stmtContent[2]);
-                r2 = ((Thing)r2).Label;
+                r2 = ((Cogneme)r2).Label;
             }
 
             //if (r1 or r2 are set, use them instead here

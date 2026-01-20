@@ -49,12 +49,12 @@ public class ModuleAttributeBubble : ModuleBase
 
     public class RelDest
     {
-        public Thing relType;
-        public Thing target;
-        public List<Relationship> relationships = new();
+        public Cogneme relType;
+        public Cogneme target;
+        public List<Cogneme> relationships = new();
         public RelDest()
         { }
-        public RelDest(Relationship r)
+        public RelDest(Cogneme r)
         {
             relType = r.RelType;
             target = r.Target;
@@ -69,7 +69,7 @@ public class ModuleAttributeBubble : ModuleBase
     public void DoTheWork()
     {
         debugString = "Bubbler Started\n";
-        foreach (Thing t in theUKS.AllThings)
+        foreach (Cogneme t in theUKS.AllThings)
         {
             if (t.Label == "Animal")
             { }
@@ -79,22 +79,22 @@ public class ModuleAttributeBubble : ModuleBase
         debugString += "Bubbler Finished\n";
         UpdateDialog();
     }
-    void BubbleChildAttributes(Thing t)
+    void BubbleChildAttributes(Cogneme t)
     {
         if (t.Children.Count == 0) return;
         if (t.Label == "unknownObject") return;
 
         //build a List of all the Relationships which this thing's children have
         List<RelDest> itemCounts = new();
-        foreach (Thing t1 in t.ChildrenWithSubclasses)
+        foreach (Cogneme t1 in t.ChildrenWithSubclasses)
         {
-            foreach (Relationship r in t1.Relationships)
+            foreach (Cogneme r in t1.Relationships)
             {
-                if (r.RelType == Thing.IsA) continue;
-                Thing useRelType = GetInstanceType(r.RelType);
+                if (r.RelType == Cogneme.IsA) continue;
+                Cogneme useRelType = GetInstanceType(r.RelType);
 
                 RelDest foundItem = itemCounts.FindFirst(x => x.relType == useRelType && x.target == r.Target);
-                if (foundItem == null)
+                if (foundItem is null)
                 {
                     foundItem = new RelDest { relType = useRelType, target = r.Target };
                     itemCounts.Add(foundItem);
@@ -113,10 +113,10 @@ public class ModuleAttributeBubble : ModuleBase
             if (excludeTypes.Contains(rr.relType.Label, comparer: StringComparer.OrdinalIgnoreCase)) continue;
 
             //find an existing relationship
-            Relationship r = theUKS.GetRelationship(t, rr.relType, rr.target);
-            float currentWeight = (r != null) ? r.Weight : 0f;
+            Cogneme r = theUKS.GetRelationship(t, rr.relType, rr.target);
+            float currentWeight = (r is not null) ? r.Weight : 0f;
 
-            //We need 1) count for this Relationship, 2) count for any conflicting, 3) count without a reference
+            //We need 1) count for this Thing, 2) count for any conflicting, 3) count without a reference
             float totalCount = t.Children.Count;
             float positiveCount = rr.relationships.FindAll(x => x.Weight > .5f).Count;
             float positiveWeight = rr.relationships.Sum(x => x.Weight);
@@ -138,7 +138,7 @@ public class ModuleAttributeBubble : ModuleBase
 
             if (negativeCount >= positiveCount)
             {
-                if (r != null)
+                if (r is not null)
                 {
                     t.RemoveRelationship(r);
                     debugString += $"Removed {r} \n";
@@ -166,7 +166,7 @@ public class ModuleAttributeBubble : ModuleBase
                 {
                     if (newWeight < .5)
                     {
-                        if (r != null)
+                        if (r is not null)
                         {
                             t.RemoveRelationship(r);
                             debugString += $"Removed {r.ToString()} \n";
@@ -180,9 +180,9 @@ public class ModuleAttributeBubble : ModuleBase
                         r.Fire();
                         debugString += $"Added  {r.ToString()}   {r.Weight.ToString(".0")} \n";
 
-                        foreach (Thing t1 in t.Children)
+                        foreach (Cogneme t1 in t.Children)
                         {
-                            Relationship rrr = t1.RemoveRelationship(rr.target, rr.relType);
+                            Cogneme rrr = t1.RemoveRelationship(rr.target, rr.relType);
                             debugString += $"Removed {rrr.ToString()} \n";
                         }
                         //if there is a conflicting relationship, delete it
@@ -203,7 +203,7 @@ public class ModuleAttributeBubble : ModuleBase
 
     //If some relationships are exceptions, we can still bubble the 
     //Relationships are exceptions if they conflict AND numbers are one are small relative to the other.
-    //a conflicting Relationship is:
+    //a conflicting Thing is:
     //  reltypes are the same AND targets are different but have a common parent w/ isexclusive (colors)
     //  targets are the same AND relTypes are different and have attributes with acommon parent which has the IsExslucive property (counts) (have 3, have 4)
     // Modified from UKS.CS line 181.  This does not includ AllowMultiples as these should not be bubbled
@@ -223,29 +223,29 @@ public class ModuleAttributeBubble : ModuleBase
                 if (parent.HasProperty("isExclusive")) return true;
 
             //get the attributes of the relationships
-            IList<Thing> r1RelAttribs = r1.relType.GetAttributes();
-            IList<Thing> r2RelAttribs = r2.relType.GetAttributes();
+            IReadOnlyList<Cogneme> r1RelAttribs = r1.relType.GetAttributes();
+            IReadOnlyList<Cogneme> r2RelAttribs = r2.relType.GetAttributes();
 
-            Thing r1Not = r1RelAttribs.FindFirst(x => x.Label == "not" || x.Label == "no");
-            Thing r2Not = r2RelAttribs.FindFirst(x => x.Label == "not" || x.Label == "no");
-            if (r1Not == null && r2Not != null || r1Not != null && r2Not == null)
+            Cogneme r1Not = r1RelAttribs.FindFirst(x => x.Label == "not" || x.Label == "no");
+            Cogneme r2Not = r2RelAttribs.FindFirst(x => x.Label == "not" || x.Label == "no");
+            if (r1Not is null && r2Not is not null || r1Not is not null && r2Not is null)
                 return true;
 
             //are any of the attrbutes which are exclusive?
-            foreach (Thing t1 in r1RelAttribs)
-                foreach (Thing t2 in r2RelAttribs)
+            foreach (Cogneme t1 in r1RelAttribs)
+                foreach (Cogneme t2 in r2RelAttribs)
                 {
                     if (t1 == t2) continue;
-                    List<Thing> commonParents = FindCommonParents(t1, t2);
-                    foreach (Thing t3 in commonParents)
+                    List<Cogneme> commonParents = FindCommonParents(t1, t2);
+                    foreach (Cogneme t3 in commonParents)
                     {
                         if (t3.HasProperty("isexclusive") || t3.HasProperty("allowMultiple"))
                             return true;
                     }
                 }
             // handle special case where one reltype has is numberic and the other is not
-            bool hasNumber1 = (r1RelAttribs.FindFirst(x => x.HasAncestorLabeled("number")) != null);
-            bool hasNumber2 = (r2RelAttribs.FindFirst(x => x.HasAncestorLabeled("number")) != null);
+            bool hasNumber1 = (r1RelAttribs.FindFirst(x => x.HasAncestorLabeled("number")) is not null);
+            bool hasNumber2 = (r2RelAttribs.FindFirst(x => x.HasAncestorLabeled("number")) is not null);
             if (hasNumber1 || hasNumber2) return true;
 
         }
@@ -253,11 +253,11 @@ public class ModuleAttributeBubble : ModuleBase
     }
 
 
-    private static List<Thing> FindCommonParents(Thing t, Thing t1)
+    private static List<Cogneme> FindCommonParents(Cogneme t, Cogneme t1)
     {
         //BORROWED from UKSStatement.cs line 323
-        List<Thing> commonParents = new List<Thing>();
-        foreach (Thing p in t.Parents)
+        List<Cogneme> commonParents = new List<Cogneme>();
+        foreach (Cogneme p in t.Parents)
             if (t1.Parents.Contains(p))
                 commonParents.Add(p);
         return commonParents;
@@ -272,14 +272,14 @@ public class ModuleAttributeBubble : ModuleBase
 
 
     //if the given thing is an instance of its parent, get the parent
-    public static Thing GetInstanceType(Thing t)
+    public static Cogneme GetInstanceType(Cogneme t)
     {
         bool EndsInInteger(string input)
         {
             // Regular expression to check if the string ends with a sequence of digits
             return Regex.IsMatch(input, @"\d+$");
         }
-        Thing useRelType = t;
+        Cogneme useRelType = t;
         while (useRelType.Parents.Count > 0 && EndsInInteger(useRelType.Label) && 
             !t.Label.Contains(".") && useRelType.Label.StartsWith(useRelType.Parents[0].Label))
             useRelType = useRelType.Parents[0];

@@ -40,73 +40,73 @@ public partial class ModuleUKSClauseDlg : ModuleBaseDlg
 
         ModuleUKSClause UKSClause = (ModuleUKSClause)ParentModule;
 
-        Thing source = UKSClause.theUKS.CreateThingFromMultipleAttributes(newThing,false);
-        Thing target = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetThing,false);
-        Thing relType = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationType, true);
-        Thing clauseType = UKSClause.theUKS.CreateThingFromMultipleAttributes(clauseLabel, false);
+        Cogneme source = UKSClause.theUKS.CreateThingFromMultipleAttributes(newThing,false);
+        Cogneme target = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetThing,false);
+        Cogneme relType = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationType, true);
+        Cogneme clauseType = UKSClause.theUKS.CreateThingFromMultipleAttributes(clauseLabel, false);
 
-        Relationship r1 = null;
-        if (rBase != null)
+        Cogneme r1 = null;
+        if (rBase is not null)
         {
             if (GetInstanceRoot(rBase.Source) != source ||
                 GetInstanceRoot(rBase.Target) != target ||
                 GetInstanceRoot(rBase.RelType) != relType)
                 rBase = null;
-            if (rBase != null && !rBase.Source.Relationships.Contains(rBase))
+            if (rBase is not null && !rBase.Source.Relationships.Contains(rBase))
                 rBase = null;
-            if (rBase != null)
+            if (rBase is not null)
                 r1 = rBase;
         }
-        if (r1 == null) //enable appending clause to existing Relationships
+        if (r1 is null) //enable appending clause to existing Relationships
             r1 = UKSClause.theUKS.AddStatement (source,relType,target);
 
-        Thing theClauseType = UKSClause.theUKS.GetOrAddThing(clauseLabel,"ClauseType");
+        Cogneme theClauseType = UKSClause.theUKS.GetOrAddThing(clauseLabel,"ClauseType");
 
-        Thing source2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(sourceText2.Text, false);
-        Thing relType2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationshipText2.Text, true);
-        Thing target2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetText2.Text, false);
+        Cogneme source2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(sourceText2.Text, false);
+        Cogneme relType2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationshipText2.Text, true);
+        Cogneme target2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetText2.Text, false);
 
-        Relationship rClause = UKSClause.theUKS.AddStatement(source2, relType2, target2);
+        Cogneme rClause = UKSClause.theUKS.AddStatement(source2, relType2, target2);
 
-        Relationship rAdded = UKSClause.theUKS.AddClause(r1, theClauseType, rClause);
+        Cogneme rAdded = UKSClause.theUKS.AddClause(r1, theClauseType, rClause);
 
         SetUpRelComboBox(GetInstanceRoot(r1.Source),rAdded);
     }
 
-    private Thing GetInstanceRoot(Thing t)
+    private Cogneme GetInstanceRoot(Cogneme t)
     {
-        Thing t1 = t;
+        Cogneme t1 = t;
         while (t1.HasProperty("isInstance")) t1 = t1.Parents[0];
         return t1;
     }
 
 
     public static readonly DependencyProperty theRelationship=
-DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBoxItem));
+DependencyProperty.Register("Thing", typeof(Cogneme), typeof(ComboBoxItem));
 
 
     // thingText_TextChanged is called when the thing textbox changes
     private void Text_TextChanged(object sender, TextChangedEventArgs e)
     {
-        Thing sourceThing = CheckThingExistence(sender);
+        Cogneme sourceThing = CheckThingExistence(sender);
         if (sender is TextBox source && source.Name == "sourceText")
         {
             SetUpRelComboBox(sourceThing);
         }
     }
 
-    private void SetUpRelComboBox(Thing sourceThing,Relationship rSelected = null)
+    private void SetUpRelComboBox(Cogneme sourceThing,Cogneme rSelected = null)
     {
         SourceDisambiguation.Items.Clear();
         SourceDisambiguation.Items.Add("<new>");
         SourceDisambiguation.SelectedIndex = 0;
         rBase = null;
-        if (sourceThing != null)
+        if (sourceThing is not null)
         {
-            foreach (Thing t in sourceThing.Descendents)
+            foreach (Cogneme t in sourceThing.Descendents)
             {
                 if (t != sourceThing && !t.HasProperty("isInstance")) continue;
-                foreach (Relationship r in t.Relationships)
+                foreach (Cogneme r in t.Relationships)
                 {
                     if (r.RelType.Label == "has-child") continue;
                     if (r.RelType.Label == "hasProperty") continue;
@@ -128,7 +128,7 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
         }
     }
 
-    Relationship rBase = null;
+    Cogneme rBase = null;
     private void SourceDisambuation_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (sender is ComboBox cb)
@@ -141,7 +141,7 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
             else
             {
                 ComboBoxItem cbi = (ComboBoxItem)cb.SelectedItem;
-                Relationship r = (Relationship)cbi.GetValue(theRelationship);
+                Cogneme r = (Cogneme)cbi.GetValue(theRelationship);
                 relationshipText.Text = r.RelType.Label;
                 targetText.Text = r.Target.Label;
                 rBase = r;
@@ -151,7 +151,7 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
     }
 
     //copied from UKSStatementDlg.cs
-    private Thing CheckThingExistence(object sender)
+    private Cogneme CheckThingExistence(object sender)
     {
         if (sender is TextBox tb)
         {
@@ -163,8 +163,8 @@ DependencyProperty.Register("Relationship", typeof(Relationship), typeof(ComboBo
                 SetStatus("Source and type cannot be empty");
                 return null;
             }
-            List<Thing> tl = ModuleUKSStatement.ThingListFromString(text);
-            if (tl == null || tl.Count == 0)
+            List<Cogneme> tl = ModuleUKSStatement.ThingListFromString(text);
+            if (tl is null || tl.Count == 0)
             {
                 tb.Background = new SolidColorBrush(Colors.LemonChiffon);
                 return null;

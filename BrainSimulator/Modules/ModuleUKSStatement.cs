@@ -59,47 +59,47 @@ public class ModuleUKSStatement : ModuleBase
     }
 
 
-    public Relationship AddRelationship(string source, string target, string relationshipType)
+    public Cogneme AddRelationship(string source, string target, string relationshipType)
     {
         GetUKS();
-        if (theUKS == null) return null;
+        if (theUKS is null) return null;
         IPluralize pluralizer = new Pluralizer();
         if (pluralizer.IsPlural(source) && pluralizer.IsPlural(target) && relationshipType == "are")
             relationshipType = "is-a";
 
         //Figure out the source
         var sourceParts = Singular(source.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-        Thing tSource = null;
+        Cogneme tSource = null;
         if (sourceParts.Length == 3)
             tSource = theUKS.AddStatement(sourceParts[0], sourceParts[1], sourceParts[2]);
-        if (tSource == null)
+        if (tSource is null)
         {
             tSource = theUKS.CreateThingFromMultipleAttributes(source, false);
         }
         //figure out the RelType
-        Thing tRelType = theUKS.CreateThingFromMultipleAttributes(relationshipType, true);
+        Cogneme tRelType = theUKS.CreateThingFromMultipleAttributes(relationshipType, true);
 
 
         //Figure out the target
         var targetParts = Singular(target.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-        Thing tTarget = null;
+        Cogneme tTarget = null;
 
         if (target.StartsWith("*"))
         {
-            List<Thing> targets = new();
+            List<Cogneme> targets = new();
             targetParts = target[1..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
             foreach (string label in targetParts)
             {
-                Thing t = theUKS.GetOrAddThing(label);
+                Cogneme t = theUKS.GetOrAddThing(label);
                 targets.Add(t);
             }
-            Relationship r1 = theUKS.AddSequence(tSource, tRelType, targets);
+            Cogneme r1 = theUKS.AddSequence(tSource, tRelType, targets);
             return r1;
         }
  
         if (targetParts.Length == 3)
             tTarget = theUKS.AddStatement(targetParts[0], targetParts[1], targetParts[2]);
-        if (tTarget == null)
+        if (tTarget is null)
             tTarget = theUKS.CreateThingFromMultipleAttributes(target, false);
         if (target == "" && relationshipType == "is-a")
         {
@@ -109,7 +109,7 @@ public class ModuleUKSStatement : ModuleBase
         }
 
         //Create the relationship
-        Relationship r = theUKS.AddStatement(tSource, tRelType, tTarget);
+        Cogneme r = theUKS.AddStatement(tSource, tRelType, tTarget);
 
         if (tRelType.Label == "IF")  //this is a HACK which must be fixed later
         {
@@ -130,9 +130,9 @@ public class ModuleUKSStatement : ModuleBase
         return s;
     }
 
-    public static List<Thing> ThingListFromString(string source)
+    public static List<Cogneme> ThingListFromString(string source)
     {
-        List<Thing> retVal = new();
+        List<Cogneme> retVal = new();
         IPluralize pluralizer = new Pluralizer();
         source = source.Trim();
         string[] tempStringArray = source.Split(' ');
@@ -142,8 +142,8 @@ public class ModuleUKSStatement : ModuleBase
             if (tempStringArray[i] == "") continue;
             if (!char.IsUpper(tempStringArray[i][0]) && tempStringArray[i].Length > 2)
                 tempStringArray[i] = pluralizer.Singularize(tempStringArray[i]);
-            Thing t = ThingLabels.GetThing(tempStringArray[i]);
-            if (t == null) return retVal;
+            Cogneme t = CognemeLabels.GetThing(tempStringArray[i]);
+            if (t is null) return retVal;
             retVal.Add(t);
         }
 

@@ -53,50 +53,50 @@ public class ModuleAddCounts : ModuleBase
         debugString = "Agent Started\n";
         for (int i = 0; i < theUKS.AllThings.Count; i++)
         {
-            Thing t = theUKS.AllThings[i];
+            Cogneme t = theUKS.AllThings[i];
             AddCountRelationships(t);
         }
         debugString += "Agent  Finished\n";
         UpdateDialog();
     }
 
-    private void AddCountRelationships(Thing t)
+    private void AddCountRelationships(Cogneme t)
     {
         for (int j = 0; j < t.Relationships.Count; j++)
         {
-            Relationship r = t.Relationships[j];
-            if (r.RelType == Thing.IsA) continue;
-            Thing useRelType = ModuleAttributeBubble.GetInstanceType(r.RelType);
+            Cogneme r = t.Relationships[j];
+            if (r.RelType == Cogneme.IsA) continue;
+            Cogneme useRelType = ModuleAttributeBubble.GetInstanceType(r.RelType);
 
             //get the counts of targets and/or their ancestors
-            List<Thing> targets = t.Relationships.FindAll(x => ModuleAttributeBubble.GetInstanceType(x.RelType) == useRelType).Select(x => x.Target).ToList();
-            List<(Thing tMatch, int bestCount)> bestMatches = GetAttributeCounts(targets);
+            List<Cogneme> targets = t.Relationships.FindAll(x => ModuleAttributeBubble.GetInstanceType(x.RelType) == useRelType).Select(x => x.Target).ToList();
+            List<(Cogneme tMatch, int bestCount)> bestMatches = GetAttributeCounts(targets);
             foreach (var match in bestMatches)
             {
-                Relationship existingRelationship = theUKS.GetRelationship(r.Source, useRelType.ToString() + "." + match.bestCount.ToString(), match.tMatch);
-                if (existingRelationship == null)
+                Cogneme existingRelationship = theUKS.GetRelationship(r.Source, useRelType.ToString() + "." + match.bestCount.ToString(), match.tMatch);
+                if (existingRelationship is null)
                 {
                     string newRelLabel = useRelType.ToString() + "." + match.bestCount.ToString();
-                    Thing newRelType = theUKS.GetOrAddThing(newRelLabel, useRelType.Parents[0]);
-                    Relationship rAdded = theUKS.AddStatement(r.Source.Label, newRelType, match.tMatch);
+                    Cogneme newRelType = theUKS.GetOrAddThing(newRelLabel, useRelType.Parents[0]);
+                    Cogneme rAdded = theUKS.AddStatement(r.Source.Label, newRelType, match.tMatch);
                     debugString += $"Added: {rAdded}\n";
                 }
             }
         }
     }
 
-    private List<(Thing, int)> GetAttributeCounts(List<Thing> ts)
+    private List<(Cogneme, int)> GetAttributeCounts(List<Cogneme> ts)
     {
-        List<(Thing, int)> retVal = new();
+        List<(Cogneme, int)> retVal = new();
         if (ts.Count > 0)
         {
-            Dictionary<Thing, int> dict = new();
+            Dictionary<Cogneme, int> dict = new();
 
-            List<IList<Thing>> theAncestors = new();
-            foreach (Thing t in ts)
+            List<IReadOnlyList<Cogneme>> theAncestors = new();
+            foreach (Cogneme t in ts)
             {
-                if (t == null) continue;
-                foreach (Thing t1 in t.AncestorList())
+                if (t is null) continue;
+                foreach (Cogneme t1 in t.AncestorList())
                 {
                     if (dict.ContainsKey(t1))
                         dict[t1]++;
@@ -106,7 +106,7 @@ public class ModuleAddCounts : ModuleBase
             }
             foreach (var k in dict.Keys)
             {
-                if (!k.HasAncestor("unknownObject") || k == (Thing)"unknownObject") continue;
+                if (!k.HasAncestor("unknownObject") || k == (Cogneme)"unknownObject") continue;
                 if (dict[k] > 1)
                     retVal.Add((k, dict[k]));
             }

@@ -14,40 +14,40 @@ public partial class UKS
         //this hack is needed to preserve the info relating to module layout
         for (int i = 0; i < AllThings.Count; i++)
         {
-            Thing t = AllThings[i];
+            Cogneme t = AllThings[i];
             if (t.HasAncestorLabeled("BrainSim"))
                 continue;
             if (t.Label == "is-a") continue;
             //if (t.Label == "Thing") continue;
             //if (t.Label == "RelationshipType") continue;
             if (t.Label == "hasAttribute") continue;
-            if (t != null)
+            if (t is not null)
             {
                 DeleteThing(t);
                 i--;
             }
         }
 
-        ThingLabels.ClearLabelList();
-        foreach (Thing t in AllThings)
-            ThingLabels.AddThingLabel(t.Label,t);
+        CognemeLabels.ClearLabelList();
+        foreach (Cogneme t in AllThings)
+            CognemeLabels.AddThingLabel(t.Label,t);
 
-        if (Labeled("Thing") == null)
+        if (Labeled("Thing") is null)
             AddThing("Thing", null);
-        Thing isA = Labeled("is-a");
-        if (isA == null)
+        Cogneme isA = Labeled("is-a");
+        if (isA is null)
             isA = AddThing("is-a", null);
-        Thing hasChild = Labeled("has-child");
-        if (hasChild == null)
+        Cogneme hasChild = Labeled("has-child");
+        if (hasChild is null)
             hasChild = AddThing("has-child", null);
-        Thing relType = AddThing("RelationshipType", "Thing");
+        Cogneme relType = AddThing("RelationshipType", "Thing");
         isA.AddParent(relType);
         hasChild.AddParent(relType);
 
         GetOrAddThing("Object", "Thing");
         GetOrAddThing("Action", "Thing");
         GetOrAddThing("RelationshipType", "Thing");
-        GetOrAddThing("Relationship", "Thing");
+        GetOrAddThing("Thing", "Thing");
         GetOrAddThing("unknownObject", "Object");
         GetOrAddThing("is-a", "RelationshipType");
         GetOrAddThing("inverseOf", "RelationshipType");
@@ -167,7 +167,7 @@ public partial class UKS
 
     void AddBrainSimConfigSectionIfNeeded()
     {
-        if (Labeled("BrainSim") != null) return;
+        if (Labeled("BrainSim") is not null) return;
         AddThing("BrainSim", null);
         GetOrAddThing("AvailableModule", "BrainSim");
         GetOrAddThing("ActiveModule", "BrainSim");
@@ -201,7 +201,7 @@ public partial class UKS
         UKSTemp.Clear();
 
         // TODO: Wipe transient data ...
-        foreach (Thing t in AllThings)
+        foreach (Cogneme t in AllThings)
         {
             SThing st = new()
             {
@@ -209,16 +209,16 @@ public partial class UKS
                 V = t.V,
                 //useCount = t.useCount
             };
-            foreach (Relationship l in t.Relationships)
+            foreach (Cogneme l in t.Relationships)
             {
-                SThing sR = ConvertRelationship(l, new List<Relationship>());
+                SThing sR = ConvertRelationship(l, new List<Cogneme>());
                 st.relationships.Add(sR);
             }
             UKSTemp.Add(st);
         }
     }
 
-    private SThing ConvertRelationship(Relationship l, List<Relationship> stack)
+    private SThing ConvertRelationship(Cogneme l, List<Cogneme> stack)
     {
         if (l.Source.Label == "Fido")
         { }
@@ -234,7 +234,7 @@ public partial class UKS
             weight = l.Weight,
         };
 
-        foreach (Relationship r1 in l.Relationships)
+        foreach (Cogneme r1 in l.Relationships)
         {
             sR.relationships.Add(ConvertRelationship(r1, stack));
         }
@@ -247,9 +247,9 @@ public partial class UKS
         //TODO  add handline of clauses
         foreach (SThing st in UKSTemp)
         {
-            if (Labeled(st.label) == null)
+            if (Labeled(st.label) is null)
             {
-                Thing t = new()
+                Cogneme t = new()
                 {
                     Label = st.label,
                     V = st.V,
@@ -270,11 +270,11 @@ public partial class UKS
     private void DeFormatContentAfterLoading()
     {
         AllThings.Clear();
-        ThingLabels.ClearLabelList();
+        CognemeLabels.ClearLabelList();
         //get all the things
         foreach (SThing st in UKSTemp)
         {
-            Thing t = new()
+            Cogneme t = new()
             {
                 Label = st.label,
                 V = st.V,
@@ -288,8 +288,8 @@ public partial class UKS
             SThing sT = UKSTemp[i];
             foreach (SThing p in sT.relationships)
             {
-                Relationship r = UnConvertRelationship(p, new List<SThing>());
-                if (r != null)
+                Cogneme r = UnConvertRelationship(p, new List<SThing>());
+                if (r is not null)
                 {
                     if (r.RelType.Label != "is-a") //swap has-child for is-a
                         AllThings[i].RelationshipsWriteable.Add(r);
@@ -299,37 +299,37 @@ public partial class UKS
             }
         }
         //rebuild all the reverse linkages
-        foreach (Thing t in AllThings)
+        foreach (Cogneme t in AllThings)
         {
-            foreach (Relationship r in t.Relationships)
+            foreach (Cogneme r in t.Relationships)
             {
-                Thing t1 = r.Target;
-                if (t1 != null)
+                Cogneme t1 = r.Target;
+                if (t1 is not null)
                     if (!t1.RelationshipsFromWriteable.Contains(r))
                         t1.RelationshipsFromWriteable.Add(r);
-                if (r.RelType != null)
+                if (r.RelType is not null)
                     if (!r.RelType.RelationshipsAsTypeWriteable.Contains(r))
                         r.RelType.RelationshipsAsTypeWriteable.Add(r);
             }
         }
     }
 
-    private Relationship UnConvertRelationship(SThing p, List<SThing> stack)
+    private Cogneme UnConvertRelationship(SThing p, List<SThing> stack)
     {
-        if (p == null)
+        if (p is null)
             return null;
         if (stack.Contains(p))
             return null;
         stack.Add(p);
-        Thing source = null;
+        Cogneme source = null;
         if (p.source != -1)
             source = AllThings[p.source];
         else
             return null;
-        Thing relationshipType = null;
+        Cogneme relationshipType = null;
         if (p.relationshipType != -1)
             relationshipType = AllThings[p.relationshipType];
-        Thing target = null;
+        Cogneme target = null;
         if (p.target != -1)
             target = AllThings[p.target];
 
@@ -341,7 +341,7 @@ public partial class UKS
         }
 
 
-        Relationship r = new()
+        Cogneme r = new()
         {
             Source = source,
             Target = target,
@@ -380,10 +380,10 @@ public partial class UKS
         return true;
     }
 
-    List<string> ExtractPortionOfUKS(Thing root)
+    List<string> ExtractPortionOfUKS(Cogneme root)
     {
         List<string> uksContent = new List<string>();
-        if (root == null) return uksContent;
+        if (root is null) return uksContent;
         var descendants = root.DescendentsList;
         foreach (var descendant in root.DescendentsList())
         {
@@ -434,7 +434,7 @@ public partial class UKS
         }
         catch (Exception e)
         {
-            if (e.InnerException != null)
+            if (e.InnerException is not null)
                 Debug.WriteLine("Xml file write failed because: " + e.InnerException.Message);
             else
                 Debug.WriteLine("Xml file write failed because: " + e.Message);
@@ -452,9 +452,9 @@ public partial class UKS
     {
         //TODO, This works for writing but not for reading
         List<Type> extraTypes = new List<Type>();
-        foreach (Thing t in uKSList)
+        foreach (Cogneme t in uKSList)
         {
-            if (t.V != null)
+            if (t.V is not null)
             {
                 var theType = t.V.GetType();
                 if (!extraTypes.Contains(theType))
@@ -522,7 +522,7 @@ public partial class UKS
 
         AddBrainSimConfigSectionIfNeeded();
 
-        if (Labeled("BrainSim") == null)
+        if (Labeled("BrainSim") is null)
         {
             MergeStringListIntoUKS(contentToRestore);
         }
@@ -532,12 +532,12 @@ public partial class UKS
         var activeModules = Labeled("ActiveModule").Children;
         var avaialableModules = Labeled("AvailableModule").Children;
 
-        foreach (Thing t in avaialableModules)
+        foreach (Cogneme t in avaialableModules)
         {
             if (!t.Label.ToLower().StartsWith("module"))
                 t.Label = "Module" + t.Label;
         }
-        foreach (Thing t in activeModules)
+        foreach (Cogneme t in activeModules)
         {
             if (!t.Label.ToLower().StartsWith("module"))
                 t.Label = "Module" + t.Label;
@@ -546,23 +546,23 @@ public partial class UKS
         //more hacks for compatibility old file formatting
         //this does nothing on updated file content
         AddStatement("inheritable", "is-a", "Property");
-        Thing hasChild = Labeled("has-child");
-        if (hasChild != null)
+        Cogneme hasChild = Labeled("has-child");
+        if (hasChild is not null)
         {
             hasChild.AddRelationship("is-a", "inverseOf");
             hasChild.RemoveRelationship("isTransitive", "hasProperty");
             hasChild.RemoveRelationship("inheritable", "hasProperty");
         }
-        Thing isA = Labeled("is-a");
-        if (isA != null)
+        Cogneme isA = Labeled("is-a");
+        if (isA is not null)
         {
             isA.AddRelationship("inheritable", "hasProperty");
             isA.AddRelationship("isTransitive", "hasProperty");
             isA.RemoveRelationship("has-child", "inverseOf");
             isA.RemoveRelationship(null, "hasProperty");
         }
-        Thing has = Labeled("has");
-        if (has != null)
+        Cogneme has = Labeled("has");
+        if (has is not null)
         {
             has.AddRelationship("inheritable", "hasProperty");
         }

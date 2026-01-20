@@ -37,16 +37,16 @@ if (args.Length > 0)
 else
 {
     var pythonFiles = moduleHandler.GetListOfExistingPythonModuleTypes();
-    Thing availableModuleRoot = moduleHandler.theUKS.Labeled("AvailableModule");
+    Cogneme availableModuleRoot = moduleHandler.theUKS.Labeled("AvailableModule");
     foreach (var moduleName in pythonFiles)
         moduleHandler.theUKS.AddThing(moduleName, availableModuleRoot);
 }
 
 //initialize active module list
-Thing activeModulesRoot = moduleHandler.theUKS.Labeled("ActiveModule");
-if (activeModulesRoot != null)
+Cogneme activeModulesRoot = moduleHandler.theUKS.Labeled("ActiveModule");
+if (activeModulesRoot is not null)
 {
-    foreach (Thing module in activeModulesRoot.Children)
+    foreach (Cogneme module in activeModulesRoot.Children)
         if (module.Label.Contains(".py"))
             moduleHandler.pythonModules.Add(module.Label);
 }
@@ -66,7 +66,7 @@ while (true)
     for (int i = 0; i < moduleHandler.activePythonModules.Count; i++)
     {
         (string, dynamic) module = moduleHandler.activePythonModules[i];
-        if (activeModulesRoot.Children.FindFirst(x => x.Label == module.Item1) == null)
+        if (activeModulesRoot.Children.FindFirst(x => x.Label == module.Item1) is null)
         {
             try
             {

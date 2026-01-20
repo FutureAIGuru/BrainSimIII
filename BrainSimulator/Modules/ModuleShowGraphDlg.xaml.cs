@@ -39,8 +39,8 @@ namespace BrainSimulator.Modules
             //get the root to save the contents of from the UKS dialog root
             string root = "Object";
             ModuleShowGraph parent = (ModuleShowGraph)base.ParentModule;
-            Thing uksDlg = parent.theUKS.Labeled("ModuleUKS0");
-            if (uksDlg != null)
+            Cogneme uksDlg = parent.theUKS.Labeled("ModuleUKS0");
+            if (uksDlg is not null)
                 foreach (var r in uksDlg.Relationships)
                 {
                     if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith("Root"))
@@ -56,10 +56,10 @@ namespace BrainSimulator.Modules
             g.Attr.BackgroundColor = Microsoft.Msagl.Drawing.Color.Black;
             viewer.OutsideAreaBrush = Brushes.Black;
 
-            Thing theRoot = parent.theUKS.Labeled(root);
-            foreach (Thing t in theRoot.Descendents)
+            Cogneme theRoot = parent.theUKS.Labeled(root);
+            foreach (Cogneme t in theRoot.Descendents)
             {
-                foreach (Relationship r in t.Relationships)
+                foreach (Cogneme r in t.Relationships)
                 {
                     if (r.Source == theRoot) continue;
                     string label = r.RelType.Label;

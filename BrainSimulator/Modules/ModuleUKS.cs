@@ -58,7 +58,7 @@ public partial class ModuleUKS : ModuleBase
     public override void SetUpBeforeSave()
     {
         base.SetUpBeforeSave();
-        if (fileName != null && fileName.Length > 0)
+        if (fileName is not null && fileName.Length > 0)
         {
             theUKS.SaveUKStoXMLFile();
         }

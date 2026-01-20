@@ -48,7 +48,7 @@ public class ModuleRemoveRedundancy : ModuleBase
     public void DoTheWork()
     {
         debugString = "Agent Started\n";
-        foreach (Thing t in theUKS.AllThings)
+        foreach (Cogneme t in theUKS.AllThings)
         {
             RemoveRedundantAttributes(t);
         }
@@ -56,16 +56,16 @@ public class ModuleRemoveRedundancy : ModuleBase
         UpdateDialog();
     }
 
-    private void RemoveRedundantAttributes(Thing t)
+    private void RemoveRedundantAttributes(Cogneme t)
     {
-        foreach (Thing parent in t.Parents) //usually only a single parent
+        foreach (Cogneme parent in t.Parents) //usually only a single parent
         {
-            List<Relationship> relationshipsWithInheritance = theUKS.GetAllRelationships(new List<Thing> { parent });
+            List<Cogneme> relationshipsWithInheritance = theUKS.GetAllRelationships(new List<Cogneme> { parent });
             for (int i = 0; i < t.Relationships.Count; i++)
             {
-                Relationship r = t.Relationships[i];
-                Relationship rMatch = relationshipsWithInheritance.FindFirst(x => x.Source != r.Source && x.RelType == r.RelType && x.Target == r.Target);
-                if (rMatch != null && rMatch.Weight > 0.8f)
+                Cogneme r = t.Relationships[i];
+                Cogneme rMatch = relationshipsWithInheritance.FindFirst(x => x.Source != r.Source && x.RelType == r.RelType && x.Target == r.Target);
+                if (rMatch is not null && rMatch.Weight > 0.8f)
                 {
                     r.Weight -= 0.1f;
                     if (r.Weight < 0.5f)

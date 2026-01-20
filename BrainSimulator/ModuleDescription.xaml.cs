@@ -61,15 +61,15 @@ namespace BrainSimulator
 
         public static string GetDescription(string moduleName)
         {
-            if (theModuleDescriptions == null) Load();
+            if (theModuleDescriptions is null) Load();
             ModuleDescription desc = theModuleDescriptions.Find(t => t.moduleName == moduleName);
-            if (desc != null) return desc.description;
+            if (desc is not null) return desc.description;
             return "";
         }
         public static void SetDescription(string moduleName, string theDescription)
         {
             ModuleDescription desc = theModuleDescriptions.Find(t => t.moduleName == moduleName);
-            if (desc != null)
+            if (desc is not null)
                 desc.description = theDescription;
             else
             {

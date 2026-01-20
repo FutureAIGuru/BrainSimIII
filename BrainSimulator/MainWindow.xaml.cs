@@ -105,7 +105,7 @@ namespace BrainSimulator
             }
 
             //safety check
-            if (theUKS.Labeled("BrainSim") == null)
+            if (theUKS.Labeled("BrainSim") is null)
                 CreateEmptyUKS();
 
             UpdateModuleListsInUKS();
@@ -129,7 +129,7 @@ namespace BrainSimulator
             for (int i = 0; i < activeModules.Count; i++)
             {
                 ModuleBase mod = activeModules[i];
-                if (mod != null)
+                if (mod is not null)
                 {
                     mod.SetUpAfterLoad();
                 }
@@ -140,7 +140,7 @@ namespace BrainSimulator
             for (int i = 0; i < activeModules.Count; i++)
             {
                 ModuleBase mod = activeModules[i];
-                if (mod != null)
+                if (mod is not null)
                 {
                     mod.SetUpBeforeSave();
                 }
@@ -152,7 +152,7 @@ namespace BrainSimulator
         {
             foreach (ModuleBase mb in activeModules)
             {
-                if (mb != null)
+                if (mb is not null)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
                     {
@@ -187,34 +187,34 @@ namespace BrainSimulator
             {
                 string name = module.Name;
                 //name = name.Replace("Module", "");
-                Thing availableModule = availableListInUKS.FindFirst(x => x.Label == name);
-                if (availableModule == null)
+                Cogneme availableModule = availableListInUKS.FindFirst(x => x.Label == name);
+                if (availableModule is null)
                     theUKS.GetOrAddThing(name, "AvailableModule");
             }
             var PythonModules = moduleHandler.GetListOfExistingPythonModuleTypes();
             foreach (var name in PythonModules)
             {
-                Thing availableModule = availableListInUKS.FindFirst(x => x.Label == name);
-                if (availableModule == null)
+                Cogneme availableModule = availableListInUKS.FindFirst(x => x.Label == name);
+                if (availableModule is null)
                     theUKS.GetOrAddThing(name, "AvailableModule");
             }
             //delete any non-existant modules
             availableListInUKS = theUKS.Labeled("AvailableModule").Children;
-            foreach (Thing t in availableListInUKS)
+            foreach (Cogneme t in availableListInUKS)
             {
                 string name = t.Label;
-                if (CSharpModules.FindFirst(x=>x.Name == name) != null) continue;
-                if (PythonModules.FindFirst(x => x == name) != null) continue;
+                if (CSharpModules.FindFirst(x=>x.Name == name) is not null) continue;
+                if (PythonModules.FindFirst(x => x == name) is not null) continue;
                 theUKS.DeleteAllChildren(t);
                 theUKS.DeleteThing(t);
             }
 
             //reconnect/delete any active modules
             var activeListInUKS = theUKS.Labeled("ActiveModule").Children;
-            foreach(Thing t in activeListInUKS)
+            foreach(Cogneme t in activeListInUKS)
             {
-                Thing parent = availableListInUKS.FindFirst(x => x.Label == t.Label.Substring(0, t.Label.Length - 1));
-                if (parent != null)
+                Cogneme parent = availableListInUKS.FindFirst(x => x.Label == t.Label.Substring(0, t.Label.Length - 1));
+                if (parent is not null)
                     t.AddParent(parent);
                 else
                     theUKS.DeleteThing(t);
@@ -231,14 +231,14 @@ namespace BrainSimulator
 
         public string ActivateModule(string moduleType)
         {
-            Thing t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
+            Cogneme t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
             t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleType));
             t.AddParent(theUKS.Labeled("ActiveModule"));
 
             if (!moduleType.Contains(".py"))
             {
                 ModuleBase newModule = CreateNewModule(moduleType);
-                if (newModule == null) return "";
+                if (newModule is null) return "";
                 newModule.Label = t.Label;
                 activeModules.Add(newModule);
             }
@@ -258,7 +258,7 @@ namespace BrainSimulator
             {
                 foreach (ModuleBase md in activeModules)
                 {
-                    if (md != null)
+                    if (md is not null)
                     {
                         md.CloseDlg();
                     }
@@ -272,7 +272,7 @@ namespace BrainSimulator
             {
                 foreach (ModuleBase mb in activeModules)
                 {
-                    if (mb != null)
+                    if (mb is not null)
                     {
                         mb.Closing();
                     }
@@ -300,12 +300,12 @@ namespace BrainSimulator
 
         private void Dt_Tick(object? sender, EventArgs e)
         {
-            Thing activeModuleParent = theUKS.Labeled("ActiveModule");
-            if (activeModuleParent == null) return;
-            foreach (Thing module in activeModuleParent.Children)
+            Cogneme activeModuleParent = theUKS.Labeled("ActiveModule");
+            if (activeModuleParent is null) return;
+            foreach (Cogneme module in activeModuleParent.Children)
             {
                 ModuleBase mb = activeModules.FindFirst(x => x.Label == module.Label);
-                if (mb != null)
+                if (mb is not null)
                 {
                     System.Windows.Application.Current.Dispatcher.Invoke((Action)delegate
                     {
@@ -326,7 +326,7 @@ namespace BrainSimulator
             foreach (var moduleType in moduleTypes)
             {
                 string moduleName = moduleType.Name;
-                Thing t = theUKS.GetOrAddThing(moduleName, "AvailableModule");
+                Cogneme t = theUKS.GetOrAddThing(moduleName, "AvailableModule");
                 //TODO: delete the following
                 t.AddParent("AvailableModule");
             }
@@ -339,7 +339,7 @@ namespace BrainSimulator
 
             ModuleListComboBox.Items.Clear();
             ModuleListComboBox.FontSize = 18;
-            foreach (Thing t in theUKS.Labeled("AvailableModule").Children)
+            foreach (Cogneme t in theUKS.Labeled("AvailableModule").Children)
             {
                 //ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = t.Label, Margin = new Thickness(0), Padding = new Thickness(0) });
                 ModuleListComboBox.Items.Add(t.Label);

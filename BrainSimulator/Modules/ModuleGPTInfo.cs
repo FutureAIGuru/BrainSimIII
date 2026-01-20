@@ -35,7 +35,7 @@ namespace BrainSimulator.Modules
         public override void SetUpAfterLoad()
         {
             string apiKey = ConfigurationManager.AppSettings["APIKey"];
-            if (apiKey == null|| !apiKey.StartsWith("sk"))
+            if (apiKey is null|| !apiKey.StartsWith("sk"))
             {
                 MessageBox.Show(@"OpenAI GPT API Key was not found in the app.config file. GPT Info requests will be ignored. To set up: after getting an API key from OpenAI, put it in the app.config file in the form:
     <appSettings>
@@ -78,25 +78,25 @@ namespace BrainSimulator.Modules
                     if (Output.Contains("language model")) return;
                     if (!answerString.Contains("yes"))
                     {
-                        Thing tParent = MainWindow.theUKS.Labeled(parent);
-                        if (tParent == null) tParent = MainWindow.theUKS.Labeled("." + parent);
-                        if (tParent == null) return;
-                        Thing tChild = MainWindow.theUKS.Labeled(child);
-                        if (tChild == null) tChild = MainWindow.theUKS.Labeled("." + child);
-                        if (tChild == null) return;
+                        Cogneme tParent = MainWindow.theUKS.Labeled(parent);
+                        if (tParent is null) tParent = MainWindow.theUKS.Labeled("." + parent);
+                        if (tParent is null) return;
+                        Cogneme tChild = MainWindow.theUKS.Labeled(child);
+                        if (tChild is null) tChild = MainWindow.theUKS.Labeled("." + child);
+                        if (tChild is null) return;
                         tChild.RemoveParent(tParent);
                         if (tChild.Parents.Count == 0)
                             tChild.AddParent(MainWindow.theUKS.Labeled("unknownObject"));
-                        Debug.WriteLine($"Relationship: {child} is-a {parent} has been removed. ");
+                        Debug.WriteLine($"Thing: {child} is-a {parent} has been removed. ");
                     }
                     else
                     {
                         //tag item as verified so we don't try it again
-                        Relationship r = MainWindow.theUKS.GetRelationship(parent, "has-child", child);
-                        if (r != null)
+                        Cogneme r = MainWindow.theUKS.GetRelationship(parent, "has-child", child);
+                        if (r is not null)
                         {
 //                            r.GPTVerified = true;
-                            Debug.WriteLine($"Relationship: {child} is-a {parent} has verified. ");
+                            Debug.WriteLine($"Thing: {child} is-a {parent} has verified. ");
                         }
                     }
                 }
@@ -213,7 +213,7 @@ is-part-of-speech, ";
             try
             {
                 UKS.UKS theUKS = MainWindow.theUKS;
-                foreach (Thing t in theUKS.Labeled("Object").Descendents) {
+                foreach (Cogneme t in theUKS.Labeled("Object").Descendents) {
                     // Get the label and sanitize the input.
                     String textIn = t.Label;
                     textIn = textIn.ToLower();
@@ -256,7 +256,7 @@ is-part-of-speech, ";
             {
                 UKS.UKS theUKS = MainWindow.theUKS;
                 int limit = 20;
-                foreach (Thing t in theUKS.Labeled("Object").Descendents)
+                foreach (Cogneme t in theUKS.Labeled("Object").Descendents)
                 {
                     limit--;
                     if (limit <= 0) break;
@@ -375,7 +375,7 @@ is-part-of-speech, ";
                     String newParent = valuePairs[1];
 
                     // Make the english word "means" the abstract item.
-                    Relationship r = theUKS.AddStatement(englishWord, "means", textIn + "*");
+                    Cogneme r = theUKS.AddStatement(englishWord, "means", textIn + "*");
 
                     // Make the disambiguated term a child of the parent.
                     theUKS.AddStatement(r.Target, "is-a", newParent);
@@ -435,11 +435,11 @@ is-part-of-speech, ";
 
 
                 // Add relationships and clause
-                Relationship r1 = AddRelationshipClause(newThing, targetThing, relationType);
+                Cogneme r1 = AddRelationshipClause(newThing, targetThing, relationType);
 
-                Relationship r2 = AddRelationshipClause(newThing2, targetThing2, relationType2);
+                Cogneme r2 = AddRelationshipClause(newThing2, targetThing2, relationType2);
 
-                Thing theClauseType = GetClauseType(clauseType);
+                Cogneme theClauseType = GetClauseType(clauseType);
 
                 //r1.AddClause(theClauseType, r2);
 
@@ -447,12 +447,12 @@ is-part-of-speech, ";
             }
         }
 
-        // Add Relationship Clause.
+        // Add Thing Clause.
         // NOTES: Copied from ModuleUKSClause exactly, working on a fix.
-        public static Relationship AddRelationshipClause(string source, string target, string relationshipType)
+        public static Cogneme AddRelationshipClause(string source, string target, string relationshipType)
         {
             UKS.UKS theUKS = MainWindow.theUKS;
-            if (theUKS == null) return null;
+            if (theUKS is null) return null;
             IPluralize pluralizer = new Pluralizer();
 
 
@@ -475,17 +475,17 @@ is-part-of-speech, ";
             relationshipType = pluralizer.Singularize(tempStringArray[0]);
             for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
-            Relationship r = theUKS.AddStatement(source, relationshipType, target);
+            Cogneme r = theUKS.AddStatement(source, relationshipType, target);
 
             return r;
         }
 
         // Get clause type.
         // NOTES: Copied directly from ModuleUKSClause like AddRelationshipClause, looking for a fix.
-        public static Thing GetClauseType(string newThing)
+        public static Cogneme GetClauseType(string newThing)
         {
             UKS.UKS theUKS = MainWindow.theUKS;
-            if (theUKS == null) return null;
+            if (theUKS is null) return null;
 
             return theUKS.GetOrAddThing(newThing, "ClauseType");
         }
@@ -602,7 +602,7 @@ is-part-of-speech, ";
                         }
                         else if (valueType.Contains("contains"))
                         {
-                            Relationship r;
+                            Cogneme r;
                             if (count == "" || count == "1")
                                 r = theUKS.AddStatement("." + textIn, "has", "." + value);
                             else
@@ -618,9 +618,9 @@ is-part-of-speech, ";
                         }
                         ///////   null reltypes? This was a safety check
                         ///
-                        foreach (Thing t in theUKS.AllThings)
-                            foreach (Relationship r in t.Relationships)
-                                if (r.RelType == null)
+                        foreach (Cogneme t in theUKS.AllThings)
+                            foreach (Cogneme r in t.Relationships)
+                                if (r.RelType is null)
                                 {
                                     t.RemoveRelationship(r);
                                 }
@@ -634,16 +634,16 @@ is-part-of-speech, ";
         {
             // Get the UKS.
             UKS.UKS theUKS = MainWindow.theUKS;
-            List<Thing> thingsToRemove = new List<Thing>();
+            List<Cogneme> thingsToRemove = new List<Cogneme>();
             // Get all the children of Word and remove duplicates.
-            foreach (Thing word in theUKS.GetOrAddThing("Word").Children)
+            foreach (Cogneme word in theUKS.GetOrAddThing("Word").Children)
             {
                 // Find unique parents to remove duplicates
-                List<Thing> uniqueParents = new List<Thing>();
-                foreach (Relationship meaning in word.Relationships)
+                List<Cogneme> uniqueParents = new List<Cogneme>();
+                foreach (Cogneme meaning in word.Relationships)
                 {
                     // Find the parents of each target in the realtionship.
-                    foreach (Thing parent in meaning.Target.Parents)
+                    foreach (Cogneme parent in meaning.Target.Parents)
                     {
                         // Continue if the parent is the word itself, (.rock and rock), instead of an actual abstract parent.
                         if ("." + parent.Label == meaning.Source.Label)
@@ -666,7 +666,7 @@ is-part-of-speech, ";
             }
 
             // Remove the duplicate things at the end.
-            foreach (Thing t in thingsToRemove)
+            foreach (Cogneme t in thingsToRemove)
             {
                 theUKS.DeleteThing(t);
                 ModuleGPTInfoDlg.relationshipCount++;

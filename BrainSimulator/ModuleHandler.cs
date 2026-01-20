@@ -33,7 +33,7 @@ public class ModuleHandler
 
     public string ActivateModule(string moduleType)
     {
-        Thing t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
+        Cogneme t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
         t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleType));
         t.AddParent(theUKS.Labeled("ActiveModule"));
 
@@ -54,11 +54,11 @@ public class ModuleHandler
     }
     public void DeactivateModule(string moduleLabel)
     {
-        Thing t = theUKS.Labeled(moduleLabel);
-        if (t == null) return;
+        Cogneme t = theUKS.Labeled(moduleLabel);
+        if (t is null) return;
         for (int i = 0; i < t.Relationships.Count; i++)
         {
-            Relationship r = t.Relationships[i];
+            Cogneme r = t.Relationships[i];
             theUKS.DeleteThing(r.Target);
         }
         theUKS.DeleteThing(t);
@@ -120,9 +120,9 @@ public class ModuleHandler
     public void Close(string moduleLabel)
     {
         var theModuleEntry = activePythonModules.FirstOrDefault(x => x.Item1.ToLower() == moduleLabel.ToLower());
-        if (theModuleEntry.Item2 != null)
+        if (theModuleEntry.Item2 is not null)
         {
-            if (theModuleEntry.Item2 != null)
+            if (theModuleEntry.Item2 is not null)
             {
                 try
                 {
@@ -138,15 +138,15 @@ public class ModuleHandler
         if (PythonPath == "no") return;
         bool firstTime = false;
         //get the ModuleType
-        Thing tModule = theUKS.Labeled(moduleLabel);
-        if (tModule == null) { return; }
-        Thing tModuleType = tModule.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
-        if (tModuleType == null) return;
+        Cogneme tModule = theUKS.Labeled(moduleLabel);
+        if (tModule is null) { return; }
+        Cogneme tModuleType = tModule.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+        if (tModuleType is null) return;
         string moduleType = tModuleType.Label;
         moduleType = moduleType.Replace(".py", "");
 
         //if this is the very first call, initialize the python engine
-        if (Runtime.PythonDLL == null)
+        if (Runtime.PythonDLL is null)
         {
             try
             {
@@ -187,7 +187,7 @@ public class ModuleHandler
                     activePythonModules.Add(theModuleEntry);
                 }
             }
-            if (theModuleEntry.Item2 != null)
+            if (theModuleEntry.Item2 is not null)
             {
                 try
                 {
@@ -221,7 +221,7 @@ public class ModuleHandler
     public void CreateEmptyUKS()
     {
         theUKS = new UKS.UKS();
-        if (theUKS.Labeled("BrainSim") == null)
+        if (theUKS.Labeled("BrainSim") is null)
             theUKS.AddThing("BrainSim", null);
         theUKS.GetOrAddThing("AvailableModule", "BrainSim");
         theUKS.GetOrAddThing("ActiveModule", "BrainSim");

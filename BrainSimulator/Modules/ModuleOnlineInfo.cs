@@ -54,7 +54,7 @@ namespace BrainSimulator.Modules
         {
             Init();  //be sure to leave this here
 
-            if (wordsToLookUp == null) wordsToLookUp = new();
+            if (wordsToLookUp is null) wordsToLookUp = new();
 
             if (wordsToLookUp.Count > 0)
             {
@@ -81,11 +81,11 @@ namespace BrainSimulator.Modules
         public void GetCSKGData(string word)
         {
 
-            if (CSKGContent != null)
+            if (CSKGContent is not null)
             {
                 foreach (string line in CSKGContent)
                 {
-                    if (line == null) break;
+                    if (line is null) break;
                     var fields = line.Split("\t");
                     string source = fields[4];
                     string target = fields[5];
@@ -121,7 +121,7 @@ namespace BrainSimulator.Modules
                             count++;
                             if (count % 100000 == 0) Debug.Write(".");
                             string line = reader.ReadLine();
-                            if (line == null) break;
+                            if (line is null) break;
                             var fields = line.Split("\t");
                             string source = fields[4];
                             string target = fields[5];
@@ -177,21 +177,21 @@ namespace BrainSimulator.Modules
 
         public void ConceptNetLocal(string word)
         {
-            if (sourceHash == null)
+            if (sourceHash is null)
             {
                 ReadConceptNetFile();
                 return;
             }
             if (word == "")
             {
-                if (sourceHash != null)
+                if (sourceHash is not null)
                 {
                     //delete orphas
-                    Thing objectRoot = theUKS.GetOrAddThing("Object", "Thing");
-                    if (objectRoot == null) return;
+                    Cogneme objectRoot = theUKS.GetOrAddThing("Object", "Thing");
+                    if (objectRoot is null) return;
                     for (int i = 0; i < objectRoot.Children.Count; i++)
                     {
-                        Thing child = (Thing)objectRoot.Children[i];
+                        Cogneme child = (Cogneme)objectRoot.Children[i];
                         int descendentCount = child.GetDescendentsCount();
                         if (descendentCount == 1)
                         {
@@ -244,7 +244,7 @@ namespace BrainSimulator.Modules
             if (targetHash.ContainsKey(word))
                 resultListHash.AddRange(targetHash[word].FindAll(x => x.rel == "IsA"));
 
-            if (resultListHash == null) return;
+            if (resultListHash is null) return;
             foreach (Result r in resultListHash)
             {
                 try
@@ -280,9 +280,9 @@ namespace BrainSimulator.Modules
                             // Process the line
                             //Debug.WriteLine($"{source} -> {rel} -> {target} :  {fWeight.ToString("F2")}");
                             //Debug.Write(".");
-                            if (wordsToLookUp == null) wordsToLookUp = new();
-                            Thing t = theUKS.Labeled(target);
-                            if (t == null)
+                            if (wordsToLookUp is null) wordsToLookUp = new();
+                            Cogneme t = theUKS.Labeled(target);
+                            if (t is null)
                             {
                                 //    int index1 = wordsToLookUp.FindIndex(x => x.Item1 == target);
                                 //    if (index1 == -1)
@@ -293,8 +293,8 @@ namespace BrainSimulator.Modules
                             }
                             //if (sourceHash[source].Count > 5 && targetHash[target].Count > 5)
                             {
-                                Relationship r1 = theUKS.AddStatement(source, "is-a", target);
-                                if (r1 != null)
+                                Cogneme r1 = theUKS.AddStatement(source, "is-a", target);
+                                if (r1 is not null)
                                 {
                                     if (r1.TimeToLive == TimeSpan.MaxValue)
                                         r1.TimeToLive = TimeSpan.FromSeconds(1130);
@@ -352,7 +352,7 @@ namespace BrainSimulator.Modules
                     using (StreamWriter writer = new StreamWriter(EnglishPath))
                     {
                         string line = reader.ReadLine();
-                        while (line != null)
+                        while (line is not null)
                         {
                             count++;
                             if (count % 100000 == 0) Debug.Write(".");
@@ -367,7 +367,7 @@ namespace BrainSimulator.Modules
                 {
                     //skip the header line
                     string line = reader.ReadLine();
-                    while (line != null)
+                    while (line is not null)
                     {
                         count++;
                         if (count % 100000 == 0) Debug.Write(".");
@@ -508,7 +508,7 @@ namespace BrainSimulator.Modules
                 using (StreamReader reader = new StreamReader(wordListPath))
                 {
                     string line = reader.ReadLine();
-                    while (line != null)
+                    while (line is not null)
                     {
                         line = line.Replace("\t", " ");
                         string[] words = line.Split(" ");
@@ -551,7 +551,7 @@ namespace BrainSimulator.Modules
                 {
                     string line2;
                     string prevWord = "";
-                    while ((line2 = reader.ReadLine()) != null)
+                    while ((line2 = reader.ReadLine()) is not null)
                     {
                         string line = line2;
                         string[] lineBreaks = new string[] { "A1", "B1", "A2", "B2" };
@@ -592,7 +592,7 @@ namespace BrainSimulator.Modules
                             word = word.Replace("’", "");
                             word = word.ToLower();
                             word = RemoveParentheticals(word);
-                            //word = Relationship.TrimDigits(word.Trim());
+                            //word = Thing.TrimDigits(word.Trim());
 
                             if (word == "" && pos.Count > 0)
                                 word = prevWord;
@@ -615,7 +615,7 @@ namespace BrainSimulator.Modules
             {
                 if (word.Item1 == "")
                 { continue; }
-                Thing existingThing = null;
+                Cogneme existingThing = null;
                 /* rewrite for new single-label concept
                  * var existingThings = theUKS.Labeled(word.Item1);
                                 foreach (var t in existingThings)
@@ -628,9 +628,9 @@ namespace BrainSimulator.Modules
                 string firstLetter = word.Item1.Substring(0, 1).ToUpper();
                 theUKS.GetOrAddThing("Words", "Object");
                 theUKS.GetOrAddThing(word.Item2, "Words");
-                Thing letterParent = theUKS.GetOrAddThing(firstLetter, word.Item2);
+                Cogneme letterParent = theUKS.GetOrAddThing(firstLetter, word.Item2);
 
-                if (existingThing == null)
+                if (existingThing is null)
                     existingThing = theUKS.GetOrAddThing(word.Item1, letterParent);
                 else
                     existingThing.AddParent(letterParent);
@@ -674,7 +674,7 @@ namespace BrainSimulator.Modules
                 {
                     Output = kid.ToString();
                     GetUKS();
-                    Thing incomingInfo = theUKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
+                    Cogneme incomingInfo = theUKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
                     incomingInfo.V = kid;
                     return;
                 }
@@ -707,7 +707,7 @@ namespace BrainSimulator.Modules
             }
 
 
-            if (kids == null) kids = new();
+            if (kids is null) kids = new();
             KidsWord kidsdef = new() { word = text };
             kids.Add(kidsdef);
             string defSearch = "data\">";
@@ -741,7 +741,7 @@ namespace BrainSimulator.Modules
             }
             Output = kidsdef.ToString();
             GetUKS();
-            Thing incomingInfo = theUKS.GetOrAddThing("CurrentIncomingInfo", "Attention");
+            Cogneme incomingInfo = theUKS.GetOrAddThing("CurrentIncomingInfo", "Attention");
             incomingInfo.V = kidsdef;
 
             int index = 0;
@@ -929,14 +929,14 @@ namespace BrainSimulator.Modules
                           "&language=en&format=xml";
                 var response = await Network.theHttpClient.GetAsync(url);
 
-                if (response != null)
+                if (response is not null)
                 {
                     var content = response.Content.ReadAsStringAsync();
                     XmlDocument xmlItemDoc = new XmlDocument();
                     xmlItemDoc.LoadXml(content.Result.ToString());
                     var xmlItemDocValue = xmlItemDoc.GetElementsByTagName("entity");
                     var xmlItemDocValueFirst = xmlItemDocValue[0];
-                    if (xmlItemDocValueFirst != null)
+                    if (xmlItemDocValueFirst is not null)
                     {
                         var nameLabel = xmlItemDocValueFirst.Attributes[0];
                         string itemID = nameLabel.InnerXml;
@@ -1011,7 +1011,7 @@ namespace BrainSimulator.Modules
                             }
                         }
                     }
-                    if (fn != null)
+                    if (fn is not null)
                     {
                         end[docCount] = fn;
                     }
@@ -1023,7 +1023,7 @@ namespace BrainSimulator.Modules
                 {
                     foreach (var text in end[i])
                     {
-                        if (text != null)
+                        if (text is not null)
                         {
                             Debug.WriteLine(text);
 
@@ -1058,7 +1058,7 @@ namespace BrainSimulator.Modules
                         //}
                     }
 
-                    if (fn != null)
+                    if (fn is not null)
                     {
                         end[docCount] = fn;
                     }
@@ -1072,7 +1072,7 @@ namespace BrainSimulator.Modules
 
                     foreach (var text in end[i])
                     {
-                        if (text != null)
+                        if (text is not null)
                         {
                             Debug.Print(text);
                             //theUKS.GetOrAddThing(text, props);
@@ -1101,7 +1101,7 @@ namespace BrainSimulator.Modules
         //delete if not needed
         public override void SizeChanged()
         {
-//            if (mv == null) return; //this is called the first time before the module actually exists
+//            if (mv is null) return; //this is called the first time before the module actually exists
         }
 
         // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);

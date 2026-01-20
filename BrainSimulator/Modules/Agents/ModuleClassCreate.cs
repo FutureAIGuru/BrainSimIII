@@ -55,7 +55,7 @@ public class ModuleClassCreate : ModuleBase
         debugString = "Agent Started\n";
         for (int i = 0; i < theUKS.AllThings.Count; i++)
         {
-            Thing t = theUKS.AllThings[i];
+            Cogneme t = theUKS.AllThings[i];
             if (t.HasAncestor("Object") && !t.Label.Contains(".") && !t.Label.Contains("unknown"))
             {
                 HandleClassWithCommonAttributes(t);
@@ -65,25 +65,25 @@ public class ModuleClassCreate : ModuleBase
         UpdateDialog();
     }
 
-    void HandleClassWithCommonAttributes(Thing t)
+    void HandleClassWithCommonAttributes(Cogneme t)
     {
         //build a List of counts of the attributes
         //build a List of all the Relationships which this thing's children have
         List<RelDest> attributes = new();
-        foreach (Thing t1 in t.ChildrenWithSubclasses)
+        foreach (Cogneme t1 in t.ChildrenWithSubclasses)
         {
-            foreach (Relationship r in t1.Relationships)
+            foreach (Cogneme r in t1.Relationships)
             {
-                if (r.RelType == Thing.IsA) continue;
-                Thing useRelType = GetInstanceType(r.RelType);
+                if (r.RelType == Cogneme.IsA) continue;
+                Cogneme useRelType = GetInstanceType(r.RelType);
 
                 RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.Target);
-                if (foundItem == null)
+                if (foundItem is null)
                 {
                     foundItem = new RelDest { relType = useRelType, target = r.Target };
                     attributes.Add(foundItem);
                 }
-                if (foundItem.relationships.FindFirst(x=>x.Source == r.Source && x.Target == r.Target) == null)
+                if (foundItem.relationships.FindFirst(x=>x.Source == r.Source && x.Target == r.Target) is null)
                     foundItem.relationships.Add(r);
             }
         }
@@ -92,12 +92,12 @@ public class ModuleClassCreate : ModuleBase
         {
             if (key.relationships.Count >= minCommonAttributes)
             {
-                Thing newParent = theUKS.GetOrAddThing(t.Label + "." + key.relType + "." + key.target, t);
+                Cogneme newParent = theUKS.GetOrAddThing(t.Label + "." + key.relType + "." + key.target, t);
                 newParent.AddRelationship(key.target, key.relType);
                 debugString += "Created new subclass " + newParent;
-                foreach (Relationship r in key.relationships)
+                foreach (Cogneme r in key.relationships)
                 {
-                    Thing tChild = (Thing)r.Source;
+                    Cogneme tChild = (Cogneme)r.Source;
                     tChild.AddParent(newParent);
                     tChild.RemoveParent(t);
                 }

@@ -10,7 +10,7 @@ public partial class UKS
 {
 
     //This is the actual internal Universal Knowledge Store
-    static private List<Thing> uKSList = new() { Capacity = 1000000, };
+    static private List<Cogneme> uKSList = new() { Capacity = 1000000, };
 
 
     //This is a temporary copy of the UKS which used internally during the save and restore process to 
@@ -21,10 +21,10 @@ public partial class UKS
     /// Occasionally a list of all the Things in the UKS is needed. This is READ ONLY.
     /// There is only one (shared) list for the App.
     /// </summary>
-    public IList<Thing> AllThings { get => uKSList; }
+    public List<Cogneme> AllThings { get => uKSList; }
 
     //TimeToLive processing for relationships
-    static public List<Relationship> transientRelationships = new List<Relationship>();
+    static public List<Cogneme> transientRelationships = new List<Cogneme>();
     static Timer stateTimer;
 
     public static UKS theUKS = new UKS();
@@ -37,7 +37,7 @@ public partial class UKS
         if (AllThings.Count == 0 || clear)
         {
             AllThings.Clear();
-            ThingLabels.ClearLabelList();
+            CognemeLabels.ClearLabelList();
             CreateInitialStructure();
         }
         UKSTemp.Clear();
@@ -55,7 +55,7 @@ public partial class UKS
         {
             for (int i = transientRelationships.Count - 1; i >= 0; i--)
             {
-                Relationship r = transientRelationships[i];
+                Cogneme r = transientRelationships[i];
                 //check to see if the relationship has expired
                 if (r.TimeToLive != TimeSpan.MaxValue && r.LastFiredTime + r.TimeToLive < DateTime.Now)
                 {
@@ -63,7 +63,7 @@ public partial class UKS
                     //if this leaves an orphan thing, delete the thing
                     if (r.RelType.Label == "has-child" && r.Target?.Parents.Count == 0)
                     {
-                        r.Target.AddParent(ThingLabels.GetThing("unknownObject"));
+                        r.Target.AddParent(CognemeLabels.GetThing("unknownObject"));
                     }
                     transientRelationships.Remove(r);
                     //HACK
@@ -88,9 +88,9 @@ public partial class UKS
     /// <param name="label"></param>
     /// <param name="parent">May be null</param>
     /// <returns></returns>
-    public virtual Thing AddThing(string label, Thing? parent)
+    public virtual Cogneme AddThing(string label, Cogneme? parent)
     {
-        Thing newThing = new();
+        Cogneme newThing = new();
         newThing.Label = label;
         if (parent is not null)
         {
@@ -108,16 +108,16 @@ public partial class UKS
     /// This is a primitive method to Delete a Thing...the Thing must not have any children
     /// </summary>
     /// <param name="t">The Thing to delete</param>
-    public virtual void DeleteThing(Thing t)
+    public virtual void DeleteThing(Cogneme t)
     {
-        if (t == null) return;
+        if (t is null) return;
         //if (t.Children.Count != 0)
         //    return; //can't delete something with children...must delete all children first.
-        foreach (Relationship r in t.Relationships)
+        foreach (Cogneme r in t.Relationships)
             t.RemoveRelationship(r);
-        foreach (Relationship r in t.RelationshipsFrom)
+        foreach (Cogneme r in t.RelationshipsFrom)
             r.Source.RemoveRelationship(r);
-        ThingLabels.RemoveThingLabel(t.Label);
+        CognemeLabels.RemoveThingLabel(t.Label);
         lock (AllThings)
             AllThings.Remove(t);
 
@@ -128,26 +128,26 @@ public partial class UKS
     /// </summary>
     /// <param name="label"></param>
     /// <returns>The Thing or null</returns>
-    public Thing Labeled(string label)
+    public Cogneme Labeled(string label)
     {
-        Thing retVal = ThingLabels.GetThing(label);
+        Cogneme retVal = CognemeLabels.GetThing(label);
         return retVal;
     }
 
-    public bool ThingInTree(Thing t1, Thing t2)
+    public bool ThingInTree(Cogneme t1, Cogneme t2)
     {
-        if (t2 == null) return false;
-        if (t1 == null) return false;
+        if (t2 is null) return false;
+        if (t1 is null) return false;
         if (t1 == t2) return true;
         if (t1.AncestorList().Contains(t2)) return true;
         if (t2.AncestorList().Contains(t1)) return true;
         return false;
     }
-    List<Thing> GetTransitiveTargetChain(Thing t, Thing relType, List<Thing> results = null)
+    List<Cogneme> GetTransitiveTargetChain(Cogneme t, Cogneme relType, List<Cogneme> results = null)
     {
-        if (results == null) results = new();
-        List<Relationship> targets = RelationshipTree(t, relType);
-        foreach (Relationship r in targets)
+        if (results is null) results = new();
+        List<Cogneme> targets = RelationshipTree(t, relType);
+        foreach (Cogneme r in targets)
             if (r.RelType == relType)
             {
                 if (!results.Contains(r.Target))
@@ -159,21 +159,21 @@ public partial class UKS
             }
         return results;
     }
-    List<Relationship> RelationshipTree(Thing t, Thing relType)
+    List<Cogneme> RelationshipTree(Cogneme t, Cogneme relType)
     {
-        List<Relationship> results = new();
+        List<Cogneme> results = new();
         results.AddRange(t.Relationships.FindAll(x => x.RelType == relType));
-        foreach (Thing t1 in t.Ancestors)
+        foreach (Cogneme t1 in t.Ancestors)
             results.AddRange(t1.Relationships.FindAll(x => x.RelType == relType));
-        foreach (Thing t1 in t.Descendents)
+        foreach (Cogneme t1 in t.Descendents)
             results.AddRange(t1.Relationships.FindAll(x => x.RelType == relType));
         return results;
     }
-    List<Thing> GetTransitiveSourceChain(Thing t, Thing relType, List<Thing> results = null)
+    List<Cogneme> GetTransitiveSourceChain(Cogneme t, Cogneme relType, List<Cogneme> results = null)
     {
-        if (results == null) results = new();
-        List<Relationship> targets = RelationshipsByTree(t, relType);
-        foreach (Relationship r in targets)
+        if (results is null) results = new();
+        List<Cogneme> targets = RelationshipsByTree(t, relType);
+        foreach (Cogneme r in targets)
             if (r.RelType == relType)
             {
                 if (!results.Contains(r.Source))
@@ -185,19 +185,19 @@ public partial class UKS
             }
         return results;
     }
-    List<Relationship> RelationshipsByTree(Thing t, Thing relType)
+    List<Cogneme> RelationshipsByTree(Cogneme t, Cogneme relType)
     {
-        List<Relationship> results = new();
-        if (t == null) return results;
+        List<Cogneme> results = new();
+        if (t is null) return results;
         results.AddRange(t.RelationshipsFrom.FindAll(x => x.RelType == relType));
-        foreach (Thing t1 in t.Ancestors)
+        foreach (Cogneme t1 in t.Ancestors)
             results.AddRange(t1.RelationshipsFrom.FindAll(x => x.RelType == relType));
-        foreach (Thing t1 in t.Descendents)
+        foreach (Cogneme t1 in t.Descendents)
             results.AddRange(t1.RelationshipsFrom.FindAll(x => x.RelType == relType));
         return results;
     }
 
-    private bool RelationshipsAreExclusive(Relationship r1, Relationship r2)
+    private bool RelationshipsAreExclusive(Cogneme r1, Cogneme r2)
     {
         //are two relationships mutually exclusive?
         //yes if they differ by a single component property
@@ -208,7 +208,7 @@ public partial class UKS
         //  is lessthan is greaterthan
         //  several other cases
 
-        if (r1.Target != r2.Target && (r1.Target == null || r2.Target == null)) return false;
+        if (r1.Target != r2.Target && (r1.Target is null || r2.Target is null)) return false;
         if (r1.Target == r2.Target && r1.RelType == r2.RelType) return false;
         //TODO Verify this:
         if (r1.HasProperty("isResult")) return false;
@@ -222,21 +222,21 @@ public partial class UKS
             FindCommonParents(r1.Source, r1.Source).Count() > 0)
         {
 
-            IList<Thing> r1RelProps = r1.RelType.GetAttributes();
-            IList<Thing> r2RelProps = r2.RelType.GetAttributes();
+            IReadOnlyList<Cogneme> r1RelProps = r1.RelType.GetAttributes();
+            IReadOnlyList<Cogneme> r2RelProps = r2.RelType.GetAttributes();
             //handle case with properties of the target
-            if (r1.Target != null && r1.Target == r2.Target &&
+            if (r1.Target is not null && r1.Target == r2.Target &&
                 (r1.Target.AncestorList().Contains(r2.Target) ||
                 r2.Target.AncestorList().Contains(r1.Target) ||
                 FindCommonParents(r1.Target, r1.Target).Count() > 0))
             {
-                IList<Thing> r1TargetProps = r1.Target.GetAttributes();
-                IList<Thing> r2TargetProps = r2.Target.GetAttributes();
-                foreach (Thing t1 in r1TargetProps)
-                    foreach (Thing t2 in r2TargetProps)
+                IReadOnlyList<Cogneme> r1TargetProps = r1.Target.GetAttributes();
+                IReadOnlyList<Cogneme> r2TargetProps = r2.Target.GetAttributes();
+                foreach (Cogneme t1 in r1TargetProps)
+                    foreach (Cogneme t2 in r2TargetProps)
                     {
-                        List<Thing> commonParents = FindCommonParents(t1, t2);
-                        foreach (Thing t3 in commonParents)
+                        List<Cogneme> commonParents = FindCommonParents(t1, t2);
+                        foreach (Cogneme t3 in commonParents)
                         {
                             if (HasProperty(t3, "isexclusive") || HasProperty(t3, "allowMultiple"))
                                 return true;
@@ -244,10 +244,10 @@ public partial class UKS
                     }
             }
             //handle case with conflicting targets
-            if (r1.Target != null && r2.Target != null)
+            if (r1.Target is not null && r2.Target is not null)
             {
-                List<Thing> commonParents = FindCommonParents(r1.Target, r2.Target);
-                foreach (Thing t3 in commonParents)
+                List<Cogneme> commonParents = FindCommonParents(r1.Target, r2.Target);
+                foreach (Cogneme t3 in commonParents)
                 {
                     if (HasProperty(t3, "isexclusive") || HasProperty(t3, "allowMultiple"))
                         return true;
@@ -255,12 +255,12 @@ public partial class UKS
             }
             if (r1.Target == r2.Target)
             {
-                foreach (Thing t1 in r1RelProps)
-                    foreach (Thing t2 in r2RelProps)
+                foreach (Cogneme t1 in r1RelProps)
+                    foreach (Cogneme t2 in r2RelProps)
                     {
                         if (t1 == t2) continue;
-                        List<Thing> commonParents = FindCommonParents(t1, t2);
-                        foreach (Thing t3 in commonParents)
+                        List<Cogneme> commonParents = FindCommonParents(t1, t2);
+                        foreach (Cogneme t3 in commonParents)
                         {
                             if (HasProperty(t3, "isexclusive") || HasProperty(t3, "allowMultiple"))
                                 return true;
@@ -269,26 +269,26 @@ public partial class UKS
             }
             //if source and target are the same and one contains a number, assume that the other contains "1"
             // fido has leg -> fido has 1 leg  
-            bool hasNumber1 = (r1RelProps.FindFirst(x => x.HasAncestorLabeled("number")) != null);
-            bool hasNumber2 = (r2RelProps.FindFirst(x => x.HasAncestorLabeled("number")) != null);
+            bool hasNumber1 = (r1RelProps.FindFirst(x => x.HasAncestorLabeled("number")) is not null);
+            bool hasNumber2 = (r2RelProps.FindFirst(x => x.HasAncestorLabeled("number")) is not null);
             if (r1.Target == r2.Target &&
                 (hasNumber1 || hasNumber2))
                 return true;
 
             //if one of the reltypes contains negation and not the other
-            Thing r1Not = r1RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
-            Thing r2Not = r2RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
+            Cogneme r1Not = r1RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
+            Cogneme r2Not = r2RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
             if ((r1.Source.Ancestors.Contains(r2.Source) ||
                 r2.Source.Ancestors.Contains(r1.Source)) &&
                 r1.Target == r2.Target &&
-                (r1Not == null && r2Not != null || r1Not != null && r2Not == null))
+                (r1Not is null && r2Not is not null || r1Not is not null && r2Not is null))
                 return true;
         }
         else
         {
             //this appears to duplicate code at line 226
-            List<Thing> commonParents = FindCommonParents(r1.Target, r2.Target);
-            foreach (Thing t3 in commonParents)
+            List<Cogneme> commonParents = FindCommonParents(r1.Target, r2.Target);
+            foreach (Cogneme t3 in commonParents)
             {
                 if (HasProperty(t3, "isexclusive"))
                     return true;
@@ -300,44 +300,44 @@ public partial class UKS
         return false;
     }
 
-    private bool RelationshipTypesAreExclusive(Relationship r1, Relationship r2)
+    private bool RelationshipTypesAreExclusive(Cogneme r1, Cogneme r2)
     {
-        IList<Thing> r1RelProps = r1.RelType.GetAttributes();
-        IList<Thing> r2RelProps = r2.RelType.GetAttributes();
-        Thing r1Not = r1RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
-        Thing r2Not = r2RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
+        IReadOnlyList<Cogneme> r1RelProps = r1.RelType.GetAttributes();
+        IReadOnlyList<Cogneme> r2RelProps = r2.RelType.GetAttributes();
+        Cogneme r1Not = r1RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
+        Cogneme r2Not = r2RelProps.FindFirst(x => x.Label == "not" || x.Label == "no");
         if (r1.Target == r2.Target &&
-            (r1Not == null && r2Not != null || r1Not != null && r2Not == null))
+            (r1Not is null && r2Not is not null || r1Not is not null && r2Not is null))
             return true;
         return false;
     }
 
-    private bool HasAttribute(Thing t, string name)
+    private bool HasAttribute(Cogneme t, string name)
     {
-        if (t == null) return false;
-        foreach (Relationship r in t.Relationships)
+        if (t is null) return false;
+        foreach (Cogneme r in t.Relationships)
         {
-            if (r.RelType != null && r.RelType.Label == "is" && r.Target.Label == name)
+            if (r.RelType is not null && r.RelType.Label == "is" && r.Target.Label == name)
                 return true;
         }
         return false;
     }
 
-    bool HasProperty(Thing t, string propertyName)
+    bool HasProperty(Cogneme t, string propertyName)
     {
-        if (t == null) return false;
+        if (t is null) return false;
         var v = t.Relationships;
-        if (v.FindFirst(x => x.Target?.Label.ToLower() == propertyName.ToLower() && x.RelType.Label == "hasProperty") != null) return true;
+        if (v.FindFirst(x => x.Target?.Label.ToLower() == propertyName.ToLower() && x.RelType.Label == "hasProperty") is not null) return true;
         return false;
     }
 
-    bool RelationshipsAreEqual(Relationship r1, Relationship r2, bool ignoreSource = true)
+    bool RelationshipsAreEqual(Cogneme r1, Cogneme r2, bool ignoreSource = true)
     {
         //special case if these contain other relationships
-        if (r1.Source is Relationship rt1 && r2.Source is Relationship rt2)
+        if (r1.Source is Cogneme rt1 && r2.Source is Cogneme rt2)
         {
             if (!RelationshipsAreEqual(rt1, rt2)) return false;
-            if (r1.Target is Relationship rt3 && r2.Target is Relationship rt4)
+            if (r1.Target is Cogneme rt3 && r2.Target is Cogneme rt4)
                 if (!RelationshipsAreEqual(rt3, rt4)) return false;
             if (r1.RelType != r2.RelType) return false;
             return true;
@@ -350,32 +350,32 @@ public partial class UKS
         return false;
     }
 
-    public Relationship GetRelationship(Thing source, Thing relType, Thing target)
+    public Cogneme GetRelationship(Cogneme source, Cogneme relType, Cogneme target)
     {
-        if (source == null) return null;
+        if (source is null) return null;
         //create a temporary relationship
-        Relationship r = new() { Source = source, RelType = relType, Target = target };
+        Cogneme r = new() { Source = source, RelType = relType, Target = target };
         //see if it already exists
         return GetRelationship(r);
     }
-    public Relationship GetRelationship(Relationship r)
+    public Cogneme GetRelationship(Cogneme r)
     {
-        foreach (Relationship r1 in r.Source.Relationships)
+        foreach (Cogneme r1 in r.Source?.Relationships)
         {
             if (RelationshipsAreEqual(r, r1)) return r1;
         }
         return null;
     }
 
-    private Thing ThingFromString(string label, string defaultParent, Thing source = null)
+    private Cogneme ThingFromString(string label, string defaultParent, Cogneme source = null)
     {
         if (string.IsNullOrEmpty(label)) return null;
         if (label == "") return null;
-        Thing t = Labeled(label);
+        Cogneme t = Labeled(label);
 
-        if (t == null)
+        if (t is null)
         {
-            if (Labeled(defaultParent) == null)
+            if (Labeled(defaultParent) is null)
             {
                 GetOrAddThing(defaultParent, Labeled("Object"), source);
             }
@@ -385,13 +385,13 @@ public partial class UKS
     }
 
     //temporarily public for testing
-    private Thing ThingFromObject(object o, string parentLabel = "", Thing source = null)
+    private Cogneme ThingFromObject(object o, string parentLabel = "", Cogneme source = null)
     {
         if (parentLabel == "")
             parentLabel = "unknownObject";
         if (o is string s3)
             return ThingFromString(s3.Trim(), parentLabel, source);
-        else if (o is Thing t3)
+        else if (o is Cogneme t3)
             return t3;
         else if (o is null)
             return null;
@@ -403,13 +403,13 @@ public partial class UKS
     /// Recursively removes all the descendants of a Thing. If these descendants have no other parents, they will be deleted as well
     /// </summary>
     /// <param name="t">The Thing to remove the children from</param>
-    public void DeleteAllChildren(Thing t)
+    public void DeleteAllChildren(Cogneme t)
     {
         if (t is not null)
         {
             while (t.Children.Count > 0)
             {
-                Thing theChild = t.Children[0];
+                Cogneme theChild = t.Children[0];
                 if (theChild.Parents.Count == 1)
                 {
                     DeleteAllChildren(theChild);
@@ -435,30 +435,30 @@ public partial class UKS
     /// <param name="source"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-    public Thing GetOrAddThing(string label, object parent = null, Thing source = null)
+    public Cogneme GetOrAddThing(string label, object parent = null, Cogneme source = null)
     {
-        Thing thingToReturn = null;
+        Cogneme thingToReturn = null;
 
         if (string.IsNullOrEmpty(label)) return thingToReturn;
 
-        thingToReturn = ThingLabels.GetThing(label);
-        if (thingToReturn != null) return thingToReturn;
+        thingToReturn = CognemeLabels.GetThing(label);
+        if (thingToReturn is not null) return thingToReturn;
 
         //. are used to indicate attributes to be added
         if (label.Contains(".") && label != "." && !label.Contains(".py"))
         {
             string[] attribs = label.Split(".");
-            Thing baseThing = Labeled(attribs[0]);
-            if (baseThing == null) baseThing = AddThing(attribs[0], "unknownObject");
-            Thing instanceThing = Labeled(label);
-            if (instanceThing == null)
+            Cogneme baseThing = Labeled(attribs[0]);
+            if (baseThing is null) baseThing = AddThing(attribs[0], "unknownObject");
+            Cogneme instanceThing = Labeled(label);
+            if (instanceThing is null)
             {
                 instanceThing = AddThing(label, baseThing);
             }
             for (int i = 1; i < attribs.Length; i++)
             {
-                Thing attrib = Labeled(attribs[i]);
-                if (attrib == null)
+                Cogneme attrib = Labeled(attribs[i]);
+                if (attrib is null)
                     attrib = AddThing(attribs[i], "unknownObject");
                 instanceThing.AddRelationship(attrib, "is");
             }
@@ -466,30 +466,30 @@ public partial class UKS
         }
 
 
-        Thing correctParent = null;
+        Cogneme correctParent = null;
         if (parent is string s)
-            correctParent = ThingLabels.GetThing(s);
-        if (parent is Thing t)
+            correctParent = CognemeLabels.GetThing(s);
+        if (parent is Cogneme t)
             correctParent = t;
-        if (correctParent == null)
-            correctParent = ThingLabels.GetThing("unknownObject");
+        if (correctParent is null)
+            correctParent = CognemeLabels.GetThing("unknownObject");
 
         if (correctParent is null) throw new ArgumentException("GetOrAddThing: could not find parent");
 
         if (label.EndsWith("*"))
         {
             string baseLabel = label.Substring(0, label.Length - 1);
-            Thing newParent = ThingLabels.GetThing(baseLabel);
+            Cogneme newParent = CognemeLabels.GetThing(baseLabel);
             //instead of creating a new label, see if the next label for this item already exists and can be reused
-            if (source != null)
+            if (source is not null)
             {
                 int digit = 0;
-                while (source.Relationships.FindFirst(x => x.RelType.Label == baseLabel + digit) != null) digit++;
-                Thing labeled = ThingLabels.GetThing(baseLabel + digit);
-                if (labeled != null)
+                while (source.Relationships.FindFirst(x => x.RelType.Label == baseLabel + digit) is not null) digit++;
+                Cogneme labeled = CognemeLabels.GetThing(baseLabel + digit);
+                if (labeled is not null)
                     return labeled;
             }
-            if (newParent == null)
+            if (newParent is null)
                 newParent = AddThing(baseLabel, correctParent);
             correctParent = newParent;
         }
@@ -517,7 +517,7 @@ public partial class UKS
     /// <param name="attributesFollow">Attributes follow or precede the main</param>
     /// <param name="singularize"></param>
     /// <returns></returns>
-    public Thing CreateThingFromMultipleAttributes(string label, bool attributesFollow, bool singularize = true)
+    public Cogneme CreateThingFromMultipleAttributes(string label, bool attributesFollow, bool singularize = true)
     {
         IPluralize pluralizer = new Pluralizer();
         label = label.Trim();
@@ -545,20 +545,20 @@ public partial class UKS
                     thingLabel += "." + tempStringArray[i];
         }
 
-        Thing t = GetOrAddThing(thingLabel);
+        Cogneme t = GetOrAddThing(thingLabel);
         return t;
     }
 
 
 
-    public Relationship AddClause(Relationship rBase, Thing clauseType, Relationship rClause)
+    public Cogneme AddClause(Cogneme rBase, Cogneme clauseType, Cogneme rClause)
     {
         //rNew is an orhpan...not a real linked-up relationship, yet
-        Relationship rNew = new() { Source = rBase, RelType = clauseType, Target = rClause, Weight = .9f };
+        Cogneme rNew = new() { Source = rBase, RelType = clauseType, Target = rClause, Weight = .9f };
 
         //does this relation/clause already exist?
         var r = GetRelationship(rNew);
-        if (r != null) return r;
+        if (r is not null) return r;
 
         rBase.AddRelationship(rNew.Target, rNew.RelType);
 

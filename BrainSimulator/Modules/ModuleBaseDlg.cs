@@ -157,8 +157,8 @@ public class ModuleBaseDlg : Window
     public void Timer_Tick(object sender, EventArgs e)
     {
         timer.Stop();
-        if (Application.Current == null) return;
-        if (this != null)
+        if (Application.Current is null) return;
+        if (this is not null)
             Draw(false);
 
     }
@@ -167,8 +167,8 @@ public class ModuleBaseDlg : Window
     public void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
     {
         timer.Stop();
-        if (Application.Current == null) return;
-        if (this != null)
+        if (Application.Current is null) return;
+        if (this is not null)
             Draw(false);
     }
 
@@ -179,7 +179,7 @@ public class ModuleBaseDlg : Window
     /// <param name="c">Defaults to red</param>
     public void SetStatus(string message, Color? c = null)
     {
-        if (c == null) c = Colors.Red;
+        if (c is null) c = Colors.Red;
         statusLabel.Background = new SolidColorBrush(Colors.Gray);
         if (c == Colors.Red && (message != "OK" && message != "" ))
             statusLabel.Background = new SolidColorBrush(Colors.LemonChiffon);

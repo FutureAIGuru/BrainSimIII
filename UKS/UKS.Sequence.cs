@@ -13,34 +13,34 @@ public partial class UKS
     /// <param name="targets">The target Things (can be letters or sequence start nodes)</param>
     /// <param name="baseWeight">The base weight of the relationships</param>
     /// <returns></returns>
-    public Relationship AddSequence(Thing source, Thing relType, List<Thing> targets, float baseWeight = 1.0f)
+    public Cogneme AddSequence(Cogneme source, Cogneme relType, List<Cogneme> targets, float baseWeight = 1.0f)
     {
         if (targets.Count == 0) return null;
 
         // Create first node with FRST pointer
-        Relationship firstNode = new Relationship() { Label = source.Label + "-seq0" };
+        Cogneme firstNode = new Cogneme() { Label = source.Label + "-seq0" };
         firstNode.AddRelationship(firstNode, "FRST"); // Points to itself as first node
         firstNode.AddRelationship(targets[0], "VLU");
 
-        Relationship retVal = source.AddRelationship(firstNode, relType);
+        Cogneme retVal = source.AddRelationship(firstNode, relType);
 
         var prevElement = firstNode;
 
         // Build chain of sequence nodes
         for (int i = 1; i < targets.Count; i++)
         {
-            Relationship newNode = new Relationship() { Label = source.Label + "-seq" + i };
+            Cogneme newNode = new Cogneme() { Label = source.Label + "-seq" + i };
             newNode.AddRelationship(firstNode, "FRST");
             //does this target have a similar relationship?
             var target = targets[i].Relationships?.FindFirst(x => x.RelType == relType)?.Target;
-            if (target == null) target = targets[i];
+            if (target is null) target = targets[i];
             newNode.AddRelationship(target, "VLU");
             prevElement.Source = prevElement;
-            prevElement.RelType = (Thing)"NXT";
+            prevElement.RelType = (Cogneme)"NXT";
             prevElement.Target = newNode;
             prevElement = newNode;
         }
-        prevElement.RelType = (Thing)"NXT";
+        prevElement.RelType = (Cogneme)"NXT";
         return retVal;
     }
 
@@ -54,7 +54,7 @@ public partial class UKS
     /// <param name="circularSearch">If true, circularizes the search of the candidate (for visuals)</param>
     /// <param name="firstLastPriority">If true, prioritizes matches with first and last elements matching</param>
     /// <returns>Confidence that the pattern exists in the candidate</returns>
-    public List<(Relationship r, float confidence)> HasSequence(List<Thing> targets, Thing relType, bool circularSearch = false, bool firstLastPriority = false)
+    public List<(Cogneme r, float confidence)> HasSequence(List<Cogneme> targets, Cogneme relType, bool circularSearch = false, bool firstLastPriority = false)
     {
         //this function searches the UKS for sequences matching the specified pattern in targets. 
         //the sstructure of a sequence is a series of Relationships of RelType "NXT" with a target of the next element in the sequence
@@ -83,7 +83,7 @@ public partial class UKS
         ///Example: given the stored sequance S E A T , S A E T would match with higher confidence than E S A T
         ///
 
-        // Returns a list of tuples of (Relationship to the start of the matching sequence, confidence value between 0 and 1)
+        // Returns a list of tuples of (Thing to the start of the matching sequence, confidence value between 0 and 1)
 
         //CASE 0:  elements must be in exact order, no circular search, no first/last priority
         //Ignoring, for now, the circularSearch and firstLastPriority options
@@ -100,11 +100,11 @@ public partial class UKS
         // a perfect match will have a Final Next relationship back to the source Thing and the source thing will have a relationship of relType to the first element in the sequence
         // return the list of source things and their confidence values
 
-        List<(Relationship r, float confidence)> retVal = new List<(Relationship r, float confidence)>();
+        List<(Cogneme r, float confidence)> retVal = new List<(Cogneme r, float confidence)>();
 
         // Handle edge cases
-        if (targets == null || targets.Count == 0) return retVal;
-        if (targets[0] == null) return retVal;
+        if (targets is null || targets.Count == 0) return retVal;
+        if (targets[0] is null) return retVal;
 
         // Step 1: Find all sequence nodes that have targets[0] as their VLU
         // These are potential starting points for matching sequences
@@ -118,8 +118,8 @@ public partial class UKS
         // Step 2: For each subsequent target, filter candidates by following NXT relationships
         for (int i = 1; i < targets.Count; i++)
         {
-            Thing currentTarget = targets[i];
-            if (currentTarget == null) break; // Stop if we hit a null target
+            Cogneme currentTarget = targets[i];
+            if (currentTarget is null) break; // Stop if we hit a null target
 
             // Find all sequence nodes that have currentTarget as their VLU
             var nodesWithCurrentValue = currentTarget.RelationshipsFrom
@@ -128,15 +128,15 @@ public partial class UKS
                 .ToList();
 
             // Create new candidate list by checking if any existing candidate has NXT to these nodes
-            var newCandidates = new List<(Thing seqNode, int matchedCount)>();
+            var newCandidates = new List<(Cogneme seqNode, int matchedCount)>();
 
             foreach (var candidate in candidateNodes)
             {
                 // Case A: Check if this candidate has a NXT relationship to any node with currentTarget as VLU
-                var nextRelationships = (((Relationship)candidate.Item1)?.RelType?.Label == "NXT") ?
-                    new List<Thing>() { ((Relationship)candidate.Item1).Target } : null;
+                var nextRelationships = (((Cogneme)candidate.Item1)?.RelType?.Label == "NXT") ?
+                    new List<Cogneme>() { ((Cogneme)candidate.Item1).Target } : null;
 
-                if (nextRelationships != null && nextRelationships.Count > 0)
+                if (nextRelationships is not null && nextRelationships.Count > 0)
                 {
                     foreach (var nextRel in nextRelationships)
                     {
@@ -154,9 +154,9 @@ public partial class UKS
                     var sourceRel = candidate.seqNode.Relationships
                         ?.FirstOrDefault(r => r.RelType?.Label == "FRST");
 
-                    if (sourceRel?.Target != null)
+                    if (sourceRel?.Target is not null)
                     {
-                        Thing firstNode = sourceRel.Target;
+                        Cogneme firstNode = sourceRel.Target;
 
                         // Find all sequence nodes that have this firstNode as their VLU
                         var parentSequenceNodes = firstNode.RelationshipsFrom
@@ -164,7 +164,7 @@ public partial class UKS
                             .Select(r => r.Source)
                             .ToList();
 
-                        if (parentSequenceNodes != null)
+                        if (parentSequenceNodes is not null)
                         {
                             foreach (var parentNode in parentSequenceNodes)
                             {
@@ -173,7 +173,7 @@ public partial class UKS
                                     ?.Where(r => r.RelType?.Label == "NXT")
                                     .ToList();
 
-                                if (parentNextRels != null)
+                                if (parentNextRels is not null)
                                 {
                                     foreach (var parentNextRel in parentNextRels)
                                     {
@@ -197,21 +197,21 @@ public partial class UKS
         foreach (var candidate in candidateNodes)
         {
             // Find FRST relationship from the candidate node to get the sequence's first node
-            Relationship firstSeqNode = (Relationship)candidate.seqNode.Relationships
+            Cogneme firstSeqNode = (Cogneme)candidate.seqNode.Relationships
                 .FindFirst(r => r.RelType?.Label == "FRST")?.Target;
-            if (firstSeqNode == null) continue;
+            if (firstSeqNode is null) continue;
 
 
             // Find all Things that reference this sequence (have relationships pointing to firstSeqNode)
             var referencingThings = firstSeqNode.RelationshipsFrom
-                ?.Where(r => ((relType == null || r.RelType == relType) && r.RelType?.Label != "FRST"))
+                ?.Where(r => ((relType is null || r.RelType == relType) && r.RelType?.Label != "FRST"))
                 .ToList();
 
-            if (referencingThings != null)
+            if (referencingThings is not null)
             {
                 foreach (var refRel in referencingThings)
                 {
-                    if (refRel.Source != null)
+                    if (refRel.Source is not null)
                     {
                         // Calculate confidence
                         float confidence;
@@ -256,15 +256,15 @@ public partial class UKS
     /// <summary>
     /// Helper method to count the actual length of a sequence
     /// </summary>
-    private int CountSequenceLength(Relationship firstNode, Thing sourceThing)
+    private int CountSequenceLength(Cogneme firstNode, Cogneme sourceThing)
     {
-        if (firstNode == null) return 0;
+        if (firstNode is null) return 0;
 
         int count = 0;
-        var visited = new HashSet<Thing>(); //prevent circular refernce problems
+        var visited = new HashSet<Cogneme>(); //prevent circular refernce problems
         var current = firstNode;
 
-        while (current != null && !visited.Contains(current))
+        while (current is not null && !visited.Contains(current))
         {
             count++;
 
@@ -272,12 +272,12 @@ public partial class UKS
 
             // Follow NXT relationship
             if (current.RelType?.Label != "NXT") break;
-            Relationship nextRel = (Relationship)current.Target;
+            Cogneme nextRel = (Cogneme)current.Target;
 
-            if (nextRel == null) break;
+            if (nextRel is null) break;
 
             // Stop if we've reached back to the source (completed the circle)
-            if (sourceThing != null && nextRel.Target == sourceThing) break;
+            if (sourceThing is not null && nextRel.Target == sourceThing) break;
 
             current = nextRel;
         }
@@ -288,18 +288,18 @@ public partial class UKS
     /// <summary>
     /// Helper method to find the first node in a sequence by following FRST to owner, then finding owner's relationship to sequence start
     /// </summary>
-    private Thing FindFirstSequenceNode(Thing currentNode, Thing sourceThing)
+    private Cogneme FindFirstSequenceNode(Cogneme currentNode, Cogneme sourceThing)
     {
-        if (currentNode == null || sourceThing == null) return null;
+        if (currentNode is null || sourceThing is null) return null;
 
         // The first sequence node is the one that the source Thing has a direct relationship to
         // and which has FRST pointing back to sourceThing
         var potentialFirstNodes = sourceThing.Relationships
-            ?.Where(r => r.Target != null)
+            ?.Where(r => r.Target is not null)
             .Select(r => r.Target)
             .ToList();
 
-        if (potentialFirstNodes == null) return null;
+        if (potentialFirstNodes is null) return null;
 
         // Check each potential first node to see if it's part of the same sequence
         foreach (var node in potentialFirstNodes)
@@ -324,14 +324,14 @@ public partial class UKS
     /// <summary>
     /// Helper method to check if we can reach targetNode from startNode by following NXT relationships
     /// </summary>
-    private bool CanReachNode(Thing startNode, Thing targetNode, Thing sourceThing)
+    private bool CanReachNode(Cogneme startNode, Cogneme targetNode, Cogneme sourceThing)
     {
         if (startNode == targetNode) return true;
 
-        var visited = new HashSet<Thing>();
+        var visited = new HashSet<Cogneme>();
         var current = startNode;
 
-        while (current != null && !visited.Contains(current))
+        while (current is not null && !visited.Contains(current))
         {
             if (current == targetNode) return true;
 
@@ -341,10 +341,10 @@ public partial class UKS
             var nextRel = current.Relationships
                 ?.FirstOrDefault(r => r.RelType?.Label == "NXT");
 
-            if (nextRel == null) break;
+            if (nextRel is null) break;
 
             // Stop if we've reached back to the source (completed the circle)
-            if (sourceThing != null && nextRel.Target == sourceThing) break;
+            if (sourceThing is not null && nextRel.Target == sourceThing) break;
 
             current = nextRel.Target;
         }
@@ -352,34 +352,34 @@ public partial class UKS
         return false;
     }
 
-    private Relationship NextNode(Relationship currentNode)
+    private Cogneme NextNode(Cogneme currentNode)
     {
         //cases:  This is end of the sequence
         //        This is a reference to another sequence
         //        This is the end of a subsequence
         if (currentNode.RelType?.Label != "NXT") return null;
-        return (Relationship)currentNode.Target;
+        return (Cogneme)currentNode.Target;
     }
 
     /// <summary>
     /// Flatten a sequence into a list of leaf Things (letters)
     /// Handles nested sequences automatically by following VLU pointers
     /// </summary>
-    public List<Thing> FlattenSequence(Thing sequenceStart)
+    public List<Cogneme> FlattenSequence(Cogneme sequenceStart)
     {
-        List<Thing> result = new();
+        List<Cogneme> result = new();
         if (sequenceStart.RelType?.Label != "NXT") return result;  //this is not a sequence 
-        Thing current = sequenceStart;
+        Cogneme current = sequenceStart;
 
-        while (current != null)
+        while (current is not null)
         {
             // Get the VLU relationship
             var valueRel = current.Relationships
                 ?.FirstOrDefault(r => r.RelType?.Label == "VLU");
 
-            if (valueRel != null)
+            if (valueRel is not null)
             {
-                Thing valueTarget = valueRel.Target;
+                Cogneme valueTarget = valueRel.Target;
 
                 // Is this VLU pointing to another sequence?
                 var isSequenceStart = valueTarget.RelType?.Label == "NXT";

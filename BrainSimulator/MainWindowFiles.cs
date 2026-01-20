@@ -36,7 +36,7 @@ namespace BrainSimulator
             }
             currentFileName = fileName;
 
-            if (theUKS.Labeled("BrainSim") == null)
+            if (theUKS.Labeled("BrainSim") is null)
                 CreateEmptyUKS();
 
             SetCurrentFileNameToProperties();
@@ -55,19 +55,19 @@ namespace BrainSimulator
         {
             ActiveModuleSP.Children.Clear();
 
-            Thing activeModuleParent = theUKS.Labeled("ActiveModule");
+            Cogneme activeModuleParent = theUKS.Labeled("ActiveModule");
             //TODO: Remove
             activeModuleParent.AddParent("BrainSim");
 
-            if (activeModuleParent == null) { return; }
+            if (activeModuleParent is null) { return; }
             var activeModules1 = activeModuleParent.Children;
             activeModules1 = activeModules1.OrderBy(x => x.Label).ToList();
 
-            foreach (Thing t in activeModules1)
+            foreach (Cogneme t in activeModules1)
             {
                 //what kind of module is this?
-                Thing t1 = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
-                if (t1 == null) continue;
+                Cogneme t1 = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+                if (t1 is null) continue;
                 string moduleType = t1.Label;
 
                 TextBlock tb = new TextBlock();
@@ -88,15 +88,15 @@ namespace BrainSimulator
         }
         void UnloadActiveModules()
         {
-            Thing activeModulesParent = theUKS.Labeled("ActiveModule");
-            if (activeModulesParent == null) return;
+            Cogneme activeModulesParent = theUKS.Labeled("ActiveModule");
+            if (activeModulesParent is null) return;
             var activeModules1 = activeModulesParent.Children;
 
-            foreach (Thing t in activeModules1)
+            foreach (Cogneme t in activeModules1)
             {
                 for (int i = 0; i < t.Relationships.Count; i++)
                 {
-                    Relationship r = t.Relationships[i];
+                    Cogneme r = t.Relationships[i];
                     theUKS.DeleteThing(r.Target);
                     t.RemoveRelationship(r);
                 }
@@ -115,11 +115,11 @@ namespace BrainSimulator
             var activeModules1 = theUKS.Labeled("ActiveModule").Children;
             activeModules1 = activeModules1.OrderBy(x => x.Label).ToList();
 
-            foreach (Thing t in activeModules1)
+            foreach (Cogneme t in activeModules1)
             {
                 //what kind of module is this?
-                Thing tModuleType = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
-                if (tModuleType == null) continue;
+                Cogneme tModuleType = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+                if (tModuleType is null) continue;
                 string moduleType = tModuleType.Label;
 
                 if (moduleType.Contains(".py"))
@@ -129,7 +129,7 @@ namespace BrainSimulator
                 else
                 {
                     ModuleBase mod = CreateNewModule(moduleType, t.Label);
-                    if (mod != null) 
+                    if (mod is not null) 
                         activeModules.Add(mod);
                     else
                     {
@@ -148,7 +148,7 @@ namespace BrainSimulator
         private void AddFileToMRUList(string filePath)
         {
             StringCollection MRUList = (StringCollection)Properties.Settings.Default["MRUList"];
-            if (MRUList == null)
+            if (MRUList is null)
                 MRUList = new StringCollection();
             MRUList.Remove(filePath); //remove it if it's already there
             MRUList.Insert(0, filePath); //add it to the top of the list
@@ -159,7 +159,7 @@ namespace BrainSimulator
         public static void RemoveFileFromMRUList(string filePath)
         {
             StringCollection MRUList = (StringCollection)Properties.Settings.Default["MRUList"];
-            if (MRUList == null)
+            if (MRUList is null)
                 MRUList = new StringCollection();
             MRUList.Remove(filePath); //remove it if it's already there
             Properties.Settings.Default["MRUList"] = MRUList;
@@ -169,11 +169,11 @@ namespace BrainSimulator
         {
             MRUListMenu.Items.Clear();
             StringCollection MRUList = (StringCollection)Properties.Settings.Default["MRUList"];
-            if (MRUList == null)
+            if (MRUList is null)
                 MRUList = new StringCollection();
             foreach (string fileItem in MRUList)
             {
-                if (fileItem == null) continue;
+                if (fileItem is null) continue;
                 string shortName = Path.GetFileNameWithoutExtension(fileItem);
                 MenuItem mi = new MenuItem() { Header = shortName };
                 mi.Click += buttonLoad_Click;

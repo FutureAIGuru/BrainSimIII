@@ -93,18 +93,18 @@ namespace BrainSimulator.Modules
                 var response = await client.SendAsync(request);
                 var responseJson = await response.Content.ReadAsStringAsync();
                 CompletionResult completionResult = JsonConvert.DeserializeObject<CompletionResult>(responseJson);
-                if (completionResult.usage != null)
+                if (completionResult.usage is not null)
                 {
                     int tokensUsed = completionResult.usage.TotalTokens;
                     totalTokensUsed += tokensUsed;
                 }
-                if (completionResult.choices != null)
+                if (completionResult.choices is not null)
                 {
                     // Extract the generated text from the CompletionResult object
                     answerString = completionResult.choices[0].message.content.Trim().ToLower();
                 }
                 else
-                    if (completionResult.error != null) answerString = "ERROR: " + completionResult.error.message;
+                    if (completionResult.error is not null) answerString = "ERROR: " + completionResult.error.message;
             }
             catch (Exception ex)
             {

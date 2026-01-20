@@ -22,19 +22,19 @@ using System.Reflection.Metadata;
 namespace BrainSimulator
 {
 
-    public static class IListExtensions
+    public static class IReadOnlyListExtensions
     {
-        public static T FindFirst<T>(this IList<T> source, Func<T, bool> condition)
+        public static T FindFirst<T>(this IReadOnlyList<T> source, Func<T, bool> condition)
         {
             foreach (T item in source)
                 if (condition(item))
                     return item;
             return default(T);
         }
-        public static List<T> FindAll<T>(this IList<T> source, Func<T, bool> condition)
+        public static List<T> FindAll<T>(this IReadOnlyList<T> source, Func<T, bool> condition)
         {
             List<T> theList = new List<T>();
-            if (source == null) return theList;
+            if (source is null) return theList;
             foreach (T item in source)
                 if (condition(item))
                     theList.Add(item);
@@ -128,7 +128,7 @@ namespace BrainSimulator
         }
         public HSLColor(HSLColor c)
         {
-            if (c == null) return;
+            if (c is null) return;
             hue = c.hue;
             saturation = c.saturation;
             luminance = c.luminance;
@@ -210,7 +210,7 @@ namespace BrainSimulator
 
         public bool Equals(HSLColor c1)
         {
-            if (c1 == null) return false;
+            if (c1 is null) return false;
             if (luminance < .05)
             {
                 if (c1.luminance < .05) return true;
@@ -261,7 +261,7 @@ namespace BrainSimulator
                     try
                     {
                         Control c2 = FindByName(v3, name);
-                        if (c2 != null)
+                        if (c2 is not null)
                             return c2;
                     }
                     catch { }
@@ -317,7 +317,7 @@ namespace BrainSimulator
             color.G = 111;
             color.B = 111;
             color.A = 255;
-            if (colorName?.ToLower() == null) return color;
+            if (colorName?.ToLower() is null) return color;
             if (colorName.ToLower() == "black") { color.R = 0; color.G = 0; color.B = 0; }
             if (colorName.ToLower() == "white") { color.R = 255; color.G = 255; color.B = 255; }
             if (colorName.ToLower() == "red") { color.R = 255; color.G = 0; color.B = 0; }
@@ -342,7 +342,7 @@ namespace BrainSimulator
 
         public static Brush GetBrush(string colorName)
         {
-            if (colorName == null) return Brushes.Black;
+            if (colorName is null) return Brushes.Black;
 
             // These color names match the HSL main scores
             if (colorName == "Red") return Brushes.Red;
@@ -403,11 +403,11 @@ namespace BrainSimulator
 
         public static HSLColor getBestColor(List<HSLColor> HSLColors)
         {
-            if (HSLColors == null || HSLColors.Count == 0) return null;
+            if (HSLColors is null || HSLColors.Count == 0) return null;
             HSLColor ret = HSLColors[0];
             for (int i = 1; i < HSLColors.Count; i++)
             {
-                if (HSLColors[i] != null && Abs(HSLColors[i].luminance - 50) < Abs(ret.luminance - 50))
+                if (HSLColors[i] is not null && Abs(HSLColors[i].luminance - 50) < Abs(ret.luminance - 50))
                 {
                     ret = HSLColors[i];
                 }
@@ -416,7 +416,7 @@ namespace BrainSimulator
         }
         public static bool isValidColorName(string colorName)
         {
-            if (colorName == null || colorName == "")
+            if (colorName is null || colorName == "")
                 return false;
             List<string> validColors = new List<string>
             {
@@ -519,7 +519,7 @@ namespace BrainSimulator
         }
         public static double FindDistanceToSegment(Segment s)
         {
-            if (s == null) return 0;
+            if (s is null) return 0;
             return FindDistanceToSegment(new Point(0, 0), s.P1.P, s.P2.P, out Point closest);
         }
 
@@ -783,7 +783,7 @@ namespace BrainSimulator
         public static bool IsPointInPolygon(Point[] polygon, Point testPoint)
         {
             bool result = false;
-            if (polygon == null) return false;
+            if (polygon is null) return false;
             if (polygon.Count() == 2)
             {
                 float dist = DistancePointToLine(testPoint, polygon[0], polygon[1]);
@@ -898,7 +898,7 @@ namespace BrainSimulator
         {
             //this hack finds the textbox within a combobox
             var textbox = (TextBox)cb.Template.FindName("PART_EditableTextBox", cb);
-            if (textbox != null)
+            if (textbox is not null)
             {
                 Border parent = (Border)textbox.Parent;
                 if (validation == "")
@@ -1140,8 +1140,8 @@ namespace BrainSimulator
         // Builds a filename of the form 20220313_100357_197_0_0.0_0_0_.jpg from time, turn, move, pan, tilt and extension
         public static string BuildAnnotatedImageFileName(string folder, Angle deltaTurn, double deltaMove, Angle cameraPan, Angle cameraTilt, string extension)
         {
-            if (cameraPan == null) cameraPan = Angle.FromDegrees(0);
-            if (cameraTilt == null) cameraTilt = Angle.FromDegrees(0);
+            if (cameraPan is null) cameraPan = Angle.FromDegrees(0);
+            if (cameraTilt is null) cameraTilt = Angle.FromDegrees(0);
             DateTime now = DateTime.Now;
             string filename = now.ToString("yyyyMMdd_HHmmss_fff") + "_" +
                               (int)deltaTurn.Degrees + "_" + deltaMove.ToString("F1") + "_" +

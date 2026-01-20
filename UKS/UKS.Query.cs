@@ -6,27 +6,27 @@ namespace UKS;
 public partial class UKS
 {
     //keeps track of the conditions of the previous query in order to answer "Why?" or "Why not?"
-    List<Relationship> failedConditions = new();
-    List<Relationship> succeededConditions = new();
+    List<Cogneme> failedConditions = new();
+    List<Cogneme> succeededConditions = new();
 
     /// <summary>
     /// Gets all relationships to a group of Things including inherited relationships
     /// </summary>
     /// <param name="sources"></param>
     /// <returns>List of matching relationships</returns>
-    public List<Relationship> GetAllRelationships(List<Thing> sources) //with inheritance, conflicts, etc
+    public List<Cogneme> GetAllRelationships(List<Cogneme> sources) //with inheritance, conflicts, etc
     {
         //expand search list to include instances of given objects  WHY??
         for (int i = 0; i < sources.Count; i++)
         {
-            Thing t = sources[i];
-            foreach (Thing child in t.Children)
+            Cogneme t = sources[i];
+            foreach (Cogneme child in t.Children)
                 if (child.HasProperty("isInstance"))
                     sources.Add(child);
         }
 
         var result1 = BuildSearchList(sources);
-        List<Relationship> result2 = GetAllRelationshipsInternal(result1);
+        List<Cogneme> result2 = GetAllRelationshipsInternal(result1);
         if (result2.Count < 200)  //the conflict-remover is really slow on large numbers
             RemoveConflictingResults(result2);
         RemoveFalseConditionals(result2);
@@ -34,7 +34,7 @@ public partial class UKS
         return result2;
     }
 
-    private void SortRelationships(ref List<Relationship> result2)
+    private void SortRelationships(ref List<Cogneme> result2)
     {
         result2 = result2.OrderByDescending(x => x.Weight).ToList();
     }
@@ -42,12 +42,12 @@ public partial class UKS
     //This is used to store temporary content during queries
     private class ThingWithQueryParams
     {
-        public Thing thing;
+        public Cogneme thing;
         public int hopCount;
         public int haveCount = 1;
         public int hitCount = 1;
         public float weight;
-        public Thing reachedWith = null;
+        public Cogneme reachedWith = null;
         public bool corner = false;
         public override string ToString()
         {
@@ -57,12 +57,12 @@ public partial class UKS
     }
 
     //this follows "inheritable" relationships...should it follow transitive too?
-    private List<ThingWithQueryParams> BuildSearchList(List<Thing> q)
+    private List<ThingWithQueryParams> BuildSearchList(List<Cogneme> q)
     {
         List<ThingWithQueryParams> thingsToExamine = new();
         int maxHops = 8;
         int hopCount = 0;
-        foreach (Thing t in q)
+        foreach (Cogneme t in q)
             thingsToExamine.Add(new ThingWithQueryParams
             {
                 thing = t,
@@ -74,12 +74,12 @@ public partial class UKS
         int currentEnd = thingsToExamine.Count;
         for (int i = 0; i < thingsToExamine.Count; i++)
         {
-            Thing t = thingsToExamine[i].thing;
+            Cogneme t = thingsToExamine[i].thing;
             float curWeight = thingsToExamine[i].weight;
             int curCount = thingsToExamine[i].haveCount;
-            Thing reachedWith = thingsToExamine[i].reachedWith;
+            Cogneme reachedWith = thingsToExamine[i].reachedWith;
 
-            foreach (Relationship r in t.Relationships)  //has-child et al
+            foreach (Cogneme r in t.Relationships)  //has-child et al
             {
                 if (r.RelType.HasProperty("inheritable"))
                 {
@@ -92,7 +92,7 @@ public partial class UKS
                     else
                     {//thing is not in the list, add it
                         bool corner = !ThingInTree(r.RelType, thingsToExamine[i].reachedWith) &&
-                            thingsToExamine[i].reachedWith != null;
+                            thingsToExamine[i].reachedWith is not null;
                         if (corner)
                         { } //TODO: corners are the reasons in a logic progression
                         thingsToExamine[i].corner |= corner;
@@ -113,59 +113,59 @@ public partial class UKS
         }
         return thingsToExamine;
     }
-    private List<Relationship> GetRelationshipsBetween(Thing t1, Thing t2)
+    private List<Cogneme> GetRelationshipsBetween(Cogneme t1, Cogneme t2)
     {
-        List<Relationship> retVal = new();
-        foreach (Relationship r in t1.Relationships)
+        List<Cogneme> retVal = new();
+        foreach (Cogneme r in t1.Relationships)
             if (r.Target == t2) retVal.Add(r);
-        foreach (Relationship r in t1.RelationshipsFrom)
+        foreach (Cogneme r in t1.RelationshipsFrom)
             if (r.Target == t2) retVal.Add(r);
-        foreach (Relationship r in t2.Relationships)
+        foreach (Cogneme r in t2.Relationships)
             if (r.Target == t1) retVal.Add(r);
-        foreach (Relationship r in t2.RelationshipsFrom)
+        foreach (Cogneme r in t2.RelationshipsFrom)
             if (r.Target == t1) retVal.Add(r);
         return retVal;
     }
-    private List<Relationship> GetAllRelationshipsInternal(List<ThingWithQueryParams> thingsToExamine)
+    private List<Cogneme> GetAllRelationshipsInternal(List<ThingWithQueryParams> thingsToExamine)
     {
-        List<Relationship> result = new();
+        List<Cogneme> result = new();
         for (int i = 0; i < thingsToExamine.Count; i++)
         {
-            Thing t = thingsToExamine[i].thing;
-            if (t == null) continue; //safety
+            Cogneme t = thingsToExamine[i].thing;
+            if (t is null) continue; //safety
             int haveCount = thingsToExamine[i].haveCount;
-            foreach (Relationship r in t.Relationships)
+            foreach (Cogneme r in t.Relationships)
             {
-                if (r.RelType == Thing.IsA) continue;
+                if (r.RelType == Cogneme.IsA) continue;
                 //only add the new relatinoship to the list if it is not already in the list
                 bool ignoreSource = thingsToExamine[i].hopCount > 1;
-                Relationship existing = result.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));
-                if (existing != null) continue;
+                Cogneme existing = result.FindFirst(x => RelationshipsAreEqual(x, r, ignoreSource));
+                if (existing is not null) continue;
 
-                if (haveCount > 1 && r.RelType?.HasAncestorLabeled("has") != null)
+                if (haveCount > 1 && r.RelType?.HasAncestorLabeled("has") is not null)
                 {
                     //this HACK creates a temporary relationship so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
-                    Relationship r1 = new Relationship(r);
+                    Cogneme r1 = new Cogneme(r);
                     r1.Weight *= thingsToExamine[i].weight;
-                    Thing newCountType = GetOrAddThing((GetCount(r.RelType) * haveCount).ToString(), "number");
+                    Cogneme newCountType = GetOrAddThing((GetCount(r.RelType) * haveCount).ToString(), "number");
 
                     //hack for numeric labels
-                    Thing rootThing = r1.RelType;
+                    Cogneme rootThing = r1.RelType;
                     if (r.RelType.Label.Contains("."))
                         rootThing = GetOrAddThing(r.RelType.Label.Substring(0, r.RelType.Label.IndexOf(".")));
-                    Thing bestMatch = r.RelType;
-                    List<Thing> missingAttributes = new();
-                    Thing newRelType = SubclassExists(rootThing, new List<Thing> { newCountType }, ref bestMatch, ref missingAttributes);
-                    if (newRelType == null)
-                        newRelType = CreateSubclass(rootThing, new List<Thing> { newCountType });
+                    Cogneme bestMatch = r.RelType;
+                    List<Cogneme> missingAttributes = new();
+                    Cogneme newRelType = SubclassExists(rootThing, new List<Cogneme> { newCountType }, ref bestMatch, ref missingAttributes);
+                    if (newRelType is null)
+                        newRelType = CreateSubclass(rootThing, new List<Cogneme> { newCountType });
                     r1.RelType = newRelType;
                     result.Add(r1);
                 }
                 else
                 {
-                    Relationship r1 = new Relationship(r);
-                    foreach (Relationship r3 in r.Relationships)
+                    Cogneme r1 = new Cogneme(r);
+                    foreach (Cogneme r3 in r.Relationships)
                         r1.AddRelationship(r3.Target, r3.RelType);
                     r1.Weight *= thingsToExamine[i].weight;
                     result.Add(r1);
@@ -176,11 +176,11 @@ public partial class UKS
     }
 
 
-    private void RemoveConflictingResults(List<Relationship> result)
+    private void RemoveConflictingResults(List<Cogneme> result)
     {
         for (int i = 0; i < result.Count; i++)
         {
-            Relationship r1 = result[i];
+            Cogneme r1 = result[i];
 
             //remove properties from the results list (they are internal)
             if (r1.RelType.Label == "hasProperty")
@@ -190,7 +190,7 @@ public partial class UKS
             }
             for (int j = i + 1; j < result.Count; j++)
             {
-                Relationship r2 = result[j];
+                Cogneme r2 = result[j];
                 //are the results the same?
                 if (r1.RelType == r2.RelType && r1.Target == r2.Target)
                 {
@@ -207,11 +207,11 @@ public partial class UKS
             }
         }
     }
-    private void RemoveFalseConditionals(List<Relationship> result)
+    private void RemoveFalseConditionals(List<Cogneme> result)
     {
         for (int i = 0; i < result.Count; i++)
         {
-            Relationship r1 = result[i];
+            Cogneme r1 = result[i];
             if (!r1.HasProperty("isResult")) continue;
             if (!ConditionsAreMet(r1))
             {
@@ -232,20 +232,20 @@ public partial class UKS
     /// <param name="result">List of Relationships from a previous Query</param>
     /// <param name="ancestors">Filter</param>
     /// <returns></returns>
-    public IList<Relationship> FilterResults(List<Relationship> result, List<Thing> ancestors)
+    public IReadOnlyList<Cogneme> FilterResults(List<Cogneme> result, List<Cogneme> ancestors)
     {
-        List<Relationship> retVal = new();
-        if (ancestors == null || ancestors.Count == 0)
+        List<Cogneme> retVal = new();
+        if (ancestors is null || ancestors.Count == 0)
             return result;
-        foreach (Relationship r in result)
+        foreach (Cogneme r in result)
             if (RelationshipHasAncestor(r, ancestors))
                 retVal.Add(r);
         return retVal;
     }
 
-    private bool RelationshipHasAncestor(Relationship r, List<Thing> ancestors)
+    private bool RelationshipHasAncestor(Cogneme r, List<Cogneme> ancestors)
     {
-        foreach (Thing ancestor in ancestors)
+        foreach (Cogneme ancestor in ancestors)
         {
             if (r.Source.HasAncestor(ancestor)) return true;
             if (r.RelType.HasAncestor(ancestor)) return true;
@@ -254,10 +254,10 @@ public partial class UKS
         return false;
     }
 
-    int GetCount(Thing t)
+    int GetCount(Cogneme t)
     {
         int retVal = 1;
-        foreach (Relationship r in t.Relationships)
+        foreach (Cogneme r in t.Relationships)
             if (r.RelType.Label == "is")
                 if (int.TryParse(r.Target.Label, out int val))
                     return val;
@@ -267,23 +267,23 @@ public partial class UKS
 
   
 
-    bool ConditionsAreMet(Relationship r)
+    bool ConditionsAreMet(Cogneme r)
     {
-        foreach (Relationship r1 in r.Relationships)
+        foreach (Cogneme r1 in r.Relationships)
         {
             if (!r1.Source.HasProperty("isResult")) continue;
             if (!r1.Target.HasProperty("isCondition")) continue;
 
-            Relationship r2 = (Relationship)r1.Target;
+            Cogneme r2 = (Cogneme)r1.Target;
             //is r1 true?
-            if (GetUnconditionalRelationship(r2) == null)
+            if (GetUnconditionalRelationship(r2) is null)
                 return false;
         }
         return true;
     }
-    Relationship GetUnconditionalRelationship(Relationship r)
+    Cogneme GetUnconditionalRelationship(Cogneme r)
     {
-        foreach (Relationship r1 in r.Source.Relationships)
+        foreach (Cogneme r1 in r.Source.Relationships)
         {
             if (RelationshipsAreEqual(r, r1))
             {
@@ -300,7 +300,7 @@ public partial class UKS
     /// </summary>
     /// <returns></returns>
 
-    public List<Relationship> WhyNot()
+    public List<Cogneme> WhyNot()
     {
         return failedConditions;
     }
@@ -308,23 +308,23 @@ public partial class UKS
     /// Returns a list of Relationships which were true in the previous query
     /// </summary>
     /// <returns></returns>
-    public List<Relationship> Why()
+    public List<Cogneme> Why()
     {
         return succeededConditions;
     }
 
-    Dictionary<Thing, float> searchCandidates;
+    Dictionary<Cogneme, float> searchCandidates;
     /// <summary>
     /// Given that you have performed a search with SearchForClosestMatch, this returns the next-best result
     /// given the previous best.
     /// </summary>
     /// <param name="confidence">value representin the quality of the match</param>
     /// <returns></returns>
-    public Thing GetNextClosestMatch(ref float confidence)
+    public Cogneme GetNextClosestMatch(ref float confidence)
     {
-        Thing bestThing = null;
+        Cogneme bestThing = null;
         confidence = -1;
-        if (searchCandidates == null) return bestThing;
+        if (searchCandidates is null) return bestThing;
 
         //find the best match with a value LESS THAN the previous best
         foreach (var key in searchCandidates)
@@ -335,19 +335,19 @@ public partial class UKS
             }
 
         //remove the item from the dictionary
-        if (bestThing != null)
+        if (bestThing is not null)
             searchCandidates.Remove(bestThing);
         return bestThing;
     }
 
     //this will be expanded to transitive...
-    private List<Thing> GetListOfSimilarThings(Thing t)
+    private List<Cogneme> GetListOfSimilarThings(Cogneme t)
     {
-        List<Thing> retVal = new();
-        foreach (Relationship r in t.Relationships)
+        List<Cogneme> retVal = new();
+        foreach (Cogneme r in t.Relationships)
             if (r.RelType.Label == "isSimilarTo")
                 retVal.Add(r.Target);
-        foreach (Relationship r in t.RelationshipsFrom)
+        foreach (Cogneme r in t.RelationshipsFrom)
             if (r.RelType.Label == "isSimilarTo" && !retVal.Contains(r.Source))
                 retVal.Add(r.Source);
         return retVal;
@@ -360,30 +360,30 @@ public partial class UKS
     /// <param name="root">All searching is done within the descendents of this Thing</param>
     /// <param name="confidence">value representing the quality of the match. </param>
     /// <returns></returns>
-    public List<(Thing t, float conf)> SearchForClosestMatch(Thing target, Thing root)
+    public List<(Cogneme t, float conf)> SearchForClosestMatch(Cogneme target, Cogneme root)
     {
-        List<(Thing t, float conf)> retVal = new();
+        List<(Cogneme t, float conf)> retVal = new();
         if (target.Relationships.Count == 0) return retVal;
         //initialize the search queues
-        List<Thing> thingsToSearch = new();
-        List<Thing> alreadySearched = new();
+        List<Cogneme> thingsToSearch = new();
+        List<Cogneme> alreadySearched = new();
         searchCandidates = new();
 
         //seed the search queue with the given parameters.
-        foreach (Relationship r in target.Relationships)
+        foreach (Cogneme r in target.Relationships)
         {
-            foreach (Relationship r1 in r.Target.RelationshipsFrom)
+            foreach (Cogneme r1 in r.Target.RelationshipsFrom)
             {
                 if (r1.Source == target) continue;
                 var existing = thingsToSearch.FindFirst(x => x == r1.Source);
-                if (r1.RelType.HasAncestor(r.RelType) && r1.Target == r.Target && existing == null)
+                if (r1.RelType.HasAncestor(r.RelType) && r1.Target == r.Target && existing is null)
                 {
                     thingsToSearch.Add(r1.Source);
                     if (!searchCandidates.ContainsKey(r1.Source))
                         searchCandidates[r1.Source] = 0; //initialize a new dictionary entry if needed
                     searchCandidates[r1.Source] += r1.Weight * r.Weight;
                 }
-                else if (existing != null)
+                else if (existing is not null)
                 {
                     searchCandidates[r1.Source] += r1.Weight * r.Weight;
                 }
@@ -395,7 +395,7 @@ public partial class UKS
             var t = thingsToSearch[0];
             thingsToSearch.RemoveAt(0);
             alreadySearched.Add(t);
-            foreach (Relationship r in t.RelationshipsFrom)
+            foreach (Cogneme r in t.RelationshipsFrom)
             {
                 if (!r.RelType.HasProperty("inheritable")) continue;
                 if (r.Source == target) continue;
@@ -419,8 +419,8 @@ public partial class UKS
         // delete items which have ancestor in list too
         for (int i = 0; i < searchCandidates.Keys.Count; i++)
         {
-            Thing t = (Thing)searchCandidates.Keys.ToList()[i];
-            foreach (Thing t1 in t.Ancestors)
+            Cogneme t = (Cogneme)searchCandidates.Keys.ToList()[i];
+            foreach (Cogneme t1 in t.Ancestors)
             {
                 if (t1 != t && searchCandidates.ContainsKey(t1) && searchCandidates[t1] < 0)
                     searchCandidates.Remove(t);
@@ -442,19 +442,19 @@ public partial class UKS
 
         return retVal;
 
-        bool AddToQueues(Thing tPrev, Thing tNew)
+        bool AddToQueues(Cogneme tPrev, Cogneme tNew)
         {
             if (!tNew.HasAncestor(root)) return false;
             if (!searchCandidates.ContainsKey(tNew))
                 searchCandidates[tNew] = 0; //initialize a new dictionary entry if needed
             searchCandidates[tNew] += searchCandidates[tPrev] * GetRelationshipWeight(tNew, tPrev);
-            if (alreadySearched.FindFirst(x => x == tNew) != null) return false;
-            if (thingsToSearch.FindFirst(x => x == tNew) != null) return false;
+            if (alreadySearched.FindFirst(x => x == tNew) is not null) return false;
+            if (thingsToSearch.FindFirst(x => x == tNew) is not null) return false;
             thingsToSearch.Add(tNew);
             return true;
         }
     }
-    public float GetRelationshipWeight(Thing t1, Thing t2)
+    public float GetRelationshipWeight(Cogneme t1, Cogneme t2)
     {
         foreach (var r in t1.Relationships)
             if (r.Target == t2) return r.Weight;
@@ -462,7 +462,7 @@ public partial class UKS
             if (r.Target == t2) return r.Weight;
         return 0;
     }
-    public void SetRelationshipWeight(Thing t1, Thing t2, float newWeight)
+    public void SetRelationshipWeight(Cogneme t1, Cogneme t2, float newWeight)
     {
         foreach (var r in t1.Relationships)
             if (r.Target == t2) r.Weight = newWeight;
@@ -474,24 +474,24 @@ public partial class UKS
             if (r.Target == t1) r.Weight = newWeight;
     }
 
-    public bool ThingsHaveConflictingRelationship(Thing source, Thing target)
+    public bool ThingsHaveConflictingRelationship(Cogneme source, Cogneme target)
     {
-        foreach (Relationship r1 in source.Relationships)
-            foreach (Relationship r2 in target.Relationships)
+        foreach (Cogneme r1 in source.Relationships)
+            foreach (Cogneme r2 in target.Relationships)
                 if (RelationshipsAreExclusive(r1, r2))
                     return true;
         return false;
     }
-    private bool RelationshipsAreSimilar(Relationship r1, Relationship r2)
+    private bool RelationshipsAreSimilar(Cogneme r1, Cogneme r2)
     {
         if (r1.RelType != r2.RelType) return false;
         if (FindCommonParents(r1.Target, r2.Target).Count == 0) return false;
         return true;
     }
-    public bool ThingsHaveSimilarRelationship(Thing source, Thing target)
+    public bool ThingsHaveSimilarRelationship(Cogneme source, Cogneme target)
     {
-        foreach (Relationship r1 in source.Relationships)
-            foreach (Relationship r2 in target.Relationships)
+        foreach (Cogneme r1 in source.Relationships)
+            foreach (Cogneme r2 in target.Relationships)
                 if (RelationshipsAreSimilar(r1, r2))
                     return true;
         return false;
