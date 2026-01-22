@@ -26,6 +26,8 @@ public partial class UKS
                 {
                     foreach (Cogneme r in t.RecursiveRelationships)
                     {
+                        if (r.Label == "R0")
+                        { }
                         string s = r.ToString() + r.Weight.ToString("0.00");
                         if (!alreadyWritten.Contains(s))
                         {
@@ -140,11 +142,13 @@ public partial class UKS
     // Adds a relationship, honoring numeric sugar (N → R.N + has-value + number typing)
     private Cogneme AddRelStmt(string label, List<string> ss, string sWeight)
     {
+        if (ss[1] == "IF")
+        { }
         Cogneme r = null;
         if (ss.Count < 3) return null;
         if (r is null)
         {
-            object r1 = ss[0];
+            object r1 = ss[0];  //is an atom or another relationship
             object r2 = ss[2];
             if (ss[0].Contains("->"))
             {
@@ -162,9 +166,13 @@ public partial class UKS
             }
 
             //if (r1 or r2 are set, use them instead here
-            r = AddStatement((string)r1, ss[1], (string)r2);
+            r = AddStatement((string)r1, ss[1], (string)r2, label);
             if (label != "")
+            {
                 r.Label = label;
+                if (!AllThings.Contains(r))
+                    AllThings.Add(r);
+            }
         }
         if (sWeight is { } n)
         {

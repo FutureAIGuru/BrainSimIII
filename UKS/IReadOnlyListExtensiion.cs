@@ -1,13 +1,13 @@
 ﻿//
-// Copyright (c) FutureAI. All rights reserved.  
-// Contains confidential and  proprietary information and programs which may not be distributed without a separate license
+// From the Future AI Society and Charles Simon
+// Available for use under an MIT license.
 //  
 
 namespace UKS;
 
-//these are used so that relationship lists can be readOnly.
-//This prevents programmers from accidentally doing a (e.g.) relationships.Add() which will not handle reverse links properly
-//Why the IReadOnlyList doesn't have FindFirst, FindAll, and FindIndex is a ???
+//these are used so that lists can be readOnly and still be searched propertly.
+//This prevents us from accidentally doing a (e.g.) _relationships.Add() which will not handle reverse links properly
+//Why the IReadOnlyList doesn't have FindFirst, FindAll, Contains, and FindIndex is a mystery.
 
 public static class IReadOnlyListExtensions
 {

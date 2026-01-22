@@ -68,7 +68,7 @@ public partial class ModuleUKSClauseDlg : ModuleBaseDlg
 
         Cogneme rClause = UKSClause.theUKS.AddStatement(source2, relType2, target2);
 
-        Cogneme rAdded = UKSClause.theUKS.AddClause(r1, theClauseType, rClause);
+        Cogneme rAdded = UKSClause.theUKS.AddStatement(r1, theClauseType, rClause);
 
         SetUpRelComboBox(GetInstanceRoot(r1.Source),rAdded);
     }
@@ -82,7 +82,7 @@ public partial class ModuleUKSClauseDlg : ModuleBaseDlg
 
 
     public static readonly DependencyProperty theRelationship=
-DependencyProperty.Register("Thing", typeof(Cogneme), typeof(ComboBoxItem));
+DependencyProperty.Register("Cogneme", typeof(Cogneme), typeof(ComboBoxItem));
 
 
     // thingText_TextChanged is called when the thing textbox changes

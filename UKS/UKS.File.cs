@@ -1,5 +1,6 @@
-﻿using System.Xml.Serialization;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Reflection.Emit;
+using System.Xml.Serialization;
 
 namespace UKS;
 
@@ -18,7 +19,7 @@ public partial class UKS
             if (t.HasAncestorLabeled("BrainSim"))
                 continue;
             if (t.Label == "is-a") continue;
-            //if (t.Label == "Thing") continue;
+            //if (t.Label == "Cogneme") continue;
             //if (t.Label == "RelationshipType") continue;
             if (t.Label == "hasAttribute") continue;
             if (t is not null)
@@ -30,25 +31,26 @@ public partial class UKS
 
         CognemeLabels.ClearLabelList();
         foreach (Cogneme t in AllThings)
-            CognemeLabels.AddThingLabel(t.Label,t);
+            CognemeLabels.AddThingLabel(t.Label, t);
 
-        if (Labeled("Thing") is null)
-            AddThing("Thing", null);
+        if (Labeled("Cogneme") is null)
+            AddThing("Cogneme", null);
         Cogneme isA = Labeled("is-a");
         if (isA is null)
             isA = AddThing("is-a", null);
         Cogneme hasChild = Labeled("has-child");
         if (hasChild is null)
             hasChild = AddThing("has-child", null);
-        Cogneme relType = AddThing("RelationshipType", "Thing");
+        Cogneme relType = AddThing("RelationshipType", "Cogneme");
         isA.AddParent(relType);
         hasChild.AddParent(relType);
 
-        GetOrAddThing("Object", "Thing");
-        GetOrAddThing("Action", "Thing");
-        GetOrAddThing("RelationshipType", "Thing");
-        GetOrAddThing("Thing", "Thing");
-        GetOrAddThing("unknownObject", "Object");
+        GetOrAddThing("Object", "Cogneme");
+        GetOrAddThing("Action", "Cogneme");
+        GetOrAddThing("Relationship", "Cogneme");
+        GetOrAddThing("RelationshipType", "Cogneme");
+        GetOrAddThing("Cogneme", "Cogneme");
+        GetOrAddThing("Unknown", "Cogneme");
         GetOrAddThing("is-a", "RelationshipType");
         GetOrAddThing("inverseOf", "RelationshipType");
         GetOrAddThing("hasProperty", "RelationshipType");
@@ -180,14 +182,10 @@ public partial class UKS
     /// 
     //this is a modification of Thing which is used to store and retrieve the KB in XML
     //it eliminates circular references by replacing Thing references with int indexed into an array and makes things much more compact
-    public class SThing
+    public class sCogneme
     {
         public string label = ""; //this is just for convenience in debugging and should not be used
-        public List<SThing> relationships = new();
-        //object value;
-        //public object V { get => value; set => this.value = value; }
-        //public int useCount;
-
+        public List<sCogneme> relationships = new();
         public int source = -1;
         public int target = -1;
         public int relationshipType = -1;
@@ -203,68 +201,86 @@ public partial class UKS
         // TODO: Wipe transient data ...
         foreach (Cogneme t in AllThings)
         {
-            SThing st = new()
+            sCogneme st = new()
             {
                 label = t.Label,
+                source = AllThings.FindIndex(x => x == t.Source),
+                relationshipType = AllThings.FindIndex(x => x == t.RelType),
+                target = AllThings.FindIndex(x => x == t.Target),
                 V = t.V,
-                //useCount = t.useCount
             };
-            foreach (Cogneme l in t.Relationships)
+            foreach (Cogneme l in t.RecursiveRelationships)
             {
-                SThing sR = ConvertRelationship(l, new List<Cogneme>());
+                sCogneme sR = ConvertRelationship(l, new List<Cogneme>());
                 st.relationships.Add(sR);
             }
             UKSTemp.Add(st);
         }
     }
 
-    private SThing ConvertRelationship(Cogneme l, List<Cogneme> stack)
+    private sCogneme ConvertRelationship(Cogneme l, List<Cogneme> stack)
     {
-        if (l.Source.Label == "Fido")
+        if (l.RelType.Label == "play")
         { }
 
         if (stack.Contains(l)) return null;
         stack.Add(l);
 
-        SThing sR = new SThing()
+        sCogneme sR = new sCogneme()
         {
+            label = l.Label,
             source = AllThings.FindIndex(x => x == l.Source),
             target = AllThings.FindIndex(x => x == l.Target),
             relationshipType = AllThings.FindIndex(x => x == l.RelType),
             weight = l.Weight,
         };
 
-        foreach (Cogneme r1 in l.Relationships)
+        foreach (Cogneme r1 in l.RecursiveRelationships)
         {
-            sR.relationships.Add(ConvertRelationship(r1, stack));
+            sCogneme sr1 = ConvertRelationship(r1, stack);
+            sR.relationships.Add(sr1);
         }
-        stack.RemoveAt(stack.Count-1);
+        stack.RemoveAt(stack.Count - 1);
         return sR;
     }
 
     private void DeFormatAndMergeContentAfterLoading()
     {
-        //TODO  add handline of clauses
-        foreach (SThing st in UKSTemp)
+        //get all the names and weights
+        foreach (sCogneme st in UKSTemp)
         {
-            if (Labeled(st.label) is null)
+            Cogneme t = new()
             {
-                Cogneme t = new()
-                {
-                    Label = st.label,
-                    V = st.V,
-                    //useCount = st.useCount
-                };
-                AllThings.Add(t);
-            }
+                Label = st.label,
+                Weight = st.weight,
+                V = st.V,
+            };
+            AllThings.Add(t);
         }
-        foreach (SThing v in UKSTemp)
+        foreach (sCogneme st in UKSTemp)
         {
-            foreach (SThing p in v.relationships)
-            {
-                AddStatement(UKSTemp[p.source].label, UKSTemp[p.relationshipType].label, UKSTemp[p.target].label);
-            }
+            Cogneme t = Labeled(st.label);
+            if (st.source != -1) t.Source = AllThings[st.source];
+            if (st.relationshipType != -1) t.RelType = AllThings[st.relationshipType];
+            if (st.target != -1) t.Target = AllThings[st.target];
         }
+        foreach (sCogneme v in UKSTemp)
+        {
+            AddRelationshipsAsStatements(v);
+        }
+    }
+
+    private void AddRelationshipsAsStatements(sCogneme v)
+    {
+        foreach (sCogneme p in v.relationships)
+        {
+            if (UKSTemp[p.relationshipType].label == "play")
+            { }
+            Cogneme r = AddStatement(UKSTemp[p.source].label, UKSTemp[p.relationshipType].label, UKSTemp[p.target].label);
+            r.Label = p.label;
+            AddRelationshipsAsStatements(p);
+        }
+
     }
 
     private void DeFormatContentAfterLoading()
@@ -272,7 +288,7 @@ public partial class UKS
         AllThings.Clear();
         CognemeLabels.ClearLabelList();
         //get all the things
-        foreach (SThing st in UKSTemp)
+        foreach (sCogneme st in UKSTemp)
         {
             Cogneme t = new()
             {
@@ -285,18 +301,8 @@ public partial class UKS
         //handle relationships
         for (int i = 0; i < UKSTemp.Count; i++)
         {
-            SThing sT = UKSTemp[i];
-            foreach (SThing p in sT.relationships)
-            {
-                Cogneme r = UnConvertRelationship(p, new List<SThing>());
-                if (r is not null)
-                {
-                    if (r.RelType.Label != "is-a") //swap has-child for is-a
-                        AllThings[i].RelationshipsWriteable.Add(r);
-                    else
-                        r.Source.RelationshipsWriteable.Add(r);
-                }
-            }
+            sCogneme sT = UKSTemp[i];
+            UnconvertRelationships(sT);
         }
         //rebuild all the reverse linkages
         foreach (Cogneme t in AllThings)
@@ -314,13 +320,25 @@ public partial class UKS
         }
     }
 
-    private Cogneme UnConvertRelationship(SThing p, List<SThing> stack)
+    private void UnconvertRelationships(sCogneme sT)
     {
-        if (p is null)
-            return null;
-        if (stack.Contains(p))
-            return null;
+        foreach (sCogneme p in sT.relationships)
+        {
+            Cogneme r = UnConvertRelationship(p, new List<sCogneme>());
+            if (r is null) continue;
+            if (r.RelType.Label == "play")
+            { }
+            if (!r.Source.RelationshipsWriteable.Contains(r))
+                r?.Source.RelationshipsWriteable.Add(r);
+        }
+    }
+
+    private Cogneme UnConvertRelationship(sCogneme p, List<sCogneme> stack)
+    {
+        if (p is null) return null;
+        if (stack.Contains(p)) return null;  //infinite recursions loop protection
         stack.Add(p);
+
         Cogneme source = null;
         if (p.source != -1)
             source = AllThings[p.source];
@@ -332,52 +350,37 @@ public partial class UKS
         Cogneme target = null;
         if (p.target != -1)
             target = AllThings[p.target];
-
-        //conversion for files using has-child to is-a
-        if (relationshipType?.Label == "has-child")
+        Cogneme r = Labeled(p.label);
+        if (r is not null)
         {
-            relationshipType = Labeled("is-a");
-            (source, target) = (target, source);
+            r.Source = source;
+            r.Target = target;
+            r.RelType = relationshipType;
+            r.Weight = p.weight;
         }
-
-
-        Cogneme r = new()
+        else
         {
-            Source = source,
-            Target = target,
-            RelType = relationshipType,
-            Weight = p.weight,
-        };
-        if (r.Source.Label == "Fido")
-        { }
-        foreach (SThing st in p.relationships)
+            r = new()
+            {
+                Label = p.label,
+                Source = source,
+                Target = target,
+                RelType = relationshipType,
+                Weight = p.weight,
+            };
+        }
+        if (r?.RelationshipsWriteable.Contains(r) is null)
+            r.Source?.RelationshipsWriteable.Add(r);
+
+        foreach (sCogneme st in p.relationships)
         {
-            r.RelationshipsWriteable.Add(UnConvertRelationship(st, stack));
+            var r1 = UnConvertRelationship(st, stack);
+            if (r?.RelationshipsWriteable.Contains(r1) is null)
+                r?.RelationshipsWriteable.Add(r1);
         }
         stack.RemoveAt(stack.Count - 1);
 
         return r;
-    }
-
-    public static bool CanWriteTo(string fileName, out string message)
-    {
-        FileStream file1;
-        message = "";
-        if (File.Exists(fileName))
-        {
-            try
-            {
-                file1 = File.Open(fileName, FileMode.Open);
-                file1.Close();
-                return true;
-            }
-            catch (Exception e)
-            {
-                message = e.Message;
-                return false;
-            }
-        }
-        return true;
     }
 
     List<string> ExtractPortionOfUKS(Cogneme root)
@@ -414,7 +417,7 @@ public partial class UKS
         if (!String.IsNullOrEmpty(filenameIn)) { fileName = filenameIn; }
         string fullPath = GetFullPathFromKnowledgeFileName(fileName);
 
-        if (!CanWriteTo(fileName, out string message))
+        if (!CanWriteToFile(fileName, out string message))
         {
             Debug.WriteLine("Could not save file because: " + message);
             return false;
@@ -479,6 +482,27 @@ public partial class UKS
         return fileName;
     }
 
+    public static bool CanWriteToFile(string fileName, out string message)
+    {
+        FileStream file1;
+        message = "";
+        if (File.Exists(fileName))
+        {
+            try
+            {
+                file1 = File.Open(fileName, FileMode.Open);
+                file1.Close();
+                return true;
+            }
+            catch (Exception e)
+            {
+                message = e.Message;
+                return false;
+            }
+        }
+        return true;
+    }
+
     /// <summary>
     /// Loads UKS content from a prvsiously-saved XML file
     /// </summary>
@@ -506,7 +530,7 @@ public partial class UKS
         XmlSerializer reader1 = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());
         try
         {
-            UKSTemp = (List<SThing>)reader1.Deserialize(file);
+            UKSTemp = (List<sCogneme>)reader1.Deserialize(file);
         }
         catch (Exception e)
         {

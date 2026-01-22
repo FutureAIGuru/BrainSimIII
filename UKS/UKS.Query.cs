@@ -16,7 +16,9 @@ public partial class UKS
     /// <returns>List of matching relationships</returns>
     public List<Cogneme> GetAllRelationships(List<Cogneme> sources) //with inheritance, conflicts, etc
     {
-        //expand search list to include instances of given objects  WHY??
+        List<Cogneme> result2 = new();
+        if (sources.Count == 0) return result2;
+            //expand search list to include instances of given objects  WHY??
         for (int i = 0; i < sources.Count; i++)
         {
             Cogneme t = sources[i];
@@ -26,7 +28,7 @@ public partial class UKS
         }
 
         var result1 = BuildSearchList(sources);
-        List<Cogneme> result2 = GetAllRelationshipsInternal(result1);
+        result2 = GetAllRelationshipsInternal(result1);
         if (result2.Count < 200)  //the conflict-remover is really slow on large numbers
             RemoveConflictingResults(result2);
         RemoveFalseConditionals(result2);
@@ -165,7 +167,7 @@ public partial class UKS
                 else
                 {
                     Cogneme r1 = new Cogneme(r);
-                    foreach (Cogneme r3 in r.Relationships)
+                    foreach (Cogneme r3 in r.Relationships.Where(x=>x.RelType.Label != "is-a"))
                         r1.AddRelationship(r3.Target, r3.RelType);
                     r1.Weight *= thingsToExamine[i].weight;
                     result.Add(r1);
@@ -285,7 +287,7 @@ public partial class UKS
     {
         foreach (Cogneme r1 in r.Source.Relationships)
         {
-            if (RelationshipsAreEqual(r, r1))
+            if (RelationshipsAreEqualIgnoringLabels(r, r1))
             {
                 if (!r1.HasProperty("isCondition"))
                    return r1;

@@ -15,7 +15,7 @@ public partial class UKS
 
     //This is a temporary copy of the UKS which used internally during the save and restore process to 
     //break circular links by storing index values instead of actual links Note the use of SThing instead of Thing
-    private List<SThing> UKSTemp = new();
+    private List<sCogneme> UKSTemp = new();
 
     /// <summary>
     /// Occasionally a list of all the Things in the UKS is needed. This is READ ONLY.
@@ -63,7 +63,7 @@ public partial class UKS
                     //if this leaves an orphan thing, delete the thing
                     if (r.RelType.Label == "has-child" && r.Target?.Parents.Count == 0)
                     {
-                        r.Target.AddParent(CognemeLabels.GetThing("unknownObject"));
+                        r.Target.AddParent(CognemeLabels.GetThing("Unknown"));
                     }
                     transientRelationships.Remove(r);
                     //HACK
@@ -120,7 +120,6 @@ public partial class UKS
         CognemeLabels.RemoveThingLabel(t.Label);
         lock (AllThings)
             AllThings.Remove(t);
-
     }
 
     /// <summary>
@@ -331,8 +330,13 @@ public partial class UKS
         return false;
     }
 
-    bool RelationshipsAreEqual(Cogneme r1, Cogneme r2, bool ignoreSource = true)
+    bool RelationshipsAreEqualIgnoringLabels(Cogneme r1, Cogneme r2, bool ignoreSource = true)
     {
+        if (
+            (r1.Source == r2.Source || ignoreSource) &&
+            r1.Target == r2.Target &&
+            r1.RelType == r2.RelType
+          ) return true;
         //special case if these contain other relationships
         if (r1.Source is Cogneme rt1 && r2.Source is Cogneme rt2)
         {
@@ -342,11 +346,27 @@ public partial class UKS
             if (r1.RelType != r2.RelType) return false;
             return true;
         }
+        return false;
+    }
+
+
+    bool RelationshipsAreEqual(Cogneme r1, Cogneme r2, bool ignoreSource = true)
+    {
         if (
+            r1.Label == r2.Label &&
             (r1.Source == r2.Source || ignoreSource) &&
             r1.Target == r2.Target &&
             r1.RelType == r2.RelType
           ) return true;
+        //special case if these contain other relationships
+        if (r1.Source is Cogneme rt1 && r2.Source is Cogneme rt2)
+        {
+            if (!RelationshipsAreEqual(rt1, rt2)) return false;
+            if (r1.Target is Cogneme rt3 && r2.Target is Cogneme rt4)
+                if (!RelationshipsAreEqual(rt3, rt4)) return false;
+            if (r1.RelType != r2.RelType) return false;
+            return true;
+        }
         return false;
     }
 
@@ -388,7 +408,7 @@ public partial class UKS
     private Cogneme ThingFromObject(object o, string parentLabel = "", Cogneme source = null)
     {
         if (parentLabel == "")
-            parentLabel = "unknownObject";
+            parentLabel = "Unknown";
         if (o is string s3)
             return ThingFromString(s3.Trim(), parentLabel, source);
         else if (o is Cogneme t3)
@@ -413,7 +433,7 @@ public partial class UKS
                 if (theChild.Parents.Count == 1)
                 {
                     DeleteAllChildren(theChild);
-                    if (t.Label == "Thing" && t.Children.Count == 0) return;
+                    if (t.Label == "Cogneme" && t.Children.Count == 0) return;
                     DeleteThing(theChild);
                 }
                 else
@@ -449,7 +469,7 @@ public partial class UKS
         {
             string[] attribs = label.Split(".");
             Cogneme baseThing = Labeled(attribs[0]);
-            if (baseThing is null) baseThing = AddThing(attribs[0], "unknownObject");
+            if (baseThing is null) baseThing = AddThing(attribs[0], "Unknown");
             Cogneme instanceThing = Labeled(label);
             if (instanceThing is null)
             {
@@ -459,7 +479,7 @@ public partial class UKS
             {
                 Cogneme attrib = Labeled(attribs[i]);
                 if (attrib is null)
-                    attrib = AddThing(attribs[i], "unknownObject");
+                    attrib = AddThing(attribs[i], "Unknown");
                 instanceThing.AddRelationship(attrib, "is");
             }
             return instanceThing;
@@ -472,7 +492,7 @@ public partial class UKS
         if (parent is Cogneme t)
             correctParent = t;
         if (correctParent is null)
-            correctParent = CognemeLabels.GetThing("unknownObject");
+            correctParent = CognemeLabels.GetThing("Unknown");
 
         if (correctParent is null) throw new ArgumentException("GetOrAddThing: could not find parent");
 
@@ -547,31 +567,5 @@ public partial class UKS
 
         Cogneme t = GetOrAddThing(thingLabel);
         return t;
-    }
-
-
-
-    public Cogneme AddClause(Cogneme rBase, Cogneme clauseType, Cogneme rClause)
-    {
-        //rNew is an orhpan...not a real linked-up relationship, yet
-        Cogneme rNew = new() { Source = rBase, RelType = clauseType, Target = rClause, Weight = .9f };
-
-        //does this relation/clause already exist?
-        var r = GetRelationship(rNew);
-        if (r is not null) return r;
-
-        rBase.AddRelationship(rNew.Target, rNew.RelType);
-
-        if (clauseType.Label == "IF")
-        {
-            rBase.AddRelationship("isResult", "hasProperty");
-            rClause.AddRelationship("isCondition", "hasProperty");
-
-            //THIS needs to be fixed
-            if (rBase.Label == "") rBase.AddToUKS();
-            if (rClause.Label == "") rClause.AddToUKS();
-            if (rNew.Label == "") rNew.AddToUKS();
-        }
-        return rNew;
     }
 }

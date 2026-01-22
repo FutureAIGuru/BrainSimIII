@@ -187,7 +187,7 @@ namespace BrainSimulator.Modules
                 if (sourceHash is not null)
                 {
                     //delete orphas
-                    Cogneme objectRoot = theUKS.GetOrAddThing("Object", "Thing");
+                    Cogneme objectRoot = theUKS.GetOrAddThing("Object", "Cogneme");
                     if (objectRoot is null) return;
                     for (int i = 0; i < objectRoot.Children.Count; i++)
                     {

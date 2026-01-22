@@ -22,7 +22,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 {
 
     public static readonly DependencyProperty ThingObjectProperty =
-    DependencyProperty.Register("Thing", typeof(Cogneme), typeof(TreeViewItem));
+    DependencyProperty.Register("Cogneme", typeof(Cogneme), typeof(TreeViewItem));
     public static readonly DependencyProperty TreeViewItemProperty =
     DependencyProperty.Register("TreeViewItem", typeof(TreeViewItem), typeof(TreeViewItem));
     public static readonly DependencyProperty RelationshipObjectProperty =
@@ -89,7 +89,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             theTreeView.FontSize = fontSize;
         if (root is null)
         {
-            root = "Thing";
+            root = "Cogneme";
             parent.SetSavedDlgAttribute("Root", root);
         }
         Cogneme thing = parent.theUKS.Labeled(root);
@@ -237,18 +237,19 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         totalItemCount++;
 
         //add each of the relationships as a "child" of the "Relationships:" entry    
-        IReadOnlyList<Cogneme> sortedRelationships = t.Relationships.OrderBy(x => x.RelType?.Label).ToList();
+        IReadOnlyList<Cogneme> sortedRelationships = t.Relationships.OrderBy(x => x?.RelType?.Label).ToList();
         foreach (Cogneme r in sortedRelationships)
         {
-            if (r.RelType?.Label == "is-a") continue;
-            if (showConditionals.IsChecked != true && (r.HasProperty("isCondition") || r.HasProperty("isResult"))) continue; //hide conditionals
+            if (r?.RelType?.Label == "is-a") continue;
+            if (r is null) continue;
+            //if (showConditionals.IsChecked != true && (r.HasProperty("isCondition") || r.HasProperty("isResult"))) continue; //hide conditionals
 
             TreeViewItem tviRel = new() { Header = GetRelationshipString(r), };
             if (t.HasProperty("isCondition") || t.HasProperty("isResult"))
                 tviRel.Header = "*" + tviRel.Header;
             else if (r.HasProperty("isCondition") || r.HasProperty("isResult"))
                 tviRel.Header = "*" + tviRel.Header;
-            if (r.Source != t) tviRel.Header = r.Source?.Label + "->" + tviRel.Header;
+            //if (r.Source != t) tviRel.Header = r.Source?.Label + "->" + tviRel.Header;
             //context menu
             tviRel.ContextMenu = GetRelationshipContextMenu(r);
             tviRelationshipsHeader.Items.Add(tviRel);
@@ -269,7 +270,8 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviRel.SetValue(ThingObjectProperty, r);
             tviRel.Expanded += EmptyChild_Expanded;
 
-            AddRelationships(r, tviRel, fullString);
+            if (r.Relationships.Count > 0)
+                AddRelationships(r, tviRel, fullString);
             //AddRelationships(r.Target, tviRef, fullString);
         }
     }
@@ -316,13 +318,6 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     //when an item is expanded, its content needs to be created in the treeview
     private void EmptyChild_Expanded(object sender, RoutedEventArgs e)
     {
-        int count = 0;
-        foreach (var item in theTreeView.Items)
-        {
-            count++;
-            if (item is TreeViewItem tvi1)
-                count += TreeviewItemCount(tvi1);
-        }
         // what tree view item is this
         if (sender is TreeViewItem tvi)
         {
@@ -345,9 +340,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             {
                 expandedItems.Add(parentLabel);
                 tvi.Items.Clear(); // delete empty child
-                AddChildren(t, tvi, depth, parentLabel);
-                AddRelationships(t, tvi, parentLabel);
-                if (reverseCB.IsChecked == true)
+                if (t.Children.Count > 0)
+                    AddChildren(t, tvi, depth, parentLabel);
+                if (t.Relationships.Count > 0)
+                    AddRelationships(t, tvi, parentLabel);
+                if (reverseCB.IsChecked == true && t.RelationshipsFrom.Count > 0)
                     AddRelationshipsFrom(t, tvi, parentLabel);
             }
         }
@@ -619,7 +616,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private string GetRelationshipString(Cogneme r)
     {
-        string retVal = r.ToString();
+        string retVal = r?.ToString();
         //        if (r.RelType is null || r.RelType.Label != "has-child")
         //            retVal = r.ToString() + " ";
         if (detailsCB.IsChecked == true)
@@ -641,7 +638,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     int CountNonChildRelationships(IReadOnlyList<Cogneme> list)
     {
-        return list.Count - list.Count(x => x.RelType?.Label == "is-a");
+        return list.Count - list.Count(x => x?.RelType?.Label == "is-a");
     }
 
 
@@ -809,7 +806,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         if (expandAll is null) expandAll = "";
         string root = parent.GetSavedDlgAttribute("Root");
         if (string.IsNullOrEmpty(root))
-            root = "Thing";
+            root = "Cogneme";
         textBoxRoot.Text = root;
         Refresh();
     }

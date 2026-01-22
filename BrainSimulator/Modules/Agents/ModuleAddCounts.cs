@@ -106,7 +106,7 @@ public class ModuleAddCounts : ModuleBase
             }
             foreach (var k in dict.Keys)
             {
-                if (!k.HasAncestor("unknownObject") || k == (Cogneme)"unknownObject") continue;
+                if (!k.HasAncestor("Unknown") || k == (Cogneme)"Unknown") continue;
                 if (dict[k] > 1)
                     retVal.Add((k, dict[k]));
             }

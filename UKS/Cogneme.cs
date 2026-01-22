@@ -1,16 +1,18 @@
 ﻿//
-// PROPRIETARY AND CONFIDENTIAL
-// Brain Simulator 3 v.1.0
-// © 2022 FutureAI, Inc., all rights reserved
-//
+// From the Future AI Society and Charles Simon
+// Available for use under an MIT license.
+//  
+
 
 
 namespace UKS;
 
 /// <summary>
-/// In the lexicon of graphs, a Thing both a "node" and an Edge.  A Thing can represent anything, physical object, attribute, word, action, etc.
+/// A cogneme is an atomic unit of thought. In the lexicon of graphs, a cogneme is both a "node" and an Edge.  
+/// A cogneme can represent anything, physical object, attribute, word, action, feeling, etc.
 /// </summary>
-/// Things often have labels which are any string. Like comments, these are typically used for programmer convenience and are not usually used for functionality.
+/// Cognemes may have labels which are any string. Like comments or variable names, these are typically used for programmer convenience and are not usually 
+/// used for functionality but are necessary to save and restore the structure.
 /// Labels are case-insensitive although the initial case is preserved within the UKS.
 /// Methods which return a Thing may return null in the event no Thing matches the result of the method. Methods which return lists of Things will
 /// return a list of zero elements if no Things match the result of the method.
@@ -35,30 +37,34 @@ public partial class Cogneme
     //    public static Thing HasChild { get => ThingLabels.GetThing("has-child"); }
     public static Cogneme IsA { get => CognemeLabels.GetThing("is-a"); }
 
-    private List<Cogneme> relationships = new List<Cogneme>(); //synapses to "has", "is", others
-    private List<Cogneme> relationshipsFrom = new List<Cogneme>(); //synapses from
+    private List<Cogneme> _relationships = new List<Cogneme>(); //synapses to "has", "is", others
+    private List<Cogneme> _relationshipsFrom = new List<Cogneme>(); //synapses from
     private List<Cogneme> relationshipsAsType = new List<Cogneme>(); //nodes which use this as a relationshipType
 
     /// <summary>
     /// Get an "unsafe" writeable list of a Thing's Relationships.
     /// This list may change while it is in use and so should not be used as a foreach iterator
     /// </summary>
-    public List<Cogneme> RelationshipsWriteable { get => relationships; }
+    public List<Cogneme> RelationshipsWriteable { get => _relationships; }
+    /// <summary>
+    /// Full "Safe" list or relationships
+    /// </summary>
+    public IReadOnlyList<Cogneme> Relationships {get{lock (_relationships){return new List<Cogneme>(_relationships.AsReadOnly());}}}
     /// <summary>
     /// Get a "safe" list of relationships which target this Thing
     /// </summary>
-    public IReadOnlyList<Cogneme> RelationshipsFrom { get { lock (relationshipsFrom) { return new List<Cogneme>(relationshipsFrom.AsReadOnly()); } } }
+    public IReadOnlyList<Cogneme> RelationshipsFrom { get { lock (_relationshipsFrom) { return new List<Cogneme>(_relationshipsFrom.AsReadOnly()); } } }
     /// <summary>
     /// Get an "unsafe" writeable list of Relationships which target this Thing
     /// </summary>
-    public List<Cogneme> RelationshipsFromWriteable { get => relationshipsFrom; }
+    public List<Cogneme> RelationshipsFromWriteable { get => _relationshipsFrom; }
     /// <summary>
     /// Get an "unsafe" writeable list of Relationships for which this Thing is the relationship type
     /// </summary>
     public List<Cogneme> RelationshipsAsTypeWriteable { get => relationshipsAsType; }
 
-    private string label = "";
-    object value;
+    private string _label = "";
+    object _value;
     //public int useCount = 0;
     public DateTime LastFiredTime = new();
 
@@ -101,10 +107,10 @@ public partial class Cogneme
     /// </summary>
     public object V
     {
-        get => value;
+        get => _value;
         set
         {
-            this.value = value;
+            this._value = value;
         }
     }
 
@@ -130,7 +136,6 @@ public partial class Cogneme
         }
     }
 
-
     private TimeSpan _timeToLive = TimeSpan.MaxValue;
     /// <summary>
     /// When set, makes a Thing transient
@@ -147,6 +152,22 @@ public partial class Cogneme
     }
 
 
+    public Cogneme()
+    {
+    }
+
+    /// <summary>
+    /// Copy Constructor
+    /// </summary>
+    /// <param name="r"></param>
+    public Cogneme(Cogneme r)
+    {
+        RelType = r.RelType;
+        Source = r.Source;
+        Target = r.Target;
+        Weight = r.Weight;
+    }
+
     /// <summary>
     /// Returns a Thing's label.
     /// Even though it shows zero references, don't delete this ToString() because the debugger uses it when mousing over a Thing
@@ -155,7 +176,7 @@ public partial class Cogneme
     public override string ToString()
     {
 
-        string retVal = label;
+        string retVal = _label;
         if (V is not null)
             retVal += " V: " + V.ToString();
 
@@ -169,42 +190,28 @@ public partial class Cogneme
     /// </summary>
     public string Label
     {
-        get => label;
+        get => _label;
         set
         {
-            if (value == label) return; //label is unchanged
-            CognemeLabels.RemoveThingLabel(label);
-            label = CognemeLabels.AddThingLabel(value, this);
+            if (value == _label) return; //label is unchanged
+            CognemeLabels.RemoveThingLabel(_label);
+            _label = CognemeLabels.AddThingLabel(value, this);
         }
     }
 
     public Cogneme AddToUKS()
     {
+        if (this.RelType is null) return this;
         if (string.IsNullOrEmpty(this.Label))
             Label = "R*";
-        this.AddParent("Thing");
-        this.Source.AddRelationship(this.Target, this.RelType);
+        this.AddParent("Relationship");
+        //this.Source.AddRelationship(this.Target, this.RelType);
         lock (UKS.theUKS.AllThings)
         {
-            UKS.theUKS.AllThings.Add(this);
+            if (!UKS.theUKS.AllThings.Contains(this))
+                UKS.theUKS.AllThings.Add(this);
         }
         return this;
-    }
-
-
-    public Cogneme()
-    {
-    }
-    /// <summary>
-    /// Copy Constructor
-    /// </summary>
-    /// <param name="r"></param>
-    public Cogneme(Cogneme r)
-    {
-        RelType = r.RelType;
-        Source = r.Source;
-        Target = r.Target;
-        Weight = r.Weight;
     }
 
 
@@ -214,77 +221,29 @@ public partial class Cogneme
         retVal += "[";
         if (!string.IsNullOrEmpty(Source?.ToString()))
         {
-            retVal += Source?.Label;
+            retVal += Source?.ToString();
         }
         if (!string.IsNullOrEmpty(RelType?.ToString()))
             retVal += ((retVal == "") ? "" : "->") + RelType?.ToString();
         if (!string.IsNullOrEmpty(Target?.ToString()))
         {
             retVal += ((retVal == "") ? "" : "->");
-            retVal += Target?.Label;
+            retVal += Target?.ToString();
         }
         retVal += "]";
         return retVal;
     }
 
-    /*
-        public string ToString(List<Thing> stack)
-        {
-            if (stack.Contains(this))  //looping block protect from circular references
-                return "";
-            stack.Add(this);
-            string retVal = "";
-
-            retVal = RecursiveToString(retVal);
-            return retVal;
-        }
-
-        public override string ToString()
-        {
-            string retVal = this.ToString(new List<Thing>());
-            return retVal;
-        }
-
-
-        private string RecursiveToString(string retVal)
-        {
-            //for convience show any value in singls quotes
-            bool showBrackets = true;
-            var value = this.Relationships.FindFirst(x => x.RelType.Label == "VLU")?.Target;
-            if (value is not null)
-            {
-                retVal += "'" + value.ToString() + "'";
-                showBrackets = false;
-            }
-            else
-                retVal += Label;
-            if (showBrackets) retVal += "[";
-            if (Source != this && !string.IsNullOrEmpty(Source?.ToString()))
-            {
-                retVal += Source?.ToString();
-            }
-            if (!string.IsNullOrEmpty(RelType?.ToString()))
-                retVal += ((retVal == "") ? "" : "->") + RelType?.ToString();
-            if (!string.IsNullOrEmpty(Target?.ToString()))
-            {
-                retVal += ((retVal == "") ? "" : "->");
-                retVal += Target?.ToString();
-            }
-            if (showBrackets) retVal += "]";
-            return retVal;
-        }
-
-    */
     public static bool operator ==(Cogneme? a, Cogneme? b)
     {
         //if (a is null && b is null)
         //    return true;
         if (a is null || b is null)
             return false;
-        if (a.Label == b.Label) return true;
+        if (a.Label != "" && a.Label == b.Label) return true;
         if (a.Target is not null || a.RelType is not null || a.Target is not null)
             if (a.Target == b.Target && a.Source == b.Source && a.RelType == b.RelType)
-            return true;
+                return true;
         return false;
     }
     //The following is needed to suppress a warning
@@ -299,6 +258,8 @@ public partial class Cogneme
                 a.Relationships.SequenceEqual(Relationships))
                 return true;
         }
+        if (obj is Cogneme b && (b.Source is null && b.RelType is null && b.Target is null))
+            return true;
         return false;
     }
 
@@ -318,18 +279,18 @@ public partial class Cogneme
         List<Cogneme> retVal = new List<Cogneme>();
         if (!useRelationshipFrom)
         {
-            lock (relationships)
+            lock (_relationships)
             {
-                foreach (Cogneme r in relationships)
-                    if (r.RelType is not null && r.RelType == relType && r.Source == this)
+                foreach (Cogneme r in _relationships)
+                    if (r?.RelType is not null && r?.RelType == relType && r?.Source == this)
                         retVal.Add(r.Target);
             }
         }
         else
         {
-            lock (relationshipsFrom)
+            lock (_relationshipsFrom)
             {
-                foreach (Cogneme r in relationshipsFrom)
+                foreach (Cogneme r in _relationshipsFrom)
                     if (r.RelType is not null && r.RelType == relType && r.Target == this)
                         retVal.Add(r.Source);
             }
@@ -357,7 +318,7 @@ public partial class Cogneme
             for (int i = 0; i < retVal.Count; i++)
             {
                 Cogneme t = retVal[i];
-                if (t.Label.StartsWith(this.label))
+                if (t.Label.StartsWith(this._label))
                 {
                     retVal.AddRange(t.Children);
                     retVal.RemoveAt(i);
@@ -368,21 +329,6 @@ public partial class Cogneme
         }
     }
 
-    /// <summary>
-    /// Full "Safe" list or relationships
-    /// </summary>
-    public IReadOnlyList<Cogneme> Relationships
-    {
-        get
-        {
-            lock (relationships)
-            {
-                //foreach (Thing r in relationships)
-                //    r.Misses++;
-                return new List<Cogneme>(relationships.AsReadOnly());
-            }
-        }
-    }
 
     /// ////////////////////////////////////////////////////////////////////////////
     //Handle the ancestors and descendents of a Thing
@@ -527,8 +473,8 @@ public partial class Cogneme
             foreach (Cogneme r in relationshipsToFollow)
             {
                 //Thing thingToAdd = followUpwards ? r.source : r.target;
-                Cogneme thingToAdd = followUpwards ? r.Target : r.Source;
-                if (r.RelType == relType)
+                Cogneme thingToAdd = followUpwards ? r?.Target : r?.Source;
+                if (r?.RelType == relType)
                 {
                     if (!retVal.Contains(thingToAdd))
                         retVal.Add(thingToAdd);
@@ -581,8 +527,8 @@ public partial class Cogneme
         };
         if (target is not null && relationshipType is not null)
         {
-            lock (relationships)
-                lock (target.relationshipsFrom)
+            lock (_relationships)
+                lock (target._relationshipsFrom)
                     lock (relationshipType.relationshipsAsType)
                     {
                         RelationshipsWriteable.Add(r);
@@ -593,14 +539,14 @@ public partial class Cogneme
         }
         else if (relationshipType is null)
         {
-            lock (relationships)
+            lock (_relationships)
             {
                 RelationshipsWriteable.Add(r);
             }
         }
         else if (relationshipType is not null)
         {
-            lock (relationships)
+            lock (_relationships)
                 lock (relationshipType.relationshipsAsType)
                 {
                     RelationshipsWriteable.Add(r);
@@ -613,9 +559,9 @@ public partial class Cogneme
 
     public void RemoveRelationships(Cogneme relationshipType)
     {
-        for (int i = 0; i < relationships.Count; i++)
+        for (int i = 0; i < _relationships.Count; i++)
         {
-            Cogneme r = relationships[i];
+            Cogneme r = _relationships[i];
             if (r.Source == this && r.RelType == relationshipType)
             {
                 RemoveRelationship(r);
@@ -627,7 +573,7 @@ public partial class Cogneme
     //TODO reverse the parameters so it's type,target
     private Cogneme HasRelationship(Cogneme target, Cogneme relationshipType)
     {
-        foreach (Cogneme r in relationships)
+        foreach (Cogneme r in _relationships)
         {
             if (r.Source == this && r.Target == target && r.RelType == relationshipType)
                 return r;
@@ -695,32 +641,12 @@ public partial class Cogneme
         return null;
     }
 
-    public Cogneme HasRelationshipWithParent(Cogneme t)
-    {
-        foreach (Cogneme L in Relationships)
-            if (L.Target.Parents.Contains(t)) return L.Target;
-        return null;
-    }
-
 
     public Cogneme RemoveRelationship(Cogneme t2, Cogneme relationshipType)
     {
         Cogneme r = new() { Source = this, RelType = relationshipType, Target = t2 };
         RemoveRelationship(r);
         return r;
-    }
-
-    public List<Cogneme> GetRelationshipByWithAncestor(Cogneme t)
-    {
-        List<Cogneme> retVal = new List<Cogneme>();
-        for (int i = 0; i < relationshipsFrom.Count; i++)
-        {
-            if (relationshipsFrom[i].Source.HasAncestor(t))
-            {
-                retVal.Add(relationshipsFrom[i]);
-            }
-        }
-        return retVal.OrderBy(x => -x.Weight).ToList();
     }
 
     /// <summary>
@@ -771,9 +697,9 @@ public partial class Cogneme
     public bool HasProperty(Cogneme t)  //with inheritance
     {
         foreach (Cogneme r in Relationships)
-            if (r.RelType.Label == "hasProperty" && r.Target == t)
+            if (r?.RelType.Label == "hasProperty" && r.Target == t)
                 return true;
-        foreach (Cogneme t1 in Parents)
+        foreach (Cogneme t1 in Parents) //handle inheritance 
         {
             return t1.HasProperty(t);
         }

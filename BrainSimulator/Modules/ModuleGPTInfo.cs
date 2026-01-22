@@ -86,7 +86,7 @@ namespace BrainSimulator.Modules
                         if (tChild is null) return;
                         tChild.RemoveParent(tParent);
                         if (tChild.Parents.Count == 0)
-                            tChild.AddParent(MainWindow.theUKS.Labeled("unknownObject"));
+                            tChild.AddParent(MainWindow.theUKS.Labeled("Unknown"));
                         Debug.WriteLine($"Thing: {child} is-a {parent} has been removed. ");
                     }
                     else
@@ -121,7 +121,7 @@ namespace BrainSimulator.Modules
             return theString;
         }
 
-        //this is used to add parents to unknownObjects
+        //this is used to add parents to Unknowns
         public static async Task GetChatGPTParents(string textIn)
         {
             try

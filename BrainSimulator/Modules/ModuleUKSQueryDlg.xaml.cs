@@ -32,6 +32,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
     private void RequeryTimer_Tick(object sender, EventArgs e)
     {
+        if (CBAutoRefresh.IsChecked == false) return;
         QueryForAttributes();
         QueryByAttributes();
     }
@@ -102,7 +103,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
         Cogneme ancestor = theUKS.Labeled(ancestorText1.Text);
         if (ancestor is null)
-            ancestor = theUKS.Labeled("Thing");
+            ancestor = theUKS.Labeled("Cogneme");
 
         //build the query object
         Cogneme queryThing = CreateTheQueryThing();
@@ -170,7 +171,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
                 if (relType.Label == "can")
                 {
                     relTarget.AddParent("Action");
-                    relTarget.RemoveParent("unknownObject");
+                    relTarget.RemoveParent("Unknown");
                 }
 
                 float conf = .9f;
@@ -190,7 +191,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
         Cogneme ancestor = theUKS.Labeled(ancestorText1.Text);
         if (ancestor is null)
-            ancestor = theUKS.Labeled("Thing");
+            ancestor = theUKS.Labeled("Cogneme");
 
         //build the query object
         Cogneme queryThing = CreateTheQueryThing();
@@ -213,7 +214,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
                 theUKS.AllThings.Add(queryThing);
             }
             queryThing.Label = "Unl*";
-            queryThing.AddParent("UnknownObject");
+            queryThing.AddParent("Unknown");
             UpdateMostRecent(queryThing);
             return;
         }
@@ -398,7 +399,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
         Cogneme ancestor = theUKS.Labeled(ancestorText1.Text);
         if (ancestor is null)
-            ancestor = theUKS.Labeled("Thing");
+            ancestor = theUKS.Labeled("Cogneme");
 
         //build the query object
         Cogneme queryThing = CreateTheQueryThing();
@@ -448,7 +449,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
                 theUKS.AllThings.Add(queryThing);
             }
             queryThing.Label = "Unl*";
-            queryThing.AddParent("UnknownObject");
+            queryThing.AddParent("Unknown");
             UpdateMostRecent(queryThing);
 
             //the following happens after a 2 second delay

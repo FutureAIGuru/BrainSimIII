@@ -42,7 +42,7 @@ namespace BrainSimulator.Modules
         public override bool Draw(bool checkDrawTimer)
         {
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
-            StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("unknownObject")?.Children.Count} unknown Things.  ";
+            StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("Unknown")?.Children.Count} unknown Things.  ";
             return base.Draw(checkDrawTimer);
         }
 
@@ -55,7 +55,7 @@ namespace BrainSimulator.Modules
         {
             txtOutput.Text = theText;
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
-            StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("unknownObject")?.Children.Count} unknown Things.  ";
+            StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("Unknown")?.Children.Count} unknown Things.  ";
         }
 
         private async void LoadButton_Click(object sender, RoutedEventArgs e)
@@ -257,7 +257,7 @@ namespace BrainSimulator.Modules
             SetOutputText("Verifying all is-a relationships");
             foreach (Cogneme t in mf.theUKS.AllThings)
             {
-                if (t.Parents.FindFirst(x => x.Label == "unknownObject") is not null) continue;
+                if (t.Parents.FindFirst(x => x.Label == "Unknown") is not null) continue;
                 if (!t.Label.StartsWith('.')) continue;
                 if (t.Label == ".") continue;
                 if (t == mf.theUKS.AllThings.Last())
@@ -363,7 +363,7 @@ namespace BrainSimulator.Modules
                 else //process unknowns
                 {
                     List<string> words = new List<string>();
-                    var thingList = mf.theUKS.Labeled("unknownObject").Children;
+                    var thingList = mf.theUKS.Labeled("Unknown").Children;
 
                     SetOutputText($"Getting parents for {thingList.Count} Things");
                     foreach (var thing in thingList)

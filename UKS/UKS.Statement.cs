@@ -20,17 +20,17 @@ public partial class UKS
     /// <param name="sTarget">string or Thing (or null)</param>
     /// <param name="isStatement">Boolean indicating if this is a true statement or part of a conditional</param>
     /// <returns>The primary relationship which was created (others may be created for given attributes</returns>
-    public Cogneme AddStatement(string sSource, string sRelationshipType, string sTarget)
+    public Cogneme AddStatement(string sSource, string sRelationshipType, string sTarget, string label = "")
     {
         Cogneme source = ThingFromObject(sSource);
         Cogneme relationshipType = ThingFromObject(sRelationshipType, "RelationshipType", source);
         Cogneme target = ThingFromObject(sTarget);
 
-        Cogneme theRelationship = AddStatement(source, relationshipType, target);
+        Cogneme theRelationship = AddStatement(source, relationshipType, target, label);
         return theRelationship;
     }
     /// <summary>
-    /// Adds a relationship between the specified source, relationship type, and target. No new Things are created.
+    /// Adds a statement relating the specified source, relationship type, and target. No new Things are created.
     /// </summary>
     /// <remarks>If a relationship with the same source, relationship type, and target already exists, the existing
     /// relationship  is returned after being activated. Otherwise, a new relationship is created and added. If the
@@ -41,23 +41,28 @@ public partial class UKS
     /// <param name="target">The target <see cref="Cogneme"/> of the relationship.</param>
     /// <returns>The created or existing <see cref="Cogneme"/> object that represents the relationship.  Returns <see
     /// langword="null"/> if <paramref name="source"/> or <paramref name="relType"/> is <see langword="null"/>.</returns>
-    public Cogneme AddStatement(Cogneme source, Cogneme relType, Cogneme target)
+    public Cogneme AddStatement(Cogneme source, Cogneme relType, Cogneme target, string label = "")
     {
         if (source is null || relType is null) return null;
 
-        //create the relationship but don't add it to the UKS
-        Cogneme r = CreateTheRelationship(source, relType, target);
+        Cogneme existing = Labeled(label);
+        Cogneme r = null; 
+
+        if (existing is null)
+        {        //create the relationship but don't add it to the UKS
+            r = CreateTheRelationship(source, relType, target);
+            existing = GetRelationship(r);
+        }
 
         //does this relationship already exist (without conditions)?
-        Cogneme existing = GetRelationship(r);
-        if (existing is not null && existing.Equals(r))
+        if (existing is not null )
         {
             WeakenConflictingRelationships(source, existing);
             existing.Fire();
             return existing;
         }
-        else if (existing is not null && existing.Label == "")
-            existing.Label = "r*";
+        if (r.Source?.Label == "") r.Source.AddToUKS();
+        if (r.Target?.Label == "") r.Target.AddToUKS();
 
         WeakenConflictingRelationships(source, r);
 
@@ -70,7 +75,7 @@ public partial class UKS
             WriteTheRelationship(rReverse);
         }
 
-        //if this is adding a child relationship, remove any unknownObject parent
+        //if this is adding a child relationship, remove any Unknown parent
         ClearExtraneousParents(r.Source);
         ClearExtraneousParents(r.Target);
         ClearExtraneousParents(r.RelType);
@@ -132,14 +137,12 @@ public partial class UKS
                 //special cases for "not" so we delete rather than weakening
                 if (newRelationship.RelType.Children.Contains(existingRelationship.RelType) && HasAttribute(existingRelationship.RelType, "not"))
                 {
-                    Cogneme after = GetOrAddThing("AFTER", "ClauseType");
-                    AddClause(newRelationship, "AFTER", existingRelationship);
+                    AddStatement(newRelationship, "AFTER", existingRelationship);
                     existingRelationship.Source.RemoveRelationship(existingRelationship);
                 }
                 else if (existingRelationship.RelType.Children.Contains(newRelationship.RelType) && HasAttribute(newRelationship.RelType, "not"))
                 {
-                    Cogneme after = GetOrAddThing("AFTER", "ClauseType");
-                    AddClause(newRelationship, "AFTER", existingRelationship);
+                    AddStatement(newRelationship, "AFTER", existingRelationship);
                     existingRelationship.Source.RemoveRelationship(existingRelationship);
                 }
                 else
@@ -162,15 +165,15 @@ public partial class UKS
     {
         if (t is null) return;
 
-        bool reconnectNeeded = t.HasAncestorLabeled("Thing");
+        bool reconnectNeeded = t.HasAncestorLabeled("Cogneme");
         //if a thing has more than one parent and one of them is unkonwnObject, 
-        //then the unknownObject relationship is unnecessary
+        //then the Unknown relationship is unnecessary
         if (t.Parents.Count > 1)
-            t.RemoveParent(CognemeLabels.GetThing("unknownObject"));
+            t.RemoveParent(CognemeLabels.GetThing("Unknown"));
         //if this disconnects the Thing from the tree, reconnect it as a Unknown
         //this may happen in the case of a circular reference.
-        if (reconnectNeeded && !t.HasAncestor("Thing"))
-            t.AddParent(CognemeLabels.GetThing("unknownObject"));
+        if (reconnectNeeded && !t.HasAncestor("Cogneme"))
+            t.AddParent(CognemeLabels.GetThing("Unknown"));
     }
 
     public Cogneme SubclassExists(Cogneme t, List<Cogneme> thingAttributes, ref Cogneme bestMatch, ref List<Cogneme> missingAttributes)

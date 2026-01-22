@@ -82,7 +82,7 @@ public class ModuleAttributeBubble : ModuleBase
     void BubbleChildAttributes(Cogneme t)
     {
         if (t.Children.Count == 0) return;
-        if (t.Label == "unknownObject") return;
+        if (t.Label == "Unknown") return;
 
         //build a List of all the Relationships which this thing's children have
         List<RelDest> itemCounts = new();
