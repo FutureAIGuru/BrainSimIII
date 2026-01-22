@@ -21,7 +21,7 @@
             <ComboBoxItem>Oxford Word List</ComboBoxItem>
         </ComboBox>
         <Button Content="Clear" Height="29" Margin="0,0,152,10" VerticalAlignment="Bottom" Click="ClearButton_Click" HorizontalAlignment="Right" Width="102"/>
-        <ComboBox x:Name="relationshipSelection" SelectedIndex="0" FontSize="18" Height="37" Margin="0,62,309,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="91" SelectionChanged="comboSelection_SelectionChanged">
+        <ComboBox x:Name="linkSelection" SelectedIndex="0" FontSize="18" Height="37" Margin="0,62,309,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="91" SelectionChanged="comboSelection_SelectionChanged">
             <ComboBoxItem Content="is-a"/>
             <ComboBoxItem Content="hasa"/>
         </ComboBox>

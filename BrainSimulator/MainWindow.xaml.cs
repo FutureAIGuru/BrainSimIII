@@ -187,20 +187,20 @@ namespace BrainSimulator
             {
                 string name = module.Name;
                 //name = name.Replace("Module", "");
-                Cogneme availableModule = availableListInUKS.FindFirst(x => x.Label == name);
+                Thought availableModule = availableListInUKS.FindFirst(x => x.Label == name);
                 if (availableModule is null)
                     theUKS.GetOrAddThing(name, "AvailableModule");
             }
             var PythonModules = moduleHandler.GetListOfExistingPythonModuleTypes();
             foreach (var name in PythonModules)
             {
-                Cogneme availableModule = availableListInUKS.FindFirst(x => x.Label == name);
+                Thought availableModule = availableListInUKS.FindFirst(x => x.Label == name);
                 if (availableModule is null)
                     theUKS.GetOrAddThing(name, "AvailableModule");
             }
             //delete any non-existant modules
             availableListInUKS = theUKS.Labeled("AvailableModule").Children;
-            foreach (Cogneme t in availableListInUKS)
+            foreach (Thought t in availableListInUKS)
             {
                 string name = t.Label;
                 if (CSharpModules.FindFirst(x=>x.Name == name) is not null) continue;
@@ -211,9 +211,9 @@ namespace BrainSimulator
 
             //reconnect/delete any active modules
             var activeListInUKS = theUKS.Labeled("ActiveModule").Children;
-            foreach(Cogneme t in activeListInUKS)
+            foreach(Thought t in activeListInUKS)
             {
-                Cogneme parent = availableListInUKS.FindFirst(x => x.Label == t.Label.Substring(0, t.Label.Length - 1));
+                Thought parent = availableListInUKS.FindFirst(x => x.Label == t.Label.Substring(0, t.Label.Length - 1));
                 if (parent is not null)
                     t.AddParent(parent);
                 else
@@ -231,7 +231,7 @@ namespace BrainSimulator
 
         public string ActivateModule(string moduleType)
         {
-            Cogneme t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
+            Thought t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
             t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleType));
             t.AddParent(theUKS.Labeled("ActiveModule"));
 
@@ -300,9 +300,9 @@ namespace BrainSimulator
 
         private void Dt_Tick(object? sender, EventArgs e)
         {
-            Cogneme activeModuleParent = theUKS.Labeled("ActiveModule");
+            Thought activeModuleParent = theUKS.Labeled("ActiveModule");
             if (activeModuleParent is null) return;
-            foreach (Cogneme module in activeModuleParent.Children)
+            foreach (Thought module in activeModuleParent.Children)
             {
                 ModuleBase mb = activeModules.FindFirst(x => x.Label == module.Label);
                 if (mb is not null)
@@ -326,7 +326,7 @@ namespace BrainSimulator
             foreach (var moduleType in moduleTypes)
             {
                 string moduleName = moduleType.Name;
-                Cogneme t = theUKS.GetOrAddThing(moduleName, "AvailableModule");
+                Thought t = theUKS.GetOrAddThing(moduleName, "AvailableModule");
                 //TODO: delete the following
                 t.AddParent("AvailableModule");
             }
@@ -339,7 +339,7 @@ namespace BrainSimulator
 
             ModuleListComboBox.Items.Clear();
             ModuleListComboBox.FontSize = 18;
-            foreach (Cogneme t in theUKS.Labeled("AvailableModule").Children)
+            foreach (Thought t in theUKS.Labeled("AvailableModule").Children)
             {
                 //ModuleListComboBox.Items.Add(new System.Windows.Controls.Label { Content = t.Label, Margin = new Thickness(0), Padding = new Thickness(0) });
                 ModuleListComboBox.Items.Add(t.Label);

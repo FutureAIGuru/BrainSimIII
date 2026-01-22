@@ -30,32 +30,32 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         return true;
     }
 
-    // BtnAddRelationship_Click is called when the AddRelationship button is clicked
-    private void BtnAddRelationship_Click(object sender, RoutedEventArgs e)
+    // BtnAddLink_Click is called when the AddLink button is clicked
+    private void BtnAddLink_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
         string newThing = sourceText.Text;
         string targetThing = targetText.Text;
-        string relationType = relationshipText.Text;
+        string relationType = linkText.Text;
 
         //Special case for [This,is-a,dog]
         if (newThing.ToLower() == "this")
         {
             if (relationType.ToLower().Contains("called"))
             {
-                Cogneme mostRecent = UKSStatement.theUKS.Labeled("mostRecent");
+                Thought mostRecent = UKSStatement.theUKS.Labeled("mostRecent");
                 if (mostRecent is null)
                 {
                     SetStatus("'This' is not defined at this time");
                     return;
                 }
-                Cogneme mostRecentTarget = mostRecent.Relationships.FindFirst(x => x.RelType.Label == "is").Target;
+                Thought mostRecentTarget = mostRecent.LinksTo.FindFirst(x => x.LinkType.Label == "is").To;
                 mostRecentTarget.Label = targetThing;
             }
             return;
         }
 
-        if (!CheckAddRelationshipFieldsFilled()) return;
+        if (!CheckAddLinkFieldsFilled()) return;
 
         TimeSpan duration = TimeSpan.MaxValue;
         string durationText = ((ComboBoxItem)durationCombo.SelectedItem).Content.ToString();
@@ -70,7 +70,7 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         }
         float confidence = (float)confidenceSlider.Value;
 
-        Cogneme r1 = UKSStatement.AddRelationship(newThing, targetThing, relationType);
+        Thought r1 = UKSStatement.AddLink(newThing, targetThing, relationType);
         if (r1 is not null && setConfCB.IsChecked == true)
         {
             r1.Weight = confidence;
@@ -79,10 +79,10 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
 
         CheckThingExistence(targetText);
         CheckThingExistence(sourceText);
-        CheckThingExistence(relationshipText);
+        CheckThingExistence(linkText);
     }
 
-    // Check for thing existence and set background color of the textbox and the error message accordingly.
+    // Check for thought existence and set background color of the textbox and the error message accordingly.
     private bool CheckThingExistence(object sender)
     {
         if (sender is TextBox tb)
@@ -95,7 +95,7 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
                 SetStatus("Source and type cannot be empty");
                 return false;
             }
-            List<Cogneme> tl = ModuleUKSStatement.ThingListFromString(text);
+            List<Thought> tl = ModuleUKSStatement.ThingListFromString(text);
             if (tl is null || tl.Count == 0)
             {
                 tb.Background = new SolidColorBrush(Colors.LemonChiffon);
@@ -116,14 +116,14 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         Draw(false);
     }
 
-    // thingText_TextChanged is called when the thing textbox changes
+    // thingText_TextChanged is called when the thought textbox changes
     private void Text_TextChanged(object sender, TextChangedEventArgs e)
     {
         CheckThingExistence(sender);
     }
 
     // Check for parent existence and set background color of the textbox and the error message accordingly.
-    private bool CheckAddRelationshipFieldsFilled()
+    private bool CheckAddLinkFieldsFilled()
     {
         SetStatus("OK");
         ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
@@ -133,7 +133,7 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
             SetStatus("Source not provided");
             return false;
         }
-        if (relationshipText.Text == "")
+        if (linkText.Text == "")
         {
             SetStatus("Type not provided");
             return false;

@@ -187,11 +187,11 @@ namespace BrainSimulator.Modules
                 if (sourceHash is not null)
                 {
                     //delete orphas
-                    Cogneme objectRoot = theUKS.GetOrAddThing("Object", "Cogneme");
+                    Thought objectRoot = theUKS.GetOrAddThing("Object", "Thought");
                     if (objectRoot is null) return;
                     for (int i = 0; i < objectRoot.Children.Count; i++)
                     {
-                        Cogneme child = (Cogneme)objectRoot.Children[i];
+                        Thought child = (Thought)objectRoot.Children[i];
                         int descendentCount = child.GetDescendentsCount();
                         if (descendentCount == 1)
                         {
@@ -217,13 +217,13 @@ namespace BrainSimulator.Modules
                 }
             }
             //check UKS for circular references
-            //foreach (Thing t1 in theUKS.GetTheUKS())
+            //foreach (Thought t1 in theUKS.GetTheUKS())
             //{
             //    if (t1.HasAncestor(t1))
             //    {
             //        //find a direct path which is the circle
-            //        Thing t2 = t1;
-            //        List<Thing> x;
+            //        Thought t2 = t1;
+            //        List<Thought> x;
             //        while ((x = t2.Parents.FindAll(x => x.HasAncestor(t1))).Count > 0)
             //        {
             //            if (x.Count == 1)
@@ -281,7 +281,7 @@ namespace BrainSimulator.Modules
                             //Debug.WriteLine($"{source} -> {rel} -> {target} :  {fWeight.ToString("F2")}");
                             //Debug.Write(".");
                             if (wordsToLookUp is null) wordsToLookUp = new();
-                            Cogneme t = theUKS.Labeled(target);
+                            Thought t = theUKS.Labeled(target);
                             if (t is null)
                             {
                                 //    int index1 = wordsToLookUp.FindIndex(x => x.Item1 == target);
@@ -293,7 +293,7 @@ namespace BrainSimulator.Modules
                             }
                             //if (sourceHash[source].Count > 5 && targetHash[target].Count > 5)
                             {
-                                Cogneme r1 = theUKS.AddStatement(source, "is-a", target);
+                                Thought r1 = theUKS.AddStatement(source, "is-a", target);
                                 if (r1 is not null)
                                 {
                                     if (r1.TimeToLive == TimeSpan.MaxValue)
@@ -592,7 +592,7 @@ namespace BrainSimulator.Modules
                             word = word.Replace("’", "");
                             word = word.ToLower();
                             word = RemoveParentheticals(word);
-                            //word = Thing.TrimDigits(word.Trim());
+                            //word = Thought.TrimDigits(word.Trim());
 
                             if (word == "" && pos.Count > 0)
                                 word = prevWord;
@@ -615,7 +615,7 @@ namespace BrainSimulator.Modules
             {
                 if (word.Item1 == "")
                 { continue; }
-                Cogneme existingThing = null;
+                Thought existingThing = null;
                 /* rewrite for new single-label concept
                  * var existingThings = theUKS.Labeled(word.Item1);
                                 foreach (var t in existingThings)
@@ -628,7 +628,7 @@ namespace BrainSimulator.Modules
                 string firstLetter = word.Item1.Substring(0, 1).ToUpper();
                 theUKS.GetOrAddThing("Words", "Object");
                 theUKS.GetOrAddThing(word.Item2, "Words");
-                Cogneme letterParent = theUKS.GetOrAddThing(firstLetter, word.Item2);
+                Thought letterParent = theUKS.GetOrAddThing(firstLetter, word.Item2);
 
                 if (existingThing is null)
                     existingThing = theUKS.GetOrAddThing(word.Item1, letterParent);
@@ -674,7 +674,7 @@ namespace BrainSimulator.Modules
                 {
                     Output = kid.ToString();
                     GetUKS();
-                    Cogneme incomingInfo = theUKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
+                    Thought incomingInfo = theUKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
                     incomingInfo.V = kid;
                     return;
                 }
@@ -741,7 +741,7 @@ namespace BrainSimulator.Modules
             }
             Output = kidsdef.ToString();
             GetUKS();
-            Cogneme incomingInfo = theUKS.GetOrAddThing("CurrentIncomingInfo", "Attention");
+            Thought incomingInfo = theUKS.GetOrAddThing("CurrentIncomingInfo", "Attention");
             incomingInfo.V = kidsdef;
 
             int index = 0;
@@ -916,7 +916,7 @@ namespace BrainSimulator.Modules
         }
 
         //This method rerieves the wikidata query number value from wikidata query
-        // for the Thing item and passes that value to GetPropertiesFromURL along
+        // for the Thought item and passes that value to GetPropertiesFromURL along
         // with the property query named prop
         public async void GetWikidataData(string item, string prop)
         {
@@ -948,7 +948,7 @@ namespace BrainSimulator.Modules
             catch { }
 
         }
-        //This method gets all the properties or subproperties of a property propName from a Thing
+        //This method gets all the properties or subproperties of a property propName from a Thought
         // with name propName and wikidata query number value numberOfName associated with propName
         private async void GetPropertiesFromURL(string itemID, string propName)
         {
@@ -972,10 +972,10 @@ namespace BrainSimulator.Modules
             string propertyURLResult = propertyURL.ToString();
             propertyDoc.LoadXml(propertyURLResult);
 
-            //Thing props = theUKS.GetOrAddThing("Properties", item);
+            //Thought props = theUKS.GetOrAddThing("Properties", item);
             if (propName != "")
             {
-                //Thing prop = theUKS.GetOrAddThing(propName, props);
+                //Thought prop = theUKS.GetOrAddThing(propName, props);
                 var propertyToCheck = propName;
 
                 var docPropertyValues = propertyDoc.GetElementsByTagName("result");
@@ -1043,7 +1043,7 @@ namespace BrainSimulator.Modules
                 {
                     bool found = false;
                     string[] fn = new string[xn.ChildNodes.Count];
-                    //Thing prop = new Thing();
+                    //Thought prop = new Thought();
                     for (int i = 0; i < xn.ChildNodes.Count; i++)
                     {
                         Debug.WriteLine(xn.ChildNodes[i].InnerText + " :: ");

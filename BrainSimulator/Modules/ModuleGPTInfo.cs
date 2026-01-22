@@ -78,25 +78,25 @@ namespace BrainSimulator.Modules
                     if (Output.Contains("language model")) return;
                     if (!answerString.Contains("yes"))
                     {
-                        Cogneme tParent = MainWindow.theUKS.Labeled(parent);
+                        Thought tParent = MainWindow.theUKS.Labeled(parent);
                         if (tParent is null) tParent = MainWindow.theUKS.Labeled("." + parent);
                         if (tParent is null) return;
-                        Cogneme tChild = MainWindow.theUKS.Labeled(child);
+                        Thought tChild = MainWindow.theUKS.Labeled(child);
                         if (tChild is null) tChild = MainWindow.theUKS.Labeled("." + child);
                         if (tChild is null) return;
                         tChild.RemoveParent(tParent);
                         if (tChild.Parents.Count == 0)
                             tChild.AddParent(MainWindow.theUKS.Labeled("Unknown"));
-                        Debug.WriteLine($"Thing: {child} is-a {parent} has been removed. ");
+                        Debug.WriteLine($"Thought: {child} is-a {parent} has been removed. ");
                     }
                     else
                     {
                         //tag item as verified so we don't try it again
-                        Cogneme r = MainWindow.theUKS.GetRelationship(parent, "has-child", child);
+                        Thought r = MainWindow.theUKS.GetLink(parent, "has-child", child);
                         if (r is not null)
                         {
 //                            r.GPTVerified = true;
-                            Debug.WriteLine($"Thing: {child} is-a {parent} has verified. ");
+                            Debug.WriteLine($"Thought: {child} is-a {parent} has verified. ");
                         }
                     }
                 }
@@ -175,7 +175,7 @@ Example for dog: is-a | animal, pet
 Example for numerical VLU: contains (with counts) always contains parts | 2 eyes, 4 legs, 1 tail
 Use any VLU only once. 
 Use the following VLU-NAMEs if appropriate: 
-is-a (where each value is a physical thing), 
+is-a (where each value is a physical thought), 
 can, 
 always contains parts (with counts),
 usually contains parts (with counts)
@@ -213,7 +213,7 @@ is-part-of-speech, ";
             try
             {
                 UKS.UKS theUKS = MainWindow.theUKS;
-                foreach (Cogneme t in theUKS.Labeled("Object").Descendents) {
+                foreach (Thought t in theUKS.Labeled("Object").Descendents) {
                     // Get the label and sanitize the input.
                     String textIn = t.Label;
                     textIn = textIn.ToLower();
@@ -256,7 +256,7 @@ is-part-of-speech, ";
             {
                 UKS.UKS theUKS = MainWindow.theUKS;
                 int limit = 20;
-                foreach (Cogneme t in theUKS.Labeled("Object").Descendents)
+                foreach (Thought t in theUKS.Labeled("Object").Descendents)
                 {
                     limit--;
                     if (limit <= 0) break;
@@ -375,16 +375,16 @@ is-part-of-speech, ";
                     String newParent = valuePairs[1];
 
                     // Make the english word "means" the abstract item.
-                    Cogneme r = theUKS.AddStatement(englishWord, "means", textIn + "*");
+                    Thought r = theUKS.AddStatement(englishWord, "means", textIn + "*");
 
                     // Make the disambiguated term a child of the parent.
-                    theUKS.AddStatement(r.Target, "is-a", newParent);
+                    theUKS.AddStatement(r.To, "is-a", newParent);
 
                     // Increment count to see how many disambiguous items there are.
                     count++;
 
-                    // Incrememnt successful relationships
-                    ModuleGPTInfoDlg.relationshipCount += 1;
+                    // Incrememnt successful links
+                    ModuleGPTInfoDlg.linkCount += 1;
                 }
             }
         }
@@ -434,22 +434,22 @@ is-part-of-speech, ";
                 string targetThing2 = valuePairs[6].Trim();
 
 
-                // Add relationships and clause
-                Cogneme r1 = AddRelationshipClause(newThing, targetThing, relationType);
+                // Add links and clause
+                Thought r1 = AddLinkClause(newThing, targetThing, relationType);
 
-                Cogneme r2 = AddRelationshipClause(newThing2, targetThing2, relationType2);
+                Thought r2 = AddLinkClause(newThing2, targetThing2, relationType2);
 
-                Cogneme theClauseType = GetClauseType(clauseType);
+                Thought theClauseType = GetClauseType(clauseType);
 
                 //r1.AddClause(theClauseType, r2);
 
-                ModuleGPTInfoDlg.relationshipCount += 1;
+                ModuleGPTInfoDlg.linkCount += 1;
             }
         }
 
-        // Add Thing Clause.
+        // Add Thought Clause.
         // NOTES: Copied from ModuleUKSClause exactly, working on a fix.
-        public static Cogneme AddRelationshipClause(string source, string target, string relationshipType)
+        public static Thought AddLinkClause(string source, string target, string linkType)
         {
             UKS.UKS theUKS = MainWindow.theUKS;
             if (theUKS is null) return null;
@@ -458,7 +458,7 @@ is-part-of-speech, ";
 
             source = source.Trim();
             target = target.Trim();
-            relationshipType = relationshipType.Trim();
+            linkType = linkType.Trim();
 
             string[] tempStringArray = source.Split(' ');
             List<string> sourceModifiers = new();
@@ -470,19 +470,19 @@ is-part-of-speech, ";
             target = pluralizer.Singularize(tempStringArray[tempStringArray.Length - 1]);
             for (int i = 0; i < tempStringArray.Length - 1; i++) targetModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
-            tempStringArray = relationshipType.Split(' ');
+            tempStringArray = linkType.Split(' ');
             List<string> typeModifiers = new();
-            relationshipType = pluralizer.Singularize(tempStringArray[0]);
+            linkType = pluralizer.Singularize(tempStringArray[0]);
             for (int i = 1; i < tempStringArray.Length; i++) typeModifiers.Add(pluralizer.Singularize(tempStringArray[i]));
 
-            Cogneme r = theUKS.AddStatement(source, relationshipType, target);
+            Thought r = theUKS.AddStatement(source, linkType, target);
 
             return r;
         }
 
         // Get clause type.
-        // NOTES: Copied directly from ModuleUKSClause like AddRelationshipClause, looking for a fix.
-        public static Cogneme GetClauseType(string newThing)
+        // NOTES: Copied directly from ModuleUKSClause like AddLinkClause, looking for a fix.
+        public static Thought GetClauseType(string newThing)
         {
             UKS.UKS theUKS = MainWindow.theUKS;
             if (theUKS is null) return null;
@@ -589,12 +589,12 @@ is-part-of-speech, ";
                         if (valueType.StartsWith("examples"))
                         {
                             theUKS.AddStatement("." + value, "is-a", "." + textIn); //note reversal
-                            ModuleGPTInfoDlg.relationshipCount += 1;
+                            ModuleGPTInfoDlg.linkCount += 1;
                         }
                         else if (valueType.StartsWith("is-part-of-speech"))
                         {
                             theUKS.AddStatement("." + textIn, "is-a", "." + value);
-                            ModuleGPTInfoDlg.relationshipCount += 1;
+                            ModuleGPTInfoDlg.linkCount += 1;
                         }
                         else if (valueType.StartsWith("has-properties"))
                         {
@@ -602,27 +602,27 @@ is-part-of-speech, ";
                         }
                         else if (valueType.Contains("contains"))
                         {
-                            Cogneme r;
+                            Thought r;
                             if (count == "" || count == "1")
                                 r = theUKS.AddStatement("." + textIn, "has", "." + value);
                             else
                                 r = theUKS.AddStatement("." + textIn, "has", "." + value);
-                            ModuleGPTInfoDlg.relationshipCount += 1;
+                            ModuleGPTInfoDlg.linkCount += 1;
                             if (valueType.Contains("usually"))
                                 r.Weight = .75f;
                         }
                         else
                         {
                             theUKS.AddStatement("." + textIn, valueType, "." + value);
-                            ModuleGPTInfoDlg.relationshipCount += 1;
+                            ModuleGPTInfoDlg.linkCount += 1;
                         }
                         ///////   null reltypes? This was a safety check
                         ///
-                        foreach (Cogneme t in theUKS.AllThings)
-                            foreach (Cogneme r in t.Relationships)
-                                if (r.RelType is null)
+                        foreach (Thought t in theUKS.AllThings)
+                            foreach (Thought r in t.LinksTo)
+                                if (r.LinkType is null)
                                 {
-                                    t.RemoveRelationship(r);
+                                    t.RemoveLink(r);
                                 }
 
                     }
@@ -634,26 +634,26 @@ is-part-of-speech, ";
         {
             // Get the UKS.
             UKS.UKS theUKS = MainWindow.theUKS;
-            List<Cogneme> thingsToRemove = new List<Cogneme>();
+            List<Thought> thingsToRemove = new List<Thought>();
             // Get all the children of Word and remove duplicates.
-            foreach (Cogneme word in theUKS.GetOrAddThing("Word").Children)
+            foreach (Thought word in theUKS.GetOrAddThing("Word").Children)
             {
                 // Find unique parents to remove duplicates
-                List<Cogneme> uniqueParents = new List<Cogneme>();
-                foreach (Cogneme meaning in word.Relationships)
+                List<Thought> uniqueParents = new List<Thought>();
+                foreach (Thought meaning in word.LinksTo)
                 {
                     // Find the parents of each target in the realtionship.
-                    foreach (Cogneme parent in meaning.Target.Parents)
+                    foreach (Thought parent in meaning.To.Parents)
                     {
                         // Continue if the parent is the word itself, (.rock and rock), instead of an actual abstract parent.
-                        if ("." + parent.Label == meaning.Source.Label)
+                        if ("." + parent.Label == meaning.From.Label)
                         {
                             continue;
                         }
                         // If the parent already exists, remove it.
                         if (uniqueParents.Contains(parent))
                         {
-                            thingsToRemove.Add(meaning.Target);
+                            thingsToRemove.Add(meaning.To);
                         }
                         // Else if the parent does not exist, add it.
                         else
@@ -666,10 +666,10 @@ is-part-of-speech, ";
             }
 
             // Remove the duplicate things at the end.
-            foreach (Cogneme t in thingsToRemove)
+            foreach (Thought t in thingsToRemove)
             {
                 theUKS.DeleteThing(t);
-                ModuleGPTInfoDlg.relationshipCount++;
+                ModuleGPTInfoDlg.linkCount++;
             }
 
         }

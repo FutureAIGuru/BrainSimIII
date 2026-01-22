@@ -128,13 +128,13 @@ namespace BrainSimulator.Modules
 
                 //get the root to save the contents of from the UKS dialog root
                 string root = "Object";
-                Cogneme uksDlg = parent.theUKS.Labeled("ModuleUKS0");
+                Thought uksDlg = parent.theUKS.Labeled("ModuleUKS0");
                 if (uksDlg is not null) 
-                foreach (var r in uksDlg.Relationships)
+                foreach (var r in uksDlg.LinksTo)
                 {
-                    if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith("Root"))
+                    if (r.LinkType.Label == "hasAttribute" && r.To.Label.StartsWith("Root"))
                     {
-                        root = (string)r.Target.V;
+                        root = (string)r.To.V;
                     }
                 }
                 await Task.Run(() => parent.theUKS.ExportTextFile(root, path));

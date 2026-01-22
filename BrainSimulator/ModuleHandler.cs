@@ -33,7 +33,7 @@ public class ModuleHandler
 
     public string ActivateModule(string moduleType)
     {
-        Cogneme t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
+        Thought t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
         t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleType));
         t.AddParent(theUKS.Labeled("ActiveModule"));
 
@@ -54,12 +54,12 @@ public class ModuleHandler
     }
     public void DeactivateModule(string moduleLabel)
     {
-        Cogneme t = theUKS.Labeled(moduleLabel);
+        Thought t = theUKS.Labeled(moduleLabel);
         if (t is null) return;
-        for (int i = 0; i < t.Relationships.Count; i++)
+        for (int i = 0; i < t.LinksTo.Count; i++)
         {
-            Cogneme r = t.Relationships[i];
-            theUKS.DeleteThing(r.Target);
+            Thought r = t.LinksTo[i];
+            theUKS.DeleteThing(r.To);
         }
         theUKS.DeleteThing(t);
 
@@ -138,9 +138,9 @@ public class ModuleHandler
         if (PythonPath == "no") return;
         bool firstTime = false;
         //get the ModuleType
-        Cogneme tModule = theUKS.Labeled(moduleLabel);
+        Thought tModule = theUKS.Labeled(moduleLabel);
         if (tModule is null) { return; }
-        Cogneme tModuleType = tModule.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+        Thought tModuleType = tModule.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
         if (tModuleType is null) return;
         string moduleType = tModuleType.Label;
         moduleType = moduleType.Replace(".py", "");

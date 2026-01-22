@@ -55,7 +55,7 @@ namespace BrainSimulator
         {
             ActiveModuleSP.Children.Clear();
 
-            Cogneme activeModuleParent = theUKS.Labeled("ActiveModule");
+            Thought activeModuleParent = theUKS.Labeled("ActiveModule");
             //TODO: Remove
             activeModuleParent.AddParent("BrainSim");
 
@@ -63,10 +63,10 @@ namespace BrainSimulator
             var activeModules1 = activeModuleParent.Children;
             activeModules1 = activeModules1.OrderBy(x => x.Label).ToList();
 
-            foreach (Cogneme t in activeModules1)
+            foreach (Thought t in activeModules1)
             {
                 //what kind of module is this?
-                Cogneme t1 = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+                Thought t1 = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
                 if (t1 is null) continue;
                 string moduleType = t1.Label;
 
@@ -88,17 +88,17 @@ namespace BrainSimulator
         }
         void UnloadActiveModules()
         {
-            Cogneme activeModulesParent = theUKS.Labeled("ActiveModule");
+            Thought activeModulesParent = theUKS.Labeled("ActiveModule");
             if (activeModulesParent is null) return;
             var activeModules1 = activeModulesParent.Children;
 
-            foreach (Cogneme t in activeModules1)
+            foreach (Thought t in activeModules1)
             {
-                for (int i = 0; i < t.Relationships.Count; i++)
+                for (int i = 0; i < t.LinksTo.Count; i++)
                 {
-                    Cogneme r = t.Relationships[i];
-                    theUKS.DeleteThing(r.Target);
-                    t.RemoveRelationship(r);
+                    Thought r = t.LinksTo[i];
+                    theUKS.DeleteThing(r.To);
+                    t.RemoveLink(r);
                 }
                 theUKS.DeleteThing(t);
             }
@@ -115,10 +115,10 @@ namespace BrainSimulator
             var activeModules1 = theUKS.Labeled("ActiveModule").Children;
             activeModules1 = activeModules1.OrderBy(x => x.Label).ToList();
 
-            foreach (Cogneme t in activeModules1)
+            foreach (Thought t in activeModules1)
             {
                 //what kind of module is this?
-                Cogneme tModuleType = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+                Thought tModuleType = t.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
                 if (tModuleType is null) continue;
                 string moduleType = tModuleType.Label;
 

@@ -9,12 +9,12 @@ public partial class UKS
     /// <summary>
     /// Export a neighborhood starting from <paramref name="root"/> to the bracketed txt file format.
     /// Emits facts as [S,R,O] (or [S,R,O,N] when R is a numeric specialization like "has.4").
-    /// Optionally emits simple clause pairs if Thing exposes a Clauses collection.
+    /// Optionally emits simple clause pairs if Thought exposes a Clauses collection.
     /// </summary>
     public void ExportTextFile(string root, string path, int maxDepth = 12)
     {
         if (string.IsNullOrWhiteSpace(root)) throw new ArgumentException("Start label is required.", nameof(root));
-        Cogneme Root = theUKS.Labeled(root);
+        Thought Root = theUKS.Labeled(root);
         if (Root is null) return;
         HashSet<string> alreadyWritten = new();
         try
@@ -22,9 +22,9 @@ public partial class UKS
             using (var writer = new StreamWriter(path))
             {
                 if (writer is null) throw new ArgumentNullException(nameof(writer));
-                foreach (Cogneme t in Root.Descendants)
+                foreach (Thought t in Root.Descendants)
                 {
-                    foreach (Cogneme r in t.RecursiveRelationships)
+                    foreach (Thought r in t.RecursiveLinks)
                     {
                         if (r.Label == "R0")
                         { }
@@ -38,9 +38,9 @@ public partial class UKS
                         //hack to follow sequences
                         //if (r?.RelType?.Label == "is-a") continue;
 
-                        foreach (Cogneme t1 in r.Target.SequenceNodes())
+                        foreach (Thought t1 in r.To.SequenceNodes())
                         {
-                            if (t1 is Cogneme r1 && r1.RelType is not null)
+                            if (t1 is Thought r1 && r1.LinkType is not null)
                             {
                                 s = r1.SingleToString() + r1.Weight.ToString("0.00");
                                 if (!alreadyWritten.Contains(s))
@@ -49,7 +49,7 @@ public partial class UKS
                                     alreadyWritten.Add(s);
                                 }
                             }
-                            foreach (Cogneme r2 in t1.Relationships.Where(x => x.RelType.Label != "is-a"))
+                            foreach (Thought r2 in t1.LinksTo.Where(x => x.LinkType.Label != "is-a"))
                             {
                                 s = r2.SingleToString() + r2.Weight.ToString("0.00");
                                 if (!alreadyWritten.Contains(s))
@@ -69,9 +69,9 @@ public partial class UKS
     }
 
 
-    public static Cogneme GetNonInstance(Cogneme source)
+    public static Thought GetNonInstance(Thought source)
     {
-        Cogneme theSource = source;
+        Thought theSource = source;
         while (theSource.HasProperty("isInstance")) theSource = theSource.Parents[0];
         return theSource;
     }
@@ -103,7 +103,7 @@ public partial class UKS
             if (tokens.Count == 0) continue;
 
             var stmt = ParseBracketStmt(tokens[1], lineNo);
-            Cogneme r = AddRelStmt(tokens[0], stmt, tokens[2]);
+            Thought r = AddRelStmt(tokens[0], stmt, tokens[2]);
         }
     }
 
@@ -139,30 +139,30 @@ public partial class UKS
         return result;
     }
 
-    // Adds a relationship, honoring numeric sugar (N → R.N + has-value + number typing)
-    private Cogneme AddRelStmt(string label, List<string> ss, string sWeight)
+    // Adds a link, honoring numeric sugar (N → R.N + has-value + number typing)
+    private Thought AddRelStmt(string label, List<string> ss, string sWeight)
     {
         if (ss[1] == "IF")
         { }
-        Cogneme r = null;
+        Thought r = null;
         if (ss.Count < 3) return null;
         if (r is null)
         {
-            object r1 = ss[0];  //is an atom or another relationship
+            object r1 = ss[0];  //is an atom or another link
             object r2 = ss[2];
             if (ss[0].Contains("->"))
             {
                 var stmtContent = TokenizeTopLevel(ss[0]);
                 var stmtContent1 = ParseBracketStmt(stmtContent[1], -1);
                 r1 = AddRelStmt(stmtContent[0], stmtContent1, stmtContent[2]);
-                r1 = ((Cogneme)r1).Label;
+                r1 = ((Thought)r1).Label;
             }
             if (ss[2].Contains("->"))
             {
                 var stmtContent = TokenizeTopLevel(ss[2]);
                 var stmtContent1 = ParseBracketStmt(stmtContent[1], -1);
                 r2 = AddRelStmt(stmtContent[0], stmtContent1, stmtContent[2]);
-                r2 = ((Cogneme)r2).Label;
+                r2 = ((Thought)r2).Label;
             }
 
             //if (r1 or r2 are set, use them instead here

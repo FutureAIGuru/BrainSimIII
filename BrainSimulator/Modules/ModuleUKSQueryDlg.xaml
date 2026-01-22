@@ -22,8 +22,8 @@
                     <TextBox  x:Name="filterText"    TabIndex="4"  Height="32" VerticalAlignment="Top"   FontSize="16"   Margin="78,170,0,0" HorizontalAlignment="Left" Width="278" TextChanged="Text_TextChanged"/>
                     <TextBox  x:Name="resultText"    TabIndex="5"   FontSize="18" Margin="78,280,36,10"  TextWrapping="Wrap"/>
 
-                    <Button x:Name="BtnRelationships" IsDefault="True" Content="Query" Height="32" VerticalAlignment="Top" FontSize="16" Margin="375,120,0,25" Click="BtnRelationships_Click" HorizontalAlignment="Left" Width="120"/>
-                    <CheckBox x:Name="fullCB" Content="Full Relationships" FontSize="16" HorizontalAlignment="Left" Height="22" Margin="78,220,0,0" VerticalAlignment="Top" Width="226"/>
+                    <Button x:Name="BtnLinks" IsDefault="True" Content="Query" Height="32" VerticalAlignment="Top" FontSize="16" Margin="375,120,0,25" Click="BtnLinks_Click" HorizontalAlignment="Left" Width="120"/>
+                    <CheckBox x:Name="fullCB" Content="Full Links" FontSize="16" HorizontalAlignment="Left" Height="22" Margin="78,220,0,0" VerticalAlignment="Top" Width="226"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Search by Attribs" FontSize="18" Background="LightGray" >
@@ -39,8 +39,8 @@
                     <TextBox  x:Name="ancestorText1"    TabIndex="4"  Height="32" VerticalAlignment="Top"   FontSize="16"   Margin="78,120,213,0" TextChanged="Text_TextChanged"/>
                     <TextBox  x:Name="queryText1"    TabIndex="5"   FontSize="16" Margin="78,170,36,177"  TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" RenderTransformOrigin="0.5,0.5" />
                     <TextBox  x:Name="resultText1"    TabIndex="5"   FontSize="18" Margin="78,0,36,10"  TextWrapping="Wrap" Height="152" VerticalAlignment="Bottom"/>
-                    <Button x:Name="BtnAdd" IsDefault="True" Content="Add" Height="32" VerticalAlignment="Top" FontSize="16" Margin="0,21,38,0" Click="BtnRelationships_Click" HorizontalAlignment="Right" Width="125" />
-                    <Button x:Name="BtnClear" Content="Clear" Height="32" VerticalAlignment="Top" FontSize="16" Margin="0,72,36,0" Click="BtnRelationships_Click" HorizontalAlignment="Right" Width="127" />
+                    <Button x:Name="BtnAdd" IsDefault="True" Content="Add" Height="32" VerticalAlignment="Top" FontSize="16" Margin="0,21,38,0" Click="BtnLinks_Click" HorizontalAlignment="Right" Width="125" />
+                    <Button x:Name="BtnClear" Content="Clear" Height="32" VerticalAlignment="Top" FontSize="16" Margin="0,72,36,0" Click="BtnLinks_Click" HorizontalAlignment="Right" Width="127" />
                     <Button x:Name="BtnLearn" Content="Learn" Height="32" VerticalAlignment="Top" FontSize="16" Margin="0,121,103,0" Click="BtnLearn_Click" HorizontalAlignment="Right" Width="60" />
                     <Button x:Name="BtnNo" Content="No" Height="32" VerticalAlignment="Top" FontSize="16" Margin="0,121,38,0" Click="BtnNo_Click" HorizontalAlignment="Right" Width="60" />
                 </Grid>

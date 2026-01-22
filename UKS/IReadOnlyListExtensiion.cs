@@ -6,7 +6,7 @@
 namespace UKS;
 
 //these are used so that lists can be readOnly and still be searched propertly.
-//This prevents us from accidentally doing a (e.g.) _relationships.Add() which will not handle reverse links properly
+//This prevents us from accidentally doing a (e.g.) _links.Add() which will not handle reverse links properly
 //Why the IReadOnlyList doesn't have FindFirst, FindAll, Contains, and FindIndex is a mystery.
 
 public static class IReadOnlyListExtensions

@@ -189,13 +189,13 @@ namespace BrainSimulator.Modules
 
         public  string GetSavedDlgAttribute(string attribName)
         {
-            Cogneme thisDlg = theUKS.Labeled(Label);
+            Thought thisDlg = theUKS.Labeled(Label);
             if (thisDlg is null) return null;   
-            foreach (var r in thisDlg.Relationships)
+            foreach (var r in thisDlg.LinksTo)
             {
-                if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith(attribName))
+                if (r.LinkType.Label == "hasAttribute" && r.To.Label.StartsWith(attribName))
                 {
-                    string retVal = (string)r.Target.V;
+                    string retVal = (string)r.To.V;
                     return retVal;
                 }
             }
@@ -204,26 +204,26 @@ namespace BrainSimulator.Modules
         public void SetSavedDlgAttribute(string attribName, string attribValue)
         {
             if (string.IsNullOrEmpty(attribName)) { return; }
-            Cogneme thisDlg = theUKS.Labeled(Label);
+            Thought thisDlg = theUKS.Labeled(Label);
             if (thisDlg is null) { return; }
-            foreach (var r in thisDlg.Relationships)
+            foreach (var r in thisDlg.LinksTo)
             {
-                if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith(attribName))
+                if (r.LinkType.Label == "hasAttribute" && r.To.Label.StartsWith(attribName))
                 {
                     if (attribValue is null)
                     {
-                        theUKS.DeleteThing(r.Target);
+                        theUKS.DeleteThing(r.To);
                         return;
                     }
-                    r.Target.V = attribValue;
+                    r.To.V = attribValue;
                     return;
                 }
             }
             if (attribName is null) return;
-            Cogneme dlgAttribParent = theUKS.GetOrAddThing("DlgAttrib", "BrainSim");
-            Cogneme dlgInfo = theUKS.AddThing(attribName, dlgAttribParent);
-            Cogneme hasAttribute = theUKS.GetOrAddThing("hasAttribute", "RelationshipType");
-            thisDlg.AddRelationship(dlgInfo,hasAttribute);
+            Thought dlgAttribParent = theUKS.GetOrAddThing("DlgAttrib", "BrainSim");
+            Thought dlgInfo = theUKS.AddThing(attribName, dlgAttribParent);
+            Thought hasAttribute = theUKS.GetOrAddThing("hasAttribute", "LinkType");
+            thisDlg.AddLink(dlgInfo,hasAttribute);
             dlgInfo.V = attribValue;
             dlgInfo.Fire();
         }

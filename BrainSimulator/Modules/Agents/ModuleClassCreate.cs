@@ -55,7 +55,7 @@ public class ModuleClassCreate : ModuleBase
         debugString = "Agent Started\n";
         for (int i = 0; i < theUKS.AllThings.Count; i++)
         {
-            Cogneme t = theUKS.AllThings[i];
+            Thought t = theUKS.AllThings[i];
             if (t.HasAncestor("Object") && !t.Label.Contains(".") && !t.Label.Contains("unknown"))
             {
                 HandleClassWithCommonAttributes(t);
@@ -65,39 +65,39 @@ public class ModuleClassCreate : ModuleBase
         UpdateDialog();
     }
 
-    void HandleClassWithCommonAttributes(Cogneme t)
+    void HandleClassWithCommonAttributes(Thought t)
     {
         //build a List of counts of the attributes
-        //build a List of all the Relationships which this thing's children have
+        //build a List of all the Links which this thought's children have
         List<RelDest> attributes = new();
-        foreach (Cogneme t1 in t.ChildrenWithSubclasses)
+        foreach (Thought t1 in t.ChildrenWithSubclasses)
         {
-            foreach (Cogneme r in t1.Relationships)
+            foreach (Thought r in t1.LinksTo)
             {
-                if (r.RelType == Cogneme.IsA) continue;
-                Cogneme useRelType = GetInstanceType(r.RelType);
+                if (r.LinkType == Thought.IsA) continue;
+                Thought useRelType = GetInstanceType(r.LinkType);
 
-                RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.Target);
+                RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.To);
                 if (foundItem is null)
                 {
-                    foundItem = new RelDest { relType = useRelType, target = r.Target };
+                    foundItem = new RelDest { relType = useRelType, target = r.To };
                     attributes.Add(foundItem);
                 }
-                if (foundItem.relationships.FindFirst(x=>x.Source == r.Source && x.Target == r.Target) is null)
-                    foundItem.relationships.Add(r);
+                if (foundItem.links.FindFirst(x=>x.From == r.From && x.To == r.To) is null)
+                    foundItem.links.Add(r);
             }
         }
         //create intermediate parent Things
         foreach (var key in attributes)
         {
-            if (key.relationships.Count >= minCommonAttributes)
+            if (key.links.Count >= minCommonAttributes)
             {
-                Cogneme newParent = theUKS.GetOrAddThing(t.Label + "." + key.relType + "." + key.target, t);
-                newParent.AddRelationship(key.target, key.relType);
+                Thought newParent = theUKS.GetOrAddThing(t.Label + "." + key.relType + "." + key.target, t);
+                newParent.AddLink(key.target, key.relType);
                 debugString += "Created new subclass " + newParent;
-                foreach (Cogneme r in key.relationships)
+                foreach (Thought r in key.links)
                 {
-                    Cogneme tChild = (Cogneme)r.Source;
+                    Thought tChild = (Thought)r.From;
                     tChild.AddParent(newParent);
                     tChild.RemoveParent(t);
                 }

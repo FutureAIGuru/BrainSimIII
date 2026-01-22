@@ -15,12 +15,12 @@ public partial class UKS
         //this hack is needed to preserve the info relating to module layout
         for (int i = 0; i < AllThings.Count; i++)
         {
-            Cogneme t = AllThings[i];
+            Thought t = AllThings[i];
             if (t.HasAncestorLabeled("BrainSim"))
                 continue;
             if (t.Label == "is-a") continue;
-            //if (t.Label == "Cogneme") continue;
-            //if (t.Label == "RelationshipType") continue;
+            //if (t.Label == "Thought") continue;
+            //if (t.Label == "LinkType") continue;
             if (t.Label == "hasAttribute") continue;
             if (t is not null)
             {
@@ -29,45 +29,45 @@ public partial class UKS
             }
         }
 
-        CognemeLabels.ClearLabelList();
-        foreach (Cogneme t in AllThings)
-            CognemeLabels.AddThingLabel(t.Label, t);
+        ThoughtLabels.ClearLabelList();
+        foreach (Thought t in AllThings)
+            ThoughtLabels.AddThingLabel(t.Label, t);
 
-        if (Labeled("Cogneme") is null)
-            AddThing("Cogneme", null);
-        Cogneme isA = Labeled("is-a");
+        if (Labeled("Thought") is null)
+            AddThing("Thought", null);
+        Thought isA = Labeled("is-a");
         if (isA is null)
             isA = AddThing("is-a", null);
-        Cogneme hasChild = Labeled("has-child");
+        Thought hasChild = Labeled("has-child");
         if (hasChild is null)
             hasChild = AddThing("has-child", null);
-        Cogneme relType = AddThing("RelationshipType", "Cogneme");
+        Thought relType = AddThing("LinkType", "Thought");
         isA.AddParent(relType);
         hasChild.AddParent(relType);
 
-        GetOrAddThing("Object", "Cogneme");
-        GetOrAddThing("Action", "Cogneme");
-        GetOrAddThing("Relationship", "Cogneme");
-        GetOrAddThing("RelationshipType", "Cogneme");
-        GetOrAddThing("Cogneme", "Cogneme");
-        GetOrAddThing("Unknown", "Cogneme");
-        GetOrAddThing("is-a", "RelationshipType");
-        GetOrAddThing("inverseOf", "RelationshipType");
-        GetOrAddThing("hasProperty", "RelationshipType");
-        GetOrAddThing("is", "RelationshipType");
+        GetOrAddThing("Object", "Thought");
+        GetOrAddThing("Action", "Thought");
+        GetOrAddThing("Link", "Thought");
+        GetOrAddThing("LinkType", "Thought");
+        GetOrAddThing("Thought", "Thought");
+        GetOrAddThing("Unknown", "Thought");
+        GetOrAddThing("is-a", "LinkType");
+        GetOrAddThing("inverseOf", "LinkType");
+        GetOrAddThing("hasProperty", "LinkType");
+        GetOrAddThing("is", "LinkType");
 
         AddStatement("has-child", "inverseOf", "is-a");
-        AddStatement("hasAttribute", "is-a", "RelationshipType");
-        AddStatement("can", "is-a", "RelationshipType");
-        AddStatement("mostRecent", "is-a", "RelationshipType");
-        AddStatement("contains", "is-a", "RelationshipType");
-        AddStatement("is-part-of", "is-a", "RelationshipType");
+        AddStatement("hasAttribute", "is-a", "LinkType");
+        AddStatement("can", "is-a", "LinkType");
+        AddStatement("mostRecent", "is-a", "LinkType");
+        AddStatement("contains", "is-a", "LinkType");
+        AddStatement("is-part-of", "is-a", "LinkType");
         AddStatement("contains", "inverseOf", "is-part-of");
-        AddStatement("has", "is-a", "RelationshipType");
-        AddStatement("not", "is-a", "RelationshipType");
+        AddStatement("has", "is-a", "LinkType");
+        AddStatement("not", "is-a", "LinkType");
 
         //properties are intenal capabilities of nodes
-        AddStatement("Property", "is-a", "RelationshipType");
+        AddStatement("Property", "is-a", "LinkType");
         AddStatement("isExclusive", "is-a", "Property");
         AddStatement("isTransitive", "is-a", "Property");
         AddStatement("isInstance", "is-a", "Property");
@@ -101,7 +101,7 @@ public partial class UKS
         AddStatement("has", "hasProperty", "inheritable");
 
         //Clauses
-        AddStatement("ClauseType", "is-a", "RelationshipType");
+        AddStatement("ClauseType", "is-a", "LinkType");
         AddStatement("IF", "is-a", "ClauseType");
         AddStatement("BECAUSE", "is-a", "ClauseType");
         AddStatement("AFTER", "is-a", "ClauseType");
@@ -123,7 +123,7 @@ public partial class UKS
     {
         return;
         GetOrAddThing("number", "Object");
-        AddStatement("Comparison", "is-a", "RelationshipType");
+        AddStatement("Comparison", "is-a", "LinkType");
         AddStatement("greaterThan", "is-a", "Comparison");
         AddStatement("greaterThan", "hasProperty", "isTransitive");
         AddStatement("lessThan", "inverseOf", "greaterThan");
@@ -180,15 +180,15 @@ public partial class UKS
     /// /////////////////////////////////////////////////////////// XML file load/save
     /// </summary>
     /// 
-    //this is a modification of Thing which is used to store and retrieve the KB in XML
-    //it eliminates circular references by replacing Thing references with int indexed into an array and makes things much more compact
+    //this is a modification of Thought which is used to store and retrieve the KB in XML
+    //it eliminates circular references by replacing Thought references with int indexed into an array and makes things much more compact
     public class sCogneme
     {
         public string label = ""; //this is just for convenience in debugging and should not be used
-        public List<sCogneme> relationships = new();
+        public List<sCogneme> links = new();
         public int source = -1;
         public int target = -1;
-        public int relationshipType = -1;
+        public int linkType = -1;
         public float weight = 0;
         public object V;
     }
@@ -199,28 +199,28 @@ public partial class UKS
         UKSTemp.Clear();
 
         // TODO: Wipe transient data ...
-        foreach (Cogneme t in AllThings)
+        foreach (Thought t in AllThings)
         {
             sCogneme st = new()
             {
                 label = t.Label,
-                source = AllThings.FindIndex(x => x == t.Source),
-                relationshipType = AllThings.FindIndex(x => x == t.RelType),
-                target = AllThings.FindIndex(x => x == t.Target),
+                source = AllThings.FindIndex(x => x == t.From),
+                linkType = AllThings.FindIndex(x => x == t.LinkType),
+                target = AllThings.FindIndex(x => x == t.To),
                 V = t.V,
             };
-            foreach (Cogneme l in t.RecursiveRelationships)
+            foreach (Thought l in t.RecursiveLinks)
             {
-                sCogneme sR = ConvertRelationship(l, new List<Cogneme>());
-                st.relationships.Add(sR);
+                sCogneme sR = ConvertLink(l, new List<Thought>());
+                st.links.Add(sR);
             }
             UKSTemp.Add(st);
         }
     }
 
-    private sCogneme ConvertRelationship(Cogneme l, List<Cogneme> stack)
+    private sCogneme ConvertLink(Thought l, List<Thought> stack)
     {
-        if (l.RelType.Label == "play")
+        if (l.LinkType.Label == "play")
         { }
 
         if (stack.Contains(l)) return null;
@@ -229,16 +229,16 @@ public partial class UKS
         sCogneme sR = new sCogneme()
         {
             label = l.Label,
-            source = AllThings.FindIndex(x => x == l.Source),
-            target = AllThings.FindIndex(x => x == l.Target),
-            relationshipType = AllThings.FindIndex(x => x == l.RelType),
+            source = AllThings.FindIndex(x => x == l.From),
+            target = AllThings.FindIndex(x => x == l.To),
+            linkType = AllThings.FindIndex(x => x == l.LinkType),
             weight = l.Weight,
         };
 
-        foreach (Cogneme r1 in l.RecursiveRelationships)
+        foreach (Thought r1 in l.RecursiveLinks)
         {
-            sCogneme sr1 = ConvertRelationship(r1, stack);
-            sR.relationships.Add(sr1);
+            sCogneme sr1 = ConvertLink(r1, stack);
+            sR.links.Add(sr1);
         }
         stack.RemoveAt(stack.Count - 1);
         return sR;
@@ -249,7 +249,7 @@ public partial class UKS
         //get all the names and weights
         foreach (sCogneme st in UKSTemp)
         {
-            Cogneme t = new()
+            Thought t = new()
             {
                 Label = st.label,
                 Weight = st.weight,
@@ -259,26 +259,26 @@ public partial class UKS
         }
         foreach (sCogneme st in UKSTemp)
         {
-            Cogneme t = Labeled(st.label);
-            if (st.source != -1) t.Source = AllThings[st.source];
-            if (st.relationshipType != -1) t.RelType = AllThings[st.relationshipType];
-            if (st.target != -1) t.Target = AllThings[st.target];
+            Thought t = Labeled(st.label);
+            if (st.source != -1) t.From = AllThings[st.source];
+            if (st.linkType != -1) t.LinkType = AllThings[st.linkType];
+            if (st.target != -1) t.To = AllThings[st.target];
         }
         foreach (sCogneme v in UKSTemp)
         {
-            AddRelationshipsAsStatements(v);
+            AddLinksAsStatements(v);
         }
     }
 
-    private void AddRelationshipsAsStatements(sCogneme v)
+    private void AddLinksAsStatements(sCogneme v)
     {
-        foreach (sCogneme p in v.relationships)
+        foreach (sCogneme p in v.links)
         {
-            if (UKSTemp[p.relationshipType].label == "play")
+            if (UKSTemp[p.linkType].label == "play")
             { }
-            Cogneme r = AddStatement(UKSTemp[p.source].label, UKSTemp[p.relationshipType].label, UKSTemp[p.target].label);
+            Thought r = AddStatement(UKSTemp[p.source].label, UKSTemp[p.linkType].label, UKSTemp[p.target].label);
             r.Label = p.label;
-            AddRelationshipsAsStatements(p);
+            AddLinksAsStatements(p);
         }
 
     }
@@ -286,11 +286,11 @@ public partial class UKS
     private void DeFormatContentAfterLoading()
     {
         AllThings.Clear();
-        CognemeLabels.ClearLabelList();
+        ThoughtLabels.ClearLabelList();
         //get all the things
         foreach (sCogneme st in UKSTemp)
         {
-            Cogneme t = new()
+            Thought t = new()
             {
                 Label = st.label,
                 V = st.V,
@@ -298,64 +298,64 @@ public partial class UKS
             };
             AllThings.Add(t);
         }
-        //handle relationships
+        //handle links
         for (int i = 0; i < UKSTemp.Count; i++)
         {
             sCogneme sT = UKSTemp[i];
-            UnconvertRelationships(sT);
+            UnconvertLinks(sT);
         }
         //rebuild all the reverse linkages
-        foreach (Cogneme t in AllThings)
+        foreach (Thought t in AllThings)
         {
-            foreach (Cogneme r in t.Relationships)
+            foreach (Thought r in t.LinksTo)
             {
-                Cogneme t1 = r.Target;
+                Thought t1 = r.To;
                 if (t1 is not null)
-                    if (!t1.RelationshipsFromWriteable.Contains(r))
-                        t1.RelationshipsFromWriteable.Add(r);
-                if (r.RelType is not null)
-                    if (!r.RelType.RelationshipsAsTypeWriteable.Contains(r))
-                        r.RelType.RelationshipsAsTypeWriteable.Add(r);
+                    if (!t1.LinksFromWriteable.Contains(r))
+                        t1.LinksFromWriteable.Add(r);
+                if (r.LinkType is not null)
+                    if (!r.LinkType.LinksAsTypeWriteable.Contains(r))
+                        r.LinkType.LinksAsTypeWriteable.Add(r);
             }
         }
     }
 
-    private void UnconvertRelationships(sCogneme sT)
+    private void UnconvertLinks(sCogneme sT)
     {
-        foreach (sCogneme p in sT.relationships)
+        foreach (sCogneme p in sT.links)
         {
-            Cogneme r = UnConvertRelationship(p, new List<sCogneme>());
+            Thought r = UnConvertLink(p, new List<sCogneme>());
             if (r is null) continue;
-            if (r.RelType.Label == "play")
+            if (r.LinkType.Label == "play")
             { }
-            if (!r.Source.RelationshipsWriteable.Contains(r))
-                r?.Source.RelationshipsWriteable.Add(r);
+            if (!r.From.LinksWriteable.Contains(r))
+                r?.From.LinksWriteable.Add(r);
         }
     }
 
-    private Cogneme UnConvertRelationship(sCogneme p, List<sCogneme> stack)
+    private Thought UnConvertLink(sCogneme p, List<sCogneme> stack)
     {
         if (p is null) return null;
         if (stack.Contains(p)) return null;  //infinite recursions loop protection
         stack.Add(p);
 
-        Cogneme source = null;
+        Thought source = null;
         if (p.source != -1)
             source = AllThings[p.source];
         else
             return null;
-        Cogneme relationshipType = null;
-        if (p.relationshipType != -1)
-            relationshipType = AllThings[p.relationshipType];
-        Cogneme target = null;
+        Thought linkType = null;
+        if (p.linkType != -1)
+            linkType = AllThings[p.linkType];
+        Thought target = null;
         if (p.target != -1)
             target = AllThings[p.target];
-        Cogneme r = Labeled(p.label);
+        Thought r = Labeled(p.label);
         if (r is not null)
         {
-            r.Source = source;
-            r.Target = target;
-            r.RelType = relationshipType;
+            r.From = source;
+            r.To = target;
+            r.LinkType = linkType;
             r.Weight = p.weight;
         }
         else
@@ -363,34 +363,34 @@ public partial class UKS
             r = new()
             {
                 Label = p.label,
-                Source = source,
-                Target = target,
-                RelType = relationshipType,
+                From = source,
+                To = target,
+                LinkType = linkType,
                 Weight = p.weight,
             };
         }
-        if (r?.RelationshipsWriteable.Contains(r) is null)
-            r.Source?.RelationshipsWriteable.Add(r);
+        if (r?.LinksWriteable.Contains(r) is null)
+            r.From?.LinksWriteable.Add(r);
 
-        foreach (sCogneme st in p.relationships)
+        foreach (sCogneme st in p.links)
         {
-            var r1 = UnConvertRelationship(st, stack);
-            if (r?.RelationshipsWriteable.Contains(r1) is null)
-                r?.RelationshipsWriteable.Add(r1);
+            var r1 = UnConvertLink(st, stack);
+            if (r?.LinksWriteable.Contains(r1) is null)
+                r?.LinksWriteable.Add(r1);
         }
         stack.RemoveAt(stack.Count - 1);
 
         return r;
     }
 
-    List<string> ExtractPortionOfUKS(Cogneme root)
+    List<string> ExtractPortionOfUKS(Thought root)
     {
         List<string> uksContent = new List<string>();
         if (root is null) return uksContent;
         var descendants = root.DescendentsList;
         foreach (var descendant in root.DescendentsList())
         {
-            foreach (var r in descendant.Relationships)
+            foreach (var r in descendant.LinksTo)
             {
                 uksContent.Add(r.ToString());
             }
@@ -455,7 +455,7 @@ public partial class UKS
     {
         //TODO, This works for writing but not for reading
         List<Type> extraTypes = new List<Type>();
-        foreach (Cogneme t in uKSList)
+        foreach (Thought t in uKSList)
         {
             if (t.V is not null)
             {
@@ -507,7 +507,7 @@ public partial class UKS
     /// Loads UKS content from a prvsiously-saved XML file
     /// </summary>
     /// <param name="fileNameIn">Leave null or empty to use file name from previous operation  </param>
-    /// <param name="merge">If true, existing UKS content is not deleted and new content is merged by Thing label</param>
+    /// <param name="merge">If true, existing UKS content is not deleted and new content is merged by Thought label</param>
     public bool LoadUKSfromXMLFile(string filenameIn = "", bool merge = false)
     {
         //stash the current BrainSim configuration
@@ -556,12 +556,12 @@ public partial class UKS
         var activeModules = Labeled("ActiveModule").Children;
         var avaialableModules = Labeled("AvailableModule").Children;
 
-        foreach (Cogneme t in avaialableModules)
+        foreach (Thought t in avaialableModules)
         {
             if (!t.Label.ToLower().StartsWith("module"))
                 t.Label = "Module" + t.Label;
         }
-        foreach (Cogneme t in activeModules)
+        foreach (Thought t in activeModules)
         {
             if (!t.Label.ToLower().StartsWith("module"))
                 t.Label = "Module" + t.Label;
@@ -570,25 +570,25 @@ public partial class UKS
         //more hacks for compatibility old file formatting
         //this does nothing on updated file content
         AddStatement("inheritable", "is-a", "Property");
-        Cogneme hasChild = Labeled("has-child");
+        Thought hasChild = Labeled("has-child");
         if (hasChild is not null)
         {
-            hasChild.AddRelationship("is-a", "inverseOf");
-            hasChild.RemoveRelationship("isTransitive", "hasProperty");
-            hasChild.RemoveRelationship("inheritable", "hasProperty");
+            hasChild.AddLink("is-a", "inverseOf");
+            hasChild.RemoveLink("isTransitive", "hasProperty");
+            hasChild.RemoveLink("inheritable", "hasProperty");
         }
-        Cogneme isA = Labeled("is-a");
+        Thought isA = Labeled("is-a");
         if (isA is not null)
         {
-            isA.AddRelationship("inheritable", "hasProperty");
-            isA.AddRelationship("isTransitive", "hasProperty");
-            isA.RemoveRelationship("has-child", "inverseOf");
-            isA.RemoveRelationship(null, "hasProperty");
+            isA.AddLink("inheritable", "hasProperty");
+            isA.AddLink("isTransitive", "hasProperty");
+            isA.RemoveLink("has-child", "inverseOf");
+            isA.RemoveLink(null, "hasProperty");
         }
-        Cogneme has = Labeled("has");
+        Thought has = Labeled("has");
         if (has is not null)
         {
-            has.AddRelationship("inheritable", "hasProperty");
+            has.AddLink("inheritable", "hasProperty");
         }
         return true;
     }

@@ -25,9 +25,9 @@ public class ModuleUKSQuery : ModuleBase
     }
 
     /*
-    Conventions [hard-coded relationships]:
+    Conventions [hard-coded links]:
 
-All Thing labels are sigularized unless they start with a capital letter. Case is preserved but all searches are case-insensitive.
+All Thought labels are sigularized unless they start with a capital letter. Case is preserved but all searches are case-insensitive.
 is-a = has parent of (inverse of has-child)
 is = has attribute of
 has = has a part of  (arm has elbow) (al
@@ -57,16 +57,16 @@ Source + type + target
 Type + target
 Target only (handled as source)
 
-Always follow is-a relationships for inheritance
+Always follow is-a links for inheritance
 Follow has ONLY if called out in type
 
      */
 
-    public List<(Cogneme r, float confidence)> QueryUKS(string sourceIn, string relTypeIn, string targetIn,
-            string filter, out List<Cogneme> thingResult, out List<Cogneme> relationships)
+    public List<(Thought r, float confidence)> QueryUKS(string sourceIn, string relTypeIn, string targetIn,
+            string filter, out List<Thought> thingResult, out List<Thought> links)
     {
         thingResult = new();
-        relationships = new();
+        links = new();
         GetUKS();
         if (theUKS is null) return null;
         string source = sourceIn.Trim();
@@ -86,10 +86,10 @@ Follow has ONLY if called out in type
             reverse = true;
         }
 
-        List<Cogneme> sourceList = ModuleUKSStatement.ThingListFromString(source);
+        List<Thought> sourceList = ModuleUKSStatement.ThingListFromString(source);
         //if (sourceList.Count == 0) return;
-        List<Cogneme> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
-        List<Cogneme> targetList = ModuleUKSStatement.ThingListFromString(target);
+        List<Thought> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
+        List<Thought> targetList = ModuleUKSStatement.ThingListFromString(target);
 
 
         //Handle is-a queries as a special case
@@ -112,20 +112,20 @@ Follow has ONLY if called out in type
         if (sourceList.Count > 1)
         {
             float confidence = 0.0f;
-            List<Cogneme> targets = new();
-            foreach (Cogneme t in sourceList)
+            List<Thought> targets = new();
+            foreach (Thought t in sourceList)
                 targets.Add(t);
             var results1 = theUKS.HasSequence(targets, null);
-            Cogneme tDict = theUKS.Labeled("location");
+            Thought tDict = theUKS.Labeled("location");
             if (tDict is not null)
             {
-                var seq = tDict.Relationships.Where(x => x.RelType.Label == "spelled").ToList()[0].Target;
+                var seq = tDict.LinksTo.Where(x => x.LinkType.Label == "spelled").ToList()[0].To;
                 var testing = theUKS.FlattenSequence(seq);
             }
             return results1;
         }
 
-        relationships = theUKS.GetAllRelationships(sourceList);
+        links = theUKS.GetAllLinks(sourceList);
 
         //unreverse the source and target
         if (reverse)
@@ -134,29 +134,29 @@ Follow has ONLY if called out in type
             (sourceList, targetList) = (targetList, sourceList);
         }
 
-        //handle compound relationship types
+        //handle compound link types
         if (relTypeList.Count > 0)
             relType = relTypeList[0].Label;
 
-        //filter the relationships
-        for (int i = 0; i < relationships.Count; i++)
+        //filter the links
+        for (int i = 0; i < links.Count; i++)
         {
-            Cogneme r = relationships[i];
-            if (targetList.Count > 0 && target != "" && !r.Target.HasAncestor(targetList[0]))
-            { relationships.RemoveAt(i); i--; continue; }
-            if (r.RelType is not null && relType != "" && !r.RelType.HasAncestorLabeled(relType))
-            { relationships.RemoveAt(i); i--; continue; }
+            Thought r = links[i];
+            if (targetList.Count > 0 && target != "" && !r.To.HasAncestor(targetList[0]))
+            { links.RemoveAt(i); i--; continue; }
+            if (r.LinkType is not null && relType != "" && !r.LinkType.HasAncestorLabeled(relType))
+            { links.RemoveAt(i); i--; continue; }
         }
 
         if (filter != "")
         {
-            List<Cogneme> filterThings = ModuleUKSStatement.ThingListFromString(filter);
-            relationships = theUKS.FilterResults(relationships, filterThings).ToList();
+            List<Thought> filterThings = ModuleUKSStatement.ThingListFromString(filter);
+            links = theUKS.FilterResults(links, filterThings).ToList();
         }
 
         //if (paramCount == 2)
         //{
-        //    foreach (Thing r in relationships)
+        //    foreach (Thought r in links)
         //    {
         //        if (sourceIn == "") thingResult.Add(r.source);
         //        if (targetIn == "") thingResult.Add(r.target);

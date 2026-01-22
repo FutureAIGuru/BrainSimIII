@@ -55,10 +55,10 @@ namespace BrainSimulator.Modules
             {
                 string txt = txtInput.Text;
                 ModuleOnlineInfo mcn = (ModuleOnlineInfo)base.ParentModule;
-                string currentRelationship = ((ComboBoxItem)relationshipSelection.SelectedItem).Content.ToString();
+                string currentLink = ((ComboBoxItem)linkSelection.SelectedItem).Content.ToString();
                 ModuleOnlineInfo.QueryType qType = ModuleOnlineInfo.QueryType.isa;
                 string currentSearch = ((ComboBoxItem)comboSelection.SelectedItem).Content.ToString();
-                switch (currentRelationship)
+                switch (currentLink)
                 {
                     case "is-a":
                         qType = ModuleOnlineInfo.QueryType.isa;

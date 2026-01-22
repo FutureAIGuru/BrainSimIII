@@ -59,17 +59,17 @@ public class ModuleUKSStatement : ModuleBase
     }
 
 
-    public Cogneme AddRelationship(string source, string target, string relationshipType)
+    public Thought AddLink(string source, string target, string linkType)
     {
         GetUKS();
         if (theUKS is null) return null;
         IPluralize pluralizer = new Pluralizer();
-        if (pluralizer.IsPlural(source) && pluralizer.IsPlural(target) && relationshipType == "are")
-            relationshipType = "is-a";
+        if (pluralizer.IsPlural(source) && pluralizer.IsPlural(target) && linkType == "are")
+            linkType = "is-a";
 
         //Figure out the source
         var sourceParts = Singular(source.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-        Cogneme tSource = null;
+        Thought tSource = null;
         if (sourceParts.Length == 3)
             tSource = theUKS.AddStatement(sourceParts[0], sourceParts[1], sourceParts[2]);
         if (tSource is null)
@@ -77,23 +77,23 @@ public class ModuleUKSStatement : ModuleBase
             tSource = theUKS.CreateThingFromMultipleAttributes(source, false);
         }
         //figure out the RelType
-        Cogneme tRelType = theUKS.CreateThingFromMultipleAttributes(relationshipType, true);
+        Thought tRelType = theUKS.CreateThingFromMultipleAttributes(linkType, true);
 
 
         //Figure out the target
         var targetParts = Singular(target.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-        Cogneme tTarget = null;
+        Thought tTarget = null;
 
         if (target.StartsWith("*"))
         {
-            List<Cogneme> targets = new();
+            List<Thought> targets = new();
             targetParts = target[1..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
             foreach (string label in targetParts)
             {
-                Cogneme t = theUKS.GetOrAddThing(label);
+                Thought t = theUKS.GetOrAddThing(label);
                 targets.Add(t);
             }
-            Cogneme r1 = theUKS.AddSequence(tSource, tRelType, targets);
+            Thought r1 = theUKS.AddSequence(tSource, tRelType, targets);
             return r1;
         }
  
@@ -101,20 +101,20 @@ public class ModuleUKSStatement : ModuleBase
             tTarget = theUKS.AddStatement(targetParts[0], targetParts[1], targetParts[2]);
         if (tTarget is null)
             tTarget = theUKS.CreateThingFromMultipleAttributes(target, false);
-        if (target == "" && relationshipType == "is-a")
+        if (target == "" && linkType == "is-a")
         {
             if (target == "" && source != "")
                 theUKS.AddThing(source, null);
             return null;
         }
 
-        //Create the relationship
-        Cogneme r = theUKS.AddStatement(tSource, tRelType, tTarget);
+        //Create the link
+        Thought r = theUKS.AddStatement(tSource, tRelType, tTarget);
 
         if (tRelType.Label == "IF")  //this is a HACK which must be fixed later
         {
-            tSource.AddRelationship("isResult", "hasProperty");
-            tTarget.AddRelationship("isCondition", "hasProperty");
+            tSource.AddLink("isResult", "hasProperty");
+            tTarget.AddLink("isCondition", "hasProperty");
         }
         return r;
     }
@@ -130,9 +130,9 @@ public class ModuleUKSStatement : ModuleBase
         return s;
     }
 
-    public static List<Cogneme> ThingListFromString(string source)
+    public static List<Thought> ThingListFromString(string source)
     {
-        List<Cogneme> retVal = new();
+        List<Thought> retVal = new();
         IPluralize pluralizer = new Pluralizer();
         source = source.Trim();
         string[] tempStringArray = source.Split(' ');
@@ -142,7 +142,7 @@ public class ModuleUKSStatement : ModuleBase
             if (tempStringArray[i] == "") continue;
             if (!char.IsUpper(tempStringArray[i][0]) && tempStringArray[i].Length > 2)
                 tempStringArray[i] = pluralizer.Singularize(tempStringArray[i]);
-            Cogneme t = CognemeLabels.GetThing(tempStringArray[i]);
+            Thought t = ThoughtLabels.GetThing(tempStringArray[i]);
             if (t is null) return retVal;
             retVal.Add(t);
         }

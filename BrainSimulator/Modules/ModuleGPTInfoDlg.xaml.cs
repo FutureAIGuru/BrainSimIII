@@ -20,9 +20,9 @@ namespace BrainSimulator.Modules
 
     public partial class ModuleGPTInfoDlg : ModuleBaseDlg
     {
-        // Error count and relationship count, used for debugging (static for now, working on fix).
+        // Error count and link count, used for debugging (static for now, working on fix).
         public static int errorCount;
-        public static int relationshipCount;
+        public static int linkCount;
 
         // Word max set to 10 by default. *Modify/Increase Value at your own risk!*
         int wordMax = 100;
@@ -62,9 +62,9 @@ namespace BrainSimulator.Modules
         {
             if (sender is Button btn)
             {
-                // Reset to 0 each time for error and relationship count
+                // Reset to 0 each time for error and link count
                 errorCount = 0;
-                relationshipCount = 0;
+                linkCount = 0;
                 MainWindow.SuspendEngine();
                 words.Clear();
                 System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
@@ -127,9 +127,9 @@ namespace BrainSimulator.Modules
         {
             if (sender is Button btn)
             {
-                // Reset to 0 each time for error and relationship count
+                // Reset to 0 each time for error and link count
                 errorCount = 0;
-                relationshipCount = 0;
+                linkCount = 0;
                 MainWindow.SuspendEngine();
                 words.Clear();
                 System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
@@ -206,8 +206,8 @@ namespace BrainSimulator.Modules
                     ModuleGPTInfo.GetChatGPTData(word.Trim());
             }
 
-            txtOutput.Text = $"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.";
-            Debug.WriteLine($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+            txtOutput.Text = $"Done running! Total word count: {words.Count}. Total link count: {linkCount}. Total error count (not accepted): {errorCount}.";
+            Debug.WriteLine($"Done running! Total word count: {words.Count}. Total link count: {linkCount}. Total error count (not accepted): {errorCount}.");
         }
 
         // Task to process the words AND remove ambiguity.
@@ -226,8 +226,8 @@ namespace BrainSimulator.Modules
                     ModuleGPTInfo.DisambiguateTermsFile(word.Trim());
             }
 
-            txtOutput.Text = $"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.";
-            Debug.WriteLine($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+            txtOutput.Text = $"Done running! Total word count: {words.Count}. Total link count: {linkCount}. Total error count (not accepted): {errorCount}.";
+            Debug.WriteLine($"Done running! Total word count: {words.Count}. Total link count: {linkCount}. Total error count (not accepted): {errorCount}.");
         }
 
 
@@ -245,8 +245,8 @@ namespace BrainSimulator.Modules
                     ModuleGPTInfo.GetChatGPTParents(word.Trim());
             }
 
-            SetOutputText($"Done processing unknowns! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
-            Debug.WriteLine($"Done running! Total word count: {words.Count}. Total relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+            SetOutputText($"Done processing unknowns! Total word count: {words.Count}. Total link count: {linkCount}. Total error count (not accepted): {errorCount}.");
+            Debug.WriteLine($"Done running! Total word count: {words.Count}. Total link count: {linkCount}. Total error count (not accepted): {errorCount}.");
         }
 
         static int count = 0;
@@ -254,8 +254,8 @@ namespace BrainSimulator.Modules
         {
             count = 0;
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
-            SetOutputText("Verifying all is-a relationships");
-            foreach (Cogneme t in mf.theUKS.AllThings)
+            SetOutputText("Verifying all is-a links");
+            foreach (Thought t in mf.theUKS.AllThings)
             {
                 if (t.Parents.FindFirst(x => x.Label == "Unknown") is not null) continue;
                 if (!t.Label.StartsWith('.')) continue;
@@ -265,22 +265,22 @@ namespace BrainSimulator.Modules
                 else
                     VerifyAsync(t.Label);
             }
-            SetOutputText($"Done verifying is-a relationships for reasonableness. Checked {count} relationships.");
+            SetOutputText($"Done verifying is-a links for reasonableness. Checked {count} links.");
 
         }
         public async Task VerifyAsync(string label)
         {
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
             if (!label.StartsWith(".")) label = "." + label;
-            UKS.Cogneme t = mf.theUKS.Labeled(label);
+            UKS.Thought t = mf.theUKS.Labeled(label);
             if (t is null) return;
-            foreach (Cogneme r in t.Relationships)
+            foreach (Thought r in t.LinksTo)
             {
                 //if (r.GPTVerified) continue;
-                if (r.RelType.Label != "has-child") continue;
+                if (r.LinkType.Label != "has-child") continue;
 
                 count++;
-                ModuleGPTInfo.GetChatGPTVerifyParentChild(r.Target.Label, t.Label);
+                ModuleGPTInfo.GetChatGPTVerifyParentChild(r.To.Label, t.Label);
             }
         }
 
@@ -297,7 +297,7 @@ namespace BrainSimulator.Modules
                 string txt = textInput.Text;
                 await ModuleGPTInfo.GetChatGPTData(txt);
                 SetOutputText(ModuleGPTInfo.Output);
-                txtOutput.Text += $"\n\rTotal relationship count: {relationshipCount}. Total error count (not accepted): {errorCount}.";
+                txtOutput.Text += $"\n\rTotal link count: {linkCount}. Total error count (not accepted): {errorCount}.";
             }
             if (e.Key == Key.Up)
             {
@@ -313,21 +313,21 @@ namespace BrainSimulator.Modules
         {
             SetOutputText("Working...");
             await ModuleGPTInfo.GetChatGPTClauses();
-            SetOutputText($"\n\rTotal clause count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+            SetOutputText($"\n\rTotal clause count: {linkCount}. Total error count (not accepted): {errorCount}.");
         }
 
         private async void SolveAmbiguityGPTAsync()
         {
             SetOutputText("Working...");
             await ModuleGPTInfo.DisambiguateTerms();
-            SetOutputText($"\n\rTotal disambiguity success count: {relationshipCount}. Total error count (not accepted): {errorCount}.");
+            SetOutputText($"\n\rTotal disambiguity success count: {linkCount}. Total error count (not accepted): {errorCount}.");
         }
 
         private async void SolveDuplicatesAsync()
         {
             SetOutputText("Working...");
             await ModuleGPTInfo.SolveDuplicates();
-            SetOutputText($"\n\rDone! Duplicates resolved: {relationshipCount}.");
+            SetOutputText($"\n\rDone! Duplicates resolved: {linkCount}.");
         }
 
         
@@ -337,9 +337,9 @@ namespace BrainSimulator.Modules
             if (sender is Button b)
             {
                 ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
-                // Reset to 0 each time for error and relationship count
+                // Reset to 0 each time for error and link count
                 errorCount = 0;
-                relationshipCount = 0;
+                linkCount = 0;
                 if (b.Content.ToString().StartsWith("Re-Parse"))
                 {
                     ModuleGPTInfo.ParseGPTOutput(textInput.Text, txtOutput.Text);
@@ -366,10 +366,10 @@ namespace BrainSimulator.Modules
                     var thingList = mf.theUKS.Labeled("Unknown").Children;
 
                     SetOutputText($"Getting parents for {thingList.Count} Things");
-                    foreach (var thing in thingList)
+                    foreach (var thought in thingList)
                     {
                         if (words.Count >= wordMax) break;
-                        words.Add(thing.Label);
+                        words.Add(thought.Label);
                     }
 
                     ProcessParentsAsync(words);

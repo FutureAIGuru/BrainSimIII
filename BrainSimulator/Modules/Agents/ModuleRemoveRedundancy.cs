@@ -48,7 +48,7 @@ public class ModuleRemoveRedundancy : ModuleBase
     public void DoTheWork()
     {
         debugString = "Agent Started\n";
-        foreach (Cogneme t in theUKS.AllThings)
+        foreach (Thought t in theUKS.AllThings)
         {
             RemoveRedundantAttributes(t);
         }
@@ -56,21 +56,21 @@ public class ModuleRemoveRedundancy : ModuleBase
         UpdateDialog();
     }
 
-    private void RemoveRedundantAttributes(Cogneme t)
+    private void RemoveRedundantAttributes(Thought t)
     {
-        foreach (Cogneme parent in t.Parents) //usually only a single parent
+        foreach (Thought parent in t.Parents) //usually only a single parent
         {
-            List<Cogneme> relationshipsWithInheritance = theUKS.GetAllRelationships(new List<Cogneme> { parent });
-            for (int i = 0; i < t.Relationships.Count; i++)
+            List<Thought> linksWithInheritance = theUKS.GetAllLinks(new List<Thought> { parent });
+            for (int i = 0; i < t.LinksTo.Count; i++)
             {
-                Cogneme r = t.Relationships[i];
-                Cogneme rMatch = relationshipsWithInheritance.FindFirst(x => x.Source != r.Source && x.RelType == r.RelType && x.Target == r.Target);
+                Thought r = t.LinksTo[i];
+                Thought rMatch = linksWithInheritance.FindFirst(x => x.From != r.From && x.LinkType == r.LinkType && x.To == r.To);
                 if (rMatch is not null && rMatch.Weight > 0.8f)
                 {
                     r.Weight -= 0.1f;
                     if (r.Weight < 0.5f)
                     {
-                        t.RemoveRelationship(r);
+                        t.RemoveLink(r);
                         i--;
                         debugString += "Removed: ";
                     }

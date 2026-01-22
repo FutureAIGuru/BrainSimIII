@@ -9,99 +9,99 @@ namespace UKS;
 public partial class UKS
 {
     /// <summary>
-    /// Creates a Thing. <br/>
+    /// Creates a Thought. <br/>
     /// Parameters are strings. If the Things with those labels
     /// do not exist, they will be created. <br/>
-    /// If the RelationshipType has an inverse, the inverse will be used and the Thing will be reversed so that 
+    /// If the LinkType has an inverse, the inverse will be used and the Thought will be reversed so that 
     /// Fido Is-a Dog become Dog Has-child Fido.<br/>
     /// </summary>
-    /// <param name="sSource">string or Thing</param>
-    /// <param name="sRelationshipType">string or Thing</param>
-    /// <param name="sTarget">string or Thing (or null)</param>
+    /// <param name="sSource">string or Thought</param>
+    /// <param name="sLinkType">string or Thought</param>
+    /// <param name="sTarget">string or Thought (or null)</param>
     /// <param name="isStatement">Boolean indicating if this is a true statement or part of a conditional</param>
-    /// <returns>The primary relationship which was created (others may be created for given attributes</returns>
-    public Cogneme AddStatement(string sSource, string sRelationshipType, string sTarget, string label = "")
+    /// <returns>The primary link which was created (others may be created for given attributes</returns>
+    public Thought AddStatement(string sSource, string sLinkType, string sTarget, string label = "")
     {
-        Cogneme source = ThingFromObject(sSource);
-        Cogneme relationshipType = ThingFromObject(sRelationshipType, "RelationshipType", source);
-        Cogneme target = ThingFromObject(sTarget);
+        Thought source = ThingFromObject(sSource);
+        Thought linkType = ThingFromObject(sLinkType, "LinkType", source);
+        Thought target = ThingFromObject(sTarget);
 
-        Cogneme theRelationship = AddStatement(source, relationshipType, target, label);
-        return theRelationship;
+        Thought theLink = AddStatement(source, linkType, target, label);
+        return theLink;
     }
     /// <summary>
-    /// Adds a statement relating the specified source, relationship type, and target. No new Things are created.
+    /// Adds a statement relating the specified source, link type, and target. No new Things are created.
     /// </summary>
-    /// <remarks>If a relationship with the same source, relationship type, and target already exists, the existing
-    /// relationship  is returned after being activated. Otherwise, a new relationship is created and added. If the
-    /// relationship type  has the "isCommutative" property, a reverse relationship is also created. Additionally, any
-    /// extraneous parent  relationships for the source, target, or relationship type are cleared.</remarks>
-    /// <param name="source">The source <see cref="Cogneme"/> of the relationship. Cannot be <see langword="null"/>.</param>
-    /// <param name="relType">The relationship type <see cref="Cogneme"/>. Cannot be <see langword="null"/>.</param>
-    /// <param name="target">The target <see cref="Cogneme"/> of the relationship.</param>
-    /// <returns>The created or existing <see cref="Cogneme"/> object that represents the relationship.  Returns <see
+    /// <remarks>If a link with the same source, link type, and target already exists, the existing
+    /// link  is returned after being activated. Otherwise, a new link is created and added. If the
+    /// link type  has the "isCommutative" property, a reverse link is also created. Additionally, any
+    /// extraneous parent  links for the source, target, or link type are cleared.</remarks>
+    /// <param name="source">The source <see cref="Thought"/> of the link. Cannot be <see langword="null"/>.</param>
+    /// <param name="relType">The link type <see cref="Thought"/>. Cannot be <see langword="null"/>.</param>
+    /// <param name="target">The target <see cref="Thought"/> of the link.</param>
+    /// <returns>The created or existing <see cref="Thought"/> object that represents the link.  Returns <see
     /// langword="null"/> if <paramref name="source"/> or <paramref name="relType"/> is <see langword="null"/>.</returns>
-    public Cogneme AddStatement(Cogneme source, Cogneme relType, Cogneme target, string label = "")
+    public Thought AddStatement(Thought source, Thought relType, Thought target, string label = "")
     {
         if (source is null || relType is null) return null;
 
-        Cogneme existing = Labeled(label);
-        Cogneme r = null; 
+        Thought existing = Labeled(label);
+        Thought r = null; 
 
         if (existing is null)
-        {        //create the relationship but don't add it to the UKS
-            r = CreateTheRelationship(source, relType, target);
-            existing = GetRelationship(r);
+        {        //create the link but don't add it to the UKS
+            r = CreateTheLink(source, relType, target);
+            existing = GetLink(r);
         }
 
-        //does this relationship already exist (without conditions)?
+        //does this link already exist (without conditions)?
         if (existing is not null )
         {
-            WeakenConflictingRelationships(source, existing);
+            WeakenConflictingLinks(source, existing);
             existing.Fire();
             return existing;
         }
-        if (r.Source?.Label == "") r.Source.AddToUKS();
-        if (r.Target?.Label == "") r.Target.AddToUKS();
+        if (r.From?.Label == "") r.From.AddToUKS();
+        if (r.To?.Label == "") r.To.AddToUKS();
 
-        WeakenConflictingRelationships(source, r);
+        WeakenConflictingLinks(source, r);
 
-        WriteTheRelationship(r);
-        if (r.RelType is not null && HasProperty(r.RelType, "isCommutative"))
+        WriteTheLink(r);
+        if (r.LinkType is not null && HasProperty(r.LinkType, "isCommutative"))
         {
-            Cogneme rReverse = new Cogneme(r);
-            (rReverse.Source, rReverse.Target) = (rReverse.Target, rReverse.Source);
+            Thought rReverse = new Thought(r);
+            (rReverse.From, rReverse.To) = (rReverse.To, rReverse.From);
             //rReverse.Clauses.Clear();
-            WriteTheRelationship(rReverse);
+            WriteTheLink(rReverse);
         }
 
-        //if this is adding a child relationship, remove any Unknown parent
-        ClearExtraneousParents(r.Source);
-        ClearExtraneousParents(r.Target);
-        ClearExtraneousParents(r.RelType);
+        //if this is adding a child link, remove any Unknown parent
+        ClearExtraneousParents(r.From);
+        ClearExtraneousParents(r.To);
+        ClearExtraneousParents(r.LinkType);
 
         return r;
     }
 
 
     //these are used by the subclass searching system to report back the closest match and what attributes are missing
-    public Cogneme CreateTheRelationship(
-      object oSource, object oRelationshipType, object oTarget)
+    public Thought CreateTheLink(
+      object oSource, object oLinkType, object oTarget)
     {
-        //Debug.WriteLine(oSource.ToString()+" "+oRelationshipType.ToString()+" "+oTarget.ToString());
-        Cogneme source = ThingFromObject(oSource);
-        Cogneme relationshipType = ThingFromObject(oRelationshipType, "RelationshipType", source);
-        Cogneme target = ThingFromObject(oTarget);
+        //Debug.WriteLine(oSource.ToString()+" "+oLinkType.ToString()+" "+oTarget.ToString());
+        Thought source = ThingFromObject(oSource);
+        Thought linkType = ThingFromObject(oLinkType, "LinkType", source);
+        Thought target = ThingFromObject(oTarget);
 
 
-        Cogneme theRelationship = CreateTheRelationship(ref source, ref relationshipType, ref target);
-        return theRelationship;
+        Thought theLink = CreateTheLink(ref source, ref linkType, ref target);
+        return theLink;
     }
 
-    public Cogneme CreateTheRelationship(ref Cogneme source, ref Cogneme relType, ref Cogneme target)
+    public Thought CreateTheLink(ref Thought source, ref Thought relType, ref Thought target)
     {
-        Cogneme inverseType1 = CheckForInverse(relType);
-        //if this relationship has an inverse, switcheroo so we are storing consistently in one direction
+        Thought inverseType1 = CheckForInverse(relType);
+        //if this link has an inverse, switcheroo so we are storing consistently in one direction
         if (inverseType1 is not null)
         {
             (source, target) = (target, source);
@@ -110,50 +110,50 @@ public partial class UKS
 
         //CREATE new subclasses if needed
 
-        Cogneme r = new Cogneme()
-        { Source = source, RelType = relType, Target = target };
+        Thought r = new Thought()
+        { From = source, LinkType = relType, To = target };
 
-        r.Source?.Fire();
-        r.Target?.Fire();
-        r.RelType?.Fire();
+        r.From?.Fire();
+        r.To?.Fire();
+        r.LinkType?.Fire();
 
         return r;
     }
 
-    private void WeakenConflictingRelationships(Cogneme newSource, Cogneme newRelationship)
+    private void WeakenConflictingLinks(Thought newSource, Thought newLink)
     {
-        //does this new relationship conflict with an existing relationship)?
-        for (int i = 0; i < newSource?.Relationships.Count; i++)
+        //does this new link conflict with an existing link)?
+        for (int i = 0; i < newSource?.LinksTo.Count; i++)
         {
-            Cogneme existingRelationship = newSource.Relationships[i];
-            if (existingRelationship == newRelationship)
+            Thought existingLink = newSource.LinksTo[i];
+            if (existingLink == newLink)
             {
-                //strengthen this relationship
-                newRelationship.Weight += (1 - newRelationship.Weight) / 2.0f;
-                newRelationship.Fire();
+                //strengthen this link
+                newLink.Weight += (1 - newLink.Weight) / 2.0f;
+                newLink.Fire();
             }
-            else if (RelationshipsAreExclusive(newRelationship, existingRelationship))
+            else if (LinksAreExclusive(newLink, existingLink))
             {
                 //special cases for "not" so we delete rather than weakening
-                if (newRelationship.RelType.Children.Contains(existingRelationship.RelType) && HasAttribute(existingRelationship.RelType, "not"))
+                if (newLink.LinkType.Children.Contains(existingLink.LinkType) && HasAttribute(existingLink.LinkType, "not"))
                 {
-                    AddStatement(newRelationship, "AFTER", existingRelationship);
-                    existingRelationship.Source.RemoveRelationship(existingRelationship);
+                    AddStatement(newLink, "AFTER", existingLink);
+                    existingLink.From.RemoveLink(existingLink);
                 }
-                else if (existingRelationship.RelType.Children.Contains(newRelationship.RelType) && HasAttribute(newRelationship.RelType, "not"))
+                else if (existingLink.LinkType.Children.Contains(newLink.LinkType) && HasAttribute(newLink.LinkType, "not"))
                 {
-                    AddStatement(newRelationship, "AFTER", existingRelationship);
-                    existingRelationship.Source.RemoveRelationship(existingRelationship);
+                    AddStatement(newLink, "AFTER", existingLink);
+                    existingLink.From.RemoveLink(existingLink);
                 }
                 else
                 {
-                    if (newRelationship.Weight == 1 && existingRelationship.Weight == 1)
-                        existingRelationship.Weight = .5f;
+                    if (newLink.Weight == 1 && existingLink.Weight == 1)
+                        existingLink.Weight = .5f;
                     else
-                        existingRelationship.Weight = Math.Clamp(existingRelationship.Weight - .2f, -1, 1);
-                    if (existingRelationship.Weight <= 0)
+                        existingLink.Weight = Math.Clamp(existingLink.Weight - .2f, -1, 1);
+                    if (existingLink.Weight <= 0)
                     {
-                        newSource.RemoveRelationship(existingRelationship);
+                        newSource.RemoveLink(existingLink);
                         i--;
                     }
                 }
@@ -161,22 +161,22 @@ public partial class UKS
         }
     }
 
-    void ClearExtraneousParents(Cogneme t)
+    void ClearExtraneousParents(Thought t)
     {
         if (t is null) return;
 
-        bool reconnectNeeded = t.HasAncestorLabeled("Cogneme");
-        //if a thing has more than one parent and one of them is unkonwnObject, 
-        //then the Unknown relationship is unnecessary
+        bool reconnectNeeded = t.HasAncestorLabeled("Thought");
+        //if a thought has more than one parent and one of them is unkonwnObject, 
+        //then the Unknown link is unnecessary
         if (t.Parents.Count > 1)
-            t.RemoveParent(CognemeLabels.GetThing("Unknown"));
-        //if this disconnects the Thing from the tree, reconnect it as a Unknown
+            t.RemoveParent(ThoughtLabels.GetThing("Unknown"));
+        //if this disconnects the Thought from the tree, reconnect it as a Unknown
         //this may happen in the case of a circular reference.
-        if (reconnectNeeded && !t.HasAncestor("Cogneme"))
-            t.AddParent(CognemeLabels.GetThing("Unknown"));
+        if (reconnectNeeded && !t.HasAncestor("Thought"))
+            t.AddParent(ThoughtLabels.GetThing("Unknown"));
     }
 
-    public Cogneme SubclassExists(Cogneme t, List<Cogneme> thingAttributes, ref Cogneme bestMatch, ref List<Cogneme> missingAttributes)
+    public Thought SubclassExists(Thought t, List<Thought> thingAttributes, ref Thought bestMatch, ref List<Thought> missingAttributes)
     {
         //TODO this doesn't work as needed if some attributes are inherited from an ancestor
         if (t is null) return null;
@@ -186,15 +186,15 @@ public partial class UKS
         //there are no attributes specified
         if (thingAttributes.Count == 0) return t;
 
-        List<Cogneme> attrs = new List<Cogneme>(thingAttributes);
+        List<Thought> attrs = new List<Thought>(thingAttributes);
 
         //get the attributes of t
-        //var existingRelationships = GetAllRelationships(new List<Thing> { t }, false);
-        var existingRelationships = t.Relationships;
-        foreach (Cogneme r in existingRelationships)
+        //var existingLinks = GetAllLinks(new List<Thought> { t }, false);
+        var existingLinks = t.LinksTo;
+        foreach (Thought r in existingLinks)
         {
-            if (attrs.Contains(r.Target)) attrs.Remove(r.Target);
-            if (attrs.Contains(r.RelType)) attrs.Remove(r.RelType);
+            if (attrs.Contains(r.To)) attrs.Remove(r.To);
+            if (attrs.Contains(r.LinkType)) attrs.Remove(r.LinkType);
         }
 
         //t already has these attributes
@@ -203,33 +203,33 @@ public partial class UKS
 
         //attrs now contains the remaing attributes we need to find in a descendent
         //bestMatch = null;
-        //missingAttributes = new List<Thing>();
+        //missingAttributes = new List<Thought>();
         return ChildHasAllAttributes(t, attrs, ref bestMatch, ref missingAttributes);
     }
 
-    List<Cogneme> GetDirectAttributes(Cogneme t)
+    List<Thought> GetDirectAttributes(Thought t)
     {
-        List<Cogneme> retVal = new();
-        foreach (Cogneme r in t.Relationships)
+        List<Thought> retVal = new();
+        foreach (Thought r in t.LinksTo)
         {
-            if (r.RelType.Label == "is")
-                retVal.Add(r.Target);
+            if (r.LinkType.Label == "is")
+                retVal.Add(r.To);
         }
         return retVal;
     }
-    private Cogneme ChildHasAllAttributes(Cogneme t, List<Cogneme> attrs, ref Cogneme bestMatch, ref List<Cogneme> missingAttributes, List<Cogneme> alreadyVisited = null)
+    private Thought ChildHasAllAttributes(Thought t, List<Thought> attrs, ref Thought bestMatch, ref List<Thought> missingAttributes, List<Thought> alreadyVisited = null)
     {
         //circular reference protection
-        if (alreadyVisited is null) alreadyVisited = new List<Cogneme>();
+        if (alreadyVisited is null) alreadyVisited = new List<Thought>();
         if (alreadyVisited.Contains(t)) return null;
         alreadyVisited.Add(t);
 
         //Localattrs lets us remove attrs from the required list without clobbering the parent list
-        List<Cogneme> localAttrs = new List<Cogneme>(attrs);
-        foreach (Cogneme child in t.Children)
+        List<Thought> localAttrs = new List<Thought>(attrs);
+        foreach (Thought child in t.Children)
         {
-            List<Cogneme> childAttrs = GetDirectAttributes(child);
-            foreach (Cogneme t3 in childAttrs)
+            List<Thought> childAttrs = GetDirectAttributes(child);
+            foreach (Thought t3 in childAttrs)
                 localAttrs.Remove(t3);
 
             if (localAttrs.Count == 0) //have all the attributes been found?
@@ -237,101 +237,101 @@ public partial class UKS
 
             if (localAttrs.Count < missingAttributes.Count)
             {
-                missingAttributes = new List<Cogneme>(localAttrs);
+                missingAttributes = new List<Thought>(localAttrs);
                 bestMatch = child;
             }
             //search any children with the remaining needed attributes
-            Cogneme retVal = ChildHasAllAttributes(child, localAttrs, ref bestMatch, ref missingAttributes, alreadyVisited);
+            Thought retVal = ChildHasAllAttributes(child, localAttrs, ref bestMatch, ref missingAttributes, alreadyVisited);
             if (retVal is not null)
                 return retVal;
-            localAttrs = new List<Cogneme>(attrs);
+            localAttrs = new List<Thought>(attrs);
         }
         return null;
     }
 
-    public Cogneme CreateInstanceOf(Cogneme t)
+    public Thought CreateInstanceOf(Thought t)
     {
-        return CreateSubclass(t, new List<Cogneme>());
+        return CreateSubclass(t, new List<Thought>());
     }
-    Cogneme CreateSubclass(Cogneme t, List<Cogneme> attributes)
+    Thought CreateSubclass(Thought t, List<Thought> attributes)
     {
         if (t is null) return null;
-        //Thing t2 = SubclassExists(t, attributes);
+        //Thought t2 = SubclassExists(t, attributes);
         //if (t2 is not null && attributes.Count != 0) return t2;
 
         string newLabel = t.Label;
-        foreach (Cogneme t1 in attributes)
+        foreach (Thought t1 in attributes)
         {
             newLabel += ((t1.Label.StartsWith(".")) ? "" : ".") + t1.Label;
         }
-        //create the new thing which is child of the original
-        Cogneme retVal = AddThing(newLabel, t);
+        //create the new thought which is child of the original
+        Thought retVal = AddThing(newLabel, t);
         //add the attributes
-        foreach (Cogneme t1 in attributes)
+        foreach (Thought t1 in attributes)
         {
-            Cogneme r1 = new Cogneme()
-            { Source = retVal, RelType = CognemeLabels.GetThing("is"), Target = t1 };
-            WriteTheRelationship(r1);
+            Thought r1 = new Thought()
+            { From = retVal, LinkType = ThoughtLabels.GetThing("is"), To = t1 };
+            WriteTheLink(r1);
         }
         return retVal;
     }
 
-    private Cogneme CheckForInverse(Cogneme relationshipType)
+    private Thought CheckForInverse(Thought linkType)
     {
-        if (relationshipType is null) return null;
-        Cogneme inverse = relationshipType.Relationships.FindFirst(x => x.RelType.Label == "inverseOf");
-        if (inverse is not null) return inverse.Target;
+        if (linkType is null) return null;
+        Thought inverse = linkType.LinksTo.FindFirst(x => x.LinkType.Label == "inverseOf");
+        if (inverse is not null) return inverse.To;
         //use the below if inverses are 2-way.  Without this, there is a one-way translation
-        //inverse = relationshipType.RelationshipsBy.FindFirst(x => x.reltype.Label == "inverseOf");
+        //inverse = linkType.LinksBy.FindFirst(x => x.reltype.Label == "inverseOf");
         //if (inverse is not null) return inverse.source;
         return null;
     }
-    private static List<Cogneme> FindCommonParents(Cogneme t, Cogneme t1)
+    private static List<Thought> FindCommonParents(Thought t, Thought t1)
     {
-        List<Cogneme> commonParents = new List<Cogneme>();
-        foreach (Cogneme p in t.Parents)
+        List<Thought> commonParents = new List<Thought>();
+        foreach (Thought p in t.Parents)
             if (t1.Parents.Contains(p))
                 commonParents.Add(p);
         return commonParents;
     }
-    public static void WriteTheRelationship(Cogneme r)
+    public static void WriteTheLink(Thought r)
     {
-        if (r.Source is null && r.Target is null) return;
-        if (r.RelType is null) return;
-        if (r.Target is null)
+        if (r.From is null && r.To is null) return;
+        if (r.LinkType is null) return;
+        if (r.To is null)
         {
-            lock (r.Source.RelationshipsWriteable)
-                lock (r.RelType.RelationshipsFromWriteable)
+            lock (r.From.LinksWriteable)
+                lock (r.LinkType.LinksFromWriteable)
                 {
-                    if (!r.Source.RelationshipsWriteable.Contains(r))
-                        r.Source.RelationshipsWriteable.Add(r);
-                    if (!r.RelType.RelationshipsAsTypeWriteable.Contains(r))
-                        r.RelType.RelationshipsAsTypeWriteable.Add(r);
+                    if (!r.From.LinksWriteable.Contains(r))
+                        r.From.LinksWriteable.Add(r);
+                    if (!r.LinkType.LinksAsTypeWriteable.Contains(r))
+                        r.LinkType.LinksAsTypeWriteable.Add(r);
                 }
         }
-        else if (r.Source is null)
+        else if (r.From is null)
         {
-            lock (r.Target.RelationshipsWriteable)
-                lock (r.RelType.RelationshipsFromWriteable)
+            lock (r.To.LinksWriteable)
+                lock (r.LinkType.LinksFromWriteable)
                 {
-                    if (!r.Target.RelationshipsWriteable.Contains(r))
-                        r.Target.RelationshipsFromWriteable.Add(r);
-                    if (!r.RelType.RelationshipsAsTypeWriteable.Contains(r))
-                        r.RelType.RelationshipsAsTypeWriteable.Add(r);
+                    if (!r.To.LinksWriteable.Contains(r))
+                        r.To.LinksFromWriteable.Add(r);
+                    if (!r.LinkType.LinksAsTypeWriteable.Contains(r))
+                        r.LinkType.LinksAsTypeWriteable.Add(r);
                 }
         }
         else
         {
-            lock (r.Source.RelationshipsWriteable)
-                lock (r.Target.RelationshipsFromWriteable)
-                    lock (r.RelType.RelationshipsFromWriteable)
+            lock (r.From.LinksWriteable)
+                lock (r.To.LinksFromWriteable)
+                    lock (r.LinkType.LinksFromWriteable)
                     {
-                        if (!r.Source.RelationshipsWriteable.Contains(r))
-                            r.Source.RelationshipsWriteable.Add(r);
-                        if (!r.Target.RelationshipsWriteable.Contains(r))
-                            r.Target.RelationshipsFromWriteable.Add(r);
-                        if (!r.RelType.RelationshipsAsTypeWriteable.Contains(r))
-                            r.RelType.RelationshipsAsTypeWriteable.Add(r);
+                        if (!r.From.LinksWriteable.Contains(r))
+                            r.From.LinksWriteable.Add(r);
+                        if (!r.To.LinksWriteable.Contains(r))
+                            r.To.LinksFromWriteable.Add(r);
+                        if (!r.LinkType.LinksAsTypeWriteable.Contains(r))
+                            r.LinkType.LinksAsTypeWriteable.Add(r);
 
                     }
         }

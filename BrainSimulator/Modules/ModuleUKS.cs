@@ -13,7 +13,7 @@ using UKS;
 namespace BrainSimulator.Modules;
 
 /// <summary>
-/// Contains a collection of Things linked by Relationships to implement Common Sense and general knowledge.
+/// Contains a collection of Things linked by Links to implement Common Sense and general knowledge.
 /// </summary>
 public partial class ModuleUKS : ModuleBase
 {

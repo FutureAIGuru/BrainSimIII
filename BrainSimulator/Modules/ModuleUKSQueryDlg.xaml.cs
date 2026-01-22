@@ -37,7 +37,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         QueryByAttributes();
     }
 
-    //List<Thing> result = new();
+    //List<Thought> result = new();
 
 
     // Draw gets called to draw the dialog when it needs refreshing
@@ -47,7 +47,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         return true;
     }
 
-    private void BtnRelationships_Click(object sender, RoutedEventArgs e)
+    private void BtnLinks_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button b)
         {
@@ -80,10 +80,10 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         string target = targetText.Text;
         string filter = filterText.Text;
 
-        List<Cogneme> things;
-        List<Cogneme> relationships;
+        List<Thought> things;
+        List<Thought> links;
         ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-        var results1 = UKSQuery.QueryUKS(source, type, target, filter, out things, out relationships);
+        var results1 = UKSQuery.QueryUKS(source, type, target, filter, out things, out links);
 
         if (results1 is not null)
         {
@@ -92,7 +92,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         else if (things.Count > 0)
             OutputResults(things);
         else
-            OutputResults(relationships, target == "", source == "");
+            OutputResults(links, target == "", source == "");
     }
 
     //query by attributes
@@ -101,12 +101,12 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
         var theUKS = UKSQuery.theUKS;
 
-        Cogneme ancestor = theUKS.Labeled(ancestorText1.Text);
+        Thought ancestor = theUKS.Labeled(ancestorText1.Text);
         if (ancestor is null)
-            ancestor = theUKS.Labeled("Cogneme");
+            ancestor = theUKS.Labeled("Thought");
 
         //build the query object
-        Cogneme queryThing = CreateTheQueryThing();
+        Thought queryThing = CreateTheQueryThing();
         if (queryThing is null)
         {
             SetStatus("Could not create query");
@@ -119,7 +119,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         {
             resultText1.Text = "<No Results>";
             BtnNo.IsEnabled = true;
-            if (queryThing.Relationships.Count > 0)
+            if (queryThing.LinksTo.Count > 0)
                 BtnLearn.IsEnabled = true;
             else
                 BtnLearn.IsEnabled = false;
@@ -144,18 +144,18 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         theUKS.DeleteThing(queryThing);
     }
 
-    private Cogneme CreateTheQueryThing()
+    private Thought CreateTheQueryThing()
     {
         ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-        Cogneme queryThing = new Cogneme() { Label = "theQuery" };
+        Thought queryThing = new Thought() { Label = "theQuery" };
         string[] rels = queryText1.Text.Split('\n');
         foreach (string s in rels)
         {
             string[] relParams = s.Split(',', StringSplitOptions.RemoveEmptyEntries);
             if (relParams.Length > 1)
             {
-                Cogneme relType = UKSQuery.theUKS.CreateThingFromMultipleAttributes(relParams[0], true);
-                Cogneme relTarget = UKSQuery.theUKS.CreateThingFromMultipleAttributes(relParams[1], false);
+                Thought relType = UKSQuery.theUKS.CreateThingFromMultipleAttributes(relParams[0], true);
+                Thought relTarget = UKSQuery.theUKS.CreateThingFromMultipleAttributes(relParams[1], false);
                 if (relType is null)
                 {
                     resultText1.Text = $"<{relParams[0]} not found>";
@@ -176,7 +176,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
                 float conf = .9f;
                 if (relParams.Length > 2) float.TryParse(relParams[2], out conf);
-                Cogneme r1 = queryThing.AddRelationship(relTarget, relType);
+                Thought r1 = queryThing.AddLink(relTarget, relType);
                 r1.Weight = conf;
             }
         }
@@ -189,12 +189,12 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
         UKS.UKS theUKS = UKSQuery.theUKS;
 
-        Cogneme ancestor = theUKS.Labeled(ancestorText1.Text);
+        Thought ancestor = theUKS.Labeled(ancestorText1.Text);
         if (ancestor is null)
-            ancestor = theUKS.Labeled("Cogneme");
+            ancestor = theUKS.Labeled("Thought");
 
         //build the query object
-        Cogneme queryThing = CreateTheQueryThing();
+        Thought queryThing = CreateTheQueryThing();
         if (queryThing is null)
         {
             SetStatus("Could not create query");
@@ -208,7 +208,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
         if (allResults.Count == 0)
         {
-            //case 1: no results, create a new Thing
+            //case 1: no results, create a new Thought
             lock (theUKS.AllThings)
             {
                 theUKS.AllThings.Add(queryThing);
@@ -232,7 +232,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
         if (matchingTopEntries > 1)
         {
-            //add the thing to UKS
+            //add the thought to UKS
             lock (theUKS.AllThings)
             {
                 theUKS.AllThings.Add(queryThing);
@@ -257,7 +257,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         {
             foreach (var child in topResult.Children)
             {
-                if (theUKS.ThingsHaveSimilarRelationship(queryThing, child))
+                if (theUKS.ThingsHaveSimilarLink(queryThing, child))
                 {
                     newChildNeeded = true;
                     break;
@@ -268,7 +268,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
                 lock (theUKS.AllThings)
                     theUKS.AllThings.Add(queryThing);
                 queryThing.Label = "Unl*";
-                Cogneme r1 = queryThing.AddParent(topResult);
+                Thought r1 = queryThing.AddParent(topResult);
                 r1.Weight = .9f;
                 UpdateMostRecent(queryThing);
                 RemoveRedundantInheritedAttributes(queryThing);
@@ -281,7 +281,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         bool bubbleNeeded = false;
         foreach (var r in missingAttributes)
         {
-            var r1 = topResult.AddRelationship(r.Target, r.RelType);
+            var r1 = topResult.AddLink(r.To, r.LinkType);
             r1.Weight = r.Weight;
             bubbleNeeded = true;
         }
@@ -293,24 +293,24 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         if (matchingTopEntries == 1)
         {
             List<int> missingCount = new();
-            foreach (Cogneme t in topResult.Parents)
+            foreach (Thought t in topResult.Parents)
                 missingCount.Add(GetMissingAttributes(queryThing, t).Count);
             float ave = (float)missingCount.Average();
             int m = 0;
-            foreach (Cogneme t in topResult.Parents)
+            foreach (Thought t in topResult.Parents)
             {
                 var m1 = missingCount[m++];
-                var w = theUKS.GetRelationshipWeight(topResult, t);
+                var w = theUKS.GetLinkWeight(topResult, t);
                 if (m1 < ave)
                 {
                     w = 1 - (1 - w) / 2;
-                    theUKS.SetRelationshipWeight(topResult, t, w);
+                    theUKS.SetLinkWeight(topResult, t, w);
                 }
                 if (m1 > ave)
                 {
                     w = w / 2;
                     if (w > .1f)
-                        theUKS.SetRelationshipWeight(topResult, t, w);
+                        theUKS.SetLinkWeight(topResult, t, w);
                     else
                         topResult.RemoveParent(t);
                 }
@@ -321,20 +321,20 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         theUKS.DeleteThing(queryThing);
     }
 
-    private void BubbleCommonAttributes(Cogneme queryThing)
+    private void BubbleCommonAttributes(Thought queryThing)
     {
         if (queryThing.Parents.Count == 0) return;
         var parent = queryThing.Parents[0];
         //build a List of counts of the attributes
-        //build a List of all the Relationships which this thing's children have
+        //build a List of all the Links which this thought's children have
         List<RelDest> attributes = new();
         foreach (var child in parent.Children)
             CountAttributes(child, attributes);
 
         foreach (var key in attributes)
         {
-            if (key.relationships.Count < 2 || key.relationships.Count < parent.Children.Count) continue;
-            parent.AddRelationship(key.target, key.relType).Weight = .9f;
+            if (key.links.Count < 2 || key.links.Count < parent.Children.Count) continue;
+            parent.AddLink(key.target, key.relType).Weight = .9f;
         }
         foreach (var child in parent.Children)
         {
@@ -343,53 +343,53 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
     }
 
-    private void RemoveRedundantInheritedAttributes(Cogneme queryThing)
+    private void RemoveRedundantInheritedAttributes(Thought queryThing)
     {
         //remove any attributes which are common to all parents
-        for (int i = 0; i < queryThing.Relationships.Count; i++)
+        for (int i = 0; i < queryThing.LinksTo.Count; i++)
         {
-            Cogneme r = queryThing.Relationships[i];
-            if (r.RelType.Label == "is-a") continue;
-            bool relationshipIsCommonToAllParents = true;
-            foreach (Cogneme parent in queryThing.Parents)
+            Thought r = queryThing.LinksTo[i];
+            if (r.LinkType.Label == "is-a") continue;
+            bool linkIsCommonToAllParents = true;
+            foreach (Thought parent in queryThing.Parents)
             {
-                if (parent.HasRelationship(parent, r.RelType, r.Target) is null)
+                if (parent.HasLink(parent, r.LinkType, r.To) is null)
                 {
-                    relationshipIsCommonToAllParents = false;
+                    linkIsCommonToAllParents = false;
                     break;
                 }
             }
-            if (relationshipIsCommonToAllParents)
+            if (linkIsCommonToAllParents)
             {
-                queryThing.RemoveRelationship(r.Target, r.RelType);
+                queryThing.RemoveLink(r.To, r.LinkType);
                 i--;
                 //Thread.Sleep(1000);
             }
         }
     }
 
-    List<Cogneme> GetMissingAttributes(Cogneme queryThing, Cogneme foundThing)
+    List<Thought> GetMissingAttributes(Thought queryThing, Thought foundThing)
     {
         ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
         var theUKS = UKSQuery.theUKS;
 
-        List<Cogneme> missingAttributes = new();
-        var inheritableRelationships = theUKS.GetAllRelationships(new List<Cogneme> { foundThing });
-        foreach (Cogneme r in queryThing.Relationships)
+        List<Thought> missingAttributes = new();
+        var inheritableLinks = theUKS.GetAllLinks(new List<Thought> { foundThing });
+        foreach (Thought r in queryThing.LinksTo)
         {
-            if (inheritableRelationships.FindFirst(x => x.RelType == r.RelType && x.Target == r.Target) is null)
+            if (inheritableLinks.FindFirst(x => x.LinkType == r.LinkType && x.To == r.To) is null)
                 missingAttributes.Add(r);
         }
         return missingAttributes;
     }
 
-    void UpdateMostRecent(Cogneme t)
+    void UpdateMostRecent(Thought t)
     {
         ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-        Cogneme mostRecent = UKSQuery.theUKS.GetOrAddThing("mostRecent", "RelationshipType");
-        //delete any previous mostRecent relationships
-        mostRecent.RemoveRelationships("is");
-        mostRecent.AddRelationship(t, "is");
+        Thought mostRecent = UKSQuery.theUKS.GetOrAddThing("mostRecent", "LinkType");
+        //delete any previous mostRecent links
+        mostRecent.RemoveLinks("is");
+        mostRecent.AddLink(t, "is");
     }
 
     private void BtnNo_Click(object sender, RoutedEventArgs e)
@@ -397,12 +397,12 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
         UKS.UKS theUKS = UKSQuery.theUKS;
 
-        Cogneme ancestor = theUKS.Labeled(ancestorText1.Text);
+        Thought ancestor = theUKS.Labeled(ancestorText1.Text);
         if (ancestor is null)
-            ancestor = theUKS.Labeled("Cogneme");
+            ancestor = theUKS.Labeled("Thought");
 
         //build the query object
-        Cogneme queryThing = CreateTheQueryThing();
+        Thought queryThing = CreateTheQueryThing();
         if (queryThing is null)
         {
             SetStatus("Could not create query");
@@ -422,11 +422,11 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
 
         var topResult = allResults[0].t;
 
-        // does the query thing have all the same relationships as the result?
+        // does the query thought have all the same links as the result?
         bool allMatch = true;
-        foreach (Cogneme r in queryThing.Relationships)
+        foreach (Thought r in queryThing.LinksTo)
         {
-            if (topResult.HasRelationship(topResult, r.RelType, r.Target) is null)
+            if (topResult.HasLink(topResult, r.LinkType, r.To) is null)
             {
                 //not the same
                 allMatch = false;
@@ -443,7 +443,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         if (topResult is not null)
         {
             //case 1: no results
-            //add the thing to UKS
+            //add the thought to UKS
             lock (theUKS.AllThings)
             {
                 theUKS.AllThings.Add(queryThing);
@@ -465,11 +465,11 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         SetStatus("OK");
     }
 
-    void CreateClassWithCommonAttributes(Cogneme tExisting, Cogneme tNew)
+    void CreateClassWithCommonAttributes(Thought tExisting, Thought tNew)
     {
         int minCommonAttributes = 2;
         //build a List of counts of the attributes
-        //build a List of all the Relationships which this thing's children have
+        //build a List of all the Links which this thought's children have
         List<RelDest> attributes = new();
 
         CountAttributes(tExisting, attributes);
@@ -478,19 +478,19 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         //create intermediate parent Things
         //bubble up the common attributes
         ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-        Cogneme newParent = null;
+        Thought newParent = null;
 
         foreach (var key in attributes)
         {
-            if (key.relationships.Count >= minCommonAttributes)
+            if (key.links.Count >= minCommonAttributes)
             {
                 if (newParent is null)
                     newParent = UKSQuery.theUKS.GetOrAddThing("newParent", tExisting.Parents[0]);
-                newParent.AddRelationship(key.target, key.relType);
-                foreach (Cogneme r in key.relationships)
+                newParent.AddLink(key.target, key.relType);
+                foreach (Thought r in key.links)
                 {
-                    Cogneme tChild = (Cogneme)r.Source;
-                    Cogneme rp = tChild.AddParent(newParent);
+                    Thought tChild = (Thought)r.From;
+                    Thought rp = tChild.AddParent(newParent);
                     rp.Weight = .9f;
                     if (tChild.Parents[0] != newParent)
                         tChild.RemoveParent(tChild.Parents[0]);
@@ -501,21 +501,21 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         newParent.Label = "Unl*";
     }
 
-    private static void CountAttributes(Cogneme tExisting, List<RelDest> attributes)
+    private static void CountAttributes(Thought tExisting, List<RelDest> attributes)
     {
-        foreach (Cogneme r in tExisting.Relationships)
+        foreach (Thought r in tExisting.LinksTo)
         {
-            if (r.RelType == Cogneme.IsA) continue;
-            Cogneme useRelType = GetInstanceType(r.RelType);
+            if (r.LinkType == Thought.IsA) continue;
+            Thought useRelType = GetInstanceType(r.LinkType);
 
-            RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.Target);
+            RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.To);
             if (foundItem is null)
             {
-                foundItem = new RelDest { relType = useRelType, target = r.Target };
+                foundItem = new RelDest { relType = useRelType, target = r.To };
                 attributes.Add(foundItem);
             }
-            if (foundItem.relationships.FindFirst(x => x.Source == r.Source && x.Target == r.Target) is null)
-                foundItem.relationships.Add(r);
+            if (foundItem.links.FindFirst(x => x.From == r.From && x.To == r.To) is null)
+                foundItem.links.Add(r);
         }
     }
 
@@ -530,33 +530,33 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         {
             foreach (var r1 in r)
             {
-                if (r1 is ValueTuple<Cogneme, float> tuple)
+                if (r1 is ValueTuple<Thought, float> tuple)
                 {
                     var r3 = tuple.Item1;
                     var conf = tuple.Item2;
-                    if (r3.Target?.RelType?.Label == "NXT")
+                    if (r3.To?.LinkType?.Label == "NXT")
                     {
                         ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
                         var theUKS = UKSQuery.theUKS;
-                        var seq = theUKS.FlattenSequence(r3.Target);
-                        foreach (Cogneme t in seq) resultString += t.Label + " ";
+                        var seq = theUKS.FlattenSequence(r3.To);
+                        foreach (Thought t in seq) resultString += t.Label + " ";
                         resultString += $"{conf.ToString("0.00")}\n";
                     }
                     else
-                        resultString += $"{r3.Source.ToString()} {r3.RelType.ToString()} {r3.Target.ToString()}  ({conf.ToString("0.00")})\n";
+                        resultString += $"{r3.From.ToString()} {r3.LinkType.ToString()} {r3.To.ToString()}  ({conf.ToString("0.00")})\n";
                 }
-                else if (r1 is Cogneme r2)
+                else if (r1 is Thought r2)
                 {
                     if (noSource && fullCB.IsChecked == false)
-                        resultString += $"{r2.RelType?.ToString()} {r2.Target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                        resultString += $"{r2.LinkType?.ToString()} {r2.To.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                     else if (noTarget && fullCB.IsChecked == false)
-                        resultString += $"{r2.Source.ToString()} {r2.RelType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                        resultString += $"{r2.From.ToString()} {r2.LinkType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                     else
                     {
-                        Cogneme theSource = UKS.UKS.GetNonInstance(r2.Source);
+                        Thought theSource = UKS.UKS.GetNonInstance(r2.From);
                         if (fullCB.IsChecked == true)
                             resultString += $"{theSource.Label} ";
-                        resultString += $"{r2.RelType.ToString()} {r2.Target.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                        resultString += $"{r2.LinkType.ToString()} {r2.To.ToString()}  ({r2.Weight.ToString("0.00")})\n";
                     }
                 }
                 else
@@ -566,13 +566,13 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         resultText.Text = resultString;
     }
 
-    // thingText_TextChanged is called when the thing textbox changes
+    // thingText_TextChanged is called when the thought textbox changes
     private void Text_TextChanged(object sender, TextChangedEventArgs e)
     {
         CheckThingExistence(sender);
     }
     //copied from UKSStatementDlg.cs
-    private Cogneme CheckThingExistence(object sender)
+    private Thought CheckThingExistence(object sender)
     {
         if (sender is TextBox tb)
         {
@@ -584,7 +584,7 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
                 SetStatus("Source and type cannot be empty");
                 return null;
             }
-            List<Cogneme> tl = ModuleUKSStatement.ThingListFromString(text);
+            List<Thought> tl = ModuleUKSStatement.ThingListFromString(text);
             if (tl is null || tl.Count == 0)
             {
                 tb.Background = new SolidColorBrush(Colors.LemonChiffon);

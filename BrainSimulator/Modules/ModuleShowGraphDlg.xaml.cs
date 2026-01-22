@@ -39,13 +39,13 @@ namespace BrainSimulator.Modules
             //get the root to save the contents of from the UKS dialog root
             string root = "Object";
             ModuleShowGraph parent = (ModuleShowGraph)base.ParentModule;
-            Cogneme uksDlg = parent.theUKS.Labeled("ModuleUKS0");
+            Thought uksDlg = parent.theUKS.Labeled("ModuleUKS0");
             if (uksDlg is not null)
-                foreach (var r in uksDlg.Relationships)
+                foreach (var r in uksDlg.LinksTo)
                 {
-                    if (r.RelType.Label == "hasAttribute" && r.Target.Label.StartsWith("Root"))
+                    if (r.LinkType.Label == "hasAttribute" && r.To.Label.StartsWith("Root"))
                     {
-                        root = (string)r.Target.V;
+                        root = (string)r.To.V;
                     }
                 }
 
@@ -56,16 +56,16 @@ namespace BrainSimulator.Modules
             g.Attr.BackgroundColor = Microsoft.Msagl.Drawing.Color.Black;
             viewer.OutsideAreaBrush = Brushes.Black;
 
-            Cogneme theRoot = parent.theUKS.Labeled(root);
-            foreach (Cogneme t in theRoot.Descendents)
+            Thought theRoot = parent.theUKS.Labeled(root);
+            foreach (Thought t in theRoot.Descendents)
             {
-                foreach (Cogneme r in t.Relationships)
+                foreach (Thought r in t.LinksTo)
                 {
-                    if (r.Source == theRoot) continue;
-                    string label = r.RelType.Label;
+                    if (r.From == theRoot) continue;
+                    string label = r.LinkType.Label;
                     //foreach (Clause c in r.Clauses)
                     //    label += $"\n{c.clauseType.Label} {c.clause.Source.Label} {c.clause.RelType.Label} {c.clause.Target.Label}";
-                    var e = g.AddEdge(t.Label, label, r.Target.Label);
+                    var e = g.AddEdge(t.Label, label, r.To.Label);
                     e.Attr.Color = Microsoft.Msagl.Drawing.Color.Yellow;
                     e.Label.FontColor = Microsoft.Msagl.Drawing.Color.White;
                     e.Label.FontSize = 6;

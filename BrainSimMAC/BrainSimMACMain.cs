@@ -37,16 +37,16 @@ if (args.Length > 0)
 else
 {
     var pythonFiles = moduleHandler.GetListOfExistingPythonModuleTypes();
-    Cogneme availableModuleRoot = moduleHandler.theUKS.Labeled("AvailableModule");
+    Thought availableModuleRoot = moduleHandler.theUKS.Labeled("AvailableModule");
     foreach (var moduleName in pythonFiles)
         moduleHandler.theUKS.AddThing(moduleName, availableModuleRoot);
 }
 
 //initialize active module list
-Cogneme activeModulesRoot = moduleHandler.theUKS.Labeled("ActiveModule");
+Thought activeModulesRoot = moduleHandler.theUKS.Labeled("ActiveModule");
 if (activeModulesRoot is not null)
 {
-    foreach (Cogneme module in activeModulesRoot.Children)
+    foreach (Thought module in activeModulesRoot.Children)
         if (module.Label.Contains(".py"))
             moduleHandler.pythonModules.Add(module.Label);
 }
