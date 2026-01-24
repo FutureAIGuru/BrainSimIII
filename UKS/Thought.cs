@@ -5,6 +5,8 @@
 
 
 
+using static UKS.UKS;
+
 namespace UKS;
 
 /// <summary>
@@ -49,7 +51,7 @@ public partial class Thought
     /// <summary>
     /// Full "Safe" list or links
     /// </summary>
-    public IReadOnlyList<Thought> LinksTo {get{lock (_linksTo){return new List<Thought>(_linksTo.AsReadOnly());}}}
+    public IReadOnlyList<Thought> LinksTo { get { lock (_linksTo) { return new List<Thought>(_linksTo.AsReadOnly()); } } }
     /// <summary>
     /// Get a "safe" list of links which target this Thought
     /// </summary>
@@ -191,30 +193,30 @@ public partial class Thought
     public override string ToString()
     {
 
-        string retVal = _label;
+        string retVal = Label;
         if (V is not null)
             retVal += " V: " + V.ToString();
 
-        if (From is not null || LinkType is not null || To is not null)
-            retVal += SingleToString();
+        if (From is null || LinkType is null || To is null)
+            return retVal;
 
-        return retVal;
-    }
-
-    public string SingleToString()
-    {
-        string retVal = "";// Label;
+        if (LinkType?.Label == "NXT")
+        {
+            var valuList = UKS.theUKS.FlattenSequence(this);
+            retVal = string.Join("", valuList);
+            return retVal;
+        }
+        
         retVal += "[";
-        if (!string.IsNullOrEmpty(From?.ToString()))
+        if (From is not null)
         {
             retVal += From?.ToString();
         }
-        if (!string.IsNullOrEmpty(LinkType?.ToString()))
+        if (LinkType is not null)
             retVal += ((retVal == "") ? "" : "->") + LinkType?.ToString();
-        if (!string.IsNullOrEmpty(To?.ToString()))
+        if (To is not null)
         {
-            retVal += ((retVal == "") ? "" : "->");
-            retVal += To?.ToString();
+            retVal += ((retVal == "") ? "" : "->") + To?.ToString();
         }
         retVal += "]";
         return retVal;
@@ -238,8 +240,8 @@ public partial class Thought
         if (obj is Thought t && Label != t.Label) return false;
         if (obj is Thought a && (a.From is not null || a.LinkType is not null || a.To is not null))
         {
-            if (a.To == To &&
-                a.From == From &&
+            if ((To is null || a.To == To) &&  //
+                (From is null || a.From == From) &&
                 a.LinkType == LinkType &&
                 a.LinksTo.SequenceEqual(LinksTo))
                 return true;
@@ -255,7 +257,11 @@ public partial class Thought
             return false;
         if (a is null || b is null)
             return true;
-        if (a.To == b.To && a.From == b.From && a.LinkType == b.LinkType) return false;
+        if (a.Label != b.Label) return true;
+        if ((a.To is null || a.To == b.To) && 
+            (a.From is null || a.From == b.From) && 
+            (a.LinkType is null ||a.LinkType == b.LinkType)) 
+            return false;
         return true;
     }
 
