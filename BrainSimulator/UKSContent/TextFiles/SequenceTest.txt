@@ -1,10 +1,57 @@
-[brown->is-a->unknownObject]1.00
-[mammal->is-a->unknownObject]1.00
-[mammal->has->warmBlood]0.90
-[dog->is-a->mammal]0.90
-[Fido->is-a->dog]0.95
-[[Fido->is-a->dog]->learnedFrom->Charles'YouTube]0.90
-[Fido->is->brown]0.90
-[warmBlood->is-a->unknownObject]1.00
-[learnedFrom->is-a->unknownObject]1.00
-[Charles'YouTube->is-a->unknownObject]1.00
+[LinkType->is-a->Thought] 1.00
+[is-a->is-a->LinkType] 1.00
+[is-a->hasProperty->isTransitive] 1.00
+[is-a->hasProperty->inheritable] 1.00
+[has-child->is-a->LinkType] 1.00
+[has-child->inverseOf->is-a] 1.00
+[inverseOf->is-a->LinkType] 1.00
+[hasProperty->is-a->LinkType] 1.00
+[is->is-a->LinkType] 1.00
+[hasAttribute->is-a->LinkType] 1.00
+[can->is-a->LinkType] 1.00
+[mostRecent->is-a->LinkType] 1.00
+[contains->is-a->LinkType] 1.00
+[contains->inverseOf->is-part-of] 1.00
+[is-part-of->is-a->LinkType] 1.00
+[has->is-a->LinkType] 1.00
+[has->hasProperty->isTransitive] 1.00
+[has->hasProperty->inheritable] 1.00
+[not->is-a->LinkType] 1.00
+[not->is-a->ClauseType] 1.00
+[Property->is-a->LinkType] 1.00
+[isExclusive->is-a->Property] 1.00
+[isTransitive->is-a->Property] 1.00
+[isInstance->is-a->Property] 1.00
+[isCommutative->is-a->Property] 1.00
+[allowMultiple->is-a->Property] 1.00
+[inheritable->is-a->Property] 1.00
+[isCondition->is-a->Property] 1.00
+[isResult->is-a->Property] 1.00
+[ClauseType->is-a->LinkType] 1.00
+[IF->is-a->ClauseType] 1.00
+[BECAUSE->is-a->ClauseType] 1.00
+[AFTER->is-a->ClauseType] 1.00
+[NXT->is-a->ClauseType] 1.00
+[VLU->is-a->ClauseType] 1.00
+[AND->is-a->ClauseType] 1.00
+[OR->is-a->ClauseType] 1.00
+[FRST->is-a->ClauseType] 1.00
+[Object->is-a->Thought] 1.00
+[Action->is-a->Thought] 1.00
+[Link->is-a->Thought] 1.00
+[Unknown->is-a->Thought] 1.00
+[CAT->is-a->Unknown] 1.00
+[CAT->spelled->cat-seq0] 0.90
+cat-seq0[cat-seq0->NXT->cat-seq1] 1.00
+[cat-seq0->FRST->cat-seq0] 1.00
+[cat-seq0->VLU->c] 1.00
+cat-seq1[cat-seq1->NXT->cat-seq2] 1.00
+[cat-seq1->FRST->cat-seq0] 1.00
+[cat-seq1->VLU->a] 1.00
+cat-seq2[cat-seq2->NXT->] 1.00
+[cat-seq2->FRST->cat-seq0] 1.00
+[cat-seq2->VLU->t] 1.00
+[spelled->is-a->Unknown] 1.00
+[c->is-a->Unknown] 1.00
+[a->is-a->Unknown] 1.00
+[t->is-a->Unknown] 1.00

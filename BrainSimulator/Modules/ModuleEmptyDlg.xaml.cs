@@ -14,28 +14,27 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using UKS;
 
-namespace BrainSimulator.Modules
+namespace BrainSimulator.Modules;
+
+public partial class ModuleEmptyDlg : ModuleBaseDlg
 {
-    public partial class ModuleEmptyDlg : ModuleBaseDlg
+    public ModuleEmptyDlg()
     {
-        public ModuleEmptyDlg()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        public override bool Draw(bool checkDrawTimer)
-        {
-            if (!base.Draw(checkDrawTimer)) return false;
-            //this has a timer so that no matter how often you might call draw, the dialog
-            //only updates 10x per second
-            ModuleEmpty parent = (ModuleEmpty)base.ParentModule;
-            return true;
-        }
+    public override bool Draw(bool checkDrawTimer)
+    {
+        if (!base.Draw(checkDrawTimer)) return false;
+        //this has a timer so that no matter how often you might call draw, the dialog
+        //only updates 10x per second
+        ModuleEmpty parent = (ModuleEmpty)base.ParentModule;
+        return true;
+    }
 
-        private void TheGrid_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            Draw(false);
-        }
+    private void TheGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        Draw(false);
     }
 }
 

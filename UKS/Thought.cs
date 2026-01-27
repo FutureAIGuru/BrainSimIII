@@ -192,7 +192,8 @@ public partial class Thought
     /// <returns>the Thought's label</returns>
     public override string ToString()
     {
-
+        if (LinkType?.Label == "spelled")
+        { }
         string retVal = Label;
         if (V is not null)
             retVal += " V: " + V.ToString();
@@ -203,7 +204,7 @@ public partial class Thought
         if (LinkType?.Label == "NXT")
         {
             var valuList = UKS.theUKS.FlattenSequence(this);
-            retVal = string.Join("", valuList);
+            retVal = "^"+string.Join("", valuList);
             return retVal;
         }
         
@@ -613,8 +614,8 @@ public partial class Thought
             {
                 lock (r.LinkType.LinksFromWriteable)
                 {
-                    r.From.LinksWriteable.RemoveAll(x => x.From == r.From && x.LinkType == r.LinkType && x.To == r.To); ;
-                    r.LinkType.LinksFromWriteable.RemoveAll(x => x.From == r.From && x.LinkType == r.LinkType && x.To == r.To);
+                    r.From.LinksWriteable.RemoveAll(x => x.From == r.From && x.LinkType == r.LinkType && x.To is null);
+                    r.LinkType.LinksFromWriteable.RemoveAll(x => x.From == r.From && x.LinkType == r.LinkType && x.To is null);
                 }
             }
         }

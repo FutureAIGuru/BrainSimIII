@@ -20,11 +20,6 @@ namespace BrainSimulator.Modules;
 
 public class ModuleEmpty : ModuleBase
 {
-    // Any public variable you create here will automatically be saved and restored  
-    // with the network unless you precede it with the [XmlIgnore] directive
-    // [XmlIgnore] 
-    // public theStatus = 1;
-
 
     // Fill this method in with code which will execute
     // once for each cycle of the engine
@@ -39,15 +34,6 @@ public class ModuleEmpty : ModuleBase
     // when the module is added, when "initialize" is selected from the context menu,
     // or when the engine restart button is pressed
     public override void Initialize()
-    {
-    }
-
-    // The following can be used to massage public data to be different in the xml file
-    // delete if not needed
-    public override void SetUpBeforeSave()
-    {
-    }
-    public override void SetUpAfterLoad()
     {
     }
 

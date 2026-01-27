@@ -160,7 +160,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             mostRecent = mostRecent?.LinksTo.FindFirst(x => x.LinkType.Label == "is")?.To;
             if (child == mostRecent)
                 tviChild.Background = new SolidColorBrush(Colors.Pink);
-            if (child.LastFiredTime > DateTime.Now - TimeSpan.FromSeconds(2))
+            if (child.LastFiredTime > DateTime.Now - TimeSpan.FromMilliseconds(500))
                 tviChild.Background = new SolidColorBrush(Colors.LightGreen);
             if (r.TimeToLive != TimeSpan.MaxValue && r.LastFiredTime + r.TimeToLive < DateTime.Now + TimeSpan.FromSeconds(3))
                 tviChild.Background = new SolidColorBrush(Colors.LightYellow);
@@ -235,6 +235,16 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviLinksHeader.IsExpanded = true;
         tvi.Items.Add(tviLinksHeader);
         totalItemCount++;
+
+        //For sequences
+        ModuleUKS parent = (ModuleUKS)ParentModule;
+        if (parent.theUKS.IsSequenceElement(t))
+        {
+            TreeViewItem tviSeqHeader = new() { Header = $"{t?.Label}->{t.LinkType?.Label}->{t?.To?.Label}" };
+            tviLinksHeader.Items.Add(tviSeqHeader);
+            tviSeqHeader.Expanded += EmptyChild_Expanded;
+            tviSeqHeader.SetValue(ThingObjectProperty, t.To);
+        }
 
         //add each of the links as a "child" of the "Links:" entry    
         IReadOnlyList<Thought> sortedLinks = t.LinksTo.OrderBy(x => x?.LinkType?.Label).ToList();
@@ -346,6 +356,13 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                     AddLinks(t, tvi, parentLabel);
                 if (reverseCB.IsChecked == true && t.LinksFrom.Count > 0)
                     AddLinksFrom(t, tvi, parentLabel);
+
+                //for seqnece expansion
+                ModuleUKS parent = (ModuleUKS)ParentModule;
+                if (parent.theUKS.IsSequenceElement(t.To))
+                {
+                    AddLinks(t.To, tvi, parentLabel);
+                }
             }
         }
     }
@@ -395,8 +412,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         menu.Items.Add(mi);
         mi = new();
         mi.Click += Mi_Click;
-        mi.Header = "Fetch GPT Info";
+        mi.Header = "Fire";
         menu.Items.Add(mi);
+        //mi = new();
+        //mi.Click += Mi_Click;
+        //mi.Header = "Fetch GPT Info";
+        //menu.Items.Add(mi);
         mi = new();
         mi.Header = "Parents:";
         if (t.Parents.Count == 0)
@@ -541,6 +562,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
                 case "Fetch GPT Info":
                     //the following is an async call so an immediate refresh is not useful
                     //ModuleGPTInfo.GetChatGPTData(t.Label);
+                    break;
+                case "Fire":
+                    t.Fire();
                     break;
                 case "Delete":
                     theUKS.DeleteAllChildren(t);
@@ -917,7 +941,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             ModuleUKS parent = (ModuleUKS)base.ParentModule;
             //get the root to save the contents of from the UKS dialog root
             string root = parent.GetSavedDlgAttribute("Root");
-            await Task.Run(() =>    parent.theUKS.ExportTextFile(root, path));
+            await Task.Run(() => parent.theUKS.ExportTextFile(root, path));
             SetStatus("Success");
         }
         catch (Exception ex)

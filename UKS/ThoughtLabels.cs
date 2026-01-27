@@ -23,6 +23,15 @@ public class ThoughtLabels
         { }  //breakpoint?
         return retVal;
     }
+    public static string RemoveTrailingDigits(string s)
+    {
+        int i = s.Length;
+        while (i > 0 && char.IsDigit(s[i - 1]))
+            i--;
+
+        return s[..i];
+    }
+
     public static string AddThingLabel(string newLabel, Thought t)
     {
         //sets a label and appends/increments trailing digits in the event of collisions
@@ -35,6 +44,7 @@ public class ThoughtLabels
         {
             curDigits = 0;
             baseString = newLabel.Substring(0, newLabel.Length - 1);
+            baseString = RemoveTrailingDigits(baseString);
             newLabel = baseString + curDigits;
         }
 

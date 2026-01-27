@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Reflection.Emit;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -26,9 +27,9 @@ public partial class UKS
                 {
                     foreach (Thought r in t.RecursiveLinks)
                     {
-                        if (r.Label == "R0")
+                        if (r.Label == "ti")
                         { }
-                        string s = r.ToString() + r.Weight.ToString("0.00");
+                        string s = FormatThought(r) + " "+ r.Weight.ToString("0.00");
                         if (!alreadyWritten.Contains(s))
                         {
                             writer.WriteLine(s);
@@ -42,7 +43,7 @@ public partial class UKS
                         {
                             if (t1 is Thought r1 && r1.LinkType is not null)
                             {
-                                s = r1.ToString() + r1.Weight.ToString("0.00");
+                                s = FormatThought(r1) + " " + r1.Weight.ToString("0.00");
                                 if (!alreadyWritten.Contains(s))
                                 {
                                     writer.WriteLine(s);
@@ -51,7 +52,7 @@ public partial class UKS
                             }
                             foreach (Thought r2 in t1.LinksTo.Where(x => x.LinkType.Label != "is-a"))
                             {
-                                s = r2.ToString() + r2.Weight.ToString("0.00");
+                                s = FormatThought(r2) + " " + r2.Weight.ToString("0.00");
                                 if (!alreadyWritten.Contains(s))
                                 {
                                     writer.WriteLine(s);
@@ -67,6 +68,42 @@ public partial class UKS
         catch(Exception ex)
         { }
     }
+
+    string FormatThought(Thought t)
+    {
+        if (t.Label == "tion-seq3")
+        { }
+        string retVal = t.Label;
+        if (t.V is not null)
+            retVal += " V: " + t.V.ToString();
+
+        if (t.From is null || t.LinkType is null)
+            return retVal;
+
+        if (t.LinkType?.Label == "NXT")
+        {
+            //var valuList = UKS.theUKS.FlattenSequence(this);
+            //retVal = string.Join("", valuList);
+            retVal = $"{t.Label}[{t.From.Label}->{t.LinkType.Label}->{t.To?.Label}]";
+            return retVal;
+        }
+        if (t.LinkType?.Label == "FRST" || t.LinkType.Label == "VLU")
+        {
+            retVal = $"{t.Label}[{t.From.Label}->{t.LinkType.Label}->{t.To?.Label}]";
+            return retVal;
+        }
+
+        retVal += "[";
+        if (t.From is not null)
+            retVal += t.From?.ToString();
+        if (t.LinkType is not null)
+            retVal += ((retVal == "") ? "" : "->") + t.LinkType?.ToString();
+        if (t.To is not null)
+            retVal += ((retVal == "") ? "" : "->") + ((t.To.Label == "")?t.To?.ToString():t.To.Label);
+        retVal += "]";
+        return retVal;
+    }
+
 
 
     public static Thought GetNonInstance(Thought source)
@@ -142,7 +179,7 @@ public partial class UKS
     // Adds a link, honoring numeric sugar (N → R.N + has-value + number typing)
     private Thought AddRelStmt(string label, List<string> ss, string sWeight)
     {
-        if (ss[1] == "IF")
+        if (label.Contains("-seq"))
         { }
         Thought r = null;
         if (ss.Count < 3) return null;
