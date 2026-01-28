@@ -32,7 +32,7 @@ public class ModuleSound : ModuleBase
     {
         Init();
 
-        if (lastNotePressed is not null && DateTime.Now > lastNotePressed + TimeSpan.FromMilliseconds(1500))
+        if (lastNotePressed is not null && DateTime.Now > lastNotePressed + TimeSpan.FromMilliseconds(2000))
         {
             if (tuneToSearch.Count > 1)
             {
@@ -44,17 +44,19 @@ public class ModuleSound : ModuleBase
             lastNotePressed = null;
         }
 
-        foreach (Thought phrase in ((Thought)"MusicalPhrase").Children)
-        {
-            if (phrase is not null && phrase.LastFiredTime >= lastFiredTime)
+        var muscialPhrase = ((Thought)"MusicalPhrase");
+        if (muscialPhrase is not null)
+            foreach (Thought phrase in muscialPhrase.Children)
             {
-                var seqStart = phrase;
-                if (!theUKS.IsSequenceElement(seqStart))
-                    seqStart = phrase.LinksTo.FindFirst(x => theUKS.IsSequenceElement(x.To))?.To;
+                if (phrase is not null && phrase.LastFiredTime >= lastFiredTime)
+                {
+                    var seqStart = phrase;
+                    if (!theUKS.IsSequenceElement(seqStart))
+                        seqStart = phrase.LinksTo.FindFirst(x => theUKS.IsSequenceElement(x.To))?.To;
 
-                enumerator = theUKS.EnumerateSequenceElements(seqStart).GetEnumerator();
+                    enumerator = theUKS.EnumerateSequenceElements(seqStart).GetEnumerator();
+                }
             }
-        }
 
         if (DateTime.Now > lastCadenceTime + TimeSpan.FromMilliseconds(Cadence) && enumerator is not null)
         {
@@ -118,16 +120,16 @@ public class ModuleSound : ModuleBase
 
         var s = theUKS.GetOrAddThing("soundAs", "Action");
 
-        theUKS.AddSequence(theUKS.GetOrAddThing("Triad", "MusicalPhrase"), s, new List<Thought> { "pitchC","+", "pitchE", "+", "pitchG", "+"});
+        theUKS.AddSequence(theUKS.GetOrAddThing("Triad", "MusicalPhrase"), s, new List<Thought> { "pitchC", "+", "pitchE", "+", "pitchG", "+" });
         theUKS.AddSequence(theUKS.GetOrAddThing("ThreeBlindMice", "MusicalPhrase"), s, new List<Thought> { "pitchE", "+", "+", "pitchD", "+", "+", "pitchC", "+", "+", "+", "+", "+" });
         theUKS.AddSequence(theUKS.GetOrAddThing("SeeHowTheyRun", "MusicalPhrase"), s, new List<Thought> { "pitchG", "+", "+", "pitchF", "+", "pitchF", "pitchE", "+", "+", "+", "+", "+" });
-        theUKS.AddSequence(theUKS.GetOrAddThing("TheyAllRanAfter", "MusicalPhrase"), s, 
-            new List<Thought> { "pitchG", "pitchC+", "+", "pitchC+", "pitchB", "pitchA", "pitchB","pitchC+", "+", "pitchG", "pitchG","+" });
+        theUKS.AddSequence(theUKS.GetOrAddThing("TheyAllRanAfter", "MusicalPhrase"), s,
+            new List<Thought> { "pitchG", "pitchC+", "+", "pitchC+", "pitchB", "pitchA", "pitchB", "pitchC+", "+", "pitchG", "pitchG", "+" });
         theUKS.AddSequence(theUKS.GetOrAddThing("TBL2", "MusicalPhrase"), s, new List<Thought> { "ThreeBlindMice-seq0", "ThreeBlindMice-seq0" });
         theUKS.AddSequence(theUKS.GetOrAddThing("SHTR2", "MusicalPhrase"), s, new List<Thought> { "SeeHowTheyRun-seq0", "SeeHowTheyRun-seq0" });
-        theUKS.AddSequence(theUKS.GetOrAddThing("TARA3", "MusicalPhrase"), s, new List<Thought> { "TheyAllRanafter-seq0", "TheyAllRanafter-seq0", "TheyAllRanafter-seq0"});
+        theUKS.AddSequence(theUKS.GetOrAddThing("TARA3", "MusicalPhrase"), s, new List<Thought> { "TheyAllRanafter-seq0", "TheyAllRanafter-seq0", "TheyAllRanafter-seq0" });
         theUKS.AddSequence(theUKS.GetOrAddThing("TBLSong", "MusicalPhrase"), s,
-            new List<Thought> { "TBL2-seq0", "SHTR2-seq0", "TARA3-seq0", "+","pitchF", "ThreeBlindMice-seq0" });
+            new List<Thought> { "TBL2-seq0", "SHTR2-seq0", "TARA3-seq0", "+", "pitchF", "ThreeBlindMice-seq0" });
 
 
     }
@@ -186,7 +188,4 @@ public class ModuleSound : ModuleBase
             Midi.Send(MidiMessage.StopNote(midiNote, 0, channel).RawData);
         });
     }
-
-    //Midi.Send(MidiMessage.StartNote(note, 100, 1).RawData);
-
 }

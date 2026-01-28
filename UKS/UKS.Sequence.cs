@@ -4,13 +4,13 @@ namespace UKS;
 
 public partial class UKS
 {
-    //The structure of a sequence is a series of Links of RelType "NXT" with a To of the next element in the sequence
-    //Each of these elements also has a link of RelType "VLU" to the actual Thought in the sequence
-    //the "owner" of the sequences had a link of RelType relType to the first element in the sequence
-    //the last element in the sequence has a link of RelType "NXT" with a To of njll
+    //The structure of a sequence is a series of Links of LinkType "NXT" with a To of the next element in the sequence
+    //Each of these elements also has a link of LinkType "VLU" to the actual Thought in the sequence
+    //the "owner" of the sequences had a link of LinkType relType to the first element in the sequence
+    //the last element in the sequence has a link of LinkType "NXT" with a To of null
     //Example, to represent the spelling of "CAT":
     // [cat -> spelled -> seq0]
-    // seq0 --NXT--> seq1 --NXT--> seq2 --NXT--> cnull
+    // seq0 --NXT--> seq1 --NXT--> seq2 --NXT--> null
     // seq0 --VLU--> C
     // seq1 --VLU--> A
     // seq2 --VLU--> T
@@ -168,10 +168,9 @@ public partial class UKS
             .Select(r => (seqNode: r.From, matchedCount: 1))
             .ToList();
         if (candidateNodes.Count == 0) return retVal;
-        //AddReferencingSequences(candidateNodes, null, null);
 
         //get/initialize enuerators for each candidate sequence
-        List<(Thought r, IEnumerator<Thought>? curPos, int matchCount)> searchCandidates = new();
+        List<(Thought seqNode, IEnumerator<Thought>? curPos, int matchCount)> searchCandidates = new();
         foreach (var candidate in candidateNodes)
         {
             var enumerator = EnumerateSequenceElements(candidate.seqNode).GetEnumerator();
@@ -187,48 +186,41 @@ public partial class UKS
 
             for (int j = 0; j < searchCandidates.Count; j++)
             {
-                (Thought seqNode, IEnumerator<Thought> curPos, int matchCount) tmp = searchCandidates[j];
-                //have we reached the end of the current subsequence?
-                if (!tmp.curPos.MoveNext())
+                Thought? nextThought = null;
+                do //skip over "+" placeholders
                 {
-                    var referrers = GetAllFollowingNodes(tmp.seqNode);
-                    foreach (var referrer in referrers)
-                        searchCandidates.Add(new(referrer, EnumerateSequenceElements(referrer).GetEnumerator(), tmp.matchCount));
-                }
+                    //have we reached the end of the current subsequence?
+                    if (!searchCandidates[j].curPos.MoveNext())
+                    {
+                        var referrers = GetAllFollowingNodes(searchCandidates[j].seqNode);
+                        foreach (var referrer in referrers)
+                        {
+                            var x = searchCandidates.FindFirst(x => x.seqNode == referrer);
+                            if (x.seqNode is null)
+                                searchCandidates.Add(new(referrer, EnumerateSequenceElements(referrer).GetEnumerator(), searchCandidates[j].matchCount));
+                        }
+                        break;
+                    }
+                    nextThought = searchCandidates[j].curPos.Current;
+                } while (nextThought.Label == "+");
                 // Check if the next thought matches the current target
-                Thought? nextThought = tmp.curPos.Current;
                 if (nextThought != currentTarget)
                 {
                     searchCandidates.RemoveAt(j);
                     j--; // Adjust index after removal
                 }
                 else
-                { 
-                    tmp.matchCount++;
-                    searchCandidates[j] = tmp;
+                {
+                    int temp = searchCandidates[j].matchCount;
+                    temp++;
+                    searchCandidates[j] = (searchCandidates[j].seqNode,searchCandidates[j].curPos, temp);
                 }
             }
-        }
-        List<Thought> GetAllFollowingNodes(Thought node)
-        {
-            List<Thought> retVal = new();
-            //if this is a subsequence, get the caller(s)
-            Thought startOfSequence = GetFirstElement(node);
-            List<Thought> referrers = startOfSequence.LinksFrom.Where(x => x.LinkType.Label == "VLU").ToList();
-            foreach (var referrer in referrers)
-            {
-                Thought nextLocation = referrer.From.To;
-                if (nextLocation is not null)
-                    retVal.Add(nextLocation);
-                else
-                    retVal.AddRange(GetAllFollowingNodes(referrer.From));
-            }
-            return retVal;
         }
 
         candidateNodes = new();
         foreach (var entry in searchCandidates)
-            candidateNodes.Add(new(entry.r, entry.matchCount));
+            candidateNodes.Add(new(entry.seqNode, entry.matchCount));
 
         // Step 3: Calculate confidence and find the Things that reference these sequences
         foreach (var candidate in candidateNodes)
@@ -295,6 +287,22 @@ public partial class UKS
             .OrderByDescending(x => x.confidence)
             .ToList();
 
+        return retVal;
+    }
+    List<Thought> GetAllFollowingNodes(Thought node)
+    {
+        List<Thought> retVal = new();
+        //if this is a subsequence, get the caller(s)
+        Thought startOfSequence = GetFirstElement(node);
+        List<Thought> referrers = startOfSequence.LinksFrom.Where(x => x.LinkType.Label == "VLU").ToList();
+        foreach (var referrer in referrers)
+        {
+            Thought nextLocation = referrer.From.To;
+            if (nextLocation is not null)
+                retVal.Add(nextLocation);
+            else
+                retVal.AddRange(GetAllFollowingNodes(referrer.From));
+        }
         return retVal;
     }
 

@@ -1,0 +1,1978 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfSCogneme xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <sCogneme>
+    <label>is-a</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>0</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>0</source>
+        <target>58</target>
+        <linkType>48</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>0</source>
+        <target>62</target>
+        <linkType>48</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>hasAttribute</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>1</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>BrainSim</label>
+    <links />
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>AvailableModule</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>3</source>
+        <target>2</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ActiveModule</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>4</source>
+        <target>2</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleUKS</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>5</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleUKS0</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>6</source>
+        <target>5</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>6</source>
+        <target>4</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>6</source>
+        <target>24</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>6</source>
+        <target>25</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>6</source>
+        <target>26</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleUKSStatement</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>7</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleUKSStatement0</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>8</source>
+        <target>7</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>8</source>
+        <target>4</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>8</source>
+        <target>27</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>8</source>
+        <target>28</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleAddCounts</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>9</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleAttributeBubble</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>10</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleBalanceTree</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>11</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleClassCreate</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>12</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleEmpty</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>13</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleGPTInfo</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>14</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleMine</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>15</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleOnlineInfo</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>16</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleRemoveRedundancy</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>17</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleShowGraph</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>18</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleStressTest</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>19</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleTextFile</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>20</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleUKSClause</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>21</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleUKSQuery</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>22</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>DlgAttrib</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>23</source>
+        <target>2</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>Open</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>24</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">True</V>
+  </sCogneme>
+  <sCogneme>
+    <label>DlgWindow</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>25</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">800x450.40000000000003+987.2+266.40000000000003</V>
+  </sCogneme>
+  <sCogneme>
+    <label>Root</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>26</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">Thought</V>
+  </sCogneme>
+  <sCogneme>
+    <label>Open0</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>27</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">True</V>
+  </sCogneme>
+  <sCogneme>
+    <label>DlgWindow0</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>28</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">530.4x300+401.6+182.4</V>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleUKSQuery0</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>29</source>
+        <target>22</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>29</source>
+        <target>4</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>29</source>
+        <target>30</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>29</source>
+        <target>31</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>Open1</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>30</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">True</V>
+  </sCogneme>
+  <sCogneme>
+    <label>DlgWindow1</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>31</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">530.4x550.4+412+489.6</V>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleSpell</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>32</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleSpell0</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>33</source>
+        <target>32</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>33</source>
+        <target>4</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>33</source>
+        <target>34</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>33</source>
+        <target>35</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>Open2</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>34</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">True</V>
+  </sCogneme>
+  <sCogneme>
+    <label>DlgWindow2</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>35</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">530.4x300+1017.6+728</V>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleSound</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>36</source>
+        <target>3</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ModuleSound0</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>37</source>
+        <target>36</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>37</source>
+        <target>4</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>37</source>
+        <target>38</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>37</source>
+        <target>39</target>
+        <linkType>1</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>Open3</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>38</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">True</V>
+  </sCogneme>
+  <sCogneme>
+    <label>DlgWindow3</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>39</source>
+        <target>23</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+    <V xsi:type="xsd:string">560x170.4+55.2+384.8</V>
+  </sCogneme>
+  <sCogneme>
+    <label>Thought</label>
+    <links />
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>has-child</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>41</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>41</source>
+        <target>0</target>
+        <linkType>47</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>LinkType</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>42</source>
+        <target>40</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>Object</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>43</source>
+        <target>40</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>Action</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>44</source>
+        <target>40</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>Link</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>45</source>
+        <target>40</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>Unknown</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>46</source>
+        <target>40</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>inverseOf</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>47</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>hasProperty</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>48</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>is</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>49</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>can</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>50</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>mostRecent</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>51</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>contains</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>52</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>52</source>
+        <target>53</target>
+        <linkType>47</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>is-part-of</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>53</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>has</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>54</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>54</source>
+        <target>58</target>
+        <linkType>48</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>54</source>
+        <target>62</target>
+        <linkType>48</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>not</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>55</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>55</source>
+        <target>65</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>Property</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>56</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>isExclusive</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>57</source>
+        <target>56</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>isTransitive</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>58</source>
+        <target>56</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>isInstance</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>59</source>
+        <target>56</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>isCommutative</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>60</source>
+        <target>56</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>allowMultiple</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>61</source>
+        <target>56</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>inheritable</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>62</source>
+        <target>56</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>isCondition</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>63</source>
+        <target>56</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>isResult</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>64</source>
+        <target>56</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ClauseType</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>65</source>
+        <target>42</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>IF</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>66</source>
+        <target>65</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>BECAUSE</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>67</source>
+        <target>65</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>AFTER</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>68</source>
+        <target>65</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>NXT</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>69</source>
+        <target>65</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>VLU</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>70</source>
+        <target>65</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>AND</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>71</source>
+        <target>65</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>OR</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>72</source>
+        <target>65</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>FRST</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>73</source>
+        <target>65</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>MusicalNote</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>74</source>
+        <target>40</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>mnC</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>75</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>mnD</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>76</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>mnE</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>77</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>mnF</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>78</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>mnG</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>79</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>mnA</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>80</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>mnB</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>81</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>mnC+</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>82</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>pitchC</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>83</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>pitchD</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>84</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>pitchE</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>85</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>pitchF</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>86</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>pitchG</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>87</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>pitchA</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>88</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>pitchB</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>89</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>pitchC+</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>90</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>+</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>91</source>
+        <target>74</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>soundAs</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>92</source>
+        <target>44</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>MusicalPhrase</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>93</source>
+        <target>46</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>Triad</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>94</source>
+        <target>93</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>94</source>
+        <target>-1</target>
+        <linkType>92</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>ThreeBlindMice</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>95</source>
+        <target>93</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>95</source>
+        <target>-1</target>
+        <linkType>92</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>SeeHowTheyRun</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>96</source>
+        <target>93</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>96</source>
+        <target>-1</target>
+        <linkType>92</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>TheyAllRanAfter</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>97</source>
+        <target>93</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>97</source>
+        <target>-1</target>
+        <linkType>92</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>TBL2</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>98</source>
+        <target>93</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>98</source>
+        <target>-1</target>
+        <linkType>92</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>SHTR2</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>99</source>
+        <target>93</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>99</source>
+        <target>-1</target>
+        <linkType>92</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>TARA3</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>100</source>
+        <target>93</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>100</source>
+        <target>-1</target>
+        <linkType>92</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+  <sCogneme>
+    <label>TBLSong</label>
+    <links>
+      <sCogneme>
+        <label />
+        <links />
+        <source>101</source>
+        <target>93</target>
+        <linkType>0</linkType>
+        <weight>1</weight>
+      </sCogneme>
+      <sCogneme>
+        <label />
+        <links />
+        <source>101</source>
+        <target>-1</target>
+        <linkType>92</linkType>
+        <weight>1</weight>
+      </sCogneme>
+    </links>
+    <source>-1</source>
+    <target>-1</target>
+    <linkType>-1</linkType>
+    <weight>0</weight>
+  </sCogneme>
+</ArrayOfSCogneme>
