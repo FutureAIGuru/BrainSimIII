@@ -17,7 +17,7 @@
         <StackPanel Orientation="Horizontal" Margin="10,57,-10,0" Height="23" VerticalAlignment="Top">
             <Label Content="Word:" VerticalAlignment="Center" Width="60"/>
             <TextBox x:Name="txtWord" Width="250" Margin="5,0" VerticalAlignment="Center" 
-                     KeyDown="txtWord_KeyDown"/>
+                     PreviewKeyDown="txtWord_PreviewKeyDown" TextChanged="txtWord_TextChanged"/>
             <Button x:Name="btnAdd" Content="Add" Click="btnAdd_Click" 
                     Padding="15,5" Margin="5,0"/>
         </StackPanel>

@@ -94,8 +94,45 @@ public partial class UKS
         //clear out any existing sequence links of this type
         source.RemoveLinks(relType);
 
+        //check for any existing sequences in the targets and incorporate them into the new sequence instead of the given targets
+        (Thought seqStart, int length) FindExistingSubsequence(int startIndex)
+        {
+            int remaining = targets.Count - startIndex;
+            for (int len = remaining; len >= 2; len--)
+            {
+                List<Thought> slice = targets.GetRange(startIndex, len);
+                var matches = HasSequence(slice, relType);
+                foreach (var match in matches)
+                {
+                    Thought seqStartNode = match.r?.To;
+                    if (seqStartNode is null || !IsSequenceElement(seqStartNode)) continue;
+                    if (match.confidence < 1.0f) continue;
+                    if (GetSequenceLength(seqStartNode) != len) continue; // exact-length match
+                    return (seqStartNode, len);
+                }
+            }
+            return (null, 0);
+        }
+
+        // Build a resolved target list that reuses any existing subsequences
+        List<Thought> resolvedTargets = new();
+        for (int i = 0; i < targets.Count;)
+        {
+            (Thought seqStart, int length) = FindExistingSubsequence(i);
+            if (seqStart is not null)
+            {
+                resolvedTargets.Add(seqStart);
+                i += length;
+                continue;
+            }
+
+            Thought candidate = targets[i];
+            Thought existingSeq = candidate?.LinksTo.FindFirst(x => x.LinkType == relType && IsSequenceElement(x.To))?.To;
+            resolvedTargets.Add(existingSeq ?? candidate);
+            i++;
+        }
         //does this target point to a LEAF or a subsequence?
-        Thought newTarget = targets[0];
+        Thought newTarget = resolvedTargets[0];
         Thought seqTarget = newTarget.LinksTo.FindFirst(x => x.LinkType == relType)?.To;
         if (IsSequenceElement(seqTarget))
             newTarget = seqTarget;
@@ -104,9 +141,9 @@ public partial class UKS
         source.AddLink(firstElement, relType);
         Thought prevElement = firstElement;
 
-        for (int i = 1; i < targets.Count; i++)
+        for (int i = 1; i < resolvedTargets.Count; i++)
         {
-            newTarget = targets[i];
+            newTarget = resolvedTargets[i];
             if (newTarget is null) continue;
             seqTarget = newTarget.LinksTo.FindFirst(x=>x.LinkType == relType)?.To;
             if (IsSequenceElement(seqTarget))
@@ -119,7 +156,7 @@ public partial class UKS
     }
 
     //TODO add concept of "near" Things
-    //TODO add option to require first and/or last entries to match
+    //TODO: make mustMatchLast, circularSearch & allowOutOfOrder work
     /// <summary>
     /// This determines how well two Things match in terms of the order of their ordered attributes.
     /// </summary>
@@ -128,7 +165,8 @@ public partial class UKS
     /// <param name="circularSearch">If true, circularizes the search of the candidate (for visuals)</param>
     /// <param name="firstLastPriority">If true, prioritizes matches with first and last elements matching</param>
     /// <returns>Confidence that the pattern exists in the candidate</returns>
-    public List<(Thought r, float confidence)> HasSequence(List<Thought> targets, Thought relType, bool circularSearch = false, bool firstLastPriority = false)
+    public List<(Thought r, float confidence)> HasSequence(List<Thought> targets, Thought relType, 
+        bool mustMatchFirst = false, bool mustMatchLast = false, bool circularSearch = false, bool allowOutOfOrder = false)
     {
         //this function searches the UKS for sequences matching the specified pattern in targets. 
 
@@ -167,6 +205,13 @@ public partial class UKS
             .Where(r => r.LinkType?.Label == "VLU")
             .Select(r => (seqNode: r.From, matchedCount: 1))
             .ToList();
+        if (mustMatchFirst && candidateNodes.Count > 0)
+        {
+            candidateNodes = candidateNodes
+                .Where(c => IsSequenceFirstElement(c.seqNode))
+                .ToList();
+        }
+
         if (candidateNodes.Count == 0) return retVal;
 
         //get/initialize enuerators for each candidate sequence
@@ -217,6 +262,17 @@ public partial class UKS
                 }
             }
         }
+        if (mustMatchLast)
+        {
+            for (int j = 0; j < searchCandidates.Count; j++)
+                if (searchCandidates[j].curPos.MoveNext())
+                {
+                    searchCandidates.RemoveAt(j);
+                    j--;
+                }
+
+        }
+
 
         candidateNodes = new();
         foreach (var entry in searchCandidates)
@@ -358,6 +414,9 @@ public partial class UKS
 
             if (IsSequenceElement(valueRel))
             {
+                //Fire the owner
+                var owner = valueRel?.LinksFrom.FindFirst(x => x.LinkType.Label != "VLU"&& x.LinkType.Label != "FRST")?.From;
+                owner?.Fire();
                 // Recursively enumerate the subsequence, passing the shared visitedSequences set
                 foreach (var subElement in EnumerateSequenceElements(valueRel, visitedSequences))
                 {

@@ -36,6 +36,22 @@ public class ModuleSpell : ModuleBase
         base.ShowDialog();
     }
 
+    public string GetWordSuggestion(string word)
+    {
+        List<Thought> letters = new List<Thought>();
+        foreach (char c in word.ToUpper())
+        {
+            string letterLabel = c.ToString();
+            Thought letter = theUKS.GetOrAddThing(letterLabel, "letter");
+            letters.Add(letter);
+        }
+        string retVal = word;
+        var suggestions = theUKS.HasSequence(letters,"spelled",true,true);
+        if (suggestions.Count > 0)
+            retVal = suggestions[0].r.From?.Label;
+        return retVal;
+    }
+
     public void AddWordSpelling(string word)
     {
         if (string.IsNullOrWhiteSpace(word)) return;
@@ -45,7 +61,7 @@ public class ModuleSpell : ModuleBase
         theUKS.GetOrAddThing("letter", "Object");
 
         // Get or create the word thing
-        Thought wordThing = theUKS.GetOrAddThing(word,"Word");
+        Thought wordThing = theUKS.GetOrAddThing(word, "Word");
 
         // Create list of letter cognemes
         List<Thought> letters = new List<Thought>();
@@ -83,7 +99,7 @@ public class ModuleSpell : ModuleBase
                     AddWordSpelling(word);
                     count++;
                 }
-            //    });
+                //    });
             }
         }
         catch (Exception ex)

@@ -131,7 +131,7 @@ public class ModuleSound : ModuleBase
         theUKS.AddSequence(theUKS.GetOrAddThing("TBLSong", "MusicalPhrase"), s,
             new List<Thought> { "TBL2-seq0", "SHTR2-seq0", "TARA3-seq0", "+", "pitchF", "ThreeBlindMice-seq0" });
 
-
+        lastFiredTime = DateTime.Now;
     }
 
 
