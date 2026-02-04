@@ -187,7 +187,7 @@ namespace BrainSimulator.Modules
                 if (sourceHash is not null)
                 {
                     //delete orphas
-                    Thought objectRoot = theUKS.GetOrAddThing("Object", "Thought");
+                    Thought objectRoot = theUKS.GetOrAddThought("Object", "Thought");
                     if (objectRoot is null) return;
                     for (int i = 0; i < objectRoot.Children.Count; i++)
                     {
@@ -197,7 +197,7 @@ namespace BrainSimulator.Modules
                         {
                             i--;
                             theUKS.DeleteAllChildren(child);
-                            theUKS.DeleteThing(child);
+                            theUKS.DeleteThought(child);
                         }
                     }
                     int counter = 0;
@@ -615,25 +615,25 @@ namespace BrainSimulator.Modules
             {
                 if (word.Item1 == "")
                 { continue; }
-                Thought existingThing = null;
+                Thought existingThought = null;
                 /* rewrite for new single-label concept
-                 * var existingThings = theUKS.Labeled(word.Item1);
-                                foreach (var t in existingThings)
+                 * var existingThoughts = theUKS.Labeled(word.Item1);
+                                foreach (var t in existingThoughts)
                                     if (t.HasAncestorLabeled("Words"))
                                     {
-                                        existingThing = t;
+                                        existingThought = t;
                                         break;
                                     }
                    */
                 string firstLetter = word.Item1.Substring(0, 1).ToUpper();
-                theUKS.GetOrAddThing("Words", "Object");
-                theUKS.GetOrAddThing(word.Item2, "Words");
-                Thought letterParent = theUKS.GetOrAddThing(firstLetter, word.Item2);
+                theUKS.GetOrAddThought("Words", "Object");
+                theUKS.GetOrAddThought(word.Item2, "Words");
+                Thought letterParent = theUKS.GetOrAddThought(firstLetter, word.Item2);
 
-                if (existingThing is null)
-                    existingThing = theUKS.GetOrAddThing(word.Item1, letterParent);
+                if (existingThought is null)
+                    existingThought = theUKS.GetOrAddThought(word.Item1, letterParent);
                 else
-                    existingThing.AddParent(letterParent);
+                    existingThought.AddParent(letterParent);
             }
         }
 
@@ -674,7 +674,7 @@ namespace BrainSimulator.Modules
                 {
                     Output = kid.ToString();
                     GetUKS();
-                    Thought incomingInfo = theUKS.GetOrAddThing("CurrentIncomingDefinition", "Attention");
+                    Thought incomingInfo = theUKS.GetOrAddThought("CurrentIncomingDefinition", "Attention");
                     incomingInfo.V = kid;
                     return;
                 }
@@ -741,7 +741,7 @@ namespace BrainSimulator.Modules
             }
             Output = kidsdef.ToString();
             GetUKS();
-            Thought incomingInfo = theUKS.GetOrAddThing("CurrentIncomingInfo", "Attention");
+            Thought incomingInfo = theUKS.GetOrAddThought("CurrentIncomingInfo", "Attention");
             incomingInfo.V = kidsdef;
 
             int index = 0;
@@ -972,10 +972,10 @@ namespace BrainSimulator.Modules
             string propertyURLResult = propertyURL.ToString();
             propertyDoc.LoadXml(propertyURLResult);
 
-            //Thought props = theUKS.GetOrAddThing("Properties", item);
+            //Thought props = theUKS.GetOrAddThought("Properties", item);
             if (propName != "")
             {
-                //Thought prop = theUKS.GetOrAddThing(propName, props);
+                //Thought prop = theUKS.GetOrAddThought(propName, props);
                 var propertyToCheck = propName;
 
                 var docPropertyValues = propertyDoc.GetElementsByTagName("result");
@@ -1027,7 +1027,7 @@ namespace BrainSimulator.Modules
                         {
                             Debug.WriteLine(text);
 
-                            //theUKS.GetOrAddThing(text, prop);
+                            //theUKS.GetOrAddThought(text, prop);
                             //AddObjectPropertyToMentalModel(name, text, prop.Label);
                             //TextBoxWiki.Text += text + '\n';
                         }
@@ -1049,12 +1049,12 @@ namespace BrainSimulator.Modules
                         Debug.WriteLine(xn.ChildNodes[i].InnerText + " :: ");
                         //if (i == 0)
                         //{
-                        //    prop = theUKS.GetOrAddThing(xn.ChildNodes[i].InnerText, props);
+                        //    prop = theUKS.GetOrAddThought(xn.ChildNodes[i].InnerText, props);
                         //}
                         //else
                         //{
                         //    fn[i] = (xn.ChildNodes[i].InnerText.ToString());
-                        //    theUKS.GetOrAddThing(xn.ChildNodes[i].InnerText, prop);
+                        //    theUKS.GetOrAddThought(xn.ChildNodes[i].InnerText, prop);
                         //}
                     }
 
@@ -1075,7 +1075,7 @@ namespace BrainSimulator.Modules
                         if (text is not null)
                         {
                             Debug.Print(text);
-                            //theUKS.GetOrAddThing(text, props);
+                            //theUKS.GetOrAddThought(text, props);
                             //AddObjectPropertyToMentalModel(name, text, props.Label);
                             //TextBoxWiki.Text += text + '\n';
                         }

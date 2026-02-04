@@ -812,7 +812,7 @@ namespace BrainSimulator
         /// Method to compute the centroid of a polygon. This does NOT work for a complex polygon.
         /// </summary>
         /// <param name="poly">points that define the polygon</param>
-        /// <returns>centroid point, or PointF.Empty if something wrong</returns>
+        /// <returns>centroid point, or PointF.Empty if somethought wrong</returns>
         public static Point GetCentroid(List<Point> poly)
         {
             double accumulatedArea = 0.0f;

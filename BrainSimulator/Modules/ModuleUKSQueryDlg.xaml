@@ -10,9 +10,9 @@
         <TabControl Background="DarkGray" SelectedIndex="1" Margin="0,36,0,35">
             <TabItem Header="Get Attribs" FontSize="18" Background="LightGray">
                 <Grid>
-                    <Label Content="Source"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
+                    <Label Content="From"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"       FontSize="16" Width="68" VerticalAlignment="Top"/>
                     <Label Content="Type"        HorizontalAlignment="Left"   Height="33"   Margin="10,70,0,0"    FontSize="16" Width="68" VerticalAlignment="Top"/>
-                    <Label Content="Target"      HorizontalAlignment="Left"   Height="33"   Margin="10,120,0,0"   FontSize="16" Width="68" VerticalAlignment="Top"/>
+                    <Label Content="To"      HorizontalAlignment="Left"   Height="33"   Margin="10,120,0,0"   FontSize="16" Width="68" VerticalAlignment="Top"/>
                     <Label Content="Filter"      HorizontalAlignment="Left"   Height="33"   Margin="10,170,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
                     <Label Content="Result"      HorizontalAlignment="Left"   Height="33"   Margin="10,280,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
 
@@ -29,7 +29,7 @@
             <TabItem Header="Search by Attribs" FontSize="18" Background="LightGray" >
                 <Grid>
                     <Label Content="Type"        HorizontalAlignment="Left"   Height="33"   Margin="10,20,0,0"    FontSize="16" Width="68" VerticalAlignment="Top"/>
-                    <Label Content="Target"      HorizontalAlignment="Left"   Height="33"   Margin="10,70,0,0"   FontSize="16" Width="68" VerticalAlignment="Top"/>
+                    <Label Content="To"      HorizontalAlignment="Left"   Height="33"   Margin="10,70,0,0"   FontSize="16" Width="68" VerticalAlignment="Top"/>
                     <Label Content="Ancestor"      HorizontalAlignment="Left"   Height="33"   Margin="10,120,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top" />
                     <Label Content="Query"      HorizontalAlignment="Left"   Height="33"   Margin="10,170,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>
                     <Label Content="Result"      HorizontalAlignment="Left"   Height="33"   Margin="15,336,0,0"   FontSize="16"  Width="68" VerticalAlignment="Top"/>

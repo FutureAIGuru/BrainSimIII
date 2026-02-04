@@ -34,12 +34,12 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
     private void BtnAddLink_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
-        string newThing = sourceText.Text;
-        string targetThing = targetText.Text;
+        string newThought = sourceText.Text;
+        string targetThought = targetText.Text;
         string relationType = linkText.Text;
 
         //Special case for [This,is-a,dog]
-        if (newThing.ToLower() == "this")
+        if (newThought.ToLower() == "this")
         {
             if (relationType.ToLower().Contains("called"))
             {
@@ -50,7 +50,7 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
                     return;
                 }
                 Thought mostRecentTarget = mostRecent.LinksTo.FindFirst(x => x.LinkType.Label == "is").To;
-                mostRecentTarget.Label = targetThing;
+                mostRecentTarget.Label = targetThought;
             }
             return;
         }
@@ -70,20 +70,20 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         }
         float confidence = (float)confidenceSlider.Value;
 
-        Thought r1 = UKSStatement.AddLink(newThing, targetThing, relationType);
+        Thought r1 = UKSStatement.AddLink(newThought, targetThought, relationType);
         if (r1 is not null && setConfCB.IsChecked == true)
         {
             r1.Weight = confidence;
             r1.TimeToLive = duration;
         }
 
-        CheckThingExistence(targetText);
-        CheckThingExistence(sourceText);
-        CheckThingExistence(linkText);
+        CheckThoughtExistence(targetText);
+        CheckThoughtExistence(sourceText);
+        CheckThoughtExistence(linkText);
     }
 
     // Check for thought existence and set background color of the textbox and the error message accordingly.
-    private bool CheckThingExistence(object sender)
+    private bool CheckThoughtExistence(object sender)
     {
         if (sender is TextBox tb)
         {
@@ -95,7 +95,7 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
                 SetStatus("Source and type cannot be empty");
                 return false;
             }
-            List<Thought> tl = ModuleUKSStatement.ThingListFromString(text);
+            List<Thought> tl = ModuleUKSStatement.ThoughtListFromString(text);
             if (tl is null || tl.Count == 0)
             {
                 tb.Background = new SolidColorBrush(Colors.LemonChiffon);
@@ -116,10 +116,10 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         Draw(false);
     }
 
-    // thingText_TextChanged is called when the thought textbox changes
+    // thoughtText_TextChanged is called when the thought textbox changes
     private void Text_TextChanged(object sender, TextChangedEventArgs e)
     {
-        CheckThingExistence(sender);
+        CheckThoughtExistence(sender);
     }
 
     // Check for parent existence and set background color of the textbox and the error message accordingly.

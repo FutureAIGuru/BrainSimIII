@@ -74,44 +74,44 @@ public class ModuleUKSStatement : ModuleBase
             tSource = theUKS.AddStatement(sourceParts[0], sourceParts[1], sourceParts[2]);
         if (tSource is null)
         {
-            tSource = theUKS.CreateThingFromMultipleAttributes(source, false);
+            tSource = theUKS.CreateThoughtFromMultipleAttributes(source, false);
         }
-        //figure out the RelType
-        Thought tRelType = theUKS.CreateThingFromMultipleAttributes(linkType, true);
+        //figure out the LinkType
+        Thought tLinkType = theUKS.CreateThoughtFromMultipleAttributes(linkType, true);
 
 
         //Figure out the target
         var targetParts = Singular(target.Split(" ", StringSplitOptions.RemoveEmptyEntries));
         Thought tTarget = null;
 
-        if (target.StartsWith("*"))
+        if (target.StartsWith("^"))
         {
             List<Thought> targets = new();
             targetParts = target[1..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
             foreach (string label in targetParts)
             {
-                Thought t = theUKS.GetOrAddThing(label);
+                Thought t = theUKS.GetOrAddThought(label);
                 targets.Add(t);
             }
-            Thought r1 = theUKS.AddSequence(tSource, tRelType, targets);
+            Thought r1 = theUKS.AddSequence(tSource, tLinkType, targets);
             return r1;
         }
  
         if (targetParts.Length == 3)
             tTarget = theUKS.AddStatement(targetParts[0], targetParts[1], targetParts[2]);
         if (tTarget is null)
-            tTarget = theUKS.CreateThingFromMultipleAttributes(target, false);
+            tTarget = theUKS.CreateThoughtFromMultipleAttributes(target, false);
         if (target == "" && linkType == "is-a")
         {
             if (target == "" && source != "")
-                theUKS.AddThing(source, null);
+                theUKS.AddThought(source, null);
             return null;
         }
 
         //Create the link
-        Thought r = theUKS.AddStatement(tSource, tRelType, tTarget);
+        Thought r = theUKS.AddStatement(tSource, tLinkType, tTarget);
 
-        if (tRelType.Label == "IF")  //this is a HACK which must be fixed later
+        if (tLinkType.Label == "IF")  //this is a HACK which must be fixed later
         {
             tSource.AddLink("isResult", "hasProperty");
             tTarget.AddLink("isCondition", "hasProperty");
@@ -130,19 +130,19 @@ public class ModuleUKSStatement : ModuleBase
         return s;
     }
 
-    public static List<Thought> ThingListFromString(string source)
+    public static List<Thought> ThoughtListFromString(string source)
     {
         List<Thought> retVal = new();
         IPluralize pluralizer = new Pluralizer();
         source = source.Trim();
         string[] tempStringArray = source.Split(' ');
-        //first, build a list of all the Things in the list
+        //first, build a list of all the Thoughts in the list
         for (int i = 0; i < tempStringArray.Length; i++)
         {
             if (tempStringArray[i] == "") continue;
             if (!char.IsUpper(tempStringArray[i][0]) && tempStringArray[i].Length > 2)
                 tempStringArray[i] = pluralizer.Singularize(tempStringArray[i]);
-            Thought t = ThoughtLabels.GetThing(tempStringArray[i]);
+            Thought t = ThoughtLabels.GetThought(tempStringArray[i]);
             if (t is null) return retVal;
             retVal.Add(t);
         }

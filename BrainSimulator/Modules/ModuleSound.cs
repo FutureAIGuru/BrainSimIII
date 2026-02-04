@@ -106,29 +106,29 @@ public class ModuleSound : ModuleBase
     public override void UKSInitializedNotification()
     {
         GetUKS();
-        theUKS.GetOrAddThing("MusicalPhrase");
-        theUKS.GetOrAddThing("MusicalNote", "MusicalPhrase");
-        theUKS.GetOrAddThing("pitchC", "MusicalNote");
-        theUKS.GetOrAddThing("pitchD", "MusicalNote");
-        theUKS.GetOrAddThing("pitchE", "MusicalNote");
-        theUKS.GetOrAddThing("pitchF", "MusicalNote");
-        theUKS.GetOrAddThing("pitchG", "MusicalNote");
-        theUKS.GetOrAddThing("pitchA", "MusicalNote");
-        theUKS.GetOrAddThing("pitchB", "MusicalNote");
-        theUKS.GetOrAddThing("pitchC+", "MusicalNote");
-        theUKS.GetOrAddThing("+", "MusicalNote");
+        theUKS.GetOrAddThought("MusicalPhrase");
+        theUKS.GetOrAddThought("MusicalNote", "MusicalPhrase");
+        theUKS.GetOrAddThought("pitchC", "MusicalNote");
+        theUKS.GetOrAddThought("pitchD", "MusicalNote");
+        theUKS.GetOrAddThought("pitchE", "MusicalNote");
+        theUKS.GetOrAddThought("pitchF", "MusicalNote");
+        theUKS.GetOrAddThought("pitchG", "MusicalNote");
+        theUKS.GetOrAddThought("pitchA", "MusicalNote");
+        theUKS.GetOrAddThought("pitchB", "MusicalNote");
+        theUKS.GetOrAddThought("pitchC+", "MusicalNote");
+        theUKS.GetOrAddThought("+", "MusicalNote");
 
-        var s = theUKS.GetOrAddThing("soundAs", "Action");
+        var s = theUKS.GetOrAddThought("soundAs", "Action");
 
-        theUKS.AddSequence(theUKS.GetOrAddThing("Triad", "MusicalPhrase"), s, new List<Thought> { "pitchC", "+", "pitchE", "+", "pitchG", "+" });
-        theUKS.AddSequence(theUKS.GetOrAddThing("ThreeBlindMice", "MusicalPhrase"), s, new List<Thought> { "pitchE", "+", "+", "pitchD", "+", "+", "pitchC", "+", "+", "+", "+", "+" });
-        theUKS.AddSequence(theUKS.GetOrAddThing("SeeHowTheyRun", "MusicalPhrase"), s, new List<Thought> { "pitchG", "+", "+", "pitchF", "+", "pitchF", "pitchE", "+", "+", "+", "+", "+" });
-        theUKS.AddSequence(theUKS.GetOrAddThing("TheyAllRanAfter", "MusicalPhrase"), s,
+        theUKS.AddSequence(theUKS.GetOrAddThought("Triad", "MusicalPhrase"), s, new List<Thought> { "pitchC", "+", "pitchE", "+", "pitchG", "+" });
+        theUKS.AddSequence(theUKS.GetOrAddThought("ThreeBlindMice", "MusicalPhrase"), s, new List<Thought> { "pitchE", "+", "+", "pitchD", "+", "+", "pitchC", "+", "+", "+", "+", "+" });
+        theUKS.AddSequence(theUKS.GetOrAddThought("SeeHowTheyRun", "MusicalPhrase"), s, new List<Thought> { "pitchG", "+", "+", "pitchF", "+", "pitchF", "pitchE", "+", "+", "+", "+", "+" });
+        theUKS.AddSequence(theUKS.GetOrAddThought("TheyAllRanAfter", "MusicalPhrase"), s,
             new List<Thought> { "pitchG", "pitchC+", "+", "pitchC+", "pitchB", "pitchA", "pitchB", "pitchC+", "+", "pitchG", "pitchG", "+" });
-        theUKS.AddSequence(theUKS.GetOrAddThing("TBL2", "MusicalPhrase"), s, new List<Thought> { "ThreeBlindMice-seq0", "ThreeBlindMice-seq0" });
-        theUKS.AddSequence(theUKS.GetOrAddThing("SHTR2", "MusicalPhrase"), s, new List<Thought> { "SeeHowTheyRun-seq0", "SeeHowTheyRun-seq0" });
-        theUKS.AddSequence(theUKS.GetOrAddThing("TARA3", "MusicalPhrase"), s, new List<Thought> { "TheyAllRanafter-seq0", "TheyAllRanafter-seq0", "TheyAllRanafter-seq0" });
-        theUKS.AddSequence(theUKS.GetOrAddThing("TBLSong", "MusicalPhrase"), s,
+        theUKS.AddSequence(theUKS.GetOrAddThought("TBL2", "MusicalPhrase"), s, new List<Thought> { "ThreeBlindMice-seq0", "ThreeBlindMice-seq0" });
+        theUKS.AddSequence(theUKS.GetOrAddThought("SHTR2", "MusicalPhrase"), s, new List<Thought> { "SeeHowTheyRun-seq0", "SeeHowTheyRun-seq0" });
+        theUKS.AddSequence(theUKS.GetOrAddThought("TARA3", "MusicalPhrase"), s, new List<Thought> { "TheyAllRanafter-seq0", "TheyAllRanafter-seq0", "TheyAllRanafter-seq0" });
+        theUKS.AddSequence(theUKS.GetOrAddThought("TBLSong", "MusicalPhrase"), s,
             new List<Thought> { "TBL2-seq0", "SHTR2-seq0", "TARA3-seq0", "+", "pitchF", "ThreeBlindMice-seq0" });
 
         lastFiredTime = DateTime.Now;

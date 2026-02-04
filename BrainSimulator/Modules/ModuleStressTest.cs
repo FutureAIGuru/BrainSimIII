@@ -65,7 +65,7 @@ namespace BrainSimulator.Modules
 
             //for (int i = 0; i < items.Count; i++)
             //{
-            //    MainWindow.theUKS.GetOrAddThing(items[i]);
+            //    MainWindow.theUKS.GetOrAddThought(items[i]);
             //    if (i % (items.Count / 10) == 0)
             //    {
             //        Debug.WriteLine($"{times * 10}% complete.");
@@ -80,13 +80,13 @@ namespace BrainSimulator.Modules
 
             for (int i = 0; i < maxOuter; i++)
             {
-                Thought parent = MainWindow.theUKS.GetOrAddThing("A" + i.ToString());
+                Thought parent = MainWindow.theUKS.GetOrAddThought("A" + i.ToString());
                 for (int j = 0; j < 100; j++)
                 {
-                    Thought parent0 = MainWindow.theUKS.GetOrAddThing("B" + i.ToString() + j.ToString(), parent);
+                    Thought parent0 = MainWindow.theUKS.GetOrAddThought("B" + i.ToString() + j.ToString(), parent);
                     for (int k = 0; k < 10; k++)
                     {
-                        Thought parent1 = MainWindow.theUKS.GetOrAddThing("C" + i.ToString() + j.ToString() + k.ToString(), parent0);
+                        Thought parent1 = MainWindow.theUKS.GetOrAddThought("C" + i.ToString() + j.ToString() + k.ToString(), parent0);
                     }
 
                 }

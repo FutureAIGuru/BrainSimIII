@@ -47,29 +47,29 @@ public class ModuleAttributeBubble : ModuleBase
         }).Start();
     }
 
-    public class RelDest
+    public class LinkDest
     {
-        public Thought relType;
+        public Thought linkType;
         public Thought target;
         public List<Thought> links = new();
-        public RelDest()
+        public LinkDest()
         { }
-        public RelDest(Thought r)
+        public LinkDest(Thought r)
         {
-            relType = r.LinkType;
+            linkType = r.LinkType;
             target = r.To;
             links.Add(r);
         }
         public override string ToString()
         {
-            return $"{relType.Label} -> {target.Label}  :  {links.Count}";
+            return $"{linkType.Label} -> {target.Label}  :  {links.Count}";
         }
     }
 
     public void DoTheWork()
     {
         debugString = "Bubbler Started\n";
-        foreach (Thought t in theUKS.AllThings)
+        foreach (Thought t in theUKS.AllThoughts)
         {
             if (t.Label == "Animal")
             { }
@@ -85,18 +85,18 @@ public class ModuleAttributeBubble : ModuleBase
         if (t.Label == "Unknown") return;
 
         //build a List of all the Links which this thought's children have
-        List<RelDest> itemCounts = new();
+        List<LinkDest> itemCounts = new();
         foreach (Thought t1 in t.ChildrenWithSubclasses)
         {
             foreach (Thought r in t1.LinksTo)
             {
                 if (r.LinkType == Thought.IsA) continue;
-                Thought useRelType = GetInstanceType(r.LinkType);
+                Thought useLinkType = GetInstanceType(r.LinkType);
 
-                RelDest foundItem = itemCounts.FindFirst(x => x.relType == useRelType && x.target == r.To);
+                LinkDest foundItem = itemCounts.FindFirst(x => x.linkType == useLinkType && x.target == r.To);
                 if (foundItem is null)
                 {
-                    foundItem = new RelDest { relType = useRelType, target = r.To };
+                    foundItem = new LinkDest { linkType = useLinkType, target = r.To };
                     itemCounts.Add(foundItem);
                 }
                 foundItem.links.Add(r);
@@ -109,11 +109,11 @@ public class ModuleAttributeBubble : ModuleBase
         //bubble the links
         for (int i = 0; i < sortedItems.Count; i++)
         {
-            RelDest rr = sortedItems[i];
-            if (excludeTypes.Contains(rr.relType.Label, comparer: StringComparer.OrdinalIgnoreCase)) continue;
+            LinkDest rr = sortedItems[i];
+            if (excludeTypes.Contains(rr.linkType.Label, comparer: StringComparer.OrdinalIgnoreCase)) continue;
 
             //find an existing link
-            Thought r = theUKS.GetLink(t, rr.relType, rr.target);
+            Thought r = theUKS.GetLink(t, rr.linkType, rr.target);
             float currentWeight = (r is not null) ? r.Weight : 0f;
 
             //We need 1) count for this Thought, 2) count for any conflicting, 3) count without a reference
@@ -175,20 +175,20 @@ public class ModuleAttributeBubble : ModuleBase
                     else
                     {
                         //bubble the property
-                        r = t.AddLink(rr.target, rr.relType);
+                        r = t.AddLink(rr.target, rr.linkType);
                         r.Weight = newWeight;
                         r.Fire();
                         debugString += $"Added  {r.ToString()}   {r.Weight.ToString(".0")} \n";
 
                         foreach (Thought t1 in t.Children)
                         {
-                            Thought rrr = t1.RemoveLink(rr.target, rr.relType);
+                            Thought rrr = t1.RemoveLink(rr.target, rr.linkType);
                             debugString += $"Removed {rrr.ToString()} \n";
                         }
                         //if there is a conflicting link, delete it
                         for (int j = 0; j < t.LinksTo.Count; j++)
                         {
-                            if (LinksConflict(new RelDest(r), new RelDest(t.LinksTo[j])))
+                            if (LinksConflict(new LinkDest(r), new LinkDest(t.LinksTo[j])))
                             {
                                 t.RemoveLink(t.LinksTo[j]);
                                 j--;
@@ -204,13 +204,13 @@ public class ModuleAttributeBubble : ModuleBase
     //If some links are exceptions, we can still bubble the 
     //Links are exceptions if they conflict AND numbers are one are small relative to the other.
     //a conflicting Thought is:
-    //  reltypes are the same AND targets are different but have a common parent w/ isexclusive (colors)
-    //  targets are the same AND relTypes are different and have attributes with acommon parent which has the IsExslucive property (counts) (have 3, have 4)
+    //  linktypes are the same AND targets are different but have a common parent w/ isexclusive (colors)
+    //  targets are the same AND linkTypes are different and have attributes with acommon parent which has the IsExslucive property (counts) (have 3, have 4)
     // Modified from UKS.CS line 181.  This does not includ AllowMultiples as these should not be bubbled
-    private bool LinksConflict(RelDest r1, RelDest r2)
+    private bool LinksConflict(LinkDest r1, LinkDest r2)
     {
-        if (r1.relType == r2.relType && r1.target == r2.target) return false;
-        if (r1.relType == r2.relType)
+        if (r1.linkType == r2.linkType && r1.target == r2.target) return false;
+        if (r1.linkType == r2.linkType)
         {
             var parents = FindCommonParents(r1.target, r2.target);
             foreach (var parent in parents)
@@ -223,8 +223,8 @@ public class ModuleAttributeBubble : ModuleBase
                 if (parent.HasProperty("isExclusive")) return true;
 
             //get the attributes of the links
-            IReadOnlyList<Thought> r1RelAttribs = r1.relType.GetAttributes();
-            IReadOnlyList<Thought> r2RelAttribs = r2.relType.GetAttributes();
+            IReadOnlyList<Thought> r1RelAttribs = r1.linkType.GetAttributes();
+            IReadOnlyList<Thought> r2RelAttribs = r2.linkType.GetAttributes();
 
             Thought r1Not = r1RelAttribs.FindFirst(x => x.Label == "not" || x.Label == "no");
             Thought r2Not = r2RelAttribs.FindFirst(x => x.Label == "not" || x.Label == "no");
@@ -243,7 +243,7 @@ public class ModuleAttributeBubble : ModuleBase
                             return true;
                     }
                 }
-            // handle special case where one reltype has is numberic and the other is not
+            // handle special case where one linktype has is numberic and the other is not
             bool hasNumber1 = (r1RelAttribs.FindFirst(x => x.HasAncestorLabeled("number")) is not null);
             bool hasNumber2 = (r2RelAttribs.FindFirst(x => x.HasAncestorLabeled("number")) is not null);
             if (hasNumber1 || hasNumber2) return true;
@@ -279,11 +279,11 @@ public class ModuleAttributeBubble : ModuleBase
             // Regular expression to check if the string ends with a sequence of digits
             return Regex.IsMatch(input, @"\d+$");
         }
-        Thought useRelType = t;
-        while (useRelType.Parents.Count > 0 && EndsInInteger(useRelType.Label) && 
-            !t.Label.Contains(".") && useRelType.Label.StartsWith(useRelType.Parents[0].Label))
-            useRelType = useRelType.Parents[0];
-        return useRelType;
+        Thought useLinkType = t;
+        while (useLinkType.Parents.Count > 0 && EndsInInteger(useLinkType.Label) && 
+            !t.Label.Contains(".") && useLinkType.Label.StartsWith(useLinkType.Parents[0].Label))
+            useLinkType = useLinkType.Parents[0];
+        return useLinkType;
     }
 
     // Fill this method in with code which will execute once

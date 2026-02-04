@@ -51,9 +51,9 @@ public class ModuleAddCounts : ModuleBase
     public void DoTheWork()
     {
         debugString = "Agent Started\n";
-        for (int i = 0; i < theUKS.AllThings.Count; i++)
+        for (int i = 0; i < theUKS.AllThoughts.Count; i++)
         {
-            Thought t = theUKS.AllThings[i];
+            Thought t = theUKS.AllThoughts[i];
             AddCountLinks(t);
         }
         debugString += "Agent  Finished\n";
@@ -66,19 +66,19 @@ public class ModuleAddCounts : ModuleBase
         {
             Thought r = t.LinksTo[j];
             if (r.LinkType == Thought.IsA) continue;
-            Thought useRelType = ModuleAttributeBubble.GetInstanceType(r.LinkType);
+            Thought useLinkType = ModuleAttributeBubble.GetInstanceType(r.LinkType);
 
             //get the counts of targets and/or their ancestors
-            List<Thought> targets = t.LinksTo.FindAll(x => ModuleAttributeBubble.GetInstanceType(x.LinkType) == useRelType).Select(x => x.To).ToList();
+            List<Thought> targets = t.LinksTo.FindAll(x => ModuleAttributeBubble.GetInstanceType(x.LinkType) == useLinkType).Select(x => x.To).ToList();
             List<(Thought tMatch, int bestCount)> bestMatches = GetAttributeCounts(targets);
             foreach (var match in bestMatches)
             {
-                Thought existingLink = theUKS.GetLink(r.From, useRelType.ToString() + "." + match.bestCount.ToString(), match.tMatch);
+                Thought existingLink = theUKS.GetLink(r.From, useLinkType.ToString() + "." + match.bestCount.ToString(), match.tMatch);
                 if (existingLink is null)
                 {
-                    string newRelLabel = useRelType.ToString() + "." + match.bestCount.ToString();
-                    Thought newRelType = theUKS.GetOrAddThing(newRelLabel, useRelType.Parents[0]);
-                    Thought rAdded = theUKS.AddStatement(r.From.Label, newRelType, match.tMatch);
+                    string newRelLabel = useLinkType.ToString() + "." + match.bestCount.ToString();
+                    Thought newLinkType = theUKS.GetOrAddThought(newRelLabel, useLinkType.Parents[0]);
+                    Thought rAdded = theUKS.AddStatement(r.From.Label, newLinkType, match.tMatch);
                     debugString += $"Added: {rAdded}\n";
                 }
             }

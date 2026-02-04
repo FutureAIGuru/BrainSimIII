@@ -48,7 +48,7 @@ public class ModuleRemoveRedundancy : ModuleBase
     public void DoTheWork()
     {
         debugString = "Agent Started\n";
-        foreach (Thought t in theUKS.AllThings)
+        foreach (Thought t in theUKS.AllThoughts)
         {
             RemoveRedundantAttributes(t);
         }

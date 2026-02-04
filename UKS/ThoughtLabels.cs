@@ -15,7 +15,7 @@ public class ThoughtLabels
 
     public static ConcurrentDictionary<string, Thought> LabelList { get => labelList;}
 
-    public static Thought GetThing(string label)
+    public static Thought GetThought(string label)
     {
         if (label is null || label == "") return null;
         Thought retVal = null;
@@ -32,7 +32,7 @@ public class ThoughtLabels
         return s[..i];
     }
 
-    public static string AddThingLabel(string newLabel, Thought t)
+    public static string AddThoughtLabel(string newLabel, Thought t)
     {
         //sets a label and appends/increments trailing digits in the event of collisions
         if (newLabel == "") return newLabel; //don't index empty lables
@@ -60,16 +60,16 @@ public class ThoughtLabels
     {
         labelList.Clear();
     }
-    public static List<Thought> AllThingsInLabelList()
+    public static List<Thought> AllThoughtsInLabelList()
     {
         List<Thought> retVal = new();
         foreach (Thought thought in labelList.Values) { retVal.Add(thought); }
         return retVal;
     }
-    public static void RemoveThingLabel(string existingLabel)
+    public static void RemoveThoughtLabel(string existingLabel)
     {
-        if (existingLabel == "") return;
-        labelList.Remove(existingLabel.ToLower(), out Thought oldThing);
+        if (string.IsNullOrEmpty(existingLabel)) return;
+        labelList.Remove(existingLabel.ToLower(), out Thought oldThought);
     }
 
 }

@@ -62,22 +62,22 @@ Follow has ONLY if called out in type
 
      */
 
-    public List<(Thought r, float confidence)> QueryUKS(string sourceIn, string relTypeIn, string targetIn,
-            string filter, out List<Thought> thingResult, out List<Thought> links)
+    public List<(Thought r, float confidence)> QueryUKS(string sourceIn, string linkTypeIn, string targetIn,
+            string filter, out List<Thought> thoughtResult, out List<Thought> links)
     {
-        thingResult = new();
+        thoughtResult = new();
         links = new();
         GetUKS();
         if (theUKS is null) return null;
         string source = sourceIn.Trim();
-        string relType = relTypeIn.Trim();
+        string linkType = linkTypeIn.Trim();
         string target = targetIn.Trim();
 
         bool reverse = false;
         //if (source == "" && target == "") return;
         int paramCount = 0;
         if (source != "") paramCount++;
-        if (relType != "") paramCount++;
+        if (linkType != "") paramCount++;
         if (target != "") paramCount++;
 
         if (source == "")
@@ -86,25 +86,25 @@ Follow has ONLY if called out in type
             reverse = true;
         }
 
-        List<Thought> sourceList = ModuleUKSStatement.ThingListFromString(source);
+        List<Thought> sourceList = ModuleUKSStatement.ThoughtListFromString(source);
         //if (sourceList.Count == 0) return;
-        List<Thought> relTypeList = ModuleUKSStatement.ThingListFromString(relType);
-        List<Thought> targetList = ModuleUKSStatement.ThingListFromString(target);
+        List<Thought> linkTypeList = ModuleUKSStatement.ThoughtListFromString(linkType);
+        List<Thought> targetList = ModuleUKSStatement.ThoughtListFromString(target);
 
 
         //Handle is-a queries as a special case
-        if (relType.Contains("is-a") && reverse ||
-            relType.Contains("has-child") && !reverse)
+        if (linkType.Contains("is-a") && reverse ||
+            linkType.Contains("has-child") && !reverse)
         {
             if (sourceList.Count > 0)
-                thingResult = sourceList[0].Children.ToList();
+                thoughtResult = sourceList[0].Children.ToList();
             return null;
         }
-        if (relType.Contains("is-a") && !reverse ||
-            relType.Contains("has-child") && reverse)
+        if (linkType.Contains("is-a") && !reverse ||
+            linkType.Contains("has-child") && reverse)
         {
             if (sourceList.Count > 0)
-                thingResult = sourceList[0].Ancestors.ToList();
+                thoughtResult = sourceList[0].Ancestors.ToList();
             return null;
         }
 
@@ -135,8 +135,8 @@ Follow has ONLY if called out in type
         }
 
         //handle compound link types
-        if (relTypeList.Count > 0)
-            relType = relTypeList[0].Label;
+        if (linkTypeList.Count > 0)
+            linkType = linkTypeList[0].Label;
 
         //filter the links
         for (int i = 0; i < links.Count; i++)
@@ -144,23 +144,23 @@ Follow has ONLY if called out in type
             Thought r = links[i];
             if (targetList.Count > 0 && target != "" && !r.To.HasAncestor(targetList[0]))
             { links.RemoveAt(i); i--; continue; }
-            if (r.LinkType is not null && relType != "" && !r.LinkType.HasAncestorLabeled(relType))
+            if (r.LinkType is not null && linkType != "" && !r.LinkType.HasAncestorLabeled(linkType))
             { links.RemoveAt(i); i--; continue; }
         }
 
         if (filter != "")
         {
-            List<Thought> filterThings = ModuleUKSStatement.ThingListFromString(filter);
-            links = theUKS.FilterResults(links, filterThings).ToList();
+            List<Thought> filterThoughts = ModuleUKSStatement.ThoughtListFromString(filter);
+            links = theUKS.FilterResults(links, filterThoughts).ToList();
         }
 
         //if (paramCount == 2)
         //{
         //    foreach (Thought r in links)
         //    {
-        //        if (sourceIn == "") thingResult.Add(r.source);
-        //        if (targetIn == "") thingResult.Add(r.target);
-        //        if (relTypeIn == "") thingResult.Add(r.relType);
+        //        if (sourceIn == "") thoughtResult.Add(r.source);
+        //        if (targetIn == "") thoughtResult.Add(r.target);
+        //        if (linkTypeIn == "") thoughtResult.Add(r.linkType);
         //    }
         //}
         return null;

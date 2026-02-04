@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="BrainSim3SplashScreen.jpg" />
+    <None Remove="refresh-3104.png" />
     <None Remove="Resources\charactergrowfont.png" />
     <None Remove="Resources\charactershrinkfont.png" />
     <None Remove="Resources\ClearHistory.png" />
@@ -98,6 +99,7 @@
     <None Remove="Resources\Record.png" />
     <None Remove="Resources\Recording %285%29.m4a" />
     <None Remove="Resources\RedCircle.png" />
+    <None Remove="Resources\refresh-3104.png" />
     <None Remove="Resources\Rewind.png" />
     <None Remove="Resources\ryanHexOutput_4.bin" />
     <None Remove="Resources\ryanHexOutput_5.bin" />
@@ -279,6 +281,7 @@
     <Resource Include="Resources\Play.png" />
     <Resource Include="Resources\Record.png" />
     <Resource Include="Resources\RedCircle.png" />
+    <Resource Include="Resources\refresh-3104.png" />
     <Resource Include="Resources\Rewind.png" />
     <Resource Include="Resources\Step.png" />
     <Resource Include="Resources\UserInterface\AudioClips\Awake.wav">

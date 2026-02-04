@@ -10,7 +10,7 @@ public partial class UKS
     List<Thought> succeededConditions = new();
 
     /// <summary>
-    /// Gets all links to a group of Things including inherited links
+    /// Gets all links to a group of Thoughts including inherited links
     /// </summary>
     /// <param name="sources"></param>
     /// <returns>List of matching links</returns>
@@ -42,7 +42,7 @@ public partial class UKS
     }
 
     //This is used to store temporary content during queries
-    private class ThingWithQueryParams
+    private class ThoughtWithQueryParams
     {
         public Thought thought;
         public int hopCount;
@@ -59,13 +59,13 @@ public partial class UKS
     }
 
     //this follows "inheritable" links...should it follow transitive too?
-    private List<ThingWithQueryParams> BuildSearchList(List<Thought> q)
+    private List<ThoughtWithQueryParams> BuildSearchList(List<Thought> q)
     {
-        List<ThingWithQueryParams> thingsToExamine = new();
+        List<ThoughtWithQueryParams> thoughtsToExamine = new();
         int maxHops = 8;
         int hopCount = 0;
         foreach (Thought t in q)
-            thingsToExamine.Add(new ThingWithQueryParams
+            thoughtsToExamine.Add(new ThoughtWithQueryParams
             {
                 thought = t,
                 hopCount = hopCount,
@@ -73,13 +73,13 @@ public partial class UKS
                 reachedWith = null
             });
         hopCount++;
-        int currentEnd = thingsToExamine.Count;
-        for (int i = 0; i < thingsToExamine.Count; i++)
+        int currentEnd = thoughtsToExamine.Count;
+        for (int i = 0; i < thoughtsToExamine.Count; i++)
         {
-            Thought t = thingsToExamine[i].thought;
-            float curWeight = thingsToExamine[i].weight;
-            int curCount = thingsToExamine[i].haveCount;
-            Thought reachedWith = thingsToExamine[i].reachedWith;
+            Thought t = thoughtsToExamine[i].thought;
+            float curWeight = thoughtsToExamine[i].weight;
+            int curCount = thoughtsToExamine[i].haveCount;
+            Thought reachedWith = thoughtsToExamine[i].reachedWith;
 
             foreach (Thought r in t.LinksTo)  //has-child et al
             {
@@ -89,31 +89,31 @@ public partial class UKS
                     //var existingLinks = GetLinksBetween(r.source, r.target);
                     //if (existingLinks.Count > 1) continue;
 
-                    if (thingsToExamine.FindFirst(x => x.thought == r.To) is ThingWithQueryParams twgp)
+                    if (thoughtsToExamine.FindFirst(x => x.thought == r.To) is ThoughtWithQueryParams twgp)
                         twgp.hitCount++;//thought is in the list, increment its count
                     else
                     {//thought is not in the list, add it
-                        bool corner = !ThingInTree(r.LinkType, thingsToExamine[i].reachedWith) &&
-                            thingsToExamine[i].reachedWith is not null;
+                        bool corner = !ThoughtInTree(r.LinkType, thoughtsToExamine[i].reachedWith) &&
+                            thoughtsToExamine[i].reachedWith is not null;
                         if (corner)
                         { } //TODO: corners are the reasons in a logic progression
-                        thingsToExamine[i].corner |= corner;
-                        ThingWithQueryParams thingToAdd = new ThingWithQueryParams
+                        thoughtsToExamine[i].corner |= corner;
+                        ThoughtWithQueryParams thoughtToAdd = new ThoughtWithQueryParams
                         {
                             thought = r.To,
                             hopCount = hopCount,
                             weight = curWeight * r.Weight,
                             reachedWith = r.LinkType,
                         };
-                        thingsToExamine.Add(thingToAdd);
-                        //JUST FOR FUN: if things have counts, the counts are multiplied...  2hands * 5 fingers/hand = 10 fingers
+                        thoughtsToExamine.Add(thoughtToAdd);
+                        //JUST FOR FUN: if thoughts have counts, the counts are multiplied...  2hands * 5 fingers/hand = 10 fingers
                         int val = GetCount(r.LinkType);
-                        thingToAdd.haveCount = curCount * val;
+                        thoughtToAdd.haveCount = curCount * val;
                     }
                 }
             }
         }
-        return thingsToExamine;
+        return thoughtsToExamine;
     }
     private List<Thought> GetLinksBetween(Thought t1, Thought t2)
     {
@@ -128,19 +128,19 @@ public partial class UKS
             if (r.To == t1) retVal.Add(r);
         return retVal;
     }
-    private List<Thought> GetAllLinksInternal(List<ThingWithQueryParams> thingsToExamine)
+    private List<Thought> GetAllLinksInternal(List<ThoughtWithQueryParams> thoughtsToExamine)
     {
         List<Thought> result = new();
-        for (int i = 0; i < thingsToExamine.Count; i++)
+        for (int i = 0; i < thoughtsToExamine.Count; i++)
         {
-            Thought t = thingsToExamine[i].thought;
+            Thought t = thoughtsToExamine[i].thought;
             if (t is null) continue; //safety
-            int haveCount = thingsToExamine[i].haveCount;
+            int haveCount = thoughtsToExamine[i].haveCount;
             foreach (Thought r in t.LinksTo)
             {
                 if (r.LinkType == Thought.IsA) continue;
                 //only add the new relatinoship to the list if it is not already in the list
-                bool ignoreSource = thingsToExamine[i].hopCount > 1;
+                bool ignoreSource = thoughtsToExamine[i].hopCount > 1;
                 Thought existing = result.FindFirst(x => LinksAreEqual(x, r, ignoreSource));
                 if (existing is not null) continue;
 
@@ -149,19 +149,19 @@ public partial class UKS
                     //this HACK creates a temporary link so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS
                     Thought r1 = new Thought(r);
-                    r1.Weight *= thingsToExamine[i].weight;
-                    Thought newCountType = GetOrAddThing((GetCount(r.LinkType) * haveCount).ToString(), "number");
+                    r1.Weight *= thoughtsToExamine[i].weight;
+                    Thought newCountType = GetOrAddThought((GetCount(r.LinkType) * haveCount).ToString(), "number");
 
                     //hack for numeric labels
-                    Thought rootThing = r1.LinkType;
+                    Thought rootThought = r1.LinkType;
                     if (r.LinkType.Label.Contains("."))
-                        rootThing = GetOrAddThing(r.LinkType.Label.Substring(0, r.LinkType.Label.IndexOf(".")));
+                        rootThought = GetOrAddThought(r.LinkType.Label.Substring(0, r.LinkType.Label.IndexOf(".")));
                     Thought bestMatch = r.LinkType;
                     List<Thought> missingAttributes = new();
-                    Thought newRelType = SubclassExists(rootThing, new List<Thought> { newCountType }, ref bestMatch, ref missingAttributes);
-                    if (newRelType is null)
-                        newRelType = CreateSubclass(rootThing, new List<Thought> { newCountType });
-                    r1.LinkType = newRelType;
+                    Thought newLinkType = SubclassExists(rootThought, new List<Thought> { newCountType }, ref bestMatch, ref missingAttributes);
+                    if (newLinkType is null)
+                        newLinkType = CreateSubclass(rootThought, new List<Thought> { newCountType });
+                    r1.LinkType = newLinkType;
                     result.Add(r1);
                 }
                 else
@@ -169,7 +169,7 @@ public partial class UKS
                     Thought r1 = new Thought(r);
                     foreach (Thought r3 in r.LinksTo.Where(x=>x.LinkType.Label != "is-a"))
                         r1.AddLink(r3.To, r3.LinkType);
-                    r1.Weight *= thingsToExamine[i].weight;
+                    r1.Weight *= thoughtsToExamine[i].weight;
                     result.Add(r1);
                 }
             }
@@ -324,26 +324,26 @@ public partial class UKS
     /// <returns></returns>
     public Thought GetNextClosestMatch(ref float confidence)
     {
-        Thought bestThing = null;
+        Thought bestThought = null;
         confidence = -1;
-        if (searchCandidates is null) return bestThing;
+        if (searchCandidates is null) return bestThought;
 
         //find the best match with a value LESS THAN the previous best
         foreach (var key in searchCandidates)
             if (key.Value > confidence)
             {
                 confidence = key.Value;
-                bestThing = key.Key;
+                bestThought = key.Key;
             }
 
         //remove the item from the dictionary
-        if (bestThing is not null)
-            searchCandidates.Remove(bestThing);
-        return bestThing;
+        if (bestThought is not null)
+            searchCandidates.Remove(bestThought);
+        return bestThought;
     }
 
     //this will be expanded to transitive...
-    private List<Thought> GetListOfSimilarThings(Thought t)
+    private List<Thought> GetListOfSimilarThoughts(Thought t)
     {
         List<Thought> retVal = new();
         foreach (Thought r in t.LinksTo)
@@ -367,7 +367,7 @@ public partial class UKS
         List<(Thought t, float conf)> retVal = new();
         if (target.LinksTo.Count == 0) return retVal;
         //initialize the search queues
-        List<Thought> thingsToSearch = new();
+        List<Thought> thoughtsToSearch = new();
         List<Thought> alreadySearched = new();
         searchCandidates = new();
 
@@ -377,10 +377,10 @@ public partial class UKS
             foreach (Thought r1 in r.To.LinksFrom)
             {
                 if (r1.From == target) continue;
-                var existing = thingsToSearch.FindFirst(x => x == r1.From);
+                var existing = thoughtsToSearch.FindFirst(x => x == r1.From);
                 if (r1.LinkType.HasAncestor(r.LinkType) && r1.To == r.To && existing is null)
                 {
-                    thingsToSearch.Add(r1.From);
+                    thoughtsToSearch.Add(r1.From);
                     if (!searchCandidates.ContainsKey(r1.From))
                         searchCandidates[r1.From] = 0; //initialize a new dictionary entry if needed
                     searchCandidates[r1.From] += r1.Weight * r.Weight;
@@ -392,10 +392,10 @@ public partial class UKS
             }
         }
         //fan out from these seeds following all "inheritable" reverse connections.
-        while (thingsToSearch.Count > 0)
+        while (thoughtsToSearch.Count > 0)
         {
-            var t = thingsToSearch[0];
-            thingsToSearch.RemoveAt(0);
+            var t = thoughtsToSearch[0];
+            thoughtsToSearch.RemoveAt(0);
             alreadySearched.Add(t);
             foreach (Thought r in t.LinksFrom)
             {
@@ -403,15 +403,15 @@ public partial class UKS
                 if (r.From == target) continue;
                 AddToQueues(t, r.From);
                 //TODO fix this to handle isSimilarTo  (and transitive...?)
-                //var similarThings = GetListOfSimilarThings(r.source);
-                //foreach (Thought t1 in similarThings)
+                //var similarThoughts = GetListOfSimilarThoughts(r.source);
+                //foreach (Thought t1 in similarThoughts)
                 //    AddToQueues(t, t1);
             }
         }
 
         foreach (var key in searchCandidates.ToList())
         {
-            if (!ThingsHaveConflictingLink(key.Key, target)) continue;
+            if (!ThoughtsHaveConflictingLink(key.Key, target)) continue;
             //searchCandidates.Remove(key.Key);
             searchCandidates[key.Key] = searchCandidates[key.Key] - .5f;
         }
@@ -451,8 +451,8 @@ public partial class UKS
                 searchCandidates[tNew] = 0; //initialize a new dictionary entry if needed
             searchCandidates[tNew] += searchCandidates[tPrev] * GetLinkWeight(tNew, tPrev);
             if (alreadySearched.FindFirst(x => x == tNew) is not null) return false;
-            if (thingsToSearch.FindFirst(x => x == tNew) is not null) return false;
-            thingsToSearch.Add(tNew);
+            if (thoughtsToSearch.FindFirst(x => x == tNew) is not null) return false;
+            thoughtsToSearch.Add(tNew);
             return true;
         }
     }
@@ -476,7 +476,7 @@ public partial class UKS
             if (r.To == t1) r.Weight = newWeight;
     }
 
-    public bool ThingsHaveConflictingLink(Thought source, Thought target)
+    public bool ThoughtsHaveConflictingLink(Thought source, Thought target)
     {
         foreach (Thought r1 in source.LinksTo)
             foreach (Thought r2 in target.LinksTo)
@@ -490,7 +490,7 @@ public partial class UKS
         if (FindCommonParents(r1.To, r2.To).Count == 0) return false;
         return true;
     }
-    public bool ThingsHaveSimilarLink(Thought source, Thought target)
+    public bool ThoughtsHaveSimilarLink(Thought source, Thought target)
     {
         foreach (Thought r1 in source.LinksTo)
             foreach (Thought r2 in target.LinksTo)

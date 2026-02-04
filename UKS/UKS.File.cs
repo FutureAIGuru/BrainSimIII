@@ -13,9 +13,9 @@ public partial class UKS
     public void CreateInitialStructure()
     {
         //this hack is needed to preserve the info relating to module layout
-        for (int i = 0; i < AllThings.Count; i++)
+        for (int i = 0; i < AllThoughts.Count; i++)
         {
-            Thought t = AllThings[i];
+            Thought t = AllThoughts[i];
             if (t.HasAncestorLabeled("BrainSim"))
                 continue;
             if (t.Label == "is-a") continue;
@@ -24,37 +24,37 @@ public partial class UKS
             if (t.Label == "hasAttribute") continue;
             if (t is not null)
             {
-                DeleteThing(t);
+                DeleteThought(t);
                 i--;
             }
         }
 
         ThoughtLabels.ClearLabelList();
-        foreach (Thought t in AllThings)
-            ThoughtLabels.AddThingLabel(t.Label, t);
+        foreach (Thought t in AllThoughts)
+            ThoughtLabels.AddThoughtLabel(t.Label, t);
 
         if (Labeled("Thought") is null)
-            AddThing("Thought", null);
+            AddThought("Thought", null);
         Thought isA = Labeled("is-a");
         if (isA is null)
-            isA = AddThing("is-a", null);
+            isA = AddThought("is-a", null);
         Thought hasChild = Labeled("has-child");
         if (hasChild is null)
-            hasChild = AddThing("has-child", null);
-        Thought relType = AddThing("LinkType", "Thought");
-        isA.AddParent(relType);
-        hasChild.AddParent(relType);
+            hasChild = AddThought("has-child", null);
+        Thought linkType = AddThought("LinkType", "Thought");
+        isA.AddParent(linkType);
+        hasChild.AddParent(linkType);
 
-        GetOrAddThing("Object", "Thought");
-        GetOrAddThing("Action", "Thought");
-        GetOrAddThing("Link", "Thought");
-        GetOrAddThing("LinkType", "Thought");
-        GetOrAddThing("Thought", "Thought");
-        GetOrAddThing("Unknown", "Thought");
-        GetOrAddThing("is-a", "LinkType");
-        GetOrAddThing("inverseOf", "LinkType");
-        GetOrAddThing("hasProperty", "LinkType");
-        GetOrAddThing("is", "LinkType");
+        GetOrAddThought("Object", "Thought");
+        GetOrAddThought("Action", "Thought");
+        GetOrAddThought("Link", "Thought");
+        GetOrAddThought("LinkType", "Thought");
+        GetOrAddThought("Thought", "Thought");
+        GetOrAddThought("Unknown", "Thought");
+        GetOrAddThought("is-a", "LinkType");
+        GetOrAddThought("inverseOf", "LinkType");
+        GetOrAddThought("hasProperty", "LinkType");
+        GetOrAddThought("is", "LinkType");
 
         AddStatement("has-child", "inverseOf", "is-a");
         AddStatement("hasAttribute", "is-a", "LinkType");
@@ -122,35 +122,35 @@ public partial class UKS
     public void SetupNumbers()
     {
         return;
-        GetOrAddThing("number", "Object");
+        GetOrAddThought("number", "Object");
         AddStatement("Comparison", "is-a", "LinkType");
         AddStatement("greaterThan", "is-a", "Comparison");
         AddStatement("greaterThan", "hasProperty", "isTransitive");
         AddStatement("lessThan", "inverseOf", "greaterThan");
         AddStatement("lessThan", "is-a", "Comparison");
         AddStatement("number", "hasProperty", "isExclusive");
-        GetOrAddThing("digit", "number");
-        GetOrAddThing("isSimilarTo", "Comparison");
+        GetOrAddThought("digit", "number");
+        GetOrAddThought("isSimilarTo", "Comparison");
         AddStatement("isSimilarTo", "hasProperty", "isCommutative");
         AddStatement("hasDigit", "is-a", "has");
 
 
         //put in digits
-        GetOrAddThing("-", "digit");
-        GetOrAddThing(".", "digit");
-        GetOrAddThing("0", "digit");
-        GetOrAddThing("2", "digit");
-        GetOrAddThing("1", "digit");
-        GetOrAddThing("3", "digit");
-        GetOrAddThing("4", "digit");
-        GetOrAddThing("5", "digit");
-        GetOrAddThing("6", "digit");
-        GetOrAddThing("7", "digit");
-        GetOrAddThing("8", "digit");
-        GetOrAddThing("9", "digit");
-        GetOrAddThing("some", "number");
-        GetOrAddThing("many", "number");
-        GetOrAddThing("none", "number");
+        GetOrAddThought("-", "digit");
+        GetOrAddThought(".", "digit");
+        GetOrAddThought("0", "digit");
+        GetOrAddThought("2", "digit");
+        GetOrAddThought("1", "digit");
+        GetOrAddThought("3", "digit");
+        GetOrAddThought("4", "digit");
+        GetOrAddThought("5", "digit");
+        GetOrAddThought("6", "digit");
+        GetOrAddThought("7", "digit");
+        GetOrAddThought("8", "digit");
+        GetOrAddThought("9", "digit");
+        GetOrAddThought("some", "number");
+        GetOrAddThought("many", "number");
+        GetOrAddThought("none", "number");
         for (int i = 9; i > 0; i--)
             AddStatement(i.ToString(), "greaterThan", (i - 1).ToString());
 
@@ -170,9 +170,9 @@ public partial class UKS
     void AddBrainSimConfigSectionIfNeeded()
     {
         if (Labeled("BrainSim") is not null) return;
-        AddThing("BrainSim", null);
-        GetOrAddThing("AvailableModule", "BrainSim");
-        GetOrAddThing("ActiveModule", "BrainSim");
+        AddThought("BrainSim", null);
+        GetOrAddThought("AvailableModule", "BrainSim");
+        GetOrAddThought("ActiveModule", "BrainSim");
     }
 
 
@@ -181,11 +181,11 @@ public partial class UKS
     /// </summary>
     /// 
     //this is a modification of Thought which is used to store and retrieve the KB in XML
-    //it eliminates circular references by replacing Thought references with int indexed into an array and makes things much more compact
-    public class sCogneme
+    //it eliminates circular references by replacing Thought references with int indexed into an array and makes thoughts much more compact
+    public class sThought
     {
         public string label = ""; //this is just for convenience in debugging and should not be used
-        public List<sCogneme> links = new();
+        public List<sThought> links = new();
         public int source = -1;
         public int target = -1;
         public int linkType = -1;
@@ -199,26 +199,34 @@ public partial class UKS
         UKSTemp.Clear();
 
         // TODO: Wipe transient data ...
-        foreach (Thought t in AllThings)
+        foreach (Thought t in AllThoughts)
         {
-            sCogneme st = new()
+            sThought st = new()
             {
                 label = t.Label,
-                source = AllThings.FindIndex(x => x == t.From),
-                linkType = AllThings.FindIndex(x => x == t.LinkType),
-                target = AllThings.FindIndex(x => x == t.To),
+                source = AllThoughts.FindIndex(x => x == t.From),
+                linkType = AllThoughts.FindIndex(x => x == t.LinkType),
+                target = AllThoughts.FindIndex(x => x == t.To),
                 V = t.V,
             };
-            foreach (Thought l in t.RecursiveLinks)
+            if (IsSequenceFirstElement(t))
             {
-                sCogneme sR = ConvertLink(l, new List<Thought>());
+                foreach (Thought l1 in t.SequenceNodes())
+                {
+                    sThought sR2 = ConvertLink(l1, new List<Thought>());
+                    st.links.Add(sR2);
+                }
+            }
+            foreach (Thought l in t.LinksTo)
+            {
+                sThought sR = ConvertLink(l, new List<Thought>());
                 st.links.Add(sR);
             }
             UKSTemp.Add(st);
         }
     }
 
-    private sCogneme ConvertLink(Thought l, List<Thought> stack)
+    private sThought ConvertLink(Thought l, List<Thought> stack)
     {
         if (l.LinkType.Label == "play")
         { }
@@ -226,18 +234,18 @@ public partial class UKS
         if (stack.Contains(l)) return null;
         stack.Add(l);
 
-        sCogneme sR = new sCogneme()
+        sThought sR = new sThought()
         {
             label = l.Label,
-            source = AllThings.FindIndex(x => x == l.From),
-            target = AllThings.FindIndex(x => x == l.To),
-            linkType = AllThings.FindIndex(x => x == l.LinkType),
+            source = AllThoughts.FindIndex(x => x == l.From),
+            target = AllThoughts.FindIndex(x => x == l.To),
+            linkType = AllThoughts.FindIndex(x => x == l.LinkType),
             weight = l.Weight,
         };
 
         foreach (Thought r1 in l.RecursiveLinks)
         {
-            sCogneme sr1 = ConvertLink(r1, stack);
+            sThought sr1 = ConvertLink(r1, stack);
             sR.links.Add(sr1);
         }
         stack.RemoveAt(stack.Count - 1);
@@ -247,7 +255,7 @@ public partial class UKS
     private void DeFormatAndMergeContentAfterLoading()
     {
         //get all the names and weights
-        foreach (sCogneme st in UKSTemp)
+        foreach (sThought st in UKSTemp)
         {
             Thought t = new()
             {
@@ -255,24 +263,24 @@ public partial class UKS
                 Weight = st.weight,
                 V = st.V,
             };
-            AllThings.Add(t);
+            AllThoughts.Add(t);
         }
-        foreach (sCogneme st in UKSTemp)
+        foreach (sThought st in UKSTemp)
         {
             Thought t = Labeled(st.label);
-            if (st.source != -1) t.From = AllThings[st.source];
-            if (st.linkType != -1) t.LinkType = AllThings[st.linkType];
-            if (st.target != -1) t.To = AllThings[st.target];
+            if (st.source != -1) t.From = AllThoughts[st.source];
+            if (st.linkType != -1) t.LinkType = AllThoughts[st.linkType];
+            if (st.target != -1) t.To = AllThoughts[st.target];
         }
-        foreach (sCogneme v in UKSTemp)
+        foreach (sThought v in UKSTemp)
         {
             AddLinksAsStatements(v);
         }
     }
 
-    private void AddLinksAsStatements(sCogneme v)
+    private void AddLinksAsStatements(sThought v)
     {
-        foreach (sCogneme p in v.links)
+        foreach (sThought p in v.links)
         {
             if (UKSTemp[p.linkType].label == "play")
             { }
@@ -280,15 +288,14 @@ public partial class UKS
             r.Label = p.label;
             AddLinksAsStatements(p);
         }
-
     }
 
     private void DeFormatContentAfterLoading()
     {
-        AllThings.Clear();
+        AllThoughts.Clear();
         ThoughtLabels.ClearLabelList();
-        //get all the things
-        foreach (sCogneme st in UKSTemp)
+        //get all the thoughts
+        foreach (sThought st in UKSTemp)
         {
             Thought t = new()
             {
@@ -296,16 +303,16 @@ public partial class UKS
                 V = st.V,
                 //useCount = st.useCount
             };
-            AllThings.Add(t);
+            AllThoughts.Add(t);
         }
         //handle links
         for (int i = 0; i < UKSTemp.Count; i++)
         {
-            sCogneme sT = UKSTemp[i];
+            sThought sT = UKSTemp[i];
             UnconvertLinks(sT);
         }
         //rebuild all the reverse linkages
-        foreach (Thought t in AllThings)
+        foreach (Thought t in AllThoughts)
         {
             foreach (Thought r in t.LinksTo)
             {
@@ -320,11 +327,11 @@ public partial class UKS
         }
     }
 
-    private void UnconvertLinks(sCogneme sT)
+    private void UnconvertLinks(sThought sT)
     {
-        foreach (sCogneme p in sT.links)
+        foreach (sThought p in sT.links)
         {
-            Thought r = UnConvertLink(p, new List<sCogneme>());
+            Thought r = UnConvertLink(p, new List<sThought>());
             if (r is null) continue;
             if (r.LinkType.Label == "play")
             { }
@@ -333,7 +340,7 @@ public partial class UKS
         }
     }
 
-    private Thought UnConvertLink(sCogneme p, List<sCogneme> stack)
+    private Thought UnConvertLink(sThought p, List<sThought> stack)
     {
         if (p is null) return null;
         if (stack.Contains(p)) return null;  //infinite recursions loop protection
@@ -341,15 +348,15 @@ public partial class UKS
 
         Thought source = null;
         if (p.source != -1)
-            source = AllThings[p.source];
+            source = AllThoughts[p.source];
         else
             return null;
         Thought linkType = null;
         if (p.linkType != -1)
-            linkType = AllThings[p.linkType];
+            linkType = AllThoughts[p.linkType];
         Thought target = null;
         if (p.target != -1)
-            target = AllThings[p.target];
+            target = AllThoughts[p.target];
         Thought r = Labeled(p.label);
         if (r is not null)
         {
@@ -372,7 +379,7 @@ public partial class UKS
         if (r?.LinksWriteable.Contains(r) is null)
             r.From?.LinksWriteable.Add(r);
 
-        foreach (sCogneme st in p.links)
+        foreach (sThought st in p.links)
         {
             var r1 = UnConvertLink(st, stack);
             if (r?.LinksWriteable.Contains(r1) is null)
@@ -399,7 +406,7 @@ public partial class UKS
     }
     void MergeStringListIntoUKS(List<String> contentToRestore)
     {
-        AddThing("BrainSim", null);
+        AddThought("BrainSim", null);
         foreach (string s in contentToRestore)
         {
             string[] strings = s.Split("->");
@@ -530,7 +537,7 @@ public partial class UKS
         XmlSerializer reader1 = new XmlSerializer(UKSTemp.GetType(), extraTypes.ToArray());
         try
         {
-            UKSTemp = (List<sCogneme>)reader1.Deserialize(file);
+            UKSTemp = (List<sThought>)reader1.Deserialize(file);
         }
         catch (Exception e)
         {
@@ -568,7 +575,7 @@ public partial class UKS
         }
 
         //more hacks for compatibility old file formatting
-        //this does nothing on updated file content
+        //this does nothought on updated file content
         AddStatement("inheritable", "is-a", "Property");
         Thought hasChild = Labeled("has-child");
         if (hasChild is not null)

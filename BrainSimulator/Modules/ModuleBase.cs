@@ -24,7 +24,6 @@ abstract public class ModuleBase
     public Point dlgPos;
     public Point dlgSize;
     public bool dlgIsOpen = false;
-    protected bool allowMultipleDialogs = false;
 
     //public static ModuleUKS UKS = null;
     public UKS.UKS theUKS = null;
@@ -133,12 +132,8 @@ abstract public class ModuleBase
         }
         if (t1 is null) return;
         //if (dlg is not null) dlg.Close();
-        if (!allowMultipleDialogs && dlg is not null) dlg.Close();
-        if (allowMultipleDialogs && dlg is not null)
-        {
-            dlgPos.X += 10;
-            dlgPos.Y += 10;
-        }
+        if (dlg is not null) dlg.Close();
+
         dlg = (ModuleBaseDlg)Activator.CreateInstance(t1);
         if (dlg is null) return;
         dlg.ParentModule = (ModuleBase)this;
@@ -212,7 +207,7 @@ abstract public class ModuleBase
             {
                 if (attribValue is null)
                 {
-                    theUKS.DeleteThing(r.To);
+                    theUKS.DeleteThought(r.To);
                     return;
                 }
                 r.To.V = attribValue;
@@ -220,9 +215,9 @@ abstract public class ModuleBase
             }
         }
         if (attribName is null) return;
-        Thought dlgAttribParent = theUKS.GetOrAddThing("DlgAttrib", "BrainSim");
-        Thought dlgInfo = theUKS.AddThing(attribName, dlgAttribParent);
-        Thought hasAttribute = theUKS.GetOrAddThing("hasAttribute", "LinkType");
+        Thought dlgAttribParent = theUKS.GetOrAddThought("DlgAttrib", "BrainSim");
+        Thought dlgInfo = theUKS.AddThought(attribName, dlgAttribParent);
+        Thought hasAttribute = theUKS.GetOrAddThought("hasAttribute", "LinkType");
         thisDlg.AddLink(dlgInfo,hasAttribute);
         dlgInfo.V = attribValue;
         dlgInfo.Fire();
@@ -235,7 +230,7 @@ abstract public class ModuleBase
     {
         string infoString = "";
         if (dlg is not null)
-            infoString = dlg.Width + "x" + dlg.Height + "+" + dlg.Left + "+" + dlg.Top;
+            infoString = dlg.Width.ToString("F0") + "x" + dlg.Height.ToString("F0") + "+" + dlg.Left.ToString("F0") + "+" + dlg.Top.ToString("F0");
         SetSavedDlgAttribute("DlgWindow", infoString);
 
     }
@@ -248,8 +243,7 @@ abstract public class ModuleBase
 
     private void Dlg_LocationChanged(object sender, EventArgs e)
     {
-        dlgPos = new Point()
-        { Y = dlg.Top, X = dlg.Left };
+        dlgPos = new Point() { Y = dlg.Top, X = dlg.Left };
         SetDlgWindow();
     }
 

@@ -167,7 +167,7 @@ namespace BrainSimulator
                 if (cc is ComboBox cb && cb.SelectedValue is not null)
                 {
                     theModuleTypeStr = "Module" + (string)cb.SelectedValue;
-                    if (theModuleTypeStr == "") return;//something went wrong
+                    if (theModuleTypeStr == "") return;//somethought went wrong
                     label = (string)cb.SelectedValue;
                 }
 
@@ -279,7 +279,7 @@ namespace BrainSimulator
             mb.CloseDlg();
             mb.Closing();
             activeModules.Remove(mb);
-            theUKS.DeleteThing(theUKS.Labeled(mb.Label));
+            theUKS.DeleteThought(theUKS.Labeled(mb.Label));
 
             ReloadActiveModulesSP();
         }

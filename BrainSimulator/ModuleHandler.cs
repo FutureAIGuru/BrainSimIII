@@ -33,7 +33,7 @@ public class ModuleHandler
 
     public string ActivateModule(string moduleType)
     {
-        Thought t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
+        Thought t = theUKS.GetOrAddThought(moduleType, "AvailableModule");
         t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleType));
         t.AddParent(theUKS.Labeled("ActiveModule"));
 
@@ -43,6 +43,7 @@ public class ModuleHandler
             BrainSimulator.Modules.ModuleBase newModule = MainWindow.theWindow.CreateNewModule(moduleType);
             newModule.Label = t.Label;
             MainWindow.theWindow.activeModules.Add(newModule);
+            newModule.OpenDlg();
         }
         else
 #endif
@@ -59,9 +60,9 @@ public class ModuleHandler
         for (int i = 0; i < t.LinksTo.Count; i++)
         {
             Thought r = t.LinksTo[i];
-            theUKS.DeleteThing(r.To);
+            theUKS.DeleteThought(r.To);
         }
-        theUKS.DeleteThing(t);
+        theUKS.DeleteThought(t);
 
         return;
     }
@@ -222,9 +223,9 @@ public class ModuleHandler
     {
         theUKS = new UKS.UKS();
         if (theUKS.Labeled("BrainSim") is null)
-            theUKS.AddThing("BrainSim", null);
-        theUKS.GetOrAddThing("AvailableModule", "BrainSim");
-        theUKS.GetOrAddThing("ActiveModule", "BrainSim");
+            theUKS.AddThought("BrainSim", null);
+        theUKS.GetOrAddThought("AvailableModule", "BrainSim");
+        theUKS.GetOrAddThought("ActiveModule", "BrainSim");
 
         InsertMandatoryModules();
     }

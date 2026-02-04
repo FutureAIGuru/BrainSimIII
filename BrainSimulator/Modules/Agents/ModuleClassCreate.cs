@@ -53,9 +53,9 @@ public class ModuleClassCreate : ModuleBase
     public void DoTheWork()
     {
         debugString = "Agent Started\n";
-        for (int i = 0; i < theUKS.AllThings.Count; i++)
+        for (int i = 0; i < theUKS.AllThoughts.Count; i++)
         {
-            Thought t = theUKS.AllThings[i];
+            Thought t = theUKS.AllThoughts[i];
             if (t.HasAncestor("Object") && !t.Label.Contains(".") && !t.Label.Contains("unknown"))
             {
                 HandleClassWithCommonAttributes(t);
@@ -69,31 +69,31 @@ public class ModuleClassCreate : ModuleBase
     {
         //build a List of counts of the attributes
         //build a List of all the Links which this thought's children have
-        List<RelDest> attributes = new();
+        List<LinkDest> attributes = new();
         foreach (Thought t1 in t.ChildrenWithSubclasses)
         {
             foreach (Thought r in t1.LinksTo)
             {
                 if (r.LinkType == Thought.IsA) continue;
-                Thought useRelType = GetInstanceType(r.LinkType);
+                Thought useLinkType = GetInstanceType(r.LinkType);
 
-                RelDest foundItem = attributes.FindFirst(x => x.relType == useRelType && x.target == r.To);
+                LinkDest foundItem = attributes.FindFirst(x => x.linkType == useLinkType && x.target == r.To);
                 if (foundItem is null)
                 {
-                    foundItem = new RelDest { relType = useRelType, target = r.To };
+                    foundItem = new LinkDest { linkType = useLinkType, target = r.To };
                     attributes.Add(foundItem);
                 }
                 if (foundItem.links.FindFirst(x=>x.From == r.From && x.To == r.To) is null)
                     foundItem.links.Add(r);
             }
         }
-        //create intermediate parent Things
+        //create intermediate parent Thoughts
         foreach (var key in attributes)
         {
             if (key.links.Count >= minCommonAttributes)
             {
-                Thought newParent = theUKS.GetOrAddThing(t.Label + "." + key.relType + "." + key.target, t);
-                newParent.AddLink(key.target, key.relType);
+                Thought newParent = theUKS.GetOrAddThought(t.Label + "." + key.linkType + "." + key.target, t);
+                newParent.AddLink(key.target, key.linkType);
                 debugString += "Created new subclass " + newParent;
                 foreach (Thought r in key.links)
                 {

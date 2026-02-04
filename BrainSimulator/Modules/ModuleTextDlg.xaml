@@ -1,0 +1,33 @@
+<local:ModuleBaseDlg x:Class="BrainSimulator.Modules.ModuleTextDlg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BrainSimulator.Modules"
+        mc:Ignorable="d"
+        Title="Text Import" Height="260" Width="560" Background="Gray" ShowInTaskbar="False" >
+
+    <Grid>
+        <TextBox x:Name="tbPhrase" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" 
+                 TextWrapping="Wrap" Margin="78,62,0,0" HorizontalAlignment="Left" Width="283" Height="24" VerticalAlignment="Top" />
+
+        <Button x:Name="btnIngest"
+                    Content="Ingest"
+                    Click="BtnIngest_Click" Margin="387,62,0,0" Height="24" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left" />
+
+        <!-- File Loading Section -->
+        <Label Content="Enter Phrase" FontWeight="Bold" Margin="10,0,0,0" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left" Width="135"/>
+        <Label Content="Load from File" FontWeight="Bold" Margin="0,124,0,0" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left" Width="135"/>
+
+        <Label Content="Phrase:" VerticalAlignment="Top" Width="60" Margin="31,61,469,0"/>
+        <Label Content="File:" VerticalAlignment="Top" Width="60" Margin="16,167,454,0"/>
+        <TextBox x:Name="txtFilePath" Height="24" Margin="81,169,0,0" IsReadOnly="True" 
+               VerticalAlignment="Top" Background="#F0F0F0" HorizontalAlignment="Left" Width="250"/>
+        <Button x:Name="btnBrowse" Content="Browse..." Click="btnBrowse_Click" Width="75" Height="24"
+              Margin="361,169,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Button x:Name="btnLoad" Content="Load" Click="btnLoad_Click"  Width="75" Height="24"
+              Margin="441,169,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Button x:Name="btnTrigram" Content="Trigrams" Click="btnTrigram_Click"  Width="75" Height="24"
+              Margin="441,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+    </Grid>
+</local:ModuleBaseDlg>

@@ -164,11 +164,11 @@ namespace BrainSimulator
 
         public void CreateEmptyUKS()
         {
-            theUKS.AllThings.Clear();
+            theUKS.AllThoughts.Clear();
             theUKS = new UKS.UKS();
-            theUKS.AddThing("BrainSim", null);
-            theUKS.GetOrAddThing("AvailableModule", "BrainSim");
-            theUKS.GetOrAddThing("ActiveModule", "BrainSim");
+            theUKS.AddThought("BrainSim", null);
+            theUKS.GetOrAddThought("AvailableModule", "BrainSim");
+            theUKS.GetOrAddThought("ActiveModule", "BrainSim");
 
             InsertMandatoryModules();
             InitializeActiveModules();
@@ -176,9 +176,9 @@ namespace BrainSimulator
 
         public void UpdateModuleListsInUKS()
         {
-            theUKS.GetOrAddThing("BrainSim", null);
-            theUKS.GetOrAddThing("AvailableModule", "BrainSim");
-            theUKS.GetOrAddThing("ActiveModule", "BrainSim");
+            theUKS.GetOrAddThought("BrainSim", null);
+            theUKS.GetOrAddThought("AvailableModule", "BrainSim");
+            theUKS.GetOrAddThought("ActiveModule", "BrainSim");
             var availableListInUKS = theUKS.Labeled("AvailableModule").Children;
 
             //add any missing modules
@@ -189,14 +189,14 @@ namespace BrainSimulator
                 //name = name.Replace("Module", "");
                 Thought availableModule = availableListInUKS.FindFirst(x => x.Label == name);
                 if (availableModule is null)
-                    theUKS.GetOrAddThing(name, "AvailableModule");
+                    theUKS.GetOrAddThought(name, "AvailableModule");
             }
             var PythonModules = moduleHandler.GetListOfExistingPythonModuleTypes();
             foreach (var name in PythonModules)
             {
                 Thought availableModule = availableListInUKS.FindFirst(x => x.Label == name);
                 if (availableModule is null)
-                    theUKS.GetOrAddThing(name, "AvailableModule");
+                    theUKS.GetOrAddThought(name, "AvailableModule");
             }
             //delete any non-existant modules
             availableListInUKS = theUKS.Labeled("AvailableModule").Children;
@@ -206,7 +206,7 @@ namespace BrainSimulator
                 if (CSharpModules.FindFirst(x=>x.Name == name) is not null) continue;
                 if (PythonModules.FindFirst(x => x == name) is not null) continue;
                 theUKS.DeleteAllChildren(t);
-                theUKS.DeleteThing(t);
+                theUKS.DeleteThought(t);
             }
 
             //reconnect/delete any active modules
@@ -217,7 +217,7 @@ namespace BrainSimulator
                 if (parent is not null)
                     t.AddParent(parent);
                 else
-                    theUKS.DeleteThing(t);
+                    theUKS.DeleteThought(t);
             }
         }
 
@@ -231,7 +231,7 @@ namespace BrainSimulator
 
         public string ActivateModule(string moduleType)
         {
-            Thought t = theUKS.GetOrAddThing(moduleType, "AvailableModule");
+            Thought t = theUKS.GetOrAddThought(moduleType, "AvailableModule");
             t = theUKS.CreateInstanceOf(theUKS.Labeled(moduleType));
             t.AddParent(theUKS.Labeled("ActiveModule"));
 
@@ -241,6 +241,7 @@ namespace BrainSimulator
                 if (newModule is null) return "";
                 newModule.Label = t.Label;
                 activeModules.Add(newModule);
+                newModule.OpenDlg();
             }
             else
             {
@@ -326,7 +327,7 @@ namespace BrainSimulator
             foreach (var moduleType in moduleTypes)
             {
                 string moduleName = moduleType.Name;
-                Thought t = theUKS.GetOrAddThing(moduleName, "AvailableModule");
+                Thought t = theUKS.GetOrAddThought(moduleName, "AvailableModule");
                 //TODO: delete the following
                 t.AddParent("AvailableModule");
             }
@@ -334,7 +335,7 @@ namespace BrainSimulator
             var pythonModules = moduleHandler.GetListOfExistingPythonModuleTypes();
             foreach (var moduleType in pythonModules)
             {
-                theUKS.GetOrAddThing(moduleType, "AvailableModule");
+                theUKS.GetOrAddThought(moduleType, "AvailableModule");
             }
 
             ModuleListComboBox.Items.Clear();

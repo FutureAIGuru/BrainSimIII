@@ -56,9 +56,9 @@ public class ModuleBalanceTree : ModuleBase
     public void DoTheWork()
     {
         debugString = "Agent Started\n";
-        for (int i = 0; i < theUKS.AllThings.Count; i++)
+        for (int i = 0; i < theUKS.AllThoughts.Count; i++)
         {
-            Thought t = theUKS.AllThings[i];
+            Thought t = theUKS.AllThoughts[i];
             if (t.HasAncestor("Object") && !t.Label.Contains("."))
             {
                 HandleExcessiveChildren(t);
@@ -71,7 +71,7 @@ public class ModuleBalanceTree : ModuleBase
     {
         while (t.Children.Count > MaxChildren)
         {
-            Thought newParent = theUKS.AddThing(t.Label, t);
+            Thought newParent = theUKS.AddThought(t.Label, t);
             debugString += $"Created new class:  {newParent.Label} \n";
             while (newParent.Children.Count < MaxChildren)
             {

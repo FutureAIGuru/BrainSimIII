@@ -42,7 +42,7 @@ namespace BrainSimulator.Modules
         public override bool Draw(bool checkDrawTimer)
         {
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
-            StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("Unknown")?.Children.Count} unknown Things.  ";
+            StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("Unknown")?.Children.Count} unknown Thoughts.  ";
             return base.Draw(checkDrawTimer);
         }
 
@@ -55,7 +55,7 @@ namespace BrainSimulator.Modules
         {
             txtOutput.Text = theText;
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
-            StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("Unknown")?.Children.Count} unknown Things.  ";
+            StatusLabel.Content = $"{GPT.totalTokensUsed} tokens used.  {mf.theUKS.Labeled("Unknown")?.Children.Count} unknown Thoughts.  ";
         }
 
         private async void LoadButton_Click(object sender, RoutedEventArgs e)
@@ -255,12 +255,12 @@ namespace BrainSimulator.Modules
             count = 0;
             ModuleGPTInfo mf = (ModuleGPTInfo)base.ParentModule;
             SetOutputText("Verifying all is-a links");
-            foreach (Thought t in mf.theUKS.AllThings)
+            foreach (Thought t in mf.theUKS.AllThoughts)
             {
                 if (t.Parents.FindFirst(x => x.Label == "Unknown") is not null) continue;
                 if (!t.Label.StartsWith('.')) continue;
                 if (t.Label == ".") continue;
-                if (t == mf.theUKS.AllThings.Last())
+                if (t == mf.theUKS.AllThoughts.Last())
                     await VerifyAsync(t.Label);
                 else
                     VerifyAsync(t.Label);
@@ -363,10 +363,10 @@ namespace BrainSimulator.Modules
                 else //process unknowns
                 {
                     List<string> words = new List<string>();
-                    var thingList = mf.theUKS.Labeled("Unknown").Children;
+                    var thoughtList = mf.theUKS.Labeled("Unknown").Children;
 
-                    SetOutputText($"Getting parents for {thingList.Count} Things");
-                    foreach (var thought in thingList)
+                    SetOutputText($"Getting parents for {thoughtList.Count} Thoughts");
+                    foreach (var thought in thoughtList)
                     {
                         if (words.Count >= wordMax) break;
                         words.Add(thought.Label);

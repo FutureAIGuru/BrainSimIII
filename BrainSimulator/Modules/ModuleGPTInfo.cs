@@ -58,8 +58,8 @@ namespace BrainSimulator.Modules
         public static async Task GetChatGPTVerifyParentChild(string child,string parent)
         {
             //these turns dotted names back into more english-language strings
-            string child1 = GetStringFromThingLabel(child);
-            string parent1 = GetStringFromThingLabel(parent);
+            string child1 = GetStringFromThoughtLabel(child);
+            string parent1 = GetStringFromThoughtLabel(parent);
 
             try
             {
@@ -109,9 +109,9 @@ namespace BrainSimulator.Modules
         }
 
         //this turns dotted names back into more english-language strings
-        private static string GetStringFromThingLabel(string thingLabel)
+        private static string GetStringFromThoughtLabel(string thoughtLabel)
         {
-            string theString = thingLabel.ToLower();
+            string theString = thoughtLabel.ToLower();
             if (theString[0] == '.') theString = theString.Substring(1);
             string[] s = theString.Split('.');
             theString = "";
@@ -182,7 +182,7 @@ usually contains parts (with counts)
 has unique characteristics,
 is-part-of-speech, ";
                 //the following have been tried but are not very consistent/useful
-                //$"list examples of {textIn} (up to 5) do not include things which have a property of {textIn} , " +
+                //$"list examples of {textIn} (up to 5) do not include thoughts which have a property of {textIn} , " +
                 //"needs, " +
                 //"is-part-of, " +
                 //"is-bigger-than, " +
@@ -270,7 +270,7 @@ is-part-of-speech, ";
                     string userText = $"Provide commonsense unambiguous item(s) to answer the request about the following: {textIn}";
                     string systemText =
                         @"Provide answers that are common sense to a 10 year old. 
-                    Format: Item, UnambiguousThing1 | Item, UnambiguousThing2 | <More Here>
+                    Format: Item, UnambiguousThought1 | Item, UnambiguousThought2 | <More Here>
                     Example 1: can, action | can, container
                     Example 2: bow, gesture | bow, weapon | bow, knot
                     Example 3: oxygen, chemical
@@ -311,7 +311,7 @@ is-part-of-speech, ";
                 string userText = $"Provide commonsense unambiguous parent(s) to answer the request about the following: {textIn}";
                 string systemText =
                         @"Provide answers that are common sense to a 10 year old. 
-                    Format: Item, UnambiguousThing1 | Item, UnambiguousThing2 | <More Here>
+                    Format: Item, UnambiguousThought1 | Item, UnambiguousThought2 | <More Here>
                     Example 1: can, action | can, container
                     Example 2: bow, gesture | bow, weapon | bow, knot
                     Example 3: oxygen, chemical
@@ -421,23 +421,23 @@ is-part-of-speech, ";
                 textIn = GPT.Singularize(textIn);
 
                 // Setting up the values from GPT
-                string newThing = valuePairs[0].Trim();
-                string relationType = valuePairs[1].Trim();
-                string targetThing = valuePairs[2].Trim();
+                string newThought = valuePairs[0].Trim();
+                string linkThought = valuePairs[1].Trim();
+                string toThought = valuePairs[2].Trim();
 
                 // Hard code clase to IF...
                 // Or to valuePairs[3].Trim() otherwise
                 string clauseType = "IF";
 
-                string newThing2 = valuePairs[4].Trim();
+                string newThought2 = valuePairs[4].Trim();
                 string relationType2 = valuePairs[5].Trim();
-                string targetThing2 = valuePairs[6].Trim();
+                string targetThought2 = valuePairs[6].Trim();
 
 
                 // Add links and clause
-                Thought r1 = AddLinkClause(newThing, targetThing, relationType);
+                Thought r1 = AddLinkClause(newThought, toThought, linkThought);
 
-                Thought r2 = AddLinkClause(newThing2, targetThing2, relationType2);
+                Thought r2 = AddLinkClause(newThought2, targetThought2, relationType2);
 
                 Thought theClauseType = GetClauseType(clauseType);
 
@@ -482,12 +482,12 @@ is-part-of-speech, ";
 
         // Get clause type.
         // NOTES: Copied directly from ModuleUKSClause like AddLinkClause, looking for a fix.
-        public static Thought GetClauseType(string newThing)
+        public static Thought GetClauseType(string newThought)
         {
             UKS.UKS theUKS = MainWindow.theUKS;
             if (theUKS is null) return null;
 
-            return theUKS.GetOrAddThing(newThing, "ClauseType");
+            return theUKS.GetOrAddThought(newThought, "ClauseType");
         }
 
         //given general information output from GPT, parse it into UKS
@@ -616,9 +616,8 @@ is-part-of-speech, ";
                             theUKS.AddStatement("." + textIn, valueType, "." + value);
                             ModuleGPTInfoDlg.linkCount += 1;
                         }
-                        ///////   null reltypes? This was a safety check
                         ///
-                        foreach (Thought t in theUKS.AllThings)
+                        foreach (Thought t in theUKS.AllThoughts)
                             foreach (Thought r in t.LinksTo)
                                 if (r.LinkType is null)
                                 {
@@ -634,9 +633,9 @@ is-part-of-speech, ";
         {
             // Get the UKS.
             UKS.UKS theUKS = MainWindow.theUKS;
-            List<Thought> thingsToRemove = new List<Thought>();
+            List<Thought> thoughtsToRemove = new List<Thought>();
             // Get all the children of Word and remove duplicates.
-            foreach (Thought word in theUKS.GetOrAddThing("Word").Children)
+            foreach (Thought word in theUKS.GetOrAddThought("Word").Children)
             {
                 // Find unique parents to remove duplicates
                 List<Thought> uniqueParents = new List<Thought>();
@@ -653,7 +652,7 @@ is-part-of-speech, ";
                         // If the parent already exists, remove it.
                         if (uniqueParents.Contains(parent))
                         {
-                            thingsToRemove.Add(meaning.To);
+                            thoughtsToRemove.Add(meaning.To);
                         }
                         // Else if the parent does not exist, add it.
                         else
@@ -665,10 +664,10 @@ is-part-of-speech, ";
 
             }
 
-            // Remove the duplicate things at the end.
-            foreach (Thought t in thingsToRemove)
+            // Remove the duplicate thoughts at the end.
+            foreach (Thought t in thoughtsToRemove)
             {
-                theUKS.DeleteThing(t);
+                theUKS.DeleteThought(t);
                 ModuleGPTInfoDlg.linkCount++;
             }
 

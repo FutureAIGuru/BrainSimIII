@@ -8,9 +8,9 @@ using UKS;
 
 namespace BrainSimulator.Modules;
 
-public partial class ModuleSpellDlg : ModuleBaseDlg
+public partial class ModuleWordDlg : ModuleBaseDlg
 {
-    public ModuleSpellDlg()
+    public ModuleWordDlg()
     {
         InitializeComponent();
     }
@@ -52,11 +52,11 @@ public partial class ModuleSpellDlg : ModuleBaseDlg
         if (!string.IsNullOrEmpty(searchText))
         {
             //get the first suggestion
-            var module = ParentModule as ModuleSpell;
+            var module = ParentModule as ModuleWord;
             if (module is null) return;
             string suggestion = module.GetWordSuggestion(txtWord.Text);
             //get the real label to get the capitalization right
-            if (suggestion is not null) suggestion = ThoughtLabels.GetThing(suggestion)?.Label;
+            if (suggestion is not null) suggestion = ThoughtLabels.GetThought(suggestion)?.Label;
 
             if (suggestion is not null && !suggestion.Equals(searchText, StringComparison.OrdinalIgnoreCase))
             {
@@ -84,10 +84,10 @@ public partial class ModuleSpellDlg : ModuleBaseDlg
             return;
         }
 
-        var module = ParentModule as ModuleSpell;
+        var module = ParentModule as ModuleWord;
         if (module != null)
         {
-            module.AddWordSpelling(word);
+            ModuleWord.AddWordSpelling(word);
             SetStatus($"Spelling added: {word}", Colors.Black);
             txtWord.Clear();
             txtWord.Focus();
@@ -129,7 +129,7 @@ public partial class ModuleSpellDlg : ModuleBaseDlg
             return;
         }
 
-        var module = ParentModule as ModuleSpell;
+        var module = ParentModule as ModuleWord;
         if (module != null)
         {
             SetStatus("Loading words...");

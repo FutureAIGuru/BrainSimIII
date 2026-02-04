@@ -31,8 +31,8 @@ public partial class ModuleUKSClauseDlg : ModuleBaseDlg
     // BtnAddLink_Click is called the AddLink button is clicked
     private void BtnAddLink_Click(object sender, RoutedEventArgs e)
     {
-        string newThing = sourceText.Text;
-        string targetThing = targetText.Text;
+        string newThought = sourceText.Text;
+        string targetThought = targetText.Text;
         string relationType = linkText.Text;
         string clauseLabel = clauseTypeText.Text.ToUpper(); ;
 
@@ -40,17 +40,17 @@ public partial class ModuleUKSClauseDlg : ModuleBaseDlg
 
         ModuleUKSClause UKSClause = (ModuleUKSClause)ParentModule;
 
-        Thought source = UKSClause.theUKS.CreateThingFromMultipleAttributes(newThing,false);
-        Thought target = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetThing,false);
-        Thought relType = UKSClause.theUKS.CreateThingFromMultipleAttributes(relationType, true);
-        Thought clauseType = UKSClause.theUKS.CreateThingFromMultipleAttributes(clauseLabel, false);
+        Thought source = UKSClause.theUKS.CreateThoughtFromMultipleAttributes(newThought,false);
+        Thought target = UKSClause.theUKS.CreateThoughtFromMultipleAttributes(targetThought,false);
+        Thought linkType = UKSClause.theUKS.CreateThoughtFromMultipleAttributes(relationType, true);
+        Thought clauseType = UKSClause.theUKS.CreateThoughtFromMultipleAttributes(clauseLabel, false);
 
         Thought r1 = null;
         if (rBase is not null)
         {
             if (GetInstanceRoot(rBase.From) != source ||
                 GetInstanceRoot(rBase.To) != target ||
-                GetInstanceRoot(rBase.LinkType) != relType)
+                GetInstanceRoot(rBase.LinkType) != linkType)
                 rBase = null;
             if (rBase is not null && !rBase.From.LinksTo.Contains(rBase))
                 rBase = null;
@@ -58,15 +58,15 @@ public partial class ModuleUKSClauseDlg : ModuleBaseDlg
                 r1 = rBase;
         }
         if (r1 is null) //enable appending clause to existing Links
-            r1 = UKSClause.theUKS.AddStatement (source,relType,target);
+            r1 = UKSClause.theUKS.AddStatement (source,linkType,target);
 
-        Thought theClauseType = UKSClause.theUKS.GetOrAddThing(clauseLabel,"ClauseType");
+        Thought theClauseType = UKSClause.theUKS.GetOrAddThought(clauseLabel,"ClauseType");
 
-        Thought source2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(sourceText2.Text, false);
-        Thought relType2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(linkText2.Text, true);
-        Thought target2 = UKSClause.theUKS.CreateThingFromMultipleAttributes(targetText2.Text, false);
+        Thought source2 = UKSClause.theUKS.CreateThoughtFromMultipleAttributes(sourceText2.Text, false);
+        Thought linkType2 = UKSClause.theUKS.CreateThoughtFromMultipleAttributes(linkText2.Text, true);
+        Thought target2 = UKSClause.theUKS.CreateThoughtFromMultipleAttributes(targetText2.Text, false);
 
-        Thought rClause = UKSClause.theUKS.AddStatement(source2, relType2, target2);
+        Thought rClause = UKSClause.theUKS.AddStatement(source2, linkType2, target2);
 
         Thought rAdded = UKSClause.theUKS.AddStatement(r1, theClauseType, rClause);
 
@@ -85,27 +85,27 @@ public partial class ModuleUKSClauseDlg : ModuleBaseDlg
 DependencyProperty.Register("Thought", typeof(Thought), typeof(ComboBoxItem));
 
 
-    // thingText_TextChanged is called when the thought textbox changes
+    // thoughtText_TextChanged is called when the thought textbox changes
     private void Text_TextChanged(object sender, TextChangedEventArgs e)
     {
-        Thought sourceThing = CheckThingExistence(sender);
+        Thought sourceThought = CheckThoughtExistence(sender);
         if (sender is TextBox source && source.Name == "sourceText")
         {
-            SetUpRelComboBox(sourceThing);
+            SetUpRelComboBox(sourceThought);
         }
     }
 
-    private void SetUpRelComboBox(Thought sourceThing,Thought rSelected = null)
+    private void SetUpRelComboBox(Thought sourceThought,Thought rSelected = null)
     {
         SourceDisambiguation.Items.Clear();
         SourceDisambiguation.Items.Add("<new>");
         SourceDisambiguation.SelectedIndex = 0;
         rBase = null;
-        if (sourceThing is not null)
+        if (sourceThought is not null)
         {
-            foreach (Thought t in sourceThing.Descendents)
+            foreach (Thought t in sourceThought.Descendents)
             {
-                if (t != sourceThing && !t.HasProperty("isInstance")) continue;
+                if (t != sourceThought && !t.HasProperty("isInstance")) continue;
                 foreach (Thought r in t.LinksTo)
                 {
                     if (r.LinkType.Label == "has-child") continue;
@@ -151,7 +151,7 @@ DependencyProperty.Register("Thought", typeof(Thought), typeof(ComboBoxItem));
     }
 
     //copied from UKSStatementDlg.cs
-    private Thought CheckThingExistence(object sender)
+    private Thought CheckThoughtExistence(object sender)
     {
         if (sender is TextBox tb)
         {
@@ -163,7 +163,7 @@ DependencyProperty.Register("Thought", typeof(Thought), typeof(ComboBoxItem));
                 SetStatus("Source and type cannot be empty");
                 return null;
             }
-            List<Thought> tl = ModuleUKSStatement.ThingListFromString(text);
+            List<Thought> tl = ModuleUKSStatement.ThoughtListFromString(text);
             if (tl is null || tl.Count == 0)
             {
                 tb.Background = new SolidColorBrush(Colors.LemonChiffon);

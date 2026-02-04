@@ -17,89 +17,48 @@ public partial class UKS
         if (string.IsNullOrWhiteSpace(root)) throw new ArgumentException("Start label is required.", nameof(root));
         Thought Root = theUKS.Labeled(root);
         if (Root is null) return;
+
+
         HashSet<string> alreadyWritten = new();
         try
         {
             using (var writer = new StreamWriter(path))
             {
                 if (writer is null) throw new ArgumentNullException(nameof(writer));
-                foreach (Thought t in Root.Descendants)
+                foreach (var t in Root.EnumerateClosure())
                 {
-                    foreach (Thought r in t.RecursiveLinks)
+                    string s = FormatThought(t) + " " + t.Weight.ToString("F2");
+                    if (!alreadyWritten.Contains(s))
                     {
-                        if (r.Label == "ti")
-                        { }
-                        string s = FormatThought(r) + " "+ r.Weight.ToString("0.00");
-                        if (!alreadyWritten.Contains(s))
-                        {
-                            writer.WriteLine(s);
-                            alreadyWritten.Add(s);
-                        }
-
-                        //hack to follow sequences
-                        //if (r?.RelType?.Label == "is-a") continue;
-
-                        foreach (Thought t1 in r.To.SequenceNodes())
-                        {
-                            if (t1 is Thought r1 && r1.LinkType is not null)
-                            {
-                                s = FormatThought(r1) + " " + r1.Weight.ToString("0.00");
-                                if (!alreadyWritten.Contains(s))
-                                {
-                                    writer.WriteLine(s);
-                                    alreadyWritten.Add(s);
-                                }
-                            }
-                            foreach (Thought r2 in t1.LinksTo.Where(x => x.LinkType.Label != "is-a"))
-                            {
-                                s = FormatThought(r2) + " " + r2.Weight.ToString("0.00");
-                                if (!alreadyWritten.Contains(s))
-                                {
-                                    writer.WriteLine(s);
-                                    alreadyWritten.Add(s);
-                                }
-                            }
-                        }
+                        writer.WriteLine(s);
+                        alreadyWritten.Add(s);
                     }
                 }
                 writer.Flush();
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         { }
     }
 
     string FormatThought(Thought t)
     {
-        if (t.Label == "tion-seq3")
+        if (t.Label == "abc-seq0")
         { }
-        string retVal = t.Label;
+        string retVal = t.Label.PadRight(15);
         if (t.V is not null)
             retVal += " V: " + t.V.ToString();
 
         if (t.From is null || t.LinkType is null)
             return retVal;
 
-        if (t.LinkType?.Label == "NXT")
-        {
-            //var valuList = UKS.theUKS.FlattenSequence(this);
-            //retVal = string.Join("", valuList);
-            retVal = $"{t.Label}[{t.From.Label}->{t.LinkType.Label}->{t.To?.Label}]";
-            return retVal;
-        }
-        if (t.LinkType?.Label == "FRST" || t.LinkType.Label == "VLU")
-        {
-            retVal = $"{t.Label}[{t.From.Label}->{t.LinkType.Label}->{t.To?.Label}]";
-            return retVal;
-        }
-
         retVal += "[";
         if (t.From is not null)
-            retVal += t.From?.ToString();
+            retVal += t.From?.Label;
         if (t.LinkType is not null)
-            retVal += ((retVal == "") ? "" : "->") + t.LinkType?.ToString();
+            retVal += ((retVal == "") ? "" : "->") + t.LinkType?.Label;
         if (t.To is not null)
-            retVal += ((retVal == "") ? "" : "->") + ((t.To.Label == "")?t.To?.ToString():t.To.Label);
+            retVal += ((retVal == "") ? "" : "->") + ((t.To.Label == "") ? t.To?.Label : t.To.Label);
         retVal += "]";
         return retVal;
     }
@@ -140,11 +99,75 @@ public partial class UKS
             if (tokens.Count == 0) continue;
 
             var stmt = ParseBracketStmt(tokens[1], lineNo);
-            Thought r = AddRelStmt(tokens[0], stmt, tokens[2]);
+            Thought r = AddLinkStmt(tokens[0], stmt, tokens[2]);
+        }
+
+        //This is a bit of a hack because the default AddStatement adds sequence elements to Unknown unnecessarily
+        for (int i = 0; i < theUKS.AllThoughts.Count; i++)
+        {
+            Thought t = AllThoughts[i];
+            if (IsSequenceElement(t))
+                t.RemoveLink("Unknown", "is-a");
         }
     }
 
 
+    // Adds a link, 
+    private Thought AddLinkStmt(string label, List<string> linkParts, string sWeight)
+    {
+        if (linkParts[0].Contains("seq2"))
+        { }
+        Thought r = null;
+        if (linkParts.Count < 2) return null;
+        if (r is null)
+        {
+            //get value strings (used in config
+            string value = "";
+            if (linkParts[0].Contains("_V:"))
+            {
+                int index = linkParts[0].IndexOf("_V:");
+                value = linkParts[0][(index + 3)..];
+                linkParts[0] = linkParts[0][..index];
+                DeleteThought(linkParts[0]);
+            }
+            //if (r1 or r2 are set, use them instead here
+            Thought from = Labeled(linkParts[0]);
+            if (from is null) from = AddThought(linkParts[0], null);
+            Thought linkType = Labeled(linkParts[1]);
+            if (linkType is null) linkType = AddThought(linkParts[1], null);
+            Thought to = null;
+            if (linkParts.Count > 2)
+            {
+                to = Labeled(linkParts[2]);
+                if (to is null) to = AddThought(linkParts[2], null);
+            }
+
+            //Add the statement
+            //if (linkType.Label == "NXT")
+            //{
+            //    from.LinkType = linkType;
+            //    from.To = to;
+            //    r = from;
+            //}
+            //else
+                r = AddStatement(from, linkType, to, label);
+
+            if (value != "")
+                r.From.V = value;
+            if (label != "" && !label.StartsWith("unl_"))
+            {
+                r.Label = label.Trim();
+                if (!AllThoughts.Contains(r))
+                    AllThoughts.Add(r);
+            }
+        }
+        if (sWeight is { } n)
+        {
+            if (float.TryParse(n, out float weight))
+                r.Weight = weight;
+        }
+        return r;
+    }
     // Parse "[S->R->O]" or "[S,R,O,N]" (comma separated, quotes allowed around items)
     private static List<string> ParseBracketStmt(string s, int lineNo)
     {
@@ -176,48 +199,6 @@ public partial class UKS
         return result;
     }
 
-    // Adds a link, honoring numeric sugar (N → R.N + has-value + number typing)
-    private Thought AddRelStmt(string label, List<string> ss, string sWeight)
-    {
-        if (label.Contains("-seq"))
-        { }
-        Thought r = null;
-        if (ss.Count < 3) return null;
-        if (r is null)
-        {
-            object r1 = ss[0];  //is an atom or another link
-            object r2 = ss[2];
-            if (ss[0].Contains("->"))
-            {
-                var stmtContent = TokenizeTopLevel(ss[0]);
-                var stmtContent1 = ParseBracketStmt(stmtContent[1], -1);
-                r1 = AddRelStmt(stmtContent[0], stmtContent1, stmtContent[2]);
-                r1 = ((Thought)r1).Label;
-            }
-            if (ss[2].Contains("->"))
-            {
-                var stmtContent = TokenizeTopLevel(ss[2]);
-                var stmtContent1 = ParseBracketStmt(stmtContent[1], -1);
-                r2 = AddRelStmt(stmtContent[0], stmtContent1, stmtContent[2]);
-                r2 = ((Thought)r2).Label;
-            }
-
-            //if (r1 or r2 are set, use them instead here
-            r = AddStatement((string)r1, ss[1], (string)r2, label);
-            if (label != "")
-            {
-                r.Label = label;
-                if (!AllThings.Contains(r))
-                    AllThings.Add(r);
-            }
-        }
-        if (sWeight is { } n)
-        {
-            if (float.TryParse(n, out float weight))
-                r.Weight = weight;
-        }
-        return r;
-    }
 
     // Strip EOL comments outside of quotes and brackets
     private static string StripEolComment(string line)

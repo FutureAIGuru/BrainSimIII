@@ -6,11 +6,11 @@ using UKS;
 
 namespace BrainSimulator.Modules;
 
-public class ModuleSpell : ModuleBase
+public class ModuleWord : ModuleBase
 {
-    public ModuleSpell()
+    public ModuleWord()
     {
-        Label = "Spell";
+        Label = "Word";
     }
 
     public override void Fire()
@@ -30,7 +30,7 @@ public class ModuleSpell : ModuleBase
     {
         if (dlg == null)
         {
-            dlg = new ModuleSpellDlg();
+            dlg = new ModuleWordDlg();
             dlg.Owner = MainWindow.theWindow;
         }
         base.ShowDialog();
@@ -42,7 +42,7 @@ public class ModuleSpell : ModuleBase
         foreach (char c in word.ToUpper())
         {
             string letterLabel = c.ToString();
-            Thought letter = theUKS.GetOrAddThing(letterLabel, "letter");
+            Thought letter = theUKS.GetOrAddThought(letterLabel, "letter");
             letters.Add(letter);
         }
         string retVal = word;
@@ -52,31 +52,34 @@ public class ModuleSpell : ModuleBase
         return retVal;
     }
 
-    public void AddWordSpelling(string word)
+    public static Thought AddWordSpelling(string word)
     {
-        if (string.IsNullOrWhiteSpace(word)) return;
+        var theUKS = MainWindow.theUKS;
+        if (string.IsNullOrWhiteSpace(word)) return null;
 
         word = word.Trim();
-        theUKS.GetOrAddThing("Word", "Thought");
-        theUKS.GetOrAddThing("letter", "Object");
+        theUKS.GetOrAddThought("Word", "Thought");
+        theUKS.GetOrAddThought("letter", "Object");
 
-        // Get or create the word thing
-        Thought wordThing = theUKS.GetOrAddThing(word, "Word");
+        // Get or create the word thought
+        Thought wordThought = theUKS.GetOrAddThought(word, "Word");
 
         // Create list of letter cognemes
         List<Thought> letters = new List<Thought>();
         foreach (char c in word.ToUpper())
         {
             string letterLabel = c.ToString();
-            Thought letter = theUKS.GetOrAddThing(letterLabel, "letter");
+            Thought letter = theUKS.GetOrAddThought(letterLabel, "letter");
             letters.Add(letter);
         }
 
         // Get or create the "spelled" relationship type
-        Thought spelledRelType = theUKS.GetOrAddThing("spelled", "LinkType");
+        Thought spelledLinkType = theUKS.GetOrAddThought("spelled", "LinkType");
 
         // Add the sequence
-        theUKS.AddSequence(wordThing, spelledRelType, letters);
+        theUKS.AddSequence(wordThought, spelledLinkType, letters);
+
+        return wordThought;
     }
 
     public int LoadWordsFromFile(string filePath)

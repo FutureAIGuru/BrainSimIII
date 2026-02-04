@@ -13,20 +13,17 @@ using UKS;
 namespace BrainSimulator.Modules;
 
 /// <summary>
-/// Contains a collection of Things linked by Links to implement Common Sense and general knowledge.
+/// Contains a collection of Thoughts linked by Links to implement Common Sense and general knowledge.
 /// </summary>
 public partial class ModuleUKS : ModuleBase
 {
     //keeps the file name for xml storage
     public string fileName = "";
 
-//    public UKS.UKS theUKS = null;
     //set size parameters as needed in the constructor
     //set max to be -1 if unlimited
     public ModuleUKS()
     {
-        allowMultipleDialogs = true;
-//        theUKS = MainWindow.theUKS;
     }
 
 

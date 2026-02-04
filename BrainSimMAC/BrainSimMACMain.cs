@@ -39,7 +39,7 @@ else
     var pythonFiles = moduleHandler.GetListOfExistingPythonModuleTypes();
     Thought availableModuleRoot = moduleHandler.theUKS.Labeled("AvailableModule");
     foreach (var moduleName in pythonFiles)
-        moduleHandler.theUKS.AddThing(moduleName, availableModuleRoot);
+        moduleHandler.theUKS.AddThought(moduleName, availableModuleRoot);
 }
 
 //initialize active module list

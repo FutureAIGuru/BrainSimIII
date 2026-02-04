@@ -5,39 +5,41 @@
 
 
 
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using static UKS.UKS;
 
 namespace UKS;
 
 /// <summary>
 /// A Thought is an atomic unit of thought. In the lexicon of graphs, a Thought is both a "node" and an Edge.  
-/// A Thought can represent anything, physical object, attribute, word, action, feeling, etc.
+/// A Thought can represent anythought, physical object, attribute, word, action, feeling, etc.
 /// </summary>
 /// Cognemes may have labels which are any string. Like comments or variable names, these are typically used for programmer convenience and are not usually 
 /// used for functionality but are necessary to save and restore the structure.
 /// Labels are case-insensitive although the initial case is preserved within the UKS.
-/// Methods which return a Thought may return null in the event no Thought matches the result of the method. Methods which return lists of Things will
-/// return a list of zero elements if no Things match the result of the method.
+/// Methods which return a Thought may return null in the event no Thought matches the result of the method. Methods which return lists of Thoughts will
+/// return a list of zero elements if no Thoughts match the result of the method.
 /// A Thought may be referenced by its Label. You can write AddParent("color") [where a Thought is a required parameter.] The system sill automatically retreive a Thought
 /// with the given label or throw an exception if none exists.
 
 public partial class Thought
 {
     /// <summary>
-    /// This is the magic which allows for strings to be put in place of Things for any method Paramter
+    /// This is the magic which allows for strings to be put in place of Thoughts for any method Paramter
     /// </summary>
     /// <param name="label"></param>
     /// Throse 
     public static implicit operator Thought(string label)
     {
-        Thought t = ThoughtLabels.GetThing(label);
+        Thought t = ThoughtLabels.GetThought(label);
         if (t is null)
         { }
         //            throw new ArgumentNullException($"No Thought found with label: {label}");
         return t;
     }
-    //    public static Thought HasChild { get => ThingLabels.GetThing("has-child"); }
-    public static Thought IsA { get => ThoughtLabels.GetThing("is-a"); }
+    //    public static Thought HasChild { get => ThoughtLabels.GetThought("has-child"); }
+    public static Thought IsA { get => ThoughtLabels.GetThought("is-a"); }
 
     private List<Thought> _linksTo = new List<Thought>(); //synapses to "has", "is", others
     private List<Thought> _linksFrom = new List<Thought>(); //synapses from
@@ -75,22 +77,19 @@ public partial class Thought
         set
         {
             if (value == _label) return; //label is unchanged
-            ThoughtLabels.RemoveThingLabel(_label);
-            _label = ThoughtLabels.AddThingLabel(value, this);
+            ThoughtLabels.RemoveThoughtLabel(_label);
+            _label = ThoughtLabels.AddThoughtLabel(value, this);
         }
     }
 
-
-
     public DateTime LastFiredTime = new();
-
 
     //NEEDED for Links
     public Thought _from;
     /// <summary>
     /// the Thought Source
     /// </summary>
-    public Thought From
+    public Thought? From
     {
         get => _from;
         set { _from = value; }
@@ -99,7 +98,7 @@ public partial class Thought
     /// <summary>
     /// The Link Type
     /// </summary>
-    public Thought LinkType
+    public Thought? LinkType
     {
         get { return _linkType; }
         set
@@ -108,7 +107,7 @@ public partial class Thought
         }
     }
     private Thought _to;
-    public Thought To
+    public Thought? To
     {
         get { /*Hits++; lastUsed = DateTime.Now;*/ return _to; }
         set
@@ -169,8 +168,15 @@ public partial class Thought
     }
 
 
+    public static IEnumerable<Thought> GetThoughts()
+    {
+        foreach (var kv in _live)
+            yield return kv.Key;
+    }
+    static readonly ConditionalWeakTable<Thought, object?> _live = new();
     public Thought()
     {
+        _live.Add(this, null);
     }
 
     /// <summary>
@@ -183,6 +189,8 @@ public partial class Thought
         From = r.From;
         To = r.To;
         Weight = r.Weight;
+        //COPY other properties as needed
+        _live.Add(this, null);
     }
 
     /// <summary>
@@ -195,32 +203,60 @@ public partial class Thought
         if (LinkType?.Label == "spelled")
         { }
         string retVal = Label;
-        if (V is not null)
-            retVal += " V: " + V.ToString();
 
-        if (From is null || LinkType is null || To is null)
-            return retVal;
+        if (From is not null || LinkType is not null || To is not null)
+        {
+            //if (LinkType?.Label == "NXT")
+            //{
+            //    var valuList = UKS.theUKS.FlattenSequence(this);
+            //    retVal = "^" + string.Join("", valuList);
+            //    return retVal;
+            //}
 
-        if (LinkType?.Label == "NXT")
-        {
-            var valuList = UKS.theUKS.FlattenSequence(this);
-            retVal = "^"+string.Join("", valuList);
-            return retVal;
+            retVal += "[";
+            if (From is not null)
+            {
+                retVal += From?.ToString();
+            }
+            if (LinkType is not null)
+                retVal += ((retVal == "") ? "" : "->") + LinkType?.ToString();
+            if (To is not null)
+            {
+                retVal += ((retVal == "") ? "" : "->") + To?.ToString();
+            }
+            retVal += "]";
         }
-        
-        retVal += "[";
-        if (From is not null)
-        {
-            retVal += From?.ToString();
-        }
-        if (LinkType is not null)
-            retVal += ((retVal == "") ? "" : "->") + LinkType?.ToString();
-        if (To is not null)
-        {
-            retVal += ((retVal == "") ? "" : "->") + To?.ToString();
-        }
-        retVal += "]";
+        if (V is not null)  //if there is a string value, add it to the end of the line
+            retVal += "_V:" + V.ToString();
+
         return retVal;
+    }
+
+    //The following is needed to suppress a warning
+    public override bool Equals(Object obj)
+    {
+        if (obj is Thought t)
+        {
+            if (Label != t.Label) return false;
+            //are the links the same?
+            if (LinksTo.Count != t.LinksTo.Count) return false;
+            for (int i = 0; i < LinksTo.Count; i++)
+                if (LinksTo[i] != t.LinksTo[i]) return false;
+
+            if (t.From is null && t.LinkType is null && t.To is null)
+            {//must be atomic
+                return true;
+            }
+            if ((t.From is not null || t.LinkType is not null || t.To is not null))
+            {
+                //this must be a link
+                if ((To is null || t.To == To) &&  //
+                    (From is null || t.From == From) &&
+                    (t.LinkType is not null && t.LinkType == LinkType))
+                    return true;
+            }
+        }
+        return false;
     }
 
     public static bool operator ==(Thought? a, Thought? b)
@@ -235,23 +271,6 @@ public partial class Thought
                 return true;
         return false;
     }
-    //The following is needed to suppress a warning
-    public override bool Equals(Object obj)
-    {
-        if (obj is Thought t && Label != t.Label) return false;
-        if (obj is Thought a && (a.From is not null || a.LinkType is not null || a.To is not null))
-        {
-            if ((To is null || a.To == To) &&  //
-                (From is null || a.From == From) &&
-                a.LinkType == LinkType &&
-                a.LinksTo.SequenceEqual(LinksTo))
-                return true;
-        }
-        if (obj is Thought b && (b.From is null && b.LinkType is null && b.To is null))
-            return true;
-        return false;
-    }
-
     public static bool operator !=(Thought? a, Thought? b)
     {
         if (a is null && b is null)
@@ -259,9 +278,9 @@ public partial class Thought
         if (a is null || b is null)
             return true;
         if (a.Label != b.Label) return true;
-        if ((a.To is null || a.To == b.To) && 
-            (a.From is null || a.From == b.From) && 
-            (a.LinkType is null ||a.LinkType == b.LinkType)) 
+        if ((a.To is null || a.To == b.To) &&
+            (a.From is null || a.From == b.From) &&
+            (a.LinkType is null || a.LinkType == b.LinkType))
             return false;
         return true;
     }
@@ -272,17 +291,17 @@ public partial class Thought
         if (string.IsNullOrEmpty(this.Label))
             Label = "R*";
         this.AddParent("Link");
-        lock (UKS.theUKS.AllThings)
+        lock (UKS.theUKS.AllThoughts)
         {
-            if (!UKS.theUKS.AllThings.Contains(this))
-                UKS.theUKS.AllThings.Add(this);
+            if (!UKS.theUKS.AllThoughts.Contains(this))
+                UKS.theUKS.AllThoughts.Add(this);
         }
         return this;
     }
 
 
 
-    private IReadOnlyList<Thought> LinksOfType(Thought relType, bool useLinkFrom = false)
+    private IReadOnlyList<Thought> LinksOfType(Thought linkType, bool useLinkFrom = false)
     {
         List<Thought> retVal = new List<Thought>();
         if (!useLinkFrom)
@@ -290,7 +309,7 @@ public partial class Thought
             lock (_linksTo)
             {
                 foreach (Thought r in _linksTo)
-                    if (r?.LinkType is not null && r?.LinkType == relType && r?.From == this)
+                    if (r?.LinkType is not null && r?.LinkType == linkType && r?.From == this)
                         retVal.Add(r.To);
             }
         }
@@ -299,7 +318,7 @@ public partial class Thought
             lock (_linksFrom)
             {
                 foreach (Thought r in _linksFrom)
-                    if (r.LinkType is not null && r.LinkType == relType && r.To == this)
+                    if (r.LinkType is not null && r.LinkType == linkType && r.To == this)
                         retVal.Add(r.From);
             }
         }
@@ -415,7 +434,7 @@ public partial class Thought
     /// <returns></returns>
     public bool HasAncestorLabeled(string label)
     {
-        Thought t = ThoughtLabels.GetThing(label);
+        Thought t = ThoughtLabels.GetThought(label);
         if (t is null) return false;
         return HasAncestor(label);
     }
@@ -466,8 +485,8 @@ public partial class Thought
         }
     }
 
-    //Follow chain of links with relType
-    private IReadOnlyList<Thought> FollowTransitiveLinks(Thought relType, bool followUpwards = true, Thought searchTarget = null)
+    //Follow chain of links with linkType
+    private IReadOnlyList<Thought> FollowTransitiveLinks(Thought linkType, bool followUpwards = true, Thought searchTarget = null)
     {
         List<Thought> retVal = new();
         retVal.Add(this);
@@ -480,14 +499,14 @@ public partial class Thought
             IReadOnlyList<Thought> linksToFollow = followUpwards ? t.LinksTo : t.LinksFrom;
             foreach (Thought r in linksToFollow)
             {
-                //Thought thingToAdd = followUpwards ? r.source : r.target;
-                Thought thingToAdd = followUpwards ? r?.To : r?.From;
-                if (r?.LinkType == relType)
+                //Thought thoughtToAdd = followUpwards ? r.source : r.target;
+                Thought thoughtToAdd = followUpwards ? r?.To : r?.From;
+                if (r?.LinkType == linkType)
                 {
-                    if (!retVal.Contains(thingToAdd))
-                        retVal.Add(thingToAdd);
+                    if (!retVal.Contains(thoughtToAdd))
+                        retVal.Add(thoughtToAdd);
                 }
-                if (searchTarget == thingToAdd)
+                if (searchTarget == thoughtToAdd)
                     return retVal;
             }
         }
@@ -515,7 +534,7 @@ public partial class Thought
     /// <returns>the new or existing Thought</returns>
     public Thought AddLink(Thought target, Thought linkType)
     {
-        if (linkType is null)  //NULL link types could be allowed in search Thingys Parameter?
+        if (linkType is null)  //NULL link types could be allowed in search Thoughtys Parameter?
         {
             return null;
         }
@@ -630,21 +649,18 @@ public partial class Thought
                         r.From.LinksWriteable.Remove(r);
                         r.LinkType.LinksFromWriteable.Remove(r);
                         r.To.LinksFromWriteable.Remove(r);
-                        //r.Source.LinksWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
-                        //r.RelType.LinksFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
-                        //r.Target.LinksFromWriteable.RemoveAll(x => x.Source == r.Source && x.RelType == r.RelType && x.Target == r.Target);
                     }
                 }
             }
         }
     }
 
-    public Thought HasLink(Thought source, Thought relType, Thought targett)
+    public Thought HasLink(Thought source, Thought linkType, Thought targett)
     {
-        if (source is null && relType is null && targett is null) return null;
+        if (source is null && linkType is null && targett is null) return null;
         foreach (Thought r in LinksTo)
             if ((source is null || r.From == source) &&
-                (relType is null || r.LinkType == relType) &&
+                (linkType is null || r.LinkType == linkType) &&
                 (targett is null || r.To == targett)) return r;
         return null;
     }
@@ -675,7 +691,7 @@ public partial class Thought
     /// <summary>
     /// Remove a parent from a Thought
     /// </summary>
-    /// <param name="t">If the Thought is not a parent, the function does nothing</param>
+    /// <param name="t">If the Thought is not a parent, the function does nothought</param>
     public void RemoveParent(Thought t)
     {
         Thought r = new() { From = this, LinkType = IsA, To = t };
@@ -721,4 +737,67 @@ public partial class Thought
             UKS.transientLinks.Add(this);
     }
 
+    /// <summary>
+    /// Enumerate the closure starting from this Thought (root) using a queue (BFS):
+    /// - yields root
+    /// - follows all outgoing LinksTo (includes the link-thought, its LinkType, its To)
+    /// - also follows incoming "is-a" LinksFrom (includes the link-thought, its LinkType, its From)
+    /// Cycle-safe via reference-identity visited set (not labels).
+    ///
+    /// Additionally: if any encountered Thought is unlabeled, it is assigned a GUID label.
+    /// </summary>
+    public IEnumerable<Thought> EnumerateClosure()
+    {
+        var visited = new HashSet<Thought>();
+        var q = new Queue<Thought>();
+
+        void EnsureLabel(Thought t)
+        {
+            if (string.IsNullOrWhiteSpace(t.Label))
+                // Put the GUID into the label only when it's unlabeled
+                t.Label = $"unl_{Guid.NewGuid().ToString("N")[..8]}";
+        }
+
+        void EnqueueIfNew(Thought? t)
+        {
+            if (t is null) return;
+            //if (!t.To?.HasAncestor(this)) return;
+            EnsureLabel(t);
+            if (visited.Add(t))
+                q.Enqueue(t);
+        }
+
+        // start
+        EnqueueIfNew(this);
+        foreach (var isaLink in this.LinksTo.Where(x => x.LinkType?.Label == "is-a"))
+        {
+            EnsureLabel(isaLink);  //hack to include the parents of the root.
+            yield return isaLink;
+        }
+
+        while (q.Count > 0)
+        {
+            var t = q.Dequeue();
+            if (t is null) continue;
+            if (t.From is not null || t.To is not null || t.LinkType is not null)
+                yield return t;
+
+            EnqueueIfNew(t.LinkType);
+            EnqueueIfNew(t.To);
+            foreach (var isaLink in t.LinksFrom.Where(x => x.LinkType?.Label == "is-a"))  //get all the children of this Thought
+            {
+                EnqueueIfNew(isaLink);
+                EnqueueIfNew(isaLink.From);
+            }
+            foreach (var link in t.LinksTo.Where(x => x.LinkType?.Label != "is-a")) //don't get the parents again
+            {
+                EnqueueIfNew(link);
+                EnqueueIfNew(link.To);
+            }
+
+            //is this a seq?
+            EnqueueIfNew(t.LinkType);
+            EnqueueIfNew(t.To);
+        }
+    }
 }

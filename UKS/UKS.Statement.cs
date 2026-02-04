@@ -10,7 +10,7 @@ public partial class UKS
 {
     /// <summary>
     /// Creates a Thought. <br/>
-    /// Parameters are strings. If the Things with those labels
+    /// Parameters are strings. If the Thoughts with those labels
     /// do not exist, they will be created. <br/>
     /// If the LinkType has an inverse, the inverse will be used and the Thought will be reversed so that 
     /// Fido Is-a Dog become Dog Has-child Fido.<br/>
@@ -22,47 +22,53 @@ public partial class UKS
     /// <returns>The primary link which was created (others may be created for given attributes</returns>
     public Thought AddStatement(string sSource, string sLinkType, string sTarget, string label = "")
     {
-        Thought source = ThingFromObject(sSource);
-        Thought linkType = ThingFromObject(sLinkType, "LinkType", source);
-        Thought target = ThingFromObject(sTarget);
+        Thought source = ThoughtFromObject(sSource);
+        Thought linkType = ThoughtFromObject(sLinkType, "LinkType", source);
+        Thought target = ThoughtFromObject(sTarget);
 
         Thought theLink = AddStatement(source, linkType, target, label);
         return theLink;
     }
     /// <summary>
-    /// Adds a statement relating the specified source, link type, and target. No new Things are created.
+    /// Adds a statement relating the specified source, link type, and target. No new Thoughts are created.
     /// </summary>
     /// <remarks>If a link with the same source, link type, and target already exists, the existing
     /// link  is returned after being activated. Otherwise, a new link is created and added. If the
     /// link type  has the "isCommutative" property, a reverse link is also created. Additionally, any
     /// extraneous parent  links for the source, target, or link type are cleared.</remarks>
     /// <param name="source">The source <see cref="Thought"/> of the link. Cannot be <see langword="null"/>.</param>
-    /// <param name="relType">The link type <see cref="Thought"/>. Cannot be <see langword="null"/>.</param>
+    /// <param name="linkType">The link type <see cref="Thought"/>. Cannot be <see langword="null"/>.</param>
     /// <param name="target">The target <see cref="Thought"/> of the link.</param>
     /// <returns>The created or existing <see cref="Thought"/> object that represents the link.  Returns <see
-    /// langword="null"/> if <paramref name="source"/> or <paramref name="relType"/> is <see langword="null"/>.</returns>
-    public Thought AddStatement(Thought source, Thought relType, Thought target, string label = "")
+    /// langword="null"/> if <paramref name="source"/> or <paramref name="linkType"/> is <see langword="null"/>.</returns>
+    public Thought AddStatement(Thought source, Thought linkType, Thought target, string label = "")
     {
-        if (source is null || relType is null) return null;
+        if (source is null || linkType is null) return null;
 
         Thought existing = Labeled(label);
         Thought r = null; 
 
         if (existing is null)
         {        //create the link but don't add it to the UKS
-            r = CreateTheLink(source, relType, target);
+            r = CreateTheLink(source, linkType, target);
             existing = GetLink(r);
+        }
+        else
+        {
+            existing.LinkType = linkType;
+            existing.To = target;
+            existing.From = source;
         }
 
         //does this link already exist (without conditions)?
-        if (existing is not null )
+        if (existing is not null)
         {
             WeakenConflictingLinks(source, existing);
             existing.Fire();
             return existing;
         }
-        if (r.From?.Label == "") r.From.AddToUKS();
-        if (r.To?.Label == "") r.To.AddToUKS();
+        if (r?.From?.Label == "") r.From.AddToUKS();
+        if (r?.To?.Label == "") r.To.AddToUKS();
 
         WeakenConflictingLinks(source, r);
 
@@ -89,29 +95,29 @@ public partial class UKS
       object oSource, object oLinkType, object oTarget)
     {
         //Debug.WriteLine(oSource.ToString()+" "+oLinkType.ToString()+" "+oTarget.ToString());
-        Thought source = ThingFromObject(oSource);
-        Thought linkType = ThingFromObject(oLinkType, "LinkType", source);
-        Thought target = ThingFromObject(oTarget);
+        Thought source = ThoughtFromObject(oSource);
+        Thought linkType = ThoughtFromObject(oLinkType, "LinkType", source);
+        Thought target = ThoughtFromObject(oTarget);
 
 
         Thought theLink = CreateTheLink(ref source, ref linkType, ref target);
         return theLink;
     }
 
-    public Thought CreateTheLink(ref Thought source, ref Thought relType, ref Thought target)
+    public Thought CreateTheLink(ref Thought source, ref Thought linkType, ref Thought target)
     {
-        Thought inverseType1 = CheckForInverse(relType);
+        Thought inverseType1 = CheckForInverse(linkType);
         //if this link has an inverse, switcheroo so we are storing consistently in one direction
         if (inverseType1 is not null)
         {
             (source, target) = (target, source);
-            relType = inverseType1;
+            linkType = inverseType1;
         }
 
         //CREATE new subclasses if needed
 
         Thought r = new Thought()
-        { From = source, LinkType = relType, To = target };
+        { From = source, LinkType = linkType, To = target };
 
         r.From?.Fire();
         r.To?.Fire();
@@ -122,6 +128,10 @@ public partial class UKS
 
     private void WeakenConflictingLinks(Thought newSource, Thought newLink)
     {
+        if (newLink.LinkType.Label == "is-a"  && newLink.To.Label != "Unknown")
+        {
+            newSource.RemoveParent("Unknown");
+        }
         //does this new link conflict with an existing link)?
         for (int i = 0; i < newSource?.LinksTo.Count; i++)
         {
@@ -169,24 +179,24 @@ public partial class UKS
         //if a thought has more than one parent and one of them is unkonwnObject, 
         //then the Unknown link is unnecessary
         if (t.Parents.Count > 1)
-            t.RemoveParent(ThoughtLabels.GetThing("Unknown"));
+            t.RemoveParent(ThoughtLabels.GetThought("Unknown"));
         //if this disconnects the Thought from the tree, reconnect it as a Unknown
         //this may happen in the case of a circular reference.
         if (reconnectNeeded && !t.HasAncestor("Thought"))
-            t.AddParent(ThoughtLabels.GetThing("Unknown"));
+            t.AddParent(ThoughtLabels.GetThought("Unknown"));
     }
 
-    public Thought SubclassExists(Thought t, List<Thought> thingAttributes, ref Thought bestMatch, ref List<Thought> missingAttributes)
+    public Thought SubclassExists(Thought t, List<Thought> thoughtAttributes, ref Thought bestMatch, ref List<Thought> missingAttributes)
     {
         //TODO this doesn't work as needed if some attributes are inherited from an ancestor
         if (t is null) return null;
 
         bestMatch = t;
-        missingAttributes = thingAttributes;
+        missingAttributes = thoughtAttributes;
         //there are no attributes specified
-        if (thingAttributes.Count == 0) return t;
+        if (thoughtAttributes.Count == 0) return t;
 
-        List<Thought> attrs = new List<Thought>(thingAttributes);
+        List<Thought> attrs = new List<Thought>(thoughtAttributes);
 
         //get the attributes of t
         //var existingLinks = GetAllLinks(new List<Thought> { t }, false);
@@ -265,12 +275,12 @@ public partial class UKS
             newLabel += ((t1.Label.StartsWith(".")) ? "" : ".") + t1.Label;
         }
         //create the new thought which is child of the original
-        Thought retVal = AddThing(newLabel, t);
+        Thought retVal = AddThought(newLabel, t);
         //add the attributes
         foreach (Thought t1 in attributes)
         {
             Thought r1 = new Thought()
-            { From = retVal, LinkType = ThoughtLabels.GetThing("is"), To = t1 };
+            { From = retVal, LinkType = ThoughtLabels.GetThought("is"), To = t1 };
             WriteTheLink(r1);
         }
         return retVal;
@@ -282,7 +292,7 @@ public partial class UKS
         Thought inverse = linkType.LinksTo.FindFirst(x => x.LinkType.Label == "inverseOf");
         if (inverse is not null) return inverse.To;
         //use the below if inverses are 2-way.  Without this, there is a one-way translation
-        //inverse = linkType.LinksBy.FindFirst(x => x.reltype.Label == "inverseOf");
+        //inverse = linkType.LinksBy.FindFirst(x => x.linktype.Label == "inverseOf");
         //if (inverse is not null) return inverse.source;
         return null;
     }
