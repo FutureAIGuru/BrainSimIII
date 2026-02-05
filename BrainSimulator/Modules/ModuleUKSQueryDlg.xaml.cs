@@ -525,45 +525,52 @@ public partial class ModuleUKSQueryDlg : ModuleBaseDlg
         if (r is null || r.Count == 0)
         {
             resultString = "No Results";
+            resultText.Text = resultString;
+            return;
         }
-        else
+        foreach (var r1 in r)
         {
-            foreach (var r1 in r)
+            if (r1 is ValueTuple<Thought, float> tuple)
             {
-                if (r1 is ValueTuple<Thought, float> tuple)
+                var r3 = tuple.Item1;
+                var conf = tuple.Item2;
+                if (r3.To?.LinkType?.Label == "NXT")
                 {
-                    var r3 = tuple.Item1;
-                    var conf = tuple.Item2;
-                    if (r3.To?.LinkType?.Label == "NXT")
-                    {
-                        ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
-                        var theUKS = UKSQuery.theUKS;
-                        var seq = theUKS.FlattenSequence(r3.To);
-                        foreach (Thought t in seq) resultString += t.Label + " ";
-                        resultString += $"{conf.ToString("0.00")}\n";
-                    }
-                    else
-                        resultString += $"{r3.From.ToString()} {r3.LinkType.ToString()} {r3.To.ToString()}  ({conf.ToString("0.00")})\n";
-                }
-                else if (r1 is Thought r2)
-                {
-                    if (noSource && fullCB.IsChecked == false)
-                        resultString += $"{r2.LinkType?.ToString()} {r2.To.ToString()}  ({r2.Weight.ToString("0.00")})\n";
-                    else if (noTarget && fullCB.IsChecked == false)
-                        resultString += $"{r2.From.ToString()} {r2.LinkType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
-                    else
-                    {
-                        Thought theSource = UKS.UKS.GetNonInstance(r2.From);
-                        if (fullCB.IsChecked == true)
-                            resultString += $"{theSource.Label} ";
-                        resultString += $"{r2.LinkType.ToString()} {r2.To.ToString()}  ({r2.Weight.ToString("0.00")})\n";
-                    }
+                    ModuleUKSQuery UKSQuery = (ModuleUKSQuery)ParentModule;
+                    var theUKS = UKSQuery.theUKS;
+                    var seq = theUKS.FlattenSequence(r3.To);
+                    foreach (Thought t in seq) resultString += t.Label + " ";
+                    resultString += $"{conf.ToString("0.00")}\n";
                 }
                 else
-                    resultString += r1.ToString() + "\n";
+                    resultString += $"{r3.From.ToString()} {r3.LinkType.ToString()} {r3.To.ToString()}  ({conf.ToString("0.00")})\n";
             }
+            else if (r1 is Thought r2)
+            {
+                if (noSource && fullCB.IsChecked == false)
+                    resultString += $"{r2.LinkType?.ToString()} {r2.To.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                else if (noTarget && fullCB.IsChecked == false)
+                    resultString += $"{r2.From.ToString()} {r2.LinkType.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                else
+                {
+                    Thought theSource = GetNonInstance(r2.From);
+                    if (fullCB.IsChecked == true)
+                        resultString += $"{theSource.Label} ";
+                    resultString += $"{r2.LinkType.ToString()} {r2.To.ToString()}  ({r2.Weight.ToString("0.00")})\n";
+                }
+            }
+            else
+                resultString += r1.ToString() + "\n";
         }
         resultText.Text = resultString;
+    }
+
+
+    private Thought GetNonInstance(Thought source)
+    {
+        Thought theSource = source;
+        while (theSource.HasProperty("isInstance")) theSource = theSource.Parents[0];
+        return theSource;
     }
 
     // thoughtText_TextChanged is called when the thought textbox changes

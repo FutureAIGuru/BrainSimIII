@@ -4,12 +4,16 @@
 // © 2022 FutureAI, Inc., all rights reserved
 //
 
+using Pluralize.NET;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using UKS;
+using static BrainSimulator.Modules.ModuleOnlineInfo;
 
 
 namespace BrainSimulator.Modules;
@@ -30,18 +34,22 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         return true;
     }
 
-    // BtnAddLink_Click is called when the AddLink button is clicked
+
+    //these get the data back from the combobox selection 
+    Thought tSource = null;
+
+    // BtnAddLink_Click is called when the AddLink button is clicked or ENTER is pressed in one of the textboxes
     private void BtnAddLink_Click(object sender, RoutedEventArgs e)
     {
         ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
-        string newThought = sourceText.Text;
-        string targetThought = targetText.Text;
-        string relationType = linkText.Text;
+        string fromString = sourceText.Text;
+        string toString = targetText.Text;
+        string linkTypeString = linkText.Text;
 
         //Special case for [This,is-a,dog]
-        if (newThought.ToLower() == "this")
+        if (fromString.ToLower() == "this")
         {
-            if (relationType.ToLower().Contains("called"))
+            if (linkTypeString.ToLower().Contains("called"))
             {
                 Thought mostRecent = UKSStatement.theUKS.Labeled("mostRecent");
                 if (mostRecent is null)
@@ -50,7 +58,7 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
                     return;
                 }
                 Thought mostRecentTarget = mostRecent.LinksTo.FindFirst(x => x.LinkType.Label == "is").To;
-                mostRecentTarget.Label = targetThought;
+                mostRecentTarget.Label = toString;
             }
             return;
         }
@@ -70,7 +78,62 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         }
         float confidence = (float)confidenceSlider.Value;
 
-        Thought r1 = UKSStatement.AddLink(newThought, targetThought, relationType);
+        //hack for "dogs are animals"
+        IPluralize pluralizer = new Pluralizer();
+        if (pluralizer.IsPlural(fromString) && pluralizer.IsPlural(toString) && linkTypeString == "are")
+            linkTypeString = "is-a";
+
+
+        //hand source though which is itself a link
+        var sourceParts = UKSStatement.Singular(fromString.Split(" ", StringSplitOptions.RemoveEmptyEntries));
+        if (sourceParts.Length == 3)
+        {
+            Thought r2 = new()
+            {
+                From = UKSStatement.theUKS.GetOrAddThought(sourceParts[0]),
+                LinkType = UKSStatement.theUKS.GetOrAddThought(sourceParts[1]),
+                To = UKSStatement.theUKS.GetOrAddThought(sourceParts[2])
+            };
+            var existing = UKSStatement.theUKS.GetLinks(r2);
+            if (existing.Count == 0)
+                tSource = UKSStatement.theUKS.AddStatement(sourceParts[0], sourceParts[1], sourceParts[2]);
+            else
+            {
+                // multiple matches, create a dropdown in the UI to select which one?
+                sourceCombo.Visibility = Visibility.Visible;
+                sourceCombo.Items.Clear();
+                ComboBoxItem cbi = new ComboBoxItem { Content = "<New>", ToolTip = "Create a new Link" };
+                cbi.PreviewMouseLeftButtonUp += ComboItem_Clicked;
+                sourceCombo.Items.Add(cbi);
+                sourceCombo.SelectedIndex = 0;
+                //sourceCombo.IsDropDownOpen = true;
+                Dispatcher.BeginInvoke(DispatcherPriority.Input, () => sourceCombo.IsDropDownOpen = true);
+                foreach (var t in existing)
+                {
+                    string toolTipText = "";
+                    foreach (var r in t.LinksTo.Where(x=>x.LinkType.Label != "is-a"))
+                        toolTipText += r.ToString() +  "\n";
+                    toolTipText = toolTipText[..^1];
+
+                    cbi = new()
+                    {
+                        Content = t,
+                        ToolTip = toolTipText,
+                    };
+                    cbi.PreviewMouseLeftButtonUp += ComboItem_Clicked;
+                    sourceCombo.Items.Add(cbi);
+                }
+                return;
+            }
+        }
+
+        if (tSource is null)
+        {
+            tSource = UKSStatement.theUKS.CreateThoughtFromMultipleAttributes(fromString, false);
+        }
+
+
+        Thought r1 = UKSStatement.AddLink(tSource, linkTypeString, toString);
         if (r1 is not null && setConfCB.IsChecked == true)
         {
             r1.Weight = confidence;
@@ -80,6 +143,29 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         CheckThoughtExistence(targetText);
         CheckThoughtExistence(sourceText);
         CheckThoughtExistence(linkText);
+
+        tSource = null;
+    }
+
+    private void ComboItem_Clicked(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (sender is not ComboBoxItem cbi) return;
+        ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
+        sourceCombo.Visibility = Visibility.Hidden;
+        if (cbi.Content.ToString() == "<New>")
+        {
+            var sourceParts = UKSStatement.Singular(sourceText.Text.Split(" ", StringSplitOptions.RemoveEmptyEntries));
+            if (sourceParts.Length == 3)
+            {
+                tSource = UKSStatement.theUKS.AddStatement(sourceParts[0], sourceParts[1], sourceParts[2]);
+                sourceText.Text = tSource.ToString();
+            }
+        }
+        else
+        {
+            sourceText.Text = cbi.Content.ToString();
+            tSource = (Thought)cbi.Content;
+        }
     }
 
     // Check for thought existence and set background color of the textbox and the error message accordingly.
@@ -139,5 +225,28 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
             return false;
         }
         return true;
+    }
+
+    private void sourceCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
+        sourceCombo.Visibility = Visibility.Hidden;
+        if (sourceCombo.SelectedValue.ToString() == "<New>")
+        {
+            var sourceParts = UKSStatement.Singular(sourceText.Text.Split(" ", StringSplitOptions.RemoveEmptyEntries));
+            if (sourceParts.Length == 3)
+            {
+                Thought r1 = UKSStatement.AddLink(sourceParts[0], sourceParts[1], sourceParts[2]);
+                sourceText.Text = r1.ToString();
+            }
+        }
+        else
+        {
+            if (sourceCombo.SelectedItem is ComboBoxItem cbi)
+            {
+                sourceText.Text = cbi.Content.ToString();
+                tSource = (Thought)cbi.Content;
+            }
+        }
     }
 }

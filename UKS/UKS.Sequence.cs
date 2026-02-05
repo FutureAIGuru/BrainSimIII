@@ -88,7 +88,7 @@ public partial class UKS
     public Thought AddElement(Thought prevElementIn, Thought value)
     {
         Thought prevElement = GetLastlement(prevElementIn);
-        Thought newNode = new Thought() { Label = prevElement.Label + "*"};  //the label will auto-increment.
+        Thought newNode = new Thought() { Label = prevElement.Label + "*" };  //the label will auto-increment.
         newNode.AddLink(GetFirstElement(prevElement), "FRST");
         newNode.AddLink(value, "VLU");
         prevElement.AddLink(newNode, "NXT");

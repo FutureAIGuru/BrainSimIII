@@ -65,12 +65,6 @@ public partial class UKS
 
 
 
-    public static Thought GetNonInstance(Thought source)
-    {
-        Thought theSource = source;
-        while (theSource.HasProperty("isInstance")) theSource = theSource.Parents[0];
-        return theSource;
-    }
 
     // int or decimal, optional leading minus
     private static readonly Regex NumericRegex = new(@"^-?\d+(\.\d+)?$", RegexOptions.Compiled);
@@ -81,7 +75,7 @@ public partial class UKS
     /// S,T,&O may themseves be bracketed relatisnips.
     /// Examples:
     ///   [Dog->has.4->leg]0.90
-    ///   R23[Fido,plays,outside] IF [weather,is,sunny]1.00
+    ///   R23[Fido->plays->outside] IF [weather,is,sunny]1.00
     /// Comments (# or //) allowed outside quotes/brackets.
     /// </summary>
     public void ImportTextFile(string filePath)
@@ -103,6 +97,13 @@ public partial class UKS
         }
 
         //This is a bit of a hack because the default AddStatement adds sequence elements to Unknown unnecessarily
+        foreach (var t in ((Thought)"Thought").EnumerateClosure())
+        {
+            if (t.Label.StartsWith("unl_"))
+            {
+                t.Label = "";
+            }
+        }
         for (int i = 0; i < theUKS.AllThoughts.Count; i++)
         {
             Thought t = AllThoughts[i];
@@ -142,15 +143,7 @@ public partial class UKS
                 if (to is null) to = AddThought(linkParts[2], null);
             }
 
-            //Add the statement
-            //if (linkType.Label == "NXT")
-            //{
-            //    from.LinkType = linkType;
-            //    from.To = to;
-            //    r = from;
-            //}
-            //else
-                r = AddStatement(from, linkType, to, label);
+            r = AddStatement(from, linkType, to, label);
 
             if (value != "")
                 r.From.V = value;
@@ -168,7 +161,7 @@ public partial class UKS
         }
         return r;
     }
-    // Parse "[S->R->O]" or "[S,R,O,N]" (comma separated, quotes allowed around items)
+    // Parse "[F->L->T]" or "[S,R,O,N]" (comma separated, quotes allowed around items)
     private static List<string> ParseBracketStmt(string s, int lineNo)
     {
         s = s.Substring(1, s.Length - 2); // drop initialFinal [ ]

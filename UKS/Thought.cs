@@ -38,9 +38,7 @@ public partial class Thought
         //            throw new ArgumentNullException($"No Thought found with label: {label}");
         return t;
     }
-    //    public static Thought HasChild { get => ThoughtLabels.GetThought("has-child"); }
     public static Thought IsA { get => ThoughtLabels.GetThought("is-a"); }
-
     private List<Thought> _linksTo = new List<Thought>(); //synapses to "has", "is", others
     private List<Thought> _linksFrom = new List<Thought>(); //synapses from
     private List<Thought> linksAsType = new List<Thought>(); //nodes which use this as a linkType
@@ -83,6 +81,7 @@ public partial class Thought
     }
 
     public DateTime LastFiredTime = new();
+
 
     //NEEDED for Links
     public Thought _from;
@@ -168,15 +167,8 @@ public partial class Thought
     }
 
 
-    public static IEnumerable<Thought> GetThoughts()
-    {
-        foreach (var kv in _live)
-            yield return kv.Key;
-    }
-    static readonly ConditionalWeakTable<Thought, object?> _live = new();
     public Thought()
     {
-        _live.Add(this, null);
     }
 
     /// <summary>
@@ -190,7 +182,6 @@ public partial class Thought
         To = r.To;
         Weight = r.Weight;
         //COPY other properties as needed
-        _live.Add(this, null);
     }
 
     /// <summary>
@@ -206,12 +197,12 @@ public partial class Thought
 
         if (From is not null || LinkType is not null || To is not null)
         {
-            //if (LinkType?.Label == "NXT")
-            //{
-            //    var valuList = UKS.theUKS.FlattenSequence(this);
-            //    retVal = "^" + string.Join("", valuList);
-            //    return retVal;
-            //}
+            if (theUKS.IsSequenceElement(this))
+            {
+                var valuList = theUKS.FlattenSequence(this);
+                retVal = "^" + string.Join("", valuList);
+                return retVal;
+            }
 
             retVal += "[";
             if (From is not null)
@@ -291,10 +282,10 @@ public partial class Thought
         if (string.IsNullOrEmpty(this.Label))
             Label = "R*";
         this.AddParent("Link");
-        lock (UKS.theUKS.AllThoughts)
+        lock (theUKS.AllThoughts)
         {
-            if (!UKS.theUKS.AllThoughts.Contains(this))
-                UKS.theUKS.AllThoughts.Add(this);
+            if (!theUKS.AllThoughts.Contains(this))
+                theUKS.AllThoughts.Add(this);
         }
         return this;
     }
@@ -717,9 +708,12 @@ public partial class Thought
         return retVal;
     }
 
-
+    List<Thought> stack = null;
     public bool HasProperty(Thought t)  //with inheritance
     {
+        if (stack is null) stack = new();
+        if (stack.Contains(t)) return false;
+        stack.Add(t);
         foreach (Thought r in LinksTo)
             if (r?.LinkType.Label == "hasProperty" && r.To == t)
                 return true;

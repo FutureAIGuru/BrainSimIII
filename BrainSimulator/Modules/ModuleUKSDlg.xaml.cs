@@ -21,17 +21,17 @@ namespace BrainSimulator.Modules;
 public partial class ModuleUKSDlg : ModuleBaseDlg
 {
 
-    public static readonly DependencyProperty ThoughtObjectProperty =
+    public static readonly DependencyProperty ThoughtObjectProperty = //used in TreeView items
     DependencyProperty.Register("Thought", typeof(Thought), typeof(TreeViewItem));
-    public static readonly DependencyProperty TreeViewItemProperty =
+    public static readonly DependencyProperty TreeViewItemProperty = //used in Thought context menus
     DependencyProperty.Register("TreeViewItem", typeof(TreeViewItem), typeof(TreeViewItem));
-    public static readonly DependencyProperty LinkObjectProperty =
+    public static readonly DependencyProperty LinkObjectProperty = //used in Link context menus
     DependencyProperty.Register("LinkType", typeof(Thought), typeof(TreeViewItem));
 
 
     private const int maxDepth = 20;
     private int totalItemCount;
-    private bool mouseInTree; //prevent auto-update while the mouse is in the tree
+    private bool mouseInWindow; //prevent auto-update while the mouse is in the tree
     private bool busy;
     private List<string> expandedItems = new();
     private bool updateFailed;
@@ -132,9 +132,11 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
     {
         if (t.LinksTo.Count == 0 && t.From is null && t.To is null) return;
 
-        ////add the entry to the entry of expanded items
-        string expandedLabel = "|" + parentLabel + "|" + t.ToString();
-        expandedLabel = expandedLabel.Replace("||", "|"); //needed to make top level work
+        //build the entry for the tabel of expanded items
+        string currentLabel = "|" + parentLabel + "|" + t.Label;
+        if (theUKS.IsSequenceElement(t)) //this skips over the level of the sequence element itself and only shows the links
+            currentLabel = "|" + parentLabel;
+        currentLabel = currentLabel.Replace("||", "|"); //needed to make top level work
 
         //add each of the links as a "child" of the parent entry
         //display is-a links if deteails are requested
@@ -145,26 +147,27 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
         {
             if (showConditionals.IsChecked != true)
                 if (l.HasProperty("isCondition") || l.HasProperty("isResult")) continue; //hide conditionals
+            var x = expandedItems;
 
-            TreeViewItem tviLink = GetTreeChildFormatted(expandedLabel, l);
+            TreeViewItem tviLink = GetTreeChildFormatted(currentLabel, l);
             tviLink.ContextMenu = GetLinkContextMenu(l);
             tvi.Items.Add(tviLink);
 
             if (tviLink.IsExpanded && l.LinksTo.Count > 0) //get provenance, etc. on this link
-                AddLinks(l, tviLink, depth, expandedLabel);
-            if (theUKS.IsSequenceElement(l.To) && tviLink.IsExpanded) //expand sequence elements
-                AddLinks(l.To, tviLink, depth, expandedLabel);
+                AddLinks(l, tviLink, depth, currentLabel);
+            if (tviLink.IsExpanded && theUKS.IsSequenceElement(l?.To)) //expand sequence elements
+                AddLinks(l.To, tviLink, depth, currentLabel + "|" + l.ToString());
         }
         if (reverseCB.IsChecked == true)
-            AddLinksFrom(t, tvi, parentLabel);
+            AddLinksFrom(t, tvi, currentLabel);
     }
     private void AddLinksFrom(Thought t, TreeViewItem tvi, string parentLabel)
     {
         if (t.LinksFrom.Count == 0 && t.From is null && t.To is null) return;
 
-        ////add the entry to the entry of expanded items
-        string expandedLabel = "|" + parentLabel + "|" + t.ToString();
-        expandedLabel = expandedLabel.Replace("||", "|"); //needed to make top level work
+        //add the entry to the entry of expanded items
+        parentLabel = "|" + parentLabel + "|" + t.ToString();
+        parentLabel = parentLabel.Replace("||", "|"); //needed to make top level work
 
         //add each of the links as a "child" of the parent entry
         //display is-a links if deteails are requested
@@ -174,7 +177,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             if (showConditionals.IsChecked != true)
                 if (r.HasProperty("isCondition") || r.HasProperty("isResult")) continue; //hide conditionals
 
-            TreeViewItem tviLink = GetTreeChildFormatted(expandedLabel, r);
+            TreeViewItem tviLink = GetTreeChildFormatted(parentLabel, r);
             tviLink.ContextMenu = GetLinkContextMenu(r);
             tvi.Items.Add(tviLink);
         }
@@ -219,9 +222,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tviChild.Background = new SolidColorBrush(Colors.LightYellow);
 
         //is this expanded?
-        string fullString = "|" + parentLabel + "|" + child.ToString();
-        fullString = fullString.Replace("||", "|"); //parentLabel may or may not have a leading '|'
-        if (expandedItems.Contains(fullString))
+        string currentLabel = "|" + parentLabel + "|" + (string.IsNullOrEmpty(child?.Label) ? child?.ToString() : child?.Label);
+        currentLabel = currentLabel.Replace("||", "|"); //parentLabel may or may not have a leading '|'
+        if (expandedItems.Contains(currentLabel))
             tviChild.IsExpanded = true;
         if (child.AncestorList().Contains(expandAll) &&
             (child.Label == "" || !parentLabel.Contains("|" + child.Label)))
@@ -266,7 +269,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             {
                 tvi1 = tvi2;
                 Thought t1 = (Thought)tvi1.GetValue(ThoughtObjectProperty);
-                parentLabel = "|" + t1?.ToString() + parentLabel;
+                parentLabel = "|" + (string.IsNullOrEmpty(t1?.Label)?t1?.ToString():t1?.Label) + parentLabel;
                 depth++;
             }
             if (!expandedItems.Contains(parentLabel))
@@ -640,7 +643,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private void Dt_Tick(object sender, EventArgs e)
     {
-        if (!mouseInTree)
+        if (!mouseInWindow)
             Draw(true);
         RefreshButton?.Visibility = Visibility.Hidden;
     }
@@ -663,12 +666,12 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
 
     private void TheTreeView_MouseEnter(object sender, MouseEventArgs e)
     {
-        mouseInTree = true;
+        mouseInWindow = true;
         theTreeView.Background = new SolidColorBrush(Colors.LightSteelBlue);
     }
     private void TheTreeView_MouseLeave(object sender, MouseEventArgs e)
     {
-        mouseInTree = false;
+        mouseInWindow = false;
         theTreeView.Background = new SolidColorBrush(Colors.LightGray);
     }
 

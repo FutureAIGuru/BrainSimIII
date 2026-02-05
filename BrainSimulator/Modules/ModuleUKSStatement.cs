@@ -59,35 +59,23 @@ public class ModuleUKSStatement : ModuleBase
     }
 
 
-    public Thought AddLink(string source, string target, string linkType)
+    public Thought AddLink(Thought tSource, string linkType, string to)
     {
         GetUKS();
         if (theUKS is null) return null;
-        IPluralize pluralizer = new Pluralizer();
-        if (pluralizer.IsPlural(source) && pluralizer.IsPlural(target) && linkType == "are")
-            linkType = "is-a";
 
-        //Figure out the source
-        var sourceParts = Singular(source.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-        Thought tSource = null;
-        if (sourceParts.Length == 3)
-            tSource = theUKS.AddStatement(sourceParts[0], sourceParts[1], sourceParts[2]);
-        if (tSource is null)
-        {
-            tSource = theUKS.CreateThoughtFromMultipleAttributes(source, false);
-        }
         //figure out the LinkType
         Thought tLinkType = theUKS.CreateThoughtFromMultipleAttributes(linkType, true);
 
-
         //Figure out the target
-        var targetParts = Singular(target.Split(" ", StringSplitOptions.RemoveEmptyEntries));
+        var targetParts = Singular(to.Split(" ", StringSplitOptions.RemoveEmptyEntries));
         Thought tTarget = null;
 
-        if (target.StartsWith("^"))
+        //handle sequence creation
+        if (to.StartsWith("^"))
         {
             List<Thought> targets = new();
-            targetParts = target[1..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            targetParts = to[1..].Split(' ', StringSplitOptions.RemoveEmptyEntries);
             foreach (string label in targetParts)
             {
                 Thought t = theUKS.GetOrAddThought(label);
@@ -100,11 +88,13 @@ public class ModuleUKSStatement : ModuleBase
         if (targetParts.Length == 3)
             tTarget = theUKS.AddStatement(targetParts[0], targetParts[1], targetParts[2]);
         if (tTarget is null)
-            tTarget = theUKS.CreateThoughtFromMultipleAttributes(target, false);
-        if (target == "" && linkType == "is-a")
+            tTarget = theUKS.CreateThoughtFromMultipleAttributes(to, false);
+
+        //TODO what is this case?
+        if (to == "" && linkType == "is-a")
         {
-            if (target == "" && source != "")
-                theUKS.AddThought(source, null);
+            //if (from != "")
+            //    theUKS.AddThought(from, null);
             return null;
         }
 
@@ -119,7 +109,7 @@ public class ModuleUKSStatement : ModuleBase
         return r;
     }
 
-    string[] Singular(string[] s)
+    public string[]  Singular(string[] s)
     {
         IPluralize pluralizer = new Pluralizer();
         for (int i = 0; i < s.Length; i++)

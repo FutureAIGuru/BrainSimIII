@@ -1,6 +1,7 @@
 ﻿namespace UKS;
 
 using Pluralize.NET;
+using System.Runtime.CompilerServices;
 
 
 /// <summary>
@@ -8,9 +9,8 @@ using Pluralize.NET;
 /// </summary>
 public partial class UKS
 {
-
     //This is the actual internal Universal Knowledge Store
-    static private List<Thought> uKSList = new() { Capacity = 1000000, };
+    static private List<Thought> uKSList = new();// { Capacity = 1000000, };
 
 
     //This is a temporary copy of the UKS which used internally during the save and restore process to 
@@ -21,6 +21,7 @@ public partial class UKS
     /// Occasionally a list of all the Thoughts in the UKS is needed. This is READ ONLY.
     /// There is only one (shared) list for the App.
     /// </summary>
+    //public List<Thought> AllThoughts { get => uKSList; }
     public List<Thought> AllThoughts { get => uKSList; }
 
     //TimeToLive processing for links
@@ -38,7 +39,7 @@ public partial class UKS
         {
             AllThoughts.Clear();
             ThoughtLabels.ClearLabelList();
-            CreateInitialStructure();
+            //CreateInitialStructure();
         }
         UKSTemp.Clear();
 
@@ -387,6 +388,16 @@ public partial class UKS
             if (LinksAreEqual(r, r1)) return r1;
         }
         return null;
+    }
+    public List<Thought> GetLinks(Thought r)
+    {
+        List<Thought> retVal = new();
+        foreach (Thought r1 in r.From?.LinksTo)
+        {
+            if (r.LinkType == r1.LinkType && r.To == r1.To)
+                retVal.Add(r1);
+        }
+        return retVal;
     }
 
     private Thought ThoughtFromString(string label, string defaultParent, Thought source = null)

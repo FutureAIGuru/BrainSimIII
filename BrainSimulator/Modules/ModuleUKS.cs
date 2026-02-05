@@ -17,9 +17,6 @@ namespace BrainSimulator.Modules;
 /// </summary>
 public partial class ModuleUKS : ModuleBase
 {
-    //keeps the file name for xml storage
-    public string fileName = "";
-
     //set size parameters as needed in the constructor
     //set max to be -1 if unlimited
     public ModuleUKS()
@@ -43,8 +40,6 @@ public partial class ModuleUKS : ModuleBase
     public override void Initialize()
     {
         MainWindow.SuspendEngine();
-//        theUKS = new UKS.UKS();
-
         // Make sure all other loaded modules get notified of UKS Initialization
         UKSInitialized();
         MainWindow.ResumeEngine();
@@ -54,28 +49,11 @@ public partial class ModuleUKS : ModuleBase
     //by translating object references into array indices, all the problems of circular references go away
     public override void SetUpBeforeSave()
     {
-        base.SetUpBeforeSave();
-        if (fileName is not null && fileName.Length > 0)
-        {
-            theUKS.SaveUKStoXMLFile();
-        }
     }
 
     public override void SetUpAfterLoad()
     {
-        GetUKS();
-        base.SetUpAfterLoad();
-        if (!string.IsNullOrEmpty(fileName))
-        {
-            fileName = Utils.RebaseFolderToCurrentDevEnvironment(fileName);
-            //theUKS.LoadUKSfromXMLFile();
-        }
-        else
-        {
-            theUKS = new();
-        }
     }
-
 }
     
  

@@ -128,10 +128,6 @@ public partial class UKS
 
     private void WeakenConflictingLinks(Thought newSource, Thought newLink)
     {
-        if (newLink.LinkType.Label == "is-a"  && newLink.To.Label != "Unknown")
-        {
-            newSource.RemoveParent("Unknown");
-        }
         //does this new link conflict with an existing link)?
         for (int i = 0; i < newSource?.LinksTo.Count; i++)
         {
@@ -176,7 +172,7 @@ public partial class UKS
         if (t is null) return;
 
         bool reconnectNeeded = t.HasAncestorLabeled("Thought");
-        //if a thought has more than one parent and one of them is unkonwnObject, 
+        //if a thought has more than one parent and one of them is unkonwn, 
         //then the Unknown link is unnecessary
         if (t.Parents.Count > 1)
             t.RemoveParent(ThoughtLabels.GetThought("Unknown"));
