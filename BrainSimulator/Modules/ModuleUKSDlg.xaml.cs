@@ -205,7 +205,9 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             //show sequence content unless details are selected
             if (detailsCB.IsChecked == false && theUKS.IsSequenceElement(r.To))
             {
-                string sequence = "^" + string.Join("", theUKS.FlattenSequence(r.To));
+                string joinCharacter = "";
+                if (r.LinkType.Label == "events") joinCharacter = "\n\t\t"; //hack for better dieplay of longer items
+                string sequence = "^" + string.Join(joinCharacter, theUKS.FlattenSequence(r.To));
                 header = $"[{r.From.Label}->{r.LinkType.Label}->{sequence}]";
             }
         }

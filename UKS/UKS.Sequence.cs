@@ -85,6 +85,30 @@ public partial class UKS
         return FlattenSequence(firstNode).Count;
     }
 
+    public Thought InsertElement(Thought prevElementIn, Thought value)
+    {
+        Thought first = prevElementIn;
+        if (IsSequenceFirstElement(prevElementIn))
+        {
+            //this is a bit tricky...
+            //it actually adds a 2nd element but then copies old 1st element values to the 2nd element and puts the new value on the old first
+            //why? all the FRST links will still be correct without modification
+            Thought newNode = new Thought() { Label = prevElementIn.Label + "*" };  //the label will auto-increment.
+            newNode.AddLink(first, "FRST");
+            newNode.AddLink(first.LinksTo.FindFirst(x => x.LinkType.Label == "VLU").To, "VLU");
+            newNode.AddLink(first.LinksTo.FindFirst(x => x.LinkType.Label == "NXT")?.To, "NXT");
+            first.RemoveLinks("VLU");
+            first.RemoveLinks("NXT");
+            first.AddLink(value, "VLU");
+            first.AddLink(newNode, "NXT");
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
+        return first;
+    }
+
     public Thought AddElement(Thought prevElementIn, Thought value)
     {
         Thought prevElement = GetLastlement(prevElementIn);
@@ -485,7 +509,7 @@ public partial class UKS
             {
                 //Fire the owner
                 var owner = valueRel?.LinksFrom.FindFirst(x => x.LinkType.Label != "VLU"&& x.LinkType.Label != "FRST")?.From;
-                owner?.Fire();
+                //owner?.Fire();
                 // Recursively enumerate the subsequence, passing the shared visitedSequences set
                 foreach (var subElement in EnumerateSequenceElements(valueRel, visitedSequences))
                 {
@@ -542,5 +566,4 @@ public partial class UKS
             }
         }
     }
-
 }

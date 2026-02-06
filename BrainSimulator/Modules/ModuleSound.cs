@@ -31,7 +31,6 @@ public class ModuleSound : ModuleBase
     public override void Fire()
     {
         Init();
-
         if (lastNotePressed is not null && DateTime.Now > lastNotePressed + TimeSpan.FromMilliseconds(2000))
         {
             if (tuneToSearch.Count > 1)
@@ -62,7 +61,7 @@ public class ModuleSound : ModuleBase
         {
             lastCadenceTime = DateTime.Now;
             if (enumerator.MoveNext())
-                enumerator.Current.Fire();
+               theUKS.GetElementValue(enumerator.Current).Fire();
             else
                 enumerator = null;
         }

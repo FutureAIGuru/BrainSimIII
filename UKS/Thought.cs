@@ -258,7 +258,7 @@ public partial class Thought
             return false;
         if (a.Label != "" && a.Label == b.Label) return true;
         if (a.To is not null || a.LinkType is not null || a.To is not null)
-            if (a.To == b.To && a.From == b.From && a.LinkType == b.LinkType)
+            if ((a.To is null && b.To is null)||a.To == b.To && a.From == b.From && a.LinkType == b.LinkType)
                 return true;
         return false;
     }

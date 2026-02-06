@@ -14,7 +14,7 @@
         <Label x:Name="durationLabel"              Content="Duration"      HorizontalAlignment="Left"   Height="33"   Margin="369,71,0,0"   FontSize="16"  Width="100" VerticalAlignment="Top"/>
 
         <TextBox  x:Name="sourceText"               TabIndex="1"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,174,0" TextChanged="Text_TextChanged"/>
-        <ComboBox  x:Name="sourceCombo"               TabIndex="1"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,174,0" Visibility="Hidden" SelectionChanged="sourceCombo_SelectionChanged"/>
+        <ComboBox  x:Name="sourceCombo"               TabIndex="1"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,20,174,0" Visibility="Hidden"/>
         <TextBox  x:Name="linkText"         TabIndex="2"  Height="33" VerticalAlignment="Top"   FontSize="16"   Margin="78,60,174,0" TextChanged="Text_TextChanged"/>
         <TextBox  x:Name="targetText"               TabIndex="3"  Height="33" VerticalAlignment="Top"   FontSize="16" AcceptsReturn="False"  Margin="78,100,174,0" TextChanged="Text_TextChanged" />
         <Slider   x:Name="confidenceSlider"         Minimum="0" Maximum="1" IsMoveToPointEnabled="True" TickFrequency="0.1"   TickPlacement="Both" Value=".9" HorizontalAlignment="Left" Height="25" Margin="362,44,0,0" VerticalAlignment="Top" Width="100"/>
@@ -28,7 +28,7 @@
         </ComboBox>
 
         <Button x:Name="BtnAddLink"   IsDefault="True" Content="Add/Update" Height="32" VerticalAlignment="Top" FontSize="16" Margin="78,143,0,0" Click="BtnAddLink_Click" HorizontalAlignment="Left" Width="159"/>
-        <CheckBox x:Name="setConfCB" Content="Set Confidence/Duration" IsChecked="True" FontSize="16" Height="22" Margin="265,153,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200"/>
-       
+        <CheckBox x:Name="setConfCB" Content="Set Confidence/Duration" IsChecked="True" FontSize="16" Height="22" Margin="269,142,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200"/>
+        <CheckBox x:Name="eventCB" Content="This is an Event" IsChecked="False" FontSize="16" Height="22" Margin="269,164,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200"/>
     </Grid>
 </local:ModuleBaseDlg>

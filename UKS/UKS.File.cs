@@ -105,15 +105,14 @@ public partial class UKS
         AddStatement("IF", "is-a", "ClauseType");
         AddStatement("BECAUSE", "is-a", "ClauseType");
         AddStatement("AFTER", "is-a", "ClauseType");
+        AddStatement("BEFORE", "is-a", "ClauseType");
+        AddStatement("BEFORE", "inverseOf", "AFTER");
         AddStatement("NXT", "is-a", "ClauseType");
         AddStatement("VLU", "is-a", "ClauseType");
         AddStatement("AND", "is-a", "ClauseType");
         AddStatement("OR", "is-a", "ClauseType");
         AddStatement("NOT", "is-a", "ClauseType");
         AddStatement("FRST", "is-a", "ClauseType");
-
-
-
 
         AddBrainSimConfigSectionIfNeeded();
         SetupNumbers();
@@ -153,7 +152,6 @@ public partial class UKS
         GetOrAddThought("none", "number");
         for (int i = 9; i > 0; i--)
             AddStatement(i.ToString(), "greaterThan", (i - 1).ToString());
-
 
 
         //demo to add PI to the structure

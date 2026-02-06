@@ -113,7 +113,8 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
                     string toolTipText = "";
                     foreach (var r in t.LinksTo.Where(x=>x.LinkType.Label != "is-a"))
                         toolTipText += r.ToString() +  "\n";
-                    toolTipText = toolTipText[..^1];
+                    if (!string.IsNullOrEmpty(toolTipText))
+                        toolTipText = toolTipText[..^1];
 
                     cbi = new()
                     {
@@ -134,10 +135,29 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
 
 
         Thought r1 = UKSStatement.AddLink(tSource, linkTypeString, toString);
+
         if (r1 is not null && setConfCB.IsChecked == true)
         {
             r1.Weight = confidence;
             r1.TimeToLive = duration;
+        }
+        if (r1 is not null && eventCB.IsChecked == true)
+        {
+            r1.Fire();
+            Thought subject = r1.From;
+            UKSStatement.theUKS.GetOrAddThought("events", "LinkType");
+            Thought previousEvents = subject.LinksTo.FindFirst(x => x.LinkType.Label == "events");
+            Thought theSequence = subject.LinksTo.FindFirst(x => x.LinkType.Label == "events")?.To;
+            if (theSequence is null)
+            {
+                Thought t1 = UKSStatement.theUKS.CreateFirstElement(subject, r1);
+                subject.RemoveLinks("events");
+                subject.AddLink(t1, "events");
+            }
+            else
+            {
+                Thought t1 = UKSStatement.theUKS.InsertElement(theSequence, r1);
+            }
         }
 
         CheckThoughtExistence(targetText);
@@ -227,26 +247,26 @@ public partial class ModuleUKSStatementDlg : ModuleBaseDlg
         return true;
     }
 
-    private void sourceCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
-        sourceCombo.Visibility = Visibility.Hidden;
-        if (sourceCombo.SelectedValue.ToString() == "<New>")
-        {
-            var sourceParts = UKSStatement.Singular(sourceText.Text.Split(" ", StringSplitOptions.RemoveEmptyEntries));
-            if (sourceParts.Length == 3)
-            {
-                Thought r1 = UKSStatement.AddLink(sourceParts[0], sourceParts[1], sourceParts[2]);
-                sourceText.Text = r1.ToString();
-            }
-        }
-        else
-        {
-            if (sourceCombo.SelectedItem is ComboBoxItem cbi)
-            {
-                sourceText.Text = cbi.Content.ToString();
-                tSource = (Thought)cbi.Content;
-            }
-        }
-    }
+    //private void sourceCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    //{
+    //    ModuleUKSStatement UKSStatement = (ModuleUKSStatement)ParentModule;
+    //    sourceCombo.Visibility = Visibility.Hidden;
+    //    if (sourceCombo.SelectedValue.ToString() == "<New>")
+    //    {
+    //        var sourceParts = UKSStatement.Singular(sourceText.Text.Split(" ", StringSplitOptions.RemoveEmptyEntries));
+    //        if (sourceParts.Length == 3)
+    //        {
+    //            Thought r1 = UKSStatement.AddLink(sourceParts[0], sourceParts[1], sourceParts[2]);
+    //            sourceText.Text = r1.ToString();
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if (sourceCombo.SelectedItem is ComboBoxItem cbi)
+    //        {
+    //            sourceText.Text = cbi.Content.ToString();
+    //            tSource = (Thought)cbi.Content;
+    //        }
+    //    }
+    //}
 }
