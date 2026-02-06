@@ -2,20 +2,20 @@
 <ArrayOfModuleDescription xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <ModuleDescription>
     <moduleName>ModuleUKS</moduleName>
-    <description>This dialog shows the content of the Universal Knowledge Store (UKS) which is a graph composed of Things and Relationships which connect them.  Unlike most modules, you may have any number of UKS dialogs open for multiple views into the same data.  You can expand items in the tree view.   
+    <description>This dialog shows the content of the Universal Knowledge Store (UKS) which is a graph composed of Things and Links which connect them.  Unlike most modules, you may have any number of UKS dialogs open for multiple views into the same data.  You can expand items in the tree view.   
 
-Thing/Relationship Display: 
+Thing/Link Display: 
           Each Thing with children has a small triangle which will expand it. 
           After the Thing’s name, the first number is the number of children and the second one is the total number of descendants. 
           Color: 
-                    Green: Thing or Relationship has recently been accessed/added/changed. 
-                    Yellow: Relationship is about to be deleted.
+                    Green: Thing or Link has recently been accessed/added/changed. 
+                    Yellow: Link is about to be deleted.
 
 Buttons:
           Initialize: Creates a UKS with just a few basic elements.
 
 Context Menu:
-For a Relationship, the only option is to delete the relationship.
+For a Link, the only option is to delete the link.
 For a Thing, options are:
           Rename the Thing: Case is preserved but searches are case-insensitive. If the name already exists in the UKS, digits will be appended to make it unique.
           Expand all descendants:  Only one thing can be fully expanded at a time.
@@ -27,8 +27,8 @@ For a Thing, options are:
 Bottom Panel:
           Root: Type in the name of the Thing to be the root of the Tree view. Setting this to blank shows any Things which have no parents (for debugging).
           Auto-refresh / Refresh button: When the checkbox is checked, the tree view refreshes every 200 ms. When it is not checked, use the Refresh button to update the display.
-          Show Conf. Shows or hide the confidence values associated with each Relationship. The confidence for Things is the confidence value of the Relationship which makes it a child.
-          Status: Shows total number of Things and Relationships in the UKS.
+          Show Conf. Shows or hide the confidence values associated with each Link. The confidence for Things is the confidence value of the Link which makes it a child.
+          Status: Shows total number of Things and Links in the UKS.
 </description>
   </ModuleDescription>
   <ModuleDescription>
@@ -47,31 +47,31 @@ Works together with SpeechParser, PhraseRecognizer, QueryResolution and SpeechOu
   </ModuleDescription>
   <ModuleDescription>
     <moduleName>ModuleUKSStatement</moduleName>
-    <description>This dialog adds Things and Relationships to the Universal Knowledge Store (UKS) which is a graph of Things connected by Relationships.  Each Relationship consists of a Source Thing, a Target Thing, connected by a RelationshipType Thing.  Enter Thing labels into the Source, Type, and Target boxes and press Add/Update to create a relationship.
+    <description>This dialog adds Things and Links to the Universal Knowledge Store (UKS) which is a graph of Things connected by Links.  Each Link consists of a Source Thing, a Target Thing, connected by a LinkType Thing.  Enter Thing labels into the Source, Type, and Target boxes and press Add/Update to create a link.
 Example
           Source: Fido
           Type: is-a
           Target: dog
-Would indicate that Fido is a dog. This is shown in the UKS dialog as a parent/child Relationship.  All other relationship types are shown as Source-&gt;Type-&gt;Target. All words in labels are singularized so:
+Would indicate that Fido is a dog. This is shown in the UKS dialog as a parent/child Link.  All other link types are shown as Source-&gt;Type-&gt;Target. All words in labels are singularized so:
           Source: dogs
           Type: have
           Target: fur
-Is shown as dog-&gt;has-&gt;fur.  In general, Things in the UKS represent abstract singular entities so the Relationship dog-&gt;has.4-&gt;leg would represent that all dogs have 4 legs.
-If the Things in the text boxes do not exist, the boxes will have a yellow background and the Things will be created. If the relationship already exists, no action will be taken. In some cases the target may be omitted as in Mary runs. If a label is entered with an asterisk, it will have digits appended to it to ensure that it is unique. This feature can be used to create sequences in a specific order as in Pi-&gt;hasDigit*-&gt;3,  Pi-&gt;hasDigit*-&gt;., Pi-&gt;hasDigit*-&gt;1,  Pi-&gt;hasDigit*-&gt;4.
+Is shown as dog-&gt;has-&gt;fur.  In general, Things in the UKS represent abstract singular entities so the Link dog-&gt;has.4-&gt;leg would represent that all dogs have 4 legs.
+If the Things in the text boxes do not exist, the boxes will have a yellow background and the Things will be created. If the link already exists, no action will be taken. In some cases the target may be omitted as in Mary runs. If a label is entered with an asterisk, it will have digits appended to it to ensure that it is unique. This feature can be used to create sequences in a specific order as in Pi-&gt;hasDigit*-&gt;3,  Pi-&gt;hasDigit*-&gt;., Pi-&gt;hasDigit*-&gt;1,  Pi-&gt;hasDigit*-&gt;4.
 
 Putting multiple labels in the text boxes will create a subclass. 
 Example
           Source: Fido
           Type: is-a
           Target: big dog
-Will create a subclass of dog, big.dog with the Relationship big.dog-&gt;is-&gt;big and make Fido a child of big.dog.  In the Source and Target boxes, modifiers precede the main Thing; in the Type box, modifiers follow the type. 
+Will create a subclass of dog, big.dog with the Link big.dog-&gt;is-&gt;big and make Fido a child of big.dog.  In the Source and Target boxes, modifiers precede the main Thing; in the Type box, modifiers follow the type. 
 Example
           Source: Mary
           Type: can play
           Target: electric violin
 Where the Target creates a subclass of violin with the modifier electric, the Type creates a subclass of can with the modifier play.
 
-Relationship may also have a confidence level and a duration which will be set if the Set Conf. checkbox is checked. Confidences can change automatically under certain conditions. When the duration of a Relationship expires, it will vanish.
+Link may also have a confidence level and a duration which will be set if the Set Conf. checkbox is checked. Confidences can change automatically under certain conditions. When the duration of a Link expires, it will vanish.
 
 </description>
   </ModuleDescription>
@@ -85,7 +85,7 @@ Relationship may also have a confidence level and a duration which will be set i
 
 Each of these can be filled in with one or more Thing labels separated by spaces. Text which is not a Thing label is ignored. Searches are case-insensitive and singularized.
 
-If Source or Target alone, the system will respond with all relationships which match. If any two of Source, Target, and Type are provided, the system will respond with the data which would fill in the empty item.  If you fill in all three, the system will respond with the Relationship (if any) which matches.
+If Source or Target alone, the system will respond with all links which match. If any two of Source, Target, and Type are provided, the system will respond with the data which would fill in the empty item.  If you fill in all three, the system will respond with the Link (if any) which matches.
 
 The system first searches for a sequence of inputs.  Entering 3 . 1 4 (with intervening spaces) will respond with data about Pi as it matches the sequences.  If there is no sequence, the system attempts to find a Thing which has attributes matchings all the given Things.  As such, big.dog and big dog will have equivalent meaning. The first is a single Thing label which the second is two Thing labels of which only matching Thing is big.dog.
 
@@ -94,7 +94,7 @@ After the query is performed, any Things in the Filter box will limit the result
   </ModuleDescription>
   <ModuleDescription>
     <moduleName>ModuleUKSClause</moduleName>
-    <description>This dialog creates a Relationship between two Relastionships connected by a Clause Type.  This can be used to create conditioinan relationships by using the clause type "if".  That is, enter Mary can play outside if weather is sunny.  This relationship will only be added to search results if the condition, weather is sunny, is true.</description>
+    <description>This dialog creates a Link between two Relastionships connected by a Clause Type.  This can be used to create conditioinan links by using the clause type "if".  That is, enter Mary can play outside if weather is sunny.  This link will only be added to search results if the condition, weather is sunny, is true.</description>
   </ModuleDescription>
   <ModuleDescription>
     <moduleName>ModuleVision</moduleName>
@@ -108,7 +108,7 @@ After the query is performed, any Things in the Filter box will limit the result
     <moduleName>ModuleAttributeBubble</moduleName>
     <description>This Agent scans the UKS Object tree looking for object Children which have common attributes which can be "bubbled" up to the parent.
 
-Given a number of dogs, some of which are defined as having 4 legs, the having-4-legs attributes  can be added to the "Dog" node. This makes the original relationship(s) redundant and they can subsequently be removed by the "Remove Redundancy"  Agent.</description>
+Given a number of dogs, some of which are defined as having 4 legs, the having-4-legs attributes  can be added to the "Dog" node. This makes the original link(s) redundant and they can subsequently be removed by the "Remove Redundancy"  Agent.</description>
   </ModuleDescription>
   <ModuleDescription>
     <moduleName>ModuleTextFile</moduleName>

@@ -738,25 +738,16 @@ public partial class Thought
     /// - also follows incoming "is-a" LinksFrom (includes the link-thought, its LinkType, its From)
     /// Cycle-safe via reference-identity visited set (not labels).
     ///
-    /// Additionally: if any encountered Thought is unlabeled, it is assigned a GUID label.
     /// </summary>
-    public IEnumerable<Thought> EnumerateClosure()
+    public IEnumerable<Thought> EnumerateSubThoughts()
     {
         var visited = new HashSet<Thought>();
         var q = new Queue<Thought>();
-
-        void EnsureLabel(Thought t)
-        {
-            if (string.IsNullOrWhiteSpace(t.Label))
-                // Put the GUID into the label only when it's unlabeled
-                t.Label = $"unl_{Guid.NewGuid().ToString("N")[..8]}";
-        }
 
         void EnqueueIfNew(Thought? t)
         {
             if (t is null) return;
             //if (!t.To?.HasAncestor(this)) return;
-            EnsureLabel(t);
             if (visited.Add(t))
                 q.Enqueue(t);
         }
@@ -765,7 +756,6 @@ public partial class Thought
         EnqueueIfNew(this);
         foreach (var isaLink in this.LinksTo.Where(x => x.LinkType?.Label == "is-a"))
         {
-            EnsureLabel(isaLink);  //hack to include the parents of the root.
             yield return isaLink;
         }
 

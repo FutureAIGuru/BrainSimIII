@@ -502,7 +502,7 @@ public partial class UKS
 
         while (current is not null)
         {
-            // Get the VLU relationship to find what this sequence node points to
+            // Get the VLU Linkto find what this sequence node points to
             var valueRel = GetElementValue(current);
 
             if (IsSequenceElement(valueRel))
@@ -522,7 +522,7 @@ public partial class UKS
                 yield return current;
             }
 
-            // Move to next node via NXT relationship
+            // Move to next node via NXT Link
             current = GetNextElement(current);
 
             if (current is null) break;

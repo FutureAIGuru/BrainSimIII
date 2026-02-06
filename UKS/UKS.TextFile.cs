@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Reflection.Emit;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 
 namespace UKS;
@@ -25,7 +23,7 @@ public partial class UKS
             using (var writer = new StreamWriter(path))
             {
                 if (writer is null) throw new ArgumentNullException(nameof(writer));
-                foreach (var t in Root.EnumerateClosure())
+                foreach (var t in Root.EnumerateSubThoughts())
                 {
                     string s = FormatThought(t) + " " + t.Weight.ToString("F2");
                     if (!alreadyWritten.Contains(s))
@@ -39,12 +37,32 @@ public partial class UKS
         }
         catch (Exception ex)
         { }
+        RemoveTempLabels(Root);
+    }
+
+    private void RemoveTempLabels(Thought Root)
+    {
+        if (Root is null) return;
+        //remove unnecessary "unl_..."  labels
+        foreach (var t in Root.EnumerateSubThoughts())
+        {
+            if (t.Label.ToLower() == "fido")
+            { }
+            if (t.Label.StartsWith("unl_"))
+                t.Label = "";
+        }
+    }
+
+    void EnsureLabel(Thought t)
+    {
+        if (string.IsNullOrWhiteSpace(t.Label))
+            // Put the GUID into the label only when it's unlabeled
+            t.Label = $"unl_{Guid.NewGuid().ToString("N")[..8]}";
     }
 
     string FormatThought(Thought t)
     {
-        if (t.Label == "abc-seq0")
-        { }
+        EnsureLabel(t);
         string retVal = t.Label.PadRight(15);
         if (t.V is not null)
             retVal += " V: " + t.V.ToString();
@@ -96,14 +114,15 @@ public partial class UKS
             Thought r = AddLinkStmt(tokens[0], stmt, tokens[2]);
         }
 
-        //This is a bit of a hack because the default AddStatement adds sequence elements to Unknown unnecessarily
-        foreach (var t in ((Thought)"Thought").EnumerateClosure())
+        //remove unnecessary "unl_..."  labels
+        foreach (var t in ((Thought)"Thought").EnumerateSubThoughts())
         {
             if (t.Label.StartsWith("unl_"))
             {
                 t.Label = "";
             }
         }
+        //This is a bit of a hack because the default AddStatement adds sequence elements to Unknown unnecessarily
         for (int i = 0; i < theUKS.AllThoughts.Count; i++)
         {
             Thought t = AllThoughts[i];
@@ -188,7 +207,7 @@ public partial class UKS
             sb.Append(s[i]);
         }
 
-        result.Add(sb.ToString());
+        result.Add(sb.ToString().Trim());
         return result;
     }
 

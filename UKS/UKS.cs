@@ -402,6 +402,8 @@ public partial class UKS
 
     private Thought ThoughtFromString(string label, string defaultParent, Thought source = null)
     {
+        GetOrAddThought("Thought");
+        GetOrAddThought("Unknown", "Thought");
         if (string.IsNullOrEmpty(label)) return null;
         if (label == "") return null;
         Thought t = Labeled(label);

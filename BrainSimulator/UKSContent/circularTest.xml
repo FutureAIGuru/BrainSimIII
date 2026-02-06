@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ArrayOfSThing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <SThing>
+<ArrayOfSThought xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SThought>
     <label>Thing</label>
     <relationships>
       <SRelationship>
@@ -25,8 +25,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>Object</label>
     <relationships>
       <SRelationship>
@@ -51,8 +51,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>unknownObject</label>
     <relationships>
       <SRelationship>
@@ -87,8 +87,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>is-a</label>
     <relationships>
       <SRelationship>
@@ -103,28 +103,28 @@
       </SRelationship>
     </relationships>
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>inverseOf</label>
     <relationships />
     <useCount>2</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>hasProperty</label>
     <relationships />
     <useCount>2</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>is</label>
     <relationships />
     <useCount>4</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>isExclusive</label>
     <relationships />
     <useCount>2</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>has</label>
     <relationships>
       <SRelationship>
@@ -139,8 +139,8 @@
       </SRelationship>
     </relationships>
     <useCount>2</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>ClauseType</label>
     <relationships>
       <SRelationship>
@@ -155,8 +155,8 @@
       </SRelationship>
     </relationships>
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>RelationshipType</label>
     <relationships>
       <SRelationship>
@@ -291,13 +291,13 @@
       </SRelationship>
     </relationships>
     <useCount>5</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>has-child</label>
     <relationships />
     <useCount>8</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>number</label>
     <relationships>
       <SRelationship>
@@ -362,13 +362,13 @@
       </SRelationship>
     </relationships>
     <useCount>2</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>greaterThan</label>
     <relationships />
     <useCount>2</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>lessThan</label>
     <relationships>
       <SRelationship>
@@ -383,8 +383,8 @@
       </SRelationship>
     </relationships>
     <useCount>2</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>digit</label>
     <relationships>
       <SRelationship>
@@ -499,8 +499,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>isSimilarTo</label>
     <relationships>
       <SRelationship>
@@ -515,13 +515,13 @@
       </SRelationship>
     </relationships>
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>isCommutative</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>hasDigit</label>
     <relationships>
       <SRelationship>
@@ -596,78 +596,78 @@
       </SRelationship>
     </relationships>
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>.</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>0</label>
     <relationships />
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>2</label>
     <relationships />
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>1</label>
     <relationships />
     <useCount>2</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>3</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>4</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>5</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>6</label>
     <relationships />
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>7</label>
     <relationships />
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>8</label>
     <relationships />
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>9</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>some</label>
     <relationships />
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>many</label>
     <relationships />
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>none</label>
     <relationships />
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>pi</label>
     <relationships>
       <SRelationship>
@@ -742,43 +742,43 @@
       </SRelationship>
     </relationships>
     <useCount>8</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>hasDigit0</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>hasDigit1</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>hasDigit2</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>hasDigit3</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>hasDigit4</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>hasDigit5</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>hasDigit6</label>
     <relationships />
     <useCount>1</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>world</label>
     <relationships>
       <SRelationship>
@@ -833,23 +833,23 @@
       </SRelationship>
     </relationships>
     <useCount>4</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>round</label>
     <relationships />
     <useCount>2</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>bacause</label>
     <relationships />
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>flat</label>
     <relationships />
     <useCount>2</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>BrainSim</label>
     <relationships>
       <SRelationship>
@@ -884,8 +884,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>AvailableModule</label>
     <relationships>
       <SRelationship>
@@ -920,8 +920,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>ActiveModule</label>
     <relationships>
       <SRelationship>
@@ -956,8 +956,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>UKS</label>
     <relationships>
       <SRelationship>
@@ -972,8 +972,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>UKS0</label>
     <relationships>
       <SRelationship>
@@ -1018,8 +1018,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>DlgAttrib</label>
     <relationships>
       <SRelationship>
@@ -1104,37 +1104,37 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>Root</label>
     <relationships />
     <useCount>1</useCount>
     <V xsi:type="xsd:string">Thing</V>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>hasAttribute</label>
     <relationships />
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>Open</label>
     <relationships />
     <useCount>1</useCount>
     <V xsi:type="xsd:string">True</V>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>DlgWindow</label>
     <relationships />
     <useCount>1</useCount>
     <V xsi:type="xsd:string">800x450+993+212</V>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>ExpandAll</label>
     <relationships />
     <useCount>1</useCount>
     <V xsi:type="xsd:string">unknownObject</V>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>UKSQuery</label>
     <relationships>
       <SRelationship>
@@ -1149,8 +1149,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>UKSQuery0</label>
     <relationships>
       <SRelationship>
@@ -1175,8 +1175,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>UKSStatement</label>
     <relationships>
       <SRelationship>
@@ -1191,8 +1191,8 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>UKSStatement0</label>
     <relationships>
       <SRelationship>
@@ -1217,29 +1217,29 @@
       </SRelationship>
     </relationships>
     <useCount>0</useCount>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>Open0</label>
     <relationships />
     <useCount>1</useCount>
     <V xsi:type="xsd:string">True</V>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>DlgWindow0</label>
     <relationships />
     <useCount>1</useCount>
     <V xsi:type="xsd:string">530x550+389+611</V>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>Open1</label>
     <relationships />
     <useCount>1</useCount>
     <V xsi:type="xsd:string">True</V>
-  </SThing>
-  <SThing>
+  </SThought>
+  <SThought>
     <label>DlgWindow1</label>
     <relationships />
     <useCount>1</useCount>
     <V xsi:type="xsd:string">530x300+385+273</V>
-  </SThing>
-</ArrayOfSThing>
+  </SThought>
+</ArrayOfSThought>

@@ -73,7 +73,7 @@ public class ModuleWord : ModuleBase
             letters.Add(letter);
         }
 
-        // Get or create the "spelled" relationship type
+        // Get or create the "spelled" Linktype
         Thought spelledLinkType = theUKS.GetOrAddThought("spelled", "LinkType");
 
         // Add the sequence

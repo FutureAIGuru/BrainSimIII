@@ -1,55 +1,21 @@
-[LinkType->is-a->Thought]1.00
-[is-a->is-a->LinkType]1.00
-[is-a->hasProperty->isTransitive]1.00
-[is-a->hasProperty->inheritable]1.00
-[has-child->is-a->LinkType]1.00
-[has-child->inverseOf->is-a]1.00
-[inverseOf->is-a->LinkType]1.00
-[hasProperty->is-a->LinkType]1.00
-[is->is-a->LinkType]1.00
-[hasAttribute->is-a->LinkType]1.00
-[can->is-a->LinkType]1.00
-[mostRecent->is-a->LinkType]1.00
-[contains->is-a->LinkType]1.00
-[contains->inverseOf->is-part-of]1.00
-[is-part-of->is-a->LinkType]1.00
-[has->is-a->LinkType]1.00
-[has->hasProperty->isTransitive]1.00
-[has->hasProperty->inheritable]1.00
-[not->is-a->LinkType]1.00
-[not->is-a->ClauseType]1.00
-[Property->is-a->LinkType]1.00
-[isExclusive->is-a->Property]1.00
-[isTransitive->is-a->Property]1.00
-[isInstance->is-a->Property]1.00
-[isCommutative->is-a->Property]1.00
-[allowMultiple->is-a->Property]1.00
-[inheritable->is-a->Property]1.00
-[isCondition->is-a->Property]1.00
-[isResult->is-a->Property]1.00
-[ClauseType->is-a->LinkType]1.00
-[IF->is-a->ClauseType]1.00
-[BECAUSE->is-a->ClauseType]1.00
-[AFTER->is-a->ClauseType]1.00
-[NXT->is-a->ClauseType]1.00
-[VLU->is-a->ClauseType]1.00
-[AND->is-a->ClauseType]1.00
-[OR->is-a->ClauseType]1.00
-[FRST->is-a->ClauseType]1.00
-[play->is-a->LinkType]1.00
-[Object->is-a->Thought]1.00
-[Action->is-a->Thought]1.00
-[Link->is-a->Thought]1.00
-[R0[Fido->play->outside]->is-a->Link]1.00
-[R0[Fido->play->outside]->IF->R1[weather->is->sunny]]0.90
-[weather->is->sunny]1.00
-[R1[weather->is->sunny]->hasProperty->isCondition]1.00
-[R0[Fido->play->outside]->hasProperty->isResult]1.00
-[R1[weather->is->sunny]->is-a->Link]1.00
-[Unknown->is-a->Thought]1.00
-[Fido->is-a->Unknown]1.00
-R0[Fido->play->outside]1.00
-[outside->is-a->Unknown]1.00
-[weather->is-a->Unknown]1.00
-R1[weather->is->sunny]1.00
-[sunny->is-a->Unknown]1.00
+unl_b95d2e91   [Unknown->is-a->Thought] 1.00
+unl_02c1a1e5   [dog->is-a->Unknown] 1.00
+unl_72066b02   [go->is-a->Unknown] 1.00
+unl_79623fbd   [outside->is-a->Unknown] 1.00
+unl_e05bf841   [play->is-a->Unknown] 1.00
+unl_0d777847   [fetch->is-a->Unknown] 1.00
+unl_c333331b   [inside->is-a->Unknown] 1.00
+unl_8c02c6b4   [Fido->is-a->dog] 1.00
+unl_af1e4f6a   [is-a->hasProperty->isTransitive] 1.00
+unl_4c616b10   [is-a->hasProperty->inheritable] 1.00
+unl_2dbe9a80   [Fido->is->brown] 1.00
+unl_5fddc29d   [Fido->go->outside] 1.00
+unl_a4aa5e9b   [Fido->play->fetch] 1.00
+unl_5d21642b   [Fido->go->inside] 1.00
+unl_0600ede7   [Fido->events->fido-seq00] 1.00
+unl_1550af15   [fido-seq00->FRST->fido-seq00] 1.00
+unl_7b6afc3a   [fido-seq00->VLU] 1.00
+unl_11456ea5   [fido-seq00->NXT->fido-seq3] 1.00
+unl_f4bca729   [fido-seq3->FRST->fido-seq00] 1.00
+unl_10c6b3d4   [fido-seq3->VLU] 1.00
+unl_b12cde9e   [fido-seq3->NXT] 1.00

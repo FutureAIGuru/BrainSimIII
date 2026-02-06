@@ -114,7 +114,7 @@ public partial class ModuleUKSDlg : ModuleBaseDlg
             tvi.Items.Add(tviChild);
             tviChild.ContextMenu = GetContextMenu(child, tviChild);
 
-            if (l.LinksTo.Count > 0)  //there is provenance on this is-a relationship
+            if (l.LinksTo.Count > 0)  //there is provenance on this is-a link
                 AddLinks(l, tviChild, 1, parentLabel);
 
             int childCount = child.Children.Count;

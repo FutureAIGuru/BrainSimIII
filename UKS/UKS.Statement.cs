@@ -69,6 +69,8 @@ public partial class UKS
         }
         if (r?.From?.Label == "") r.From.AddToUKS();
         if (r?.To?.Label == "") r.To.AddToUKS();
+        if (!string.IsNullOrEmpty(label))
+            r.Label = label.Trim();
 
         WeakenConflictingLinks(source, r);
 
