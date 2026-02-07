@@ -1,7 +1,19 @@
-ï»¿//
+/*
+ * Brain Simulator Thought
+ *
+ * Copyright (c) 2026 Charles Simon
+ *
+ * This file is part of Brain Simulator Thought and is licensed under
+ * the MIT License. You may use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of this software under the terms of
+ * the MIT License.
+ *
+ * See the LICENSE file in the project root for full license information.
+ */
+//
 // PROPRIETARY AND CONFIDENTIAL
 // Brain Simulator 3 v.1.0
-// Â© 2022 FutureAI, Inc., all rights reserved
+// © 2022 FutureAI, Inc., all rights reserved
 // 
 
 using System;
@@ -114,7 +126,7 @@ namespace BrainSimulator.Modules
         }
         public override string ToString()
         {
-            //            string s = "R: " + R.ToString("F3") + ", Theta: " + Degrees.ToString("F3") + "Â° (" + X.ToString("F2") + "," + Y.ToString("F2") + ") Conf:" + Conf.ToString("F3");
+            //            string s = "R: " + R.ToString("F3") + ", Theta: " + Degrees.ToString("F3") + "° (" + X.ToString("F2") + "," + Y.ToString("F2") + ") Conf:" + Conf.ToString("F3");
             string s = $"({X.ToString("0.0")}.{Y.ToString("0.0")})";
             return s;
         }
@@ -360,7 +372,7 @@ namespace BrainSimulator.Modules
         }
         public override string ToString()
         {
-            string s = "R: " + R.ToString("F3") + ", Theta: " + DegreesTheta.ToString("F3") + "Â°, Phi: " + DegreesPhi.ToString("F3") + "Â° (" +
+            string s = "R: " + R.ToString("F3") + ", Theta: " + DegreesTheta.ToString("F3") + "°, Phi: " + DegreesPhi.ToString("F3") + "° (" +
                        X.ToString("F2") + "," + Y.ToString("F2") + "," + Z.ToString("F2") + ") Conf:" + Conf.ToString("F3");
             return s;
         }
@@ -434,7 +446,7 @@ namespace BrainSimulator.Modules
         public Angle rotation = 0;
         public override string ToString()
         {
-            string s = "R: " + R.ToString("F3") + ", Theta: " + Degrees.ToString("F3") + "Â° (" + X.ToString("F2") + "," + Y.ToString("F2") + ") Rot:" + rotation;
+            string s = "R: " + R.ToString("F3") + ", Theta: " + Degrees.ToString("F3") + "° (" + X.ToString("F2") + "," + Y.ToString("F2") + ") Rot:" + rotation;
             return s;
         }
     }
@@ -453,7 +465,7 @@ namespace BrainSimulator.Modules
         }
         public override string ToString()
         {
-            string retVal = $"L: {(int)Length} ({P1.X.ToString("0.0")},{P1.Y.ToString("0.0")}) : ({P2.X.ToString("0.0")},{P2.Y.ToString("0.0")}) A: {Angle.Degrees.ToString("0.0")}Â°";
+            string retVal = $"L: {(int)Length} ({P1.X.ToString("0.0")},{P1.Y.ToString("0.0")}) : ({P2.X.ToString("0.0")},{P2.Y.ToString("0.0")}) A: {Angle.Degrees.ToString("0.0")}°";
             return retVal;
         }
 
@@ -553,7 +565,7 @@ namespace BrainSimulator.Modules
         public override string ToString()
         {
             float degrees = theAngle * 180 / (float)PI;
-            string s = theAngle.ToString("0.00") + " " + degrees.ToString("0.0") + "Â°";
+            string s = theAngle.ToString("0.00") + " " + degrees.ToString("0.0") + "°";
             return s;
         }
         public int CompareTo(Angle a)

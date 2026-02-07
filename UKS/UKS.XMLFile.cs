@@ -1,6 +1,17 @@
-﻿using System.ComponentModel;
+/*
+ * Brain Simulator Thought
+ *
+ * Copyright (c) 2026 Charles Simon
+ *
+ * This file is part of Brain Simulator Thought and is licensed under
+ * the MIT License. You may use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of this software under the terms of
+ * the MIT License.
+ *
+ * See the LICENSE file in the project root for full license information.
+ */
+using System.ComponentModel;
 using System.Diagnostics;
-using System.Reflection.Emit;
 using System.Xml.Serialization;
 
 namespace UKS;
@@ -11,17 +22,12 @@ public partial class UKS
 
     public string FileName { get => fileName; }
 
-    /// <summary>
-    /// /////////////////////////////////////////////////////////// XML file load/save
-    /// </summary>
-    /// 
     //this is a modification of Thought which is used to store and retrieve the UKS in XML
     //it eliminates circular references by replacing Thought references with int indexed into an array 
     public class sThought
     {
         public int index;
         public string label = ""; 
-        public List<sThought> links = new();
         [DefaultValue(-1)]
         public int source = -1;
         [DefaultValue(-1)]
@@ -32,7 +38,6 @@ public partial class UKS
         public float weight = 1;
         [DefaultValue(null)]
         public object V;
-        public bool ShouldSerializelinks() => links is not null && links.Count > 0;
         public override string ToString()
         {
             return $"{ index}, {label}";
@@ -254,8 +259,8 @@ public partial class UKS
     {
         List<string> uksContent = new List<string>();
         if (root is null) return uksContent;
-        var descendants = root.DescendentsList;
-        foreach (var descendant in root.DescendentsList())
+        var descendants = root.DescendantsList;
+        foreach (var descendant in root.DescendantsList())
         {
             foreach (var r in descendant.LinksTo)
             {
@@ -281,6 +286,8 @@ public partial class UKS
         //get all the thoughts
         foreach (sThought st in UKSTemp)
         {
+            if (st.label.ToLower() == "r0")
+            { }
             Thought t = new()
             {
                 Label = st.label,
@@ -294,19 +301,10 @@ public partial class UKS
             if (st.target!= -1)
                 t.To = theUKS.Labeled(UKSTemp[st.target].label);
             AllThoughts.Add(t);
-            t.From?.AddLink(t.To, t.LinkType);
+            t.From?.LinksToWriteable.Add(t);
         }
-        RemoveTempLabels("Thought");
-        RemoveTempLabels("BrainSim");
 
-        //handle links
-        //In the updated format, there are no separate links entries
-        for (int i = 0; i < UKSTemp.Count; i++)
-        {
-            sThought sT = UKSTemp[i];
-            UnconvertLinks(sT);
-        }
-        //rebuild all the reverse linkages
+        //re-create reverse links
         foreach (Thought t in AllThoughts)
         {
             foreach (Thought r in t.LinksTo)
@@ -315,73 +313,10 @@ public partial class UKS
                 if (t1 is not null)
                     if (!t1.LinksFromWriteable.Contains(r))
                         t1.LinksFromWriteable.Add(r);
-                if (r.LinkType is not null)
-                    if (!r.LinkType.LinksAsTypeWriteable.Contains(r))
-                        r.LinkType.LinksAsTypeWriteable.Add(r);
             }
         }
-    }
 
-    private void UnconvertLinks(sThought sT)
-    {
-        foreach (sThought p in sT.links)
-        {
-            Thought r = UnConvertLink(p, new List<sThought>());
-            if (r is null) continue;
-            if (r.LinkType.Label == "play")
-            { }
-            if (!r.From.LinksWriteable.Contains(r))
-                r?.From.LinksWriteable.Add(r);
-        }
-    }
-
-    private Thought UnConvertLink(sThought p, List<sThought> stack)
-    {
-        if (p is null) return null;
-        if (stack.Contains(p)) return null;  //infinite recursions loop protection
-        stack.Add(p);
-
-        Thought source = null;
-        if (p.source != -1)
-            source = AllThoughts[p.source];
-        else
-            return null;
-        Thought linkType = null;
-        if (p.linkType != -1)
-            linkType = AllThoughts[p.linkType];
-        Thought target = null;
-        if (p.target != -1)
-            target = AllThoughts[p.target];
-        Thought r = Labeled(p.label);
-        if (r is not null)
-        {
-            r.From = source;
-            r.To = target;
-            r.LinkType = linkType;
-            r.Weight = p.weight;
-        }
-        else
-        {
-            r = new()
-            {
-                Label = p.label,
-                From = source,
-                To = target,
-                LinkType = linkType,
-                Weight = p.weight,
-            };
-        }
-        if (r?.LinksWriteable.Contains(r) is null)
-            r.From?.LinksWriteable.Add(r);
-
-        foreach (sThought st in p.links)
-        {
-            var r1 = UnConvertLink(st, stack);
-            if (r?.LinksWriteable.Contains(r1) is null)
-                r?.LinksWriteable.Add(r1);
-        }
-        stack.RemoveAt(stack.Count - 1);
-
-        return r;
+        RemoveTempLabels("Thought");
+        RemoveTempLabels("BrainSim");
     }
 }

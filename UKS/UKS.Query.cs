@@ -1,4 +1,16 @@
-﻿using System.Net.Http.Headers;
+/*
+ * Brain Simulator Thought
+ *
+ * Copyright (c) 2026 Charles Simon
+ *
+ * This file is part of Brain Simulator Thought and is licensed under
+ * the MIT License. You may use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of this software under the terms of
+ * the MIT License.
+ *
+ * See the LICENSE file in the project root for full license information.
+ */
+using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 
 namespace UKS;
@@ -144,7 +156,7 @@ public partial class UKS
                 Thought existing = result.FindFirst(x => LinksAreEqual(x, r, ignoreSource));
                 if (existing is not null) continue;
 
-                if (haveCount > 1 && r.LinkType?.HasAncestorLabeled("has") is not null)
+                if (haveCount > 1 && r.LinkType?.HasAncestor("has") is not null)
                 {
                     //this HACK creates a temporary link so suzie has 2 arm, arm has 5 fingers, return suzie has 10 fingers
                     //this (transient) relationshiop doesn't exist in the UKS

@@ -1,7 +1,19 @@
-ï»¿//
+/*
+ * Brain Simulator Thought
+ *
+ * Copyright (c) 2026 Charles Simon
+ *
+ * This file is part of Brain Simulator Thought and is licensed under
+ * the MIT License. You may use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of this software under the terms of
+ * the MIT License.
+ *
+ * See the LICENSE file in the project root for full license information.
+ */
+//
 // PROPRIETARY AND CONFIDENTIAL
 // Brain Simulator 3 v.1.0
-// Â© 2022 FutureAI, Inc., all rights reserved
+// © 2022 FutureAI, Inc., all rights reserved
 //
 
 using System;
@@ -36,7 +48,7 @@ goes = implies location in target
 can = implies action possibility
 
 Every item can have subclasses with attributes.
-In source and target, attributes precede the class, in type, attributes follow the class. â€œred hatâ€ â€œbig brown dogâ€ â€œcan playâ€  â€œhas 5â€
+In source and target, attributes precede the class, in type, attributes follow the class. “red hat” “big brown dog” “can play”  “has 5”
 When adding:
 Hand has 5 fingers creates subclass of has with the attribute of 5 [has->has-child->has.5  has.5->is->5, hand->has.5->fingers
 Every subclass will match the search of its parents (searching for has fingers)
@@ -144,7 +156,7 @@ Follow has ONLY if called out in type
             Thought r = links[i];
             if (targetList.Count > 0 && target != "" && !r.To.HasAncestor(targetList[0]))
             { links.RemoveAt(i); i--; continue; }
-            if (r.LinkType is not null && linkType != "" && !r.LinkType.HasAncestorLabeled(linkType))
+            if (r.LinkType is not null && linkType != "" && !r.LinkType.HasAncestor(linkType))
             { links.RemoveAt(i); i--; continue; }
         }
 

@@ -1,53 +1,46 @@
-﻿//
-// From the Future AI Society and Charles Simon
-// Available for use under an MIT license.
-//  
-
-
-
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+/*
+ * Brain Simulator Thought
+ *
+ * Copyright (c) 2026 Charles Simon
+ *
+ * This file is part of Brain Simulator Thought and is licensed under
+ * the MIT License. You may use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of this software under the terms of
+ * the MIT License.
+ *
+ * See the LICENSE file in the project root for full license information.
+ */
 using static UKS.UKS;
 
 namespace UKS;
 
 /// <summary>
 /// A Thought is an atomic unit of thought. In the lexicon of graphs, a Thought is both a "node" and an Edge.  
-/// A Thought can represent anythought, physical object, attribute, word, action, feeling, etc.
+/// A Thought can represent anything, physical object, attribute, word, action, feeling, etc.
 /// </summary>
-/// Cognemes may have labels which are any string. Like comments or variable names, these are typically used for programmer convenience and are not usually 
+/// Thoughs may have labels which are any string...no special characters except '.'. Like comments or variable names, these are typically used for programmer convenience and are not usually 
 /// used for functionality but are necessary to save and restore the structure.
 /// Labels are case-insensitive although the initial case is preserved within the UKS.
 /// Methods which return a Thought may return null in the event no Thought matches the result of the method. Methods which return lists of Thoughts will
 /// return a list of zero elements if no Thoughts match the result of the method.
 /// A Thought may be referenced by its Label. You can write AddParent("color") [where a Thought is a required parameter.] The system sill automatically retreive a Thought
-/// with the given label or throw an exception if none exists.
+/// with the given label.
 
 public partial class Thought
 {
-    /// <summary>
-    /// This is the magic which allows for strings to be put in place of Thoughts for any method Paramter
-    /// </summary>
-    /// <param name="label"></param>
-    /// Throse 
-    public static implicit operator Thought(string label)
-    {
-        Thought t = ThoughtLabels.GetThought(label);
-        if (t is null)
-        { }
-        //            throw new ArgumentNullException($"No Thought found with label: {label}");
-        return t;
-    }
-    public static Thought IsA { get => ThoughtLabels.GetThought("is-a"); }
-    private List<Thought> _linksTo = new List<Thought>(); //synapses to "has", "is", others
-    private List<Thought> _linksFrom = new List<Thought>(); //synapses from
-    private List<Thought> linksAsType = new List<Thought>(); //nodes which use this as a linkType
+    public static Thought IsA { get => ThoughtLabels.GetThought("is-a"); }  //this is a cache value shortcut for (Thought)"is-a"
+    private List<Thought> _linksTo = new List<Thought>(); //links to "has", "is", is-a, many others
+    private List<Thought> _linksFrom = new List<Thought>(); //links from
 
     /// <summary>
     /// Get an "unsafe" writeable list of a Thought's Links.
     /// This list may change while it is in use and so should not be used as a foreach iterator
     /// </summary>
-    public List<Thought> LinksWriteable { get => _linksTo; }
+    public List<Thought> LinksToWriteable { get => _linksTo; }
+    /// <summary>
+    /// Get an "unsafe" writeable list of Links which target this Thought
+    /// </summary>
+    public List<Thought> LinksFromWriteable { get => _linksFrom; }
     /// <summary>
     /// Full "Safe" list or links
     /// </summary>
@@ -57,17 +50,24 @@ public partial class Thought
     /// </summary>
     public IReadOnlyList<Thought> LinksFrom { get { lock (_linksFrom) { return new List<Thought>(_linksFrom.AsReadOnly()); } } }
     /// <summary>
-    /// Get an "unsafe" writeable list of Links which target this Thought
+    /// "Safe" list of direct ancestors atomic thoughts (not links)
     /// </summary>
-    public List<Thought> LinksFromWriteable { get => _linksFrom; }
+    public IReadOnlyList<Thought> Parents { get { lock (_linksTo) { return new List<Thought>(_linksTo.Where(x => x.LinkType?.Label == "is-a").Select(x => x.To).ToList().AsReadOnly()); } } }
     /// <summary>
-    /// Get an "unsafe" writeable list of Links for which this Thought is the link type
+    /// "Safe" list of direct descendants
     /// </summary>
-    public List<Thought> LinksAsTypeWriteable { get => linksAsType; }
+    public IReadOnlyList<Thought> Children {get {lock (_linksFrom) { return new List<Thought>(_linksFrom.Where(x => x.LinkType?.Label == "is-a").Select(x => x.From).ToList().AsReadOnly()); }}}
 
     private string _label = "";
     /// <summary>
     /// Manages a Thought's label and maintais a hash table
+    //*Restrictions on Thought LabelsNames:
+    // * must be unique
+    // * cannot include ' ' (use a - instead)
+    // * cannot include '.' this is the flag for creating a subclass with following attributes
+    // * cannot include '*' this is the flag for auto-increment the label
+    // * case insensitive but initial input case is preserved for display
+    // * capitalized labels are never signularized even if "singularize=true"
     /// </summary>
     public string Label
     {
@@ -83,8 +83,8 @@ public partial class Thought
     public DateTime LastFiredTime = new();
 
 
-    //NEEDED for Links
-    public Thought _from;
+    //NEEDED for Link functionality 
+    public Thought? _from;
     /// <summary>
     /// the Thought Source
     /// </summary>
@@ -93,49 +93,37 @@ public partial class Thought
         get => _from;
         set { _from = value; }
     }
-    private Thought _linkType;
+    private Thought? _linkType;
     /// <summary>
     /// The Link Type
     /// </summary>
     public Thought? LinkType
     {
         get { return _linkType; }
-        set
-        {
-            _linkType = value;
-        }
+        set { _linkType = value; }
     }
-    private Thought _to;
+    private Thought? _to;
     public Thought? To
     {
-        get { /*Hits++; lastUsed = DateTime.Now;*/ return _to; }
-        set
-        {
-            _to = value;
-        }
+        get { return _to; }
+        set { _to = value; }
     }
-
 
     object _value;
     /// <summary>
     /// Any serializable object can be attached to a Thought
+    /// ONLY STRINGS are supported for save/restor to disk file
     /// </summary>
     public object V
     {
         get => _value;
-        set
-        {
-            this._value = value;
-        }
+        set{this._value = value;}
     }
 
     private float _weight = 1;
     public float Weight
     {
-        get
-        {
-            return _weight;
-        }
+        get { return _weight; }
         set
         {
             _weight = value;
@@ -166,7 +154,7 @@ public partial class Thought
         }
     }
 
-
+    //The constructores
     public Thought()
     {
     }
@@ -223,7 +211,22 @@ public partial class Thought
         return retVal;
     }
 
-    //The following is needed to suppress a warning
+
+    /// <summary>
+    /// This is the magic which allows for strings to be put in place of Thoughts for any method Paramter
+    /// </summary>
+    /// <param name="label"></param>
+    /// Throse 
+    public static implicit operator Thought(string label)
+    {
+        Thought t = ThoughtLabels.GetThought(label);
+        if (t is null)
+        { }
+        //            throw new ArgumentNullException($"No Thought found with label: {label}");
+        return t;
+    }
+
+    //The following is used by several list operations
     public override bool Equals(Object obj)
     {
         if (obj is Thought t)
@@ -258,7 +261,7 @@ public partial class Thought
             return false;
         if (a.Label != "" && a.Label == b.Label) return true;
         if (a.To is not null || a.LinkType is not null || a.To is not null)
-            if ((a.To is null && b.To is null)||a.To == b.To && a.From == b.From && a.LinkType == b.LinkType)
+            if ((a.To is null && b.To is null) || a.To == b.To && a.From == b.From && a.LinkType == b.LinkType)
                 return true;
         return false;
     }
@@ -276,62 +279,20 @@ public partial class Thought
         return true;
     }
 
-    public Thought AddToUKS()
+    public Thought AddDefaultLabel()
     {
         if (this.LinkType is null) return this;
         if (string.IsNullOrEmpty(this.Label))
             Label = "R*";
-        this.AddParent("Link");
-        lock (theUKS.AllThoughts)
-        {
-            if (!theUKS.AllThoughts.Contains(this))
-                theUKS.AllThoughts.Add(this);
-        }
         return this;
     }
 
-
-
-    private IReadOnlyList<Thought> LinksOfType(Thought linkType, bool useLinkFrom = false)
-    {
-        List<Thought> retVal = new List<Thought>();
-        if (!useLinkFrom)
-        {
-            lock (_linksTo)
-            {
-                foreach (Thought r in _linksTo)
-                    if (r?.LinkType is not null && r?.LinkType == linkType && r?.From == this)
-                        retVal.Add(r.To);
-            }
-        }
-        else
-        {
-            lock (_linksFrom)
-            {
-                foreach (Thought r in _linksFrom)
-                    if (r.LinkType is not null && r.LinkType == linkType && r.To == this)
-                        retVal.Add(r.From);
-            }
-        }
-        return retVal;
-    }
-
-
-
-    /// <summary>
-    /// "Safe" list of direct ancestors
-    /// </summary>
-    public IReadOnlyList<Thought> Parents { get => LinksOfType(IsA, false); }
-
-    /// <summary>
-    /// "Safe" list of direct descendants
-    /// </summary>
-    public IReadOnlyList<Thought> Children { get => LinksOfType(IsA, true); }
+    //This is only used in certain Agent modules...  Refactor out
     public IReadOnlyList<Thought> ChildrenWithSubclasses
     {
         get
         {
-            List<Thought> retVal = (List<Thought>)LinksOfType(IsA, true);
+            List<Thought> retVal = (List<Thought>)Children;// (List<Thought>)LinksOfType(IsA, true);
 
             for (int i = 0; i < retVal.Count; i++)
             {
@@ -353,21 +314,19 @@ public partial class Thought
     //////////////////////////////////////////////////////////////
     public IReadOnlyList<Thought> AncestorList()
     {
-        return FollowTransitiveLinks(IsA, true);
+        return Ancestors.ToList();
     }
 
-    /// <summary>
-    /// Recursively gets all the ancestors of a Thought
-    /// </summary>
     public IEnumerable<Thought> Ancestors
     {
         get
         {
-            IReadOnlyList<Thought> ancestors = AncestorList();
-            for (int i = 0; i < ancestors.Count; i++)
+            foreach (var parent in Parents)
             {
-                Thought child = ancestors[i];
-                yield return child;
+                yield return parent;
+
+                foreach (var ancestor in parent.Ancestors)
+                    yield return ancestor;
             }
         }
     }
@@ -385,50 +344,7 @@ public partial class Thought
             }
         }
     }
-    public IEnumerable<Thought> RecursiveLinks
-    {
-        get
-        {
-            foreach (var r in this.LinksTo)
-            {
-                yield return r;
 
-                foreach (var r1 in r.RecursiveLinks)
-                    yield return r1;
-            }
-        }
-    }
-
-    public IEnumerable<Thought> SequenceNodes()
-    {
-        var current = this;
-
-        while (current is not null)
-        {
-            yield return current;  // Return this node, pause, wait for next request
-
-            Thought nextRel = null;
-            if (current.LinkType?.Label == "NXT") nextRel = current.To;
-
-            if (nextRel is null) yield break;  // No more nodes, stop iteration
-
-            if (nextRel.To == this) yield break;  // Reached source, sequence complete
-
-            current = nextRel;
-        }
-    }
-
-    /// <summary>
-    /// Determines whether a Thought has a specific ancestor
-    /// </summary>
-    /// <param name="label"></param>
-    /// <returns></returns>
-    public bool HasAncestorLabeled(string label)
-    {
-        Thought t = ThoughtLabels.GetThought(label);
-        if (t is null) return false;
-        return HasAncestor(label);
-    }
 
     /// <summary>
     /// Determines whether a Thought has a specific ancestor
@@ -437,17 +353,9 @@ public partial class Thought
     /// <returns></returns>
     public bool HasAncestor(Thought t)
     {
-        var x = FollowTransitiveLinks(IsA, true, t);
-        return x.Count != 0;
-    }
-
-    /// <summary>
-    /// Determines how many descendants a Thought has
-    /// </summary>
-    /// <returns>the count</returns>
-    public int GetDescendentsCount()
-    {
-        return DescendentsList().Count;
+        foreach (var ancestor in Ancestors)
+            if (ancestor == t) return true;
+        return false;
     }
 
     /// <summary>
@@ -455,55 +363,11 @@ public partial class Thought
     /// CAUTION: this may be large and time-consuming
     /// </summary>
     /// <returns></returns>
-    public IReadOnlyList<Thought> DescendentsList()
+    public IReadOnlyList<Thought> DescendantsList()
     {
-        return FollowTransitiveLinks(IsA, false);
+        return Descendants.ToList();
     }
 
-    /// <summary>
-    /// Recursively gets all descendents of a Thought. Use with caution as this might be a large list
-    /// </summary>
-    public IEnumerable<Thought> Descendents
-    {
-        get
-        {
-            IReadOnlyList<Thought> descendents = DescendentsList();
-            for (int i = 0; i < descendents.Count; i++)
-            {
-                Thought child = descendents[i];
-                yield return child;
-            }
-        }
-    }
-
-    //Follow chain of links with linkType
-    private IReadOnlyList<Thought> FollowTransitiveLinks(Thought linkType, bool followUpwards = true, Thought searchTarget = null)
-    {
-        List<Thought> retVal = new();
-        retVal.Add(this);
-        if (this == searchTarget) return retVal;
-
-        for (int i = 0; i < retVal.Count; i++)
-        {
-            Thought t = retVal[i];
-            //IReadOnlyList<Thought> linksToFollow = followUpwards ? t.LinksFrom : t.Links;
-            IReadOnlyList<Thought> linksToFollow = followUpwards ? t.LinksTo : t.LinksFrom;
-            foreach (Thought r in linksToFollow)
-            {
-                //Thought thoughtToAdd = followUpwards ? r.source : r.target;
-                Thought thoughtToAdd = followUpwards ? r?.To : r?.From;
-                if (r?.LinkType == linkType)
-                {
-                    if (!retVal.Contains(thoughtToAdd))
-                        retVal.Add(thoughtToAdd);
-                }
-                if (searchTarget == thoughtToAdd)
-                    return retVal;
-            }
-        }
-        if (searchTarget is not null) retVal.Clear();
-        return retVal;
-    }
 
     /// <summary>
     /// Updates the last-fired time on a Thought
@@ -547,30 +411,17 @@ public partial class Thought
         {
             lock (_linksTo)
                 lock (target._linksFrom)
-                    lock (linkType.linksAsType)
-                    {
-                        LinksWriteable.Add(r);
-                        target.LinksFromWriteable.Add(r);
-                        if (!linkType.LinksAsTypeWriteable.Contains(r))
-                            linkType.LinksAsTypeWriteable.Add(r);
-                    }
+                {
+                    LinksToWriteable.Add(r);
+                    target.LinksFromWriteable.Add(r);
+                }
         }
-        else if (linkType is null)
+        else
         {
             lock (_linksTo)
             {
-                LinksWriteable.Add(r);
+                LinksToWriteable.Add(r);
             }
-        }
-        else if (linkType is not null)
-        {
-            lock (_linksTo)
-                lock (linkType.linksAsType)
-                {
-                    LinksWriteable.Add(r);
-                    if (!linkType.LinksAsTypeWriteable.Contains(r))
-                        linkType.LinksAsTypeWriteable.Add(r);
-                }
         }
         return r;
     }
@@ -620,24 +471,24 @@ public partial class Thought
         }
         else if (r.To is null)
         {
-            lock (r.From.LinksWriteable)
+            lock (r.From.LinksToWriteable)
             {
                 lock (r.LinkType.LinksFromWriteable)
                 {
-                    r.From.LinksWriteable.RemoveAll(x => x.From == r.From && x.LinkType == r.LinkType && x.To is null);
+                    r.From.LinksToWriteable.RemoveAll(x => x.From == r.From && x.LinkType == r.LinkType && x.To is null);
                     r.LinkType.LinksFromWriteable.RemoveAll(x => x.From == r.From && x.LinkType == r.LinkType && x.To is null);
                 }
             }
         }
         else
         {
-            lock (r.From.LinksWriteable)
+            lock (r.From.LinksToWriteable)
             {
                 lock (r.LinkType.LinksFromWriteable)
                 {
                     lock (r.To.LinksFromWriteable)
                     {
-                        r.From.LinksWriteable.Remove(r);
+                        r.From.LinksToWriteable.Remove(r);
                         r.LinkType.LinksFromWriteable.Remove(r);
                         r.To.LinksFromWriteable.Remove(r);
                     }
@@ -711,6 +562,7 @@ public partial class Thought
     List<Thought> stack = null;
     public bool HasProperty(Thought t)  //with inheritance
     {
+        //NOT thread safe
         if (stack is null) stack = new();
         if (stack.Contains(t)) return false;
         stack.Add(t);
@@ -747,7 +599,6 @@ public partial class Thought
         void EnqueueIfNew(Thought? t)
         {
             if (t is null) return;
-            //if (!t.To?.HasAncestor(this)) return;
             if (visited.Add(t))
                 q.Enqueue(t);
         }
@@ -765,6 +616,8 @@ public partial class Thought
             if (t is null) continue;
             if (t.From is not null || t.To is not null || t.LinkType is not null)
                 yield return t;
+            else
+            {}
 
             EnqueueIfNew(t.LinkType);
             EnqueueIfNew(t.To);

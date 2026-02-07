@@ -249,6 +249,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="BrainSimBackground.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\charactergrowfont.png" />
     <Resource Include="Resources\charactershrinkfont.png" />
     <Resource Include="Resources\ClearHistory.png" />

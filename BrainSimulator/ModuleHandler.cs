@@ -1,4 +1,16 @@
-﻿using Python.Runtime;
+/*
+ * Brain Simulator Thought
+ *
+ * Copyright (c) 2026 Charles Simon
+ *
+ * This file is part of Brain Simulator Thought and is licensed under
+ * the MIT License. You may use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of this software under the terms of
+ * the MIT License.
+ *
+ * See the LICENSE file in the project root for full license information.
+ */
+using Python.Runtime;
 using System.Diagnostics;
 using UKS;
 using System;
@@ -141,7 +153,7 @@ public class ModuleHandler
         //get the ModuleType
         Thought tModule = theUKS.Labeled(moduleLabel);
         if (tModule is null) { return; }
-        Thought tModuleType = tModule.Parents.FindFirst(x => x.HasAncestorLabeled("AvailableModule"));
+        Thought tModuleType = tModule.Parents.FindFirst(x => x.HasAncestor("AvailableModule"));
         if (tModuleType is null) return;
         string moduleType = tModuleType.Label;
         moduleType = moduleType.Replace(".py", "");

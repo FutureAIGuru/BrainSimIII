@@ -1,4 +1,16 @@
-﻿//
+/*
+ * Brain Simulator Thought
+ *
+ * Copyright (c) 2026 Charles Simon
+ *
+ * This file is part of Brain Simulator Thought and is licensed under
+ * the MIT License. You may use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of this software under the terms of
+ * the MIT License.
+ *
+ * See the LICENSE file in the project root for full license information.
+ */
+//
 // Copyright (c) FutureAI. All rights reserved.  
 // Contains confidential and  proprietary information and programs which may not be distributed without a separate license
 //  
@@ -192,7 +204,7 @@ namespace BrainSimulator.Modules
                     for (int i = 0; i < objectRoot.Children.Count; i++)
                     {
                         Thought child = (Thought)objectRoot.Children[i];
-                        int descendentCount = child.GetDescendentsCount();
+                        int descendentCount = child.DescendantsList().Count;
                         if (descendentCount == 1)
                         {
                             i--;
@@ -589,7 +601,7 @@ namespace BrainSimulator.Modules
                             word = word.Replace(",", "");
                             word = word.Replace("\t", " ");
                             word = word.Replace("-", "");
-                            word = word.Replace("’", "");
+                            word = word.Replace("�", "");
                             word = word.ToLower();
                             word = RemoveParentheticals(word);
                             //word = Thought.TrimDigits(word.Trim());
@@ -619,7 +631,7 @@ namespace BrainSimulator.Modules
                 /* rewrite for new single-label concept
                  * var existingThoughts = theUKS.Labeled(word.Item1);
                                 foreach (var t in existingThoughts)
-                                    if (t.HasAncestorLabeled("Words"))
+                                    if (t.HasAncestor("Words"))
                                     {
                                         existingThought = t;
                                         break;

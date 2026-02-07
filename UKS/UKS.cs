@@ -1,4 +1,16 @@
-﻿namespace UKS;
+/*
+ * Brain Simulator Thought
+ *
+ * Copyright (c) 2026 Charles Simon
+ *
+ * This file is part of Brain Simulator Thought and is licensed under
+ * the MIT License. You may use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of this software under the terms of
+ * the MIT License.
+ *
+ * See the LICENSE file in the project root for full license information.
+ */
+namespace UKS;
 
 using Pluralize.NET;
 using System.Runtime.CompilerServices;
@@ -145,59 +157,6 @@ public partial class UKS
         if (t2.AncestorList().Contains(t1)) return true;
         return false;
     }
-    List<Thought> GetTransitiveTargetChain(Thought t, Thought linkType, List<Thought> results = null)
-    {
-        if (results is null) results = new();
-        List<Thought> targets = LinkTree(t, linkType);
-        foreach (Thought r in targets)
-            if (r.LinkType == linkType)
-            {
-                if (!results.Contains(r.To))
-                {
-                    results.Add(r.To);
-                    results.AddRange(r.To.Descendents);
-                    GetTransitiveTargetChain(r.To, r.LinkType, results);
-                }
-            }
-        return results;
-    }
-    List<Thought> LinkTree(Thought t, Thought linkType)
-    {
-        List<Thought> results = new();
-        results.AddRange(t.LinksTo.FindAll(x => x.LinkType == linkType));
-        foreach (Thought t1 in t.Ancestors)
-            results.AddRange(t1.LinksTo.FindAll(x => x.LinkType == linkType));
-        foreach (Thought t1 in t.Descendents)
-            results.AddRange(t1.LinksTo.FindAll(x => x.LinkType == linkType));
-        return results;
-    }
-    List<Thought> GetTransitiveSourceChain(Thought t, Thought linkType, List<Thought> results = null)
-    {
-        if (results is null) results = new();
-        List<Thought> targets = LinksByTree(t, linkType);
-        foreach (Thought r in targets)
-            if (r.LinkType == linkType)
-            {
-                if (!results.Contains(r.From))
-                {
-                    results.Add(r.From);
-                    //results.AddRange(r.source.Ancestors);
-                    GetTransitiveSourceChain(r.From, r.LinkType, results);
-                }
-            }
-        return results;
-    }
-    List<Thought> LinksByTree(Thought t, Thought linkType)
-    {
-        List<Thought> results = new();
-        if (t is null) return results;
-        results.AddRange(t.LinksFrom.FindAll(x => x.LinkType == linkType));
-        foreach (Thought t1 in t.Ancestors)
-            results.AddRange(t1.LinksFrom.FindAll(x => x.LinkType == linkType));
-        foreach (Thought t1 in t.Descendents)
-            results.AddRange(t1.LinksFrom.FindAll(x => x.LinkType == linkType));
-        return results;
-    }
 
     private bool LinksAreExclusive(Thought r1, Thought r2)
     {
@@ -271,8 +230,8 @@ public partial class UKS
             }
             //if source and target are the same and one contains a number, assume that the other contains "1"
             // fido has leg -> fido has 1 leg  
-            bool hasNumber1 = (r1LinkiProps.FindFirst(x => x.HasAncestorLabeled("number")) is not null);
-            bool hasNumber2 = (r2LinkProps.FindFirst(x => x.HasAncestorLabeled("number")) is not null);
+            bool hasNumber1 = (r1LinkiProps.FindFirst(x => x.HasAncestor("number")) is not null);
+            bool hasNumber2 = (r2LinkProps.FindFirst(x => x.HasAncestor("number")) is not null);
             if (r1.To == r2.To &&
                 (hasNumber1 || hasNumber2))
                 return true;
@@ -532,17 +491,6 @@ public partial class UKS
         thoughtToReturn = AddThought(label, correctParent);
         return thoughtToReturn;
     }
-
-
-    /*Restrictions on Node Names:
-     * must be unique
-     * cannot be empty
-     * cannot include ' ' (use a - instead)
-     * cannot include '.' this is the flag for creating a subclass with following attributes
-     * cannot include '*' this is the flag for auto-increment the label
-     * case insensitive but initial input case is preserved for display
-     * capitalized labels are never signularized even if "singularize=true"
-    */
 
 
     /// <summary>

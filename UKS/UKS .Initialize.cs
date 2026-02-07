@@ -1,4 +1,16 @@
-﻿namespace UKS;
+/*
+ * Brain Simulator Thought
+ *
+ * Copyright (c) 2026 Charles Simon
+ *
+ * This file is part of Brain Simulator Thought and is licensed under
+ * the MIT License. You may use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of this software under the terms of
+ * the MIT License.
+ *
+ * See the LICENSE file in the project root for full license information.
+ */
+namespace UKS;
 
 public partial class UKS
 {
@@ -9,7 +21,7 @@ public partial class UKS
         for (int i = 0; i < AllThoughts.Count; i++)
         {
             Thought t = AllThoughts[i];
-            if (t.HasAncestorLabeled("BrainSim"))
+            if (t.HasAncestor("BrainSim"))
                 continue;
             if (t.Label == "is-a") continue;
             //if (t.Label == "Thought") continue;
