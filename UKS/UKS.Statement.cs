@@ -227,17 +227,8 @@ public partial class UKS
 		return ChildHasAllAttributes(t, attrs, ref bestMatch, ref missingAttributes);
 	}
 
-	List<Thought> GetDirectAttributes(Thought t)
-	{
-		List<Thought> retVal = new();
-		foreach (Thought r in t.LinksTo)
-		{
-			if (r.LinkType.Label == "is")
-				retVal.Add(r.To);
-		}
-		return retVal;
-	}
-	private Thought ChildHasAllAttributes(Thought t, List<Thought> attrs, ref Thought bestMatch, ref List<Thought> missingAttributes, List<Thought> alreadyVisited = null)
+	private Thought ChildHasAllAttributes(Thought t, List<Thought> attrs, 
+		ref Thought bestMatch, ref List<Thought> missingAttributes, List<Thought> alreadyVisited = null)
 	{
 		//circular reference protection
 		if (alreadyVisited is null) alreadyVisited = new List<Thought>();
@@ -248,7 +239,7 @@ public partial class UKS
 		List<Thought> localAttrs = new List<Thought>(attrs);
 		foreach (Thought child in t.Children)
 		{
-			List<Thought> childAttrs = GetDirectAttributes(child);
+			List<Thought> childAttrs = child.LinksTo.Where(x=>x.LinkType.LinkType == "is").ToList();
 			foreach (Thought t3 in childAttrs)
 				localAttrs.Remove(t3);
 

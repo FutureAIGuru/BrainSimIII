@@ -1,9 +1,9 @@
 /*
- * Brain Simulator Thought
+ * Brain Simulator Through
  *
  * Copyright (c) 2026 Charles Simon
  *
- * This file is part of Brain Simulator Thought and is licensed under
+ * This file is part of Brain Simulator Through and is licensed under
  * the MIT License. You may use, copy, modify, merge, publish, distribute,
  * sublicense, and/or sell copies of this software under the terms of
  * the MIT License.
@@ -442,14 +442,14 @@ is-part-of-speech, ";
                 string clauseType = "IF";
 
                 string newThought2 = valuePairs[4].Trim();
-                string relationType2 = valuePairs[5].Trim();
-                string targetThought2 = valuePairs[6].Trim();
+                string linkThought22 = valuePairs[5].Trim();
+                string toThought2 = valuePairs[6].Trim();
 
 
                 // Add links and clause
                 Thought r1 = AddLinkClause(newThought, toThought, linkThought);
 
-                Thought r2 = AddLinkClause(newThought2, targetThought2, relationType2);
+                Thought r2 = AddLinkClause(newThought2, toThought2, linkThought22);
 
                 Thought theClauseType = GetClauseType(clauseType);
 

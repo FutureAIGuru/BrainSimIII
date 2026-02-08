@@ -50,148 +50,20 @@
     <Compile Remove="XmlFile.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="BrainSim3SplashScreen.jpg" />
     <None Remove="refresh-3104.png" />
-    <None Remove="Resources\charactergrowfont.png" />
-    <None Remove="Resources\charactershrinkfont.png" />
-    <None Remove="Resources\ClearHistory.png" />
-    <None Remove="Resources\Close.png" />
-    <None Remove="Resources\diskette.png" />
-    <None Remove="Resources\Entity.png" />
-    <None Remove="Resources\facebook-3-24.ico" />
-    <None Remove="Resources\Fonts\OpenSans-Bold.ttf" />
-    <None Remove="Resources\Fonts\OpenSans-BoldItalic.ttf" />
-    <None Remove="Resources\Fonts\OpenSans-ExtraBold.ttf" />
-    <None Remove="Resources\Fonts\OpenSans-ExtraBoldItalic.ttf" />
-    <None Remove="Resources\Fonts\OpenSans-Italic.ttf" />
-    <None Remove="Resources\Fonts\OpenSans-Light.ttf" />
-    <None Remove="Resources\Fonts\OpenSans-LightItalic.ttf" />
-    <None Remove="Resources\Fonts\OpenSans-Regular.ttf" />
-    <None Remove="Resources\Fonts\OpenSans-SemiBold.ttf" />
-    <None Remove="Resources\Fonts\OpenSans-SemiBoldItalic.ttf" />
-    <None Remove="Resources\FullScreen.png" />
-    <None Remove="Resources\github-9-24.ico" />
-    <None Remove="Resources\GreenCircle.png" />
-    <None Remove="Resources\Hand.png" />
-    <None Remove="Resources\Icons\Copy_16x.png" />
-    <None Remove="Resources\Icons\Cut_16x.png" />
-    <None Remove="Resources\Icons\Hand.png" />
+    <None Remove="Resources\BrainSimBackground.jpg" />
     <None Remove="Resources\Icons\NewFile_16x.png" />
     <None Remove="Resources\Icons\OpenFile_16x.png" />
-    <None Remove="Resources\Icons\Paste_16x.png" />
-    <None Remove="Resources\Icons\Pause_16x.png" />
-    <None Remove="Resources\Icons\QuickFind_16x.png" />
     <None Remove="Resources\Icons\Refresh_16x.png" />
     <None Remove="Resources\Icons\SaveAs_16x.png" />
     <None Remove="Resources\Icons\Save_16x.png" />
-    <None Remove="Resources\Icons\SelectAll_16x.png" />
-    <None Remove="Resources\Icons\TextFileIcon.png" />
-    <None Remove="Resources\Icons\Undo_16x.png" />
-    <None Remove="Resources\Icons\ZoomIn_16x.png" />
-    <None Remove="Resources\Icons\ZoomOriginalSize_16x.png" />
-    <None Remove="Resources\Icons\ZoomOut_16x.png" />
-    <None Remove="Resources\KeywordTables\OKSallieKeyword.table" />
-    <None Remove="Resources\KeywordTables\SapphireKeyword.table" />
-    <None Remove="Resources\KeywordTables\ShamrockKeyword.table" />
-    <None Remove="Resources\mailing-list-icon-17.jpg" />
-    <None Remove="Resources\Pause.png" />
-    <None Remove="Resources\Play.png" />
-    <None Remove="Resources\Record.png" />
     <None Remove="Resources\Recording %285%29.m4a" />
-    <None Remove="Resources\RedCircle.png" />
     <None Remove="Resources\refresh-3104.png" />
-    <None Remove="Resources\Rewind.png" />
     <None Remove="Resources\ryanHexOutput_4.bin" />
     <None Remove="Resources\ryanHexOutput_5.bin" />
     <None Remove="Resources\ryanHexOutput_6.bin" />
     <None Remove="Resources\ryanHexOutput_7.bin" />
     <None Remove="Resources\ryanHexOutput_8.bin" />
-    <None Remove="Resources\Step.png" />
-    <None Remove="Resources\UserInterface\AudioClips\Awake.wav" />
-    <None Remove="Resources\UserInterface\AudioClips\Collision.wav" />
-    <None Remove="Resources\UserInterface\AudioClips\Confirm.wav" />
-    <None Remove="Resources\UserInterface\AudioClips\ConfirmationChirp.wav" />
-    <None Remove="Resources\UserInterface\AudioClips\ErrorChirp.wav" />
-    <None Remove="Resources\UserInterface\AudioClips\Help.wav" />
-    <None Remove="Resources\UserInterface\AudioClips\MagicalWhoosh.wav" />
-    <None Remove="Resources\UserInterface\AudioClips\Negative.wav" />
-    <None Remove="Resources\UserInterface\AudioClips\Ouch!.wav" />
-    <None Remove="Resources\UserInterface\AudioClips\Positive.wav" />
-    <None Remove="Resources\UserInterface\AudioClips\Thinking.wav" />
-    <None Remove="Resources\UserInterface\calibration.png" />
-    <None Remove="Resources\UserInterface\camera.png" />
-    <None Remove="Resources\UserInterface\Camera\ICON-Center-Cam-Disabled.png" />
-    <None Remove="Resources\UserInterface\Camera\ICON-Center-Cam-Enabled.png" />
-    <None Remove="Resources\UserInterface\Camera\ICON-Snap-Shot-Disabled.png" />
-    <None Remove="Resources\UserInterface\Camera\ICON-Snap-Shot-Enabled.png" />
-    <None Remove="Resources\UserInterface\close.png" />
-    <None Remove="Resources\UserInterface\collapse.png" />
-    <None Remove="Resources\UserInterface\drag.png" />
-    <None Remove="Resources\UserInterface\expand.png" />
-    <None Remove="Resources\UserInterface\ICON-Edit-Pencil.png" />
-    <None Remove="Resources\UserInterface\ICON-Help-Blue.png" />
-    <None Remove="Resources\UserInterface\ICON-Mic.png" />
-    <None Remove="Resources\UserInterface\ICON-Sallie-Blue.png" />
-    <None Remove="Resources\UserInterface\ICON-Sallie-Grey.png" />
-    <None Remove="Resources\UserInterface\ICON-Spinner.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Batt-1-5ths.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Batt-2-5ths.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Batt-3-5ths.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Batt-4-5ths.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Batt-Empty.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Batt-Full.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Help.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Network-Alert.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Network-Blue.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Network.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Settings-Blue.png" />
-    <None Remove="Resources\UserInterface\MainWindow\ICON-Settings.png" />
-    <None Remove="Resources\UserInterface\MainWindow\LOGO-Future-AI.png" />
-    <None Remove="Resources\UserInterface\MainWindow\WINDOWS-ICON-Close.png" />
-    <None Remove="Resources\UserInterface\MainWindow\WINDOWS-ICON-Compress.png" />
-    <None Remove="Resources\UserInterface\MainWindow\WINDOWS-ICON-Expand.png" />
-    <None Remove="Resources\UserInterface\MainWindow\WINDOWS-ICON-Minimize.png" />
-    <None Remove="Resources\UserInterface\MainWindow\WINDOWS-ICON-Move.png" />
-    <None Remove="Resources\UserInterface\minimize.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Background-Circle.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Big-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Big.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Med-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Med.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Small-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Small.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Big-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Big.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Med-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Med.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Small-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Small.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Big-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Big.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Med-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Med.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Small-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Small.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Stop-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Stop.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Big-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Big.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Med-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Med.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Small-Disabled.png" />
-    <None Remove="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Small.png" />
-    <None Remove="Resources\UserInterface\reset.png" />
-    <None Remove="Resources\UserInterface\SoundWaves.jpg" />
-    <None Remove="Resources\UserInterface\Speaker.png" />
-    <None Remove="Resources\UserInterface\TALK-BUBBLES-Pointer-Sallie.png" />
-    <None Remove="Resources\UserInterface\TALK-BUBBLES-Pointer-User.png" />
-    <None Remove="Resources\UserInterface\TOGGLE-Off-w-Text.png" />
-    <None Remove="Resources\UserInterface\TOGGLE-Off.png" />
-    <None Remove="Resources\UserInterface\TOGGLE-On-w-Text.png" />
-    <None Remove="Resources\YellowCircle.png" />
-    <None Remove="Resources\youtube-24.ico" />
-    <None Remove="Resources\ZoomIn.png" />
-    <None Remove="Resources\ZoomOut.png" />
     <None Remove="SplashScreen3.bmp" />
   </ItemGroup>
   <ItemGroup>
@@ -201,214 +73,18 @@
     <Page Remove="Tools\ModuleDlg.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="BrainSim3SplashScreen.jpg" />
     <Content Include="Iconsmall.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Fonts\OpenSans-Bold.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Fonts\OpenSans-BoldItalic.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Fonts\OpenSans-ExtraBold.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Fonts\OpenSans-ExtraBoldItalic.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Fonts\OpenSans-Italic.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Fonts\OpenSans-Light.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Fonts\OpenSans-LightItalic.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Fonts\OpenSans-Regular.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Fonts\OpenSans-SemiBold.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Fonts\OpenSans-SemiBoldItalic.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\KeywordTables\OKSallieKeyword.table">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\KeywordTables\SallieKeyword.table">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\KeywordTables\SapphireKeyword.table">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\KeywordTables\ShamrockKeyword.table">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="BrainSimBackground.jpg">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\charactergrowfont.png" />
-    <Resource Include="Resources\charactershrinkfont.png" />
-    <Resource Include="Resources\ClearHistory.png" />
-    <Resource Include="Resources\Close.png" />
-    <Resource Include="Resources\diskette.png" />
-    <Resource Include="Resources\Entity.png" />
-    <Resource Include="Resources\facebook-3-24.ico" />
-    <Resource Include="Resources\FullScreen.png" />
-    <Resource Include="Resources\github-9-24.ico" />
-    <Resource Include="Resources\GreenCircle.png" />
-    <Resource Include="Resources\Hand.png" />
-    <Resource Include="Resources\Icons\Copy_16x.png" />
-    <Resource Include="Resources\Icons\Cut_16x.png" />
-    <Resource Include="Resources\Icons\Hand.png" />
+    <Resource Include="Resources\BrainSimBackground.jpg" />
     <Resource Include="Resources\Icons\NewFile_16x.png" />
     <Resource Include="Resources\Icons\OpenFile_16x.png" />
-    <Resource Include="Resources\Icons\Paste_16x.png" />
-    <Resource Include="Resources\Icons\Pause_16x.png" />
-    <Resource Include="Resources\Icons\QuickFind_16x.png" />
     <Resource Include="Resources\Icons\Refresh_16x.png" />
     <Resource Include="Resources\Icons\SaveAs_16x.png" />
     <Resource Include="Resources\Icons\Save_16x.png" />
-    <Resource Include="Resources\Icons\SelectAll_16x.png" />
-    <Resource Include="Resources\Icons\Undo_16x.png" />
-    <Resource Include="Resources\Icons\ZoomIn_16x.png" />
-    <Resource Include="Resources\Icons\ZoomOriginalSize_16x.png" />
-    <Resource Include="Resources\Icons\ZoomOut_16x.png" />
-    <Resource Include="Resources\mailing-list-icon-17.jpg" />
-    <Resource Include="Resources\Pause.png" />
-    <Resource Include="Resources\Play.png" />
-    <Resource Include="Resources\Record.png" />
-    <Resource Include="Resources\RedCircle.png" />
-    <Resource Include="Resources\refresh-3104.png" />
-    <Resource Include="Resources\Rewind.png" />
-    <Resource Include="Resources\Step.png" />
-    <Resource Include="Resources\UserInterface\AudioClips\Awake.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\AudioClips\Collision.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\AudioClips\Confirm.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\AudioClips\ConfirmationChirp.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\AudioClips\ErrorChirp.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\AudioClips\Help.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\AudioClips\MagicalWhoosh.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\AudioClips\Negative.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\AudioClips\Ouch!.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\AudioClips\Positive.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\AudioClips\Thinking.wav">
-      <CopyToOutputDirectory>
-      </CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\UserInterface\calibration.png" />
-    <Resource Include="Resources\UserInterface\camera.png" />
-    <Resource Include="Resources\UserInterface\Camera\ICON-Center-Cam-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Camera\ICON-Center-Cam-Enabled.png" />
-    <Resource Include="Resources\UserInterface\Camera\ICON-Snap-Shot-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Camera\ICON-Snap-Shot-Enabled.png" />
-    <Resource Include="Resources\UserInterface\close.png" />
-    <Resource Include="Resources\UserInterface\collapse.png" />
-    <Resource Include="Resources\UserInterface\drag.png" />
-    <Resource Include="Resources\UserInterface\expand.png" />
-    <Resource Include="Resources\UserInterface\ICON-Edit-Pencil.png" />
-    <Resource Include="Resources\UserInterface\ICON-Mic.png" />
-    <Resource Include="Resources\UserInterface\ICON-Sallie-Blue.png" />
-    <Resource Include="Resources\UserInterface\ICON-Spinner.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Help-Blue.png" />
-    <Resource Include="Resources\UserInterface\ICON-Sallie-Grey.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Help.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Settings-Blue.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Settings.png" />
-    <Resource Include="Resources\UserInterface\minimize.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Background-Circle.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Big-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Big.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Med-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Med.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Small-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Down-Small.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Big-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Big.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Med-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Med.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Small-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Left-Small.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Big-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Big.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Med-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Med.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Small-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Right-Small.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Stop-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Stop.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Big-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Big.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Med-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Med.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Small-Disabled.png" />
-    <Resource Include="Resources\UserInterface\Motion\DRIVE-CONTROLS-Up-Small.png" />
-    <Resource Include="Resources\UserInterface\reset.png" />
-    <Resource Include="Resources\UserInterface\SoundWaves.jpg" />
-    <Resource Include="Resources\UserInterface\Speaker.png" />
-    <Resource Include="Resources\UserInterface\TALK-BUBBLES-Pointer-Sallie.png" />
-    <Resource Include="Resources\UserInterface\TALK-BUBBLES-Pointer-User.png" />
-    <Resource Include="Resources\UserInterface\TOGGLE-Off-w-Text.png" />
-    <Resource Include="Resources\UserInterface\TOGGLE-Off.png" />
-    <Resource Include="Resources\YellowCircle.png" />
-    <Resource Include="Resources\youtube-24.ico" />
-    <Resource Include="Resources\ZoomIn.png" />
-    <Resource Include="Resources\ZoomOut.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\UserInterface\TOGGLE-On-w-Text.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Batt-1-5ths.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Batt-2-5ths.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Batt-3-5ths.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Batt-4-5ths.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Batt-Empty.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Batt-Full.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Network-Alert.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Network-Blue.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\ICON-Network.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\LOGO-Future-AI.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\WINDOWS-ICON-Close.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\WINDOWS-ICON-Compress.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\WINDOWS-ICON-Expand.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\WINDOWS-ICON-Minimize.png" />
-    <Resource Include="Resources\UserInterface\MainWindow\WINDOWS-ICON-Move.png" />
+    <Resource Include="Resources\Icons\refresh-3104.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12" />
@@ -457,9 +133,6 @@
     <EmbeddedResource Remove="Modules\Vision\**" />
     <None Remove="Modules\Vision\**" />
     <Page Remove="Modules\Vision\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\TextFileIcon.png" />
   </ItemGroup>
 
 </Project>

@@ -25,7 +25,7 @@ public partial class UKS
     static private List<Thought> uKSList = new();// { Capacity = 1000000, };
 
 
-    //This is a temporary copy of the UKS which used internally during the save and restore process to 
+    //This is a reformatted temporary copy of the UKS which used internally during the save and restore process to 
     //break circular links by storing index values instead of actual links Note the use of SThought instead of Thought
     private List<sThought> UKSTemp = new();
 
@@ -33,7 +33,6 @@ public partial class UKS
     /// Occasionally a list of all the Thoughts in the UKS is needed. This is READ ONLY.
     /// There is only one (shared) list for the App.
     /// </summary>
-    //public List<Thought> AllThoughts { get => uKSList; }
     public List<Thought> AllThoughts { get => uKSList; }
 
     //TimeToLive processing for links

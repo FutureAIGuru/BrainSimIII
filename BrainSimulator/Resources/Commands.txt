@@ -1,5 +1,0 @@
-a cyan sphere is a cyan ball
-a cyan cube is a cyan box
-pause 10
-a cyan box is cyan
-a cyan ball is cyan

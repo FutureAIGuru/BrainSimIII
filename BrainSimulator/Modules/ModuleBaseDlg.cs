@@ -61,19 +61,19 @@ public class ModuleBaseDlg : Window
         helpButton.Click += HelpButton_Click;
 
 
-        //get the image for the source button icon
-        var img = new Image
-        {
-            Source = new BitmapImage(
-                new Uri("pack://application:,,,/Resources/icons/textFileIcon.png",
-                        UriKind.Absolute)),
-            Stretch = Stretch.Uniform
-        };
+        ////get the image for the source button icon
+        //var img = new Image
+        //{
+        //    Source = new BitmapImage(
+        //        new Uri("pack://application:,,,/Resources/icons/textFileIcon.png",
+        //                UriKind.Absolute)),
+        //    Stretch = Stretch.Uniform
+        //};
 
         //create a button to show the source code
         Button sourceButton = new Button
         {
-            Content = img,
+            Content = "src",
             Width = 20,
             Height = 25,
             Margin = new Thickness(5, 5, 30, 5),

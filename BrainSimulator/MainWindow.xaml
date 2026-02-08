@@ -6,9 +6,6 @@
         xmlns:local="clr-namespace:BrainSimulator"
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="800" WindowState="Maximized" Closing="Window_Closing">
-    <Window.Background>
-        <ImageBrush ImageSource="/BrainSimThoughtSplashScreen.jpg" Opacity="0.5" />
-    </Window.Background>
     <DockPanel Margin="0,0,0,0" >
         <Menu DockPanel.Dock="Top" x:Name="MainMenu" Height="26" Margin="0,0" VerticalAlignment="Top" Background="LightGray" >
             <MenuItem Header="_File">
@@ -44,6 +41,11 @@
             </MenuItem>
         </Menu>
         <Grid>
+
+            <Grid.Background>
+                <ImageBrush ImageSource="/Resources/BrainSimBackground.jpg" />
+            </Grid.Background>
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>

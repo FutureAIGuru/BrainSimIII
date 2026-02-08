@@ -27,7 +27,7 @@
         <Button Content="Import" Height="25" HorizontalAlignment="Left" Margin="628,8,0,0" VerticalAlignment="Top" FontSize="16" Width="70" Click="ImportButton_Click"/>
         <Button Content="Export" Height="25"  HorizontalAlignment="Left" Margin="628,39,0,0" VerticalAlignment="Top" FontSize="16" Width="70" Click="ExportButton_Click"/>
         <Button x:Name="RefreshButton" Click="RefreshButton_Click" HorizontalAlignment="Left" Margin="108,36,0,0" Width="26" Height="26" VerticalAlignment="Top">
-            <Image Width="22" Height="22" Source="/Resources/refresh-3104.png" />
+            <Image Width="22" Height="22" Source="/Resources/icons/refresh-3104.png" />
         </Button>
     </Grid>
 </local:ModuleBaseDlg>

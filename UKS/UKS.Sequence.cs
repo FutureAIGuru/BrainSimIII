@@ -16,28 +16,36 @@ namespace UKS;
 
 public partial class UKS
 {
-    //The structure of a sequence is a series of elements with 3 links.
+    //The structure of a sequence is a series of elements, each with 3 links.
     //"NXT" with a To of the next element in the sequence
     //"VLU" to the actual Thought in the sequence
     //"FRST" which points to the first element of the list
-    //the "owner" of the sequences had a link of LinkType linkType to the first element in the sequence
+    //the "owner" of the sequences had a link of LinkType (spelled e.g.) to the first element in the sequence
     //the last element in the sequence has a link of LinkType "NXT" with a To of null
     //Example, to represent the spelling of "CAT":
     // [cat -> spelled -> seq0]
-    // seq0 --NXT--> seq1 --NXT--> seq2 --NXT--> null
-    // seq0 --VLU--> C
-    // seq1 --VLU--> A
-    // seq2 --VLU--> T
+    // seq0 ->NXT--> seq1
+    // seq0 ->FRST-> seq0
+    // seq0 ->VLU--> C
+    // seq1 ->NXT -> seq2
+    // seq1 ->FRST-> seq0
+    // seq1 ->VLU--> A
+    // seq2 ->NXT -> null  (or has no NXT entry)
+    // seq2 ->FRST-> seq0
+    // seq2 ->VLU--> T
     // NOTE: the elements seq* need not have labels at all, they are just used here for clarity
     // each seq* element must also have a FRST releationship back to the owner Thought
-    // seq0 -> FRST -> cat
-    // seq1 -> FRST -> cat
-    // seq2 -> FRST -> cat
+    // The Thought ToString() method will automatically follow the sequences and return cat->spelled->^cat
+    // VLU targets may be other sequences
 
     // A few Special cases can be detected by comparing targets
+    // Is a sequence element:  Has a FRST link
     // Start of sequence:  seq->NXT = seq->FRST
     // End of sequence:    seq->NXT = null 
 
+    //TODO:
+    // add circular sequences (search can start at any location in the sequence)
+    // search with errors and scoring: First/Last are correct, Elements out of order, Elements near others
 
     public bool IsSequenceElement(Thought t)
     {
@@ -97,6 +105,7 @@ public partial class UKS
         return FlattenSequence(firstNode).Count;
     }
 
+    //puts a new wlement at the beginning of the sequence
     public Thought InsertElement(Thought prevElementIn, Thought value)
     {
         Thought first = prevElementIn;
@@ -121,6 +130,7 @@ public partial class UKS
         return first;
     }
 
+    //Adds a new element to the end of the sequence
     public Thought AddElement(Thought prevElementIn, Thought value)
     {
         Thought prevElement = GetLastlement(prevElementIn);
@@ -130,6 +140,7 @@ public partial class UKS
         prevElement.AddLink(newNode, "NXT");
         return newNode;
     }
+    //starts a sequence
     public Thought CreateFirstElement(Thought source, Thought value)
     {
         Thought firstNode = new Thought() { Label = source.Label.ToLower() + "-seq0" };
@@ -181,7 +192,7 @@ public partial class UKS
     /// </summary>
     /// <param name="source">The 'owner' of the sequence</param>
     /// <param name="linkType">The type of link</param>
-    /// <param name="targets">The target Thoughts (can be letters or sequence start nodes)</param>
+    /// <param name="targets">The target Thoughts (can be any Thoughts including sequence start of other sequences)</param>
     /// <param name="baseWeight">The base weight of the links</param>
     /// <returns></returns>
     public Thought AddSequence(Thought source, Thought linkType, List<Thought>  targets, float baseWeight = 1.0f)
@@ -253,7 +264,6 @@ public partial class UKS
         return rawSequence;
     }
 
-    //TODO add concept of "near" Thoughts
     //TODO: make mustMatchLast, circularSearch & allowOutOfOrder work
     /// <summary>
     /// This determines how well two Thoughts match in terms of the order of their ordered attributes.
@@ -393,6 +403,7 @@ public partial class UKS
         return retVal;
     }
 
+    // searches for a sequence given a list of targets
     private List<(Thought seqNode, IEnumerator<Thought>? curPos, int matchCount)> RawSearch(List<Thought> targets)
     {
         List<(Thought seqNode, IEnumerator<Thought>? curPos, int matchCount)> searchCandidates = new();
@@ -545,7 +556,7 @@ public partial class UKS
         visitedSequences.Pop();
     }
     /// <summary>
-    /// Recursively finds all sequences that reference the given sequences
+    /// Recursively finds all sequences that reference the given sequence
     /// </summary>
     private void AddReferencingSequences(List<Thought> currentReferences, Thought linkType, List<Thought> accumulator)
     {
