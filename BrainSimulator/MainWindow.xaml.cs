@@ -178,7 +178,10 @@ namespace BrainSimulator
         {
             theUKS.AllThoughts.Clear();
             theUKS = new UKS.UKS();
-            theUKS.AddThought("BrainSim", null);
+            theUKS.CreateInitialStructure();  //creates the "thought" substructure
+
+            if (theUKS.Labeled("BrainSim") is null)
+                theUKS.AddThought("BrainSim", null);
             theUKS.GetOrAddThought("AvailableModule", "BrainSim");
             theUKS.GetOrAddThought("ActiveModule", "BrainSim");
 
@@ -198,7 +201,6 @@ namespace BrainSimulator
             foreach (var module in CSharpModules)
             {
                 string name = module.Name;
-                //name = name.Replace("Module", "");
                 Thought availableModule = availableListInUKS.FindFirst(x => x.Label == name);
                 if (availableModule is null)
                     theUKS.GetOrAddThought(name, "AvailableModule");
@@ -235,7 +237,6 @@ namespace BrainSimulator
 
         public void InsertMandatoryModules()
         {
-
             Debug.WriteLine("InsertMandatoryModules entered");
             ActivateModule("ModuleUKS");
             ActivateModule("ModuleUKSStatement");
@@ -311,6 +312,7 @@ namespace BrainSimulator
         {
         }
 
+        //THIS IS THE MAIN ENGINE LOOP
         private void Dt_Tick(object? sender, EventArgs e)
         {
             Thought activeModuleParent = theUKS.Labeled("ActiveModule");

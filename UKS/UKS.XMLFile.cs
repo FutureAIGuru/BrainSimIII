@@ -213,22 +213,6 @@ public partial class UKS
             MergeStringListIntoUKS(contentToRestore);
         }
 
-        // prepend "Module" to any module names which don't have it
-        // this is needed for the UKS content change from module names starting with the word "module" to avoid naming collisions
-        var activeModules = Labeled("ActiveModule").Children;
-        var avaialableModules = Labeled("AvailableModule").Children;
-
-        foreach (Thought t in avaialableModules)
-        {
-            if (!t.Label.ToLower().StartsWith("module"))
-                t.Label = "Module" + t.Label;
-        }
-        foreach (Thought t in activeModules)
-        {
-            if (!t.Label.ToLower().StartsWith("module"))
-                t.Label = "Module" + t.Label;
-        }
-
         //more hacks for compatibility old file formatting
         //this does nothought on updated file content
         AddStatement("inheritable", "is-a", "Property");

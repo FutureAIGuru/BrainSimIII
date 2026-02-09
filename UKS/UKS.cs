@@ -50,7 +50,6 @@ public partial class UKS
         {
             AllThoughts.Clear();
             ThoughtLabels.ClearLabelList();
-            //CreateInitialStructure();
         }
         UKSTemp.Clear();
 
@@ -71,19 +70,13 @@ public partial class UKS
                 //check to see if the link has expired
                 if (r.TimeToLive != TimeSpan.MaxValue && r.LastFiredTime + r.TimeToLive < DateTime.Now)
                 {
-                    r.From.RemoveLink(r);
-                    //if this leaves an orphan thought, delete the thought
-                    if (r.LinkType.Label == "has-child" && r.To?.Parents.Count == 0)
+                    r.To.RemoveLink(r);
+                    //if this leaves an orphan thought, make it unknown
+                    if (r.LinkType.Label == "is-a" && r.From?.Parents.Count == 0)
                     {
-                        r.To.AddParent(ThoughtLabels.GetThought("Unknown"));
+                        r.From.AddParent("Unknown");
                     }
                     transientLinks.Remove(r);
-                    //HACK
-                    if (r.LinkType.Label == "has-child")
-                    {
-                        DeleteAllChildren(r.To);
-                        DeleteThought(r.To);
-                    }
                 }
             }
         }
@@ -157,6 +150,8 @@ public partial class UKS
         return false;
     }
 
+
+    //TODO: This method has gotten out of hand and needs a rewrite
     private bool LinksAreExclusive(Thought r1, Thought r2)
     {
         //are two links mutually exclusive?
@@ -291,27 +286,8 @@ public partial class UKS
         return false;
     }
 
-    bool LinksAreEqualIgnoringLabels(Thought r1, Thought r2, bool ignoreSource = true)
-    {
-        if (
-            (r1.From == r2.From || ignoreSource) &&
-            r1.To == r2.To &&
-            r1.LinkType == r2.LinkType
-          ) return true;
-        //special case if these contain other links
-        if (r1.From is Thought rt1 && r2.From is Thought rt2)
-        {
-            if (!LinksAreEqual(rt1, rt2)) return false;
-            if (r1.To is Thought rt3 && r2.To is Thought rt4)
-                if (!LinksAreEqual(rt3, rt4)) return false;
-            if (r1.LinkType != r2.LinkType) return false;
-            return true;
-        }
-        return false;
-    }
 
-
-    bool LinksAreEqual(Thought r1, Thought r2, bool ignoreSource = true)
+    private bool LinksAreEqual(Thought r1, Thought r2, bool ignoreSource = true)
     {
         if (
             r1.Label == r2.Label &&
@@ -360,8 +336,8 @@ public partial class UKS
 
     private Thought ThoughtFromString(string label, string defaultParent, Thought source = null)
     {
-        GetOrAddThought("Thought");
-        GetOrAddThought("Unknown", "Thought");
+        GetOrAddThought("Thought"); //safety
+        GetOrAddThought("Unknown", "Thought"); //safety
         if (string.IsNullOrEmpty(label)) return null;
         if (label == "") return null;
         Thought t = Labeled(label);
@@ -467,7 +443,8 @@ public partial class UKS
         if (correctParent is null)
             correctParent = ThoughtLabels.GetThought("Unknown");
 
-        if (correctParent is null) throw new ArgumentException("GetOrAddThought: could not find parent");
+        if (correctParent is null) return null;
+//            throw new ArgumentException("GetOrAddThought: could not find parent");
 
         if (label.EndsWith("*"))
         {

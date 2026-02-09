@@ -80,10 +80,25 @@ public partial class Thought
         }
     }
 
-    public DateTime LastFiredTime = new();
+    //TODO: make this useful
+    public DateTime LastFiredTime = DateTime.Now;
+    private TimeSpan _timeToLive = TimeSpan.MaxValue;
+    /// <summary>
+    /// When set, makes a Thought transient
+    /// </summary>
+    public TimeSpan TimeToLive
+    {
+        get { return _timeToLive; }
+        set
+        {
+            _timeToLive = value;
+            if (_timeToLive != TimeSpan.MaxValue)
+                AddToTransientList();
+        }
+    }
 
 
-    //NEEDED for Link functionality 
+    //////NEEDED for Link functionality 
     public Thought? _from;
     /// <summary>
     /// the Thought Source
@@ -108,6 +123,8 @@ public partial class Thought
         get { return _to; }
         set { _to = value; }
     }
+
+
 
     object _value;
     /// <summary>
@@ -139,20 +156,6 @@ public partial class Thought
         }
     }
 
-    private TimeSpan _timeToLive = TimeSpan.MaxValue;
-    /// <summary>
-    /// When set, makes a Thought transient
-    /// </summary>
-    public TimeSpan TimeToLive
-    {
-        get { return _timeToLive; }
-        set
-        {
-            _timeToLive = value;
-            if (_timeToLive != TimeSpan.MaxValue)
-                AddToTransientList();
-        }
-    }
 
     //The constructores
     public Thought()
@@ -321,12 +324,22 @@ public partial class Thought
     {
         get
         {
+            //TODO: examine ramifications of adding "this" to beginning of list
+            var queue = new Queue<Thought>();
+            queue.Enqueue(this);
             foreach (var parent in Parents)
+                queue.Enqueue(parent);
+            var seen = new HashSet<Thought>();
+
+            while (queue.Count > 0)
             {
+                var parent = queue.Dequeue();
+                if (parent is null || !seen.Add(parent)) continue;
+
                 yield return parent;
 
-                foreach (var ancestor in parent.Ancestors)
-                    yield return ancestor;
+                foreach (var gp in parent.Parents)
+                    queue.Enqueue(gp);
             }
         }
     }
@@ -335,12 +348,18 @@ public partial class Thought
     {
         get
         {
-            foreach (var child in this.Children)
+            var queue = new Queue<Thought>(Children);
+            var seen = new HashSet<Thought>();
+
+            while (queue.Count > 0)
             {
+                var child = queue.Dequeue();
+                if (child is null || !seen.Add(child)) continue;
+
                 yield return child;
 
-                foreach (var descendant in child.Descendants)
-                    yield return descendant;
+                foreach (var gc in child.Children)
+                    queue.Enqueue(gc);
             }
         }
     }
@@ -525,7 +544,7 @@ public partial class Thought
         if (!Parents.Contains(newParent))
         {
             //newParent.AddLink(this, IsA);
-            return AddLink(newParent, IsA);
+            return AddLink(newParent, "is-a");
         }
         return LinksTo.FindFirst(x => x.To == newParent && x.LinkType == IsA);
     }
@@ -559,19 +578,15 @@ public partial class Thought
         return retVal;
     }
 
-    List<Thought> stack = null;
     public bool HasProperty(Thought t)  //with inheritance
     {
         //NOT thread safe
-        if (stack is null) stack = new();
-        if (stack.Contains(t)) return false;
-        stack.Add(t);
-        foreach (Thought r in LinksTo)
-            if (r?.LinkType.Label == "hasProperty" && r.To == t)
-                return true;
-        foreach (Thought t1 in Parents) //handle inheritance 
+        if (t is null) return false;
+        if (LinksTo.FindFirst(x => x.LinkType.Label == "hasProperty" && x.To == t) is not null) return true;
+
+        foreach (Thought t1 in Ancestors) //handle inheritance 
         {
-            return t1.HasProperty(t);
+            if (t1.LinksTo.FindFirst(x => x.LinkType.Label == "hasProperty" && x.To == t) is not null) return true;
         }
         return false;
     }

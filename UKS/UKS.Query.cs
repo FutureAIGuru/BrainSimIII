@@ -97,11 +97,7 @@ public partial class UKS
             {
                 if (r.LinkType.HasProperty("inheritable"))
                 {
-                    //if there are several links, ignore the is-a, it is likely wrong
-                    //var existingLinks = GetLinksBetween(r.source, r.target);
-                    //if (existingLinks.Count > 1) continue;
-
-                    if (thoughtsToExamine.FindFirst(x => x.thought == r.To) is ThoughtWithQueryParams twgp)
+                     if (thoughtsToExamine.FindFirst(x => x.thought == r.To) is ThoughtWithQueryParams twgp)
                         twgp.hitCount++;//thought is in the list, increment its count
                     else
                     {//thought is not in the list, add it
@@ -299,7 +295,7 @@ public partial class UKS
     {
         foreach (Thought r1 in r.From.LinksTo)
         {
-            if (LinksAreEqualIgnoringLabels(r, r1))
+            if (Equals(r, r1))
             {
                 if (!r1.HasProperty("isCondition"))
                    return r1;
@@ -354,18 +350,6 @@ public partial class UKS
         return bestThought;
     }
 
-    //this will be expanded to transitive...
-    private List<Thought> GetListOfSimilarThoughts(Thought t)
-    {
-        List<Thought> retVal = new();
-        foreach (Thought r in t.LinksTo)
-            if (r.LinkType.Label == "isSimilarTo")
-                retVal.Add(r.To);
-        foreach (Thought r in t.LinksFrom)
-            if (r.LinkType.Label == "isSimilarTo" && !retVal.Contains(r.From))
-                retVal.Add(r.From);
-        return retVal;
-    }
 
     /// <summary>
     /// Search for the Thought which most closely resembles the target Thought based on the attributes of the target
@@ -390,7 +374,7 @@ public partial class UKS
             {
                 if (r1.From == target) continue;
                 var existing = thoughtsToSearch.FindFirst(x => x == r1.From);
-                if (r1.LinkType.HasAncestor(r.LinkType) && r1.To == r.To && existing is null)
+                if ((r1.LinkType == r.LinkType || r1.LinkType.HasAncestor(r.LinkType)) && r1.To == r.To && existing is null)
                 {
                     thoughtsToSearch.Add(r1.From);
                     if (!searchCandidates.ContainsKey(r1.From))
@@ -440,14 +424,6 @@ public partial class UKS
                     searchCandidates.Remove(t);
             }
         }
-
-        ////normalize the confidences
-        //float max = searchCandidates.Max(x => x.Value);
-        //if (max < target.Links.Count) max = target.Links.Count;
-        //foreach (var v in searchCandidates)
-        //{
-        //    searchCandidates[v.Key] /= max;
-        //}
 
         //create the output list
         var ordered = searchCandidates.OrderByDescending(kv => kv.Value);

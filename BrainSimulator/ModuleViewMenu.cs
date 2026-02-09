@@ -28,7 +28,7 @@ namespace BrainSimulator
 
         public void CreateContextMenu(ModuleBase nr, FrameworkElement r, ContextMenu cm = null) //for a selection
         {
-            cmCancelled = false;
+            //cmCancelled = false;
             if (cm is null)
                 cm = new ContextMenu();
             cm.SetValue(moduleNameProperty, nr.Label);
@@ -61,13 +61,7 @@ namespace BrainSimulator
             cm.Items.Add(mi);
 
             mi = new MenuItem();
-            //CheckBox cb1 = new CheckBox { Name = "Enabled", Content = "Enabled", IsChecked = nr.isEnabled, };
-            //mi.Header = cb1;
-            //cb1.Checked += Cb1_Checked;
-            //cb1.Unchecked += Cb1_Checked;
-            //cm.Items.Add(mi);
 
-            //string moduleName = (string)mi.Parent.GetValue(moduleNameProperty);
             ModuleBase m = activeModules.FindFirst(x => x.Label == nr.Label);
             int i = activeModules.IndexOf(m);
 
@@ -88,121 +82,8 @@ namespace BrainSimulator
                     ((MenuItem)cm.Items[cm.Items.Count - 1]).Click += Mi_Click;
                 }
             }
-
-            //if (nr.CustomContextMenuItems() is MenuItem miCustom)
-            //{
-            //    cm.Items.Add(miCustom);
-            //}
-
-            sp = new StackPanel { Orientation = Orientation.Horizontal };
-            Button b0 = new Button { Content = "OK", Width = 100, Height = 25, Margin = new Thickness(10) };
-            b0.Click += B0_Click;
-            sp.Children.Add(b0);
-            b0 = new Button { Content = "Cancel", Width = 100, Height = 25, Margin = new Thickness(10) };
-            b0.Click += B0_Click;
-            sp.Children.Add(b0);
-
-            cm.Items.Add(new MenuItem { Header = sp, StaysOpenOnClick = true });
-
-            cm.Closed += Cm_Closed;
         }
 
-        private void Cb1_Checked(object sender, RoutedEventArgs e)
-        {
-            if (sender is CheckBox cb)
-            {
-                if (cb.Parent is MenuItem mi)
-                    if (mi.Parent is ContextMenu cm)
-                    {
-                        Cm_Closed(cm, null);
-                    }
-            }
-        }
-
-        static bool cmCancelled = false;
-        private void B0_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button b)
-            {
-                if (b.Parent is StackPanel sp)
-                {
-                    if (sp.Parent is MenuItem mi)
-                    {
-                        if (mi.Parent is ContextMenu cm)
-                        {
-                            if ((string)b.Content == "Cancel")
-                                cmCancelled = true;
-                            Cm_Closed(cm, e);
-                        }
-                    }
-                }
-            }
-        }
-
-
-        static bool deleted = false;
-        private void Cm_Closed(object sender, RoutedEventArgs e)
-        {
-            if (deleted)
-            {
-                deleted = false;
-            }
-            else if (sender is ContextMenu cm)
-            {
-                if (!cm.IsOpen) return;
-                cm.IsOpen = false;
-                if (cmCancelled) return;
-
-                string moduleName = (string)cm.GetValue(moduleNameProperty);
-                ModuleBase m = activeModules.FindFirst(x => x.Label == moduleName);
-                int i = activeModules.IndexOf(m);
-                string label = "";
-                string theModuleTypeStr = "";
-                Color color = Colors.Wheat;
-                int width = 1, height = 1;
-
-                Control cc = Utils.FindByName(cm, "AreaName");
-                if (cc is TextBox tb)
-                    label = tb.Text;
-                cc = Utils.FindByName(cm, "Enabled");
-                bool isEnabled = true;
-                if (cc is CheckBox cb2)
-                    isEnabled = (bool)cb2.IsChecked;
-
-                cc = Utils.FindByName(cm, "AreaWidth");
-                if (cc is TextBox tb1)
-                    int.TryParse(tb1.Text, out width);
-                cc = Utils.FindByName(cm, "AreaHeight");
-                if (cc is TextBox tb2)
-                    int.TryParse(tb2.Text, out height);
-                cc = Utils.FindByName(cm, "AreaType");
-                if (cc is ComboBox cb && cb.SelectedValue is not null)
-                {
-                    theModuleTypeStr = "Module" + (string)cb.SelectedValue;
-                    if (theModuleTypeStr == "") return;//somethought went wrong
-                    label = (string)cb.SelectedValue;
-                }
-
-                cc = Utils.FindByName(cm, "AreaColor");
-                if (cc is ComboBox cb1)
-                    color = ((SolidColorBrush)((ComboBoxItem)cb1.SelectedValue).Background).Color;
-                if (label == "" && theModuleTypeStr == "") return;
-
-                ModuleBase theModule = activeModules[i];
-
-                //update the existing module
-                theModule.Label = label;
-
-                //did we change the module type?
-                Type t1x = Type.GetType("BrainSimulator.Modules." + theModuleTypeStr);
-                if (t1x is not null && (activeModules[i] is null || activeModules[i].GetType() != t1x))
-                {
-                    activeModules[i] = (ModuleBase)Activator.CreateInstance(t1x);
-                    activeModules[i].Label = theModuleTypeStr;
-                }
-            }
-            ReloadActiveModulesSP();
-        }
 
         private void Mi_Click(object sender, RoutedEventArgs e)
         {
@@ -236,7 +117,7 @@ namespace BrainSimulator
                     if (i >= 0)
                     {
                         DeleteModule(moduleName);
-                        deleted = true;
+//                        deleted = true;
                     }
                 }
                 if ((string)mi.Header == "Initialize")

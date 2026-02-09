@@ -103,22 +103,7 @@ public partial class UKS
 		return r;
 	}
 
-
-	//these are used by the subclass searching system to report back the closest match and what attributes are missing
-	public Thought CreateTheLink(
-	  object oSource, object oLinkType, object oTarget)
-	{
-		//Debug.WriteLine(oSource.ToString()+" "+oLinkType.ToString()+" "+oTarget.ToString());
-		Thought source = ThoughtFromObject(oSource);
-		Thought linkType = ThoughtFromObject(oLinkType, "LinkType", source);
-		Thought target = ThoughtFromObject(oTarget);
-
-
-		Thought theLink = CreateTheLink(ref source, ref linkType, ref target);
-		return theLink;
-	}
-
-	public Thought CreateTheLink(ref Thought source, ref Thought linkType, ref Thought target)
+	public Thought CreateTheLink(Thought source, Thought linkType, Thought target)
 	{
 		Thought inverseType1 = CheckForInverse(linkType);
 		//if this link has an inverse, switcheroo so we are storing consistently in one direction
@@ -127,8 +112,6 @@ public partial class UKS
 			(source, target) = (target, source);
 			linkType = inverseType1;
 		}
-
-		//CREATE new subclasses if needed
 
 		Thought r = new Thought()
 		{ From = source, LinkType = linkType, To = target };
@@ -210,21 +193,19 @@ public partial class UKS
 
 		//get the attributes of t
 		//var existingLinks = GetAllLinks(new List<Thought> { t }, false);
-		var existingLinks = t.LinksTo;
+		List<Thought> existingLinks = t.Descendants.ToList();
+		existingLinks.Insert(0, t);
 		foreach (Thought r in existingLinks)
 		{
-			if (attrs.Contains(r.To)) attrs.Remove(r.To);
-			if (attrs.Contains(r.LinkType)) attrs.Remove(r.LinkType);
+			foreach (var attr in attrs)
+			{
+				if (r.LinksTo.FindFirst(x => x.To == attr) is null) goto NotFound;
+			}
+			return r;
+		NotFound:
+			continue;
 		}
-
-		//t already has these attributes
-		if (attrs.Count == 0)
-			return t;
-
-		//attrs now contains the remaing attributes we need to find in a descendent
-		//bestMatch = null;
-		//missingAttributes = new List<Thought>();
-		return ChildHasAllAttributes(t, attrs, ref bestMatch, ref missingAttributes);
+		return null;
 	}
 
 	private Thought ChildHasAllAttributes(Thought t, List<Thought> attrs, 
