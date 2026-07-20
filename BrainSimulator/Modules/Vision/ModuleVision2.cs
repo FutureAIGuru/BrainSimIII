@@ -36,7 +36,7 @@ public partial class ModuleVision2 : ModuleBase
     public int stride = 1;
     public int counter = 0;
     // Original value: 4
-    public int patchesPerPixel = 4;
+    public int patchesPerPixel = 8;
     // Original Weights: etaOn = 0.06f, etaOff = 0.03f, tpOff = -0.05f, tpOnWeight = 1
     public float etaOn = 0.06f;
     public float etaOff = 0.03f;
@@ -197,9 +197,15 @@ public partial class ModuleVision2 : ModuleBase
                     string patchName = $"{layerName}_{patchCenterX:D2}_{patchCenterY:D2}_{i}";
                     Thing patchThing = theUKS.GetOrAddThing(patchName);
 
-                    // this is the maximum weight at the center for this patch index i
-                    //float centerMaxWeight = (float)(patchSize - i * 0.1);
                     float centerMaxWeight = 1f;
+
+                    // Each of the numPatchesPerPixel copies at this location is a distinct
+                    // orientation-tuned "simple cell", evenly spaced across the 180-degree
+                    // range of undirected line orientations (e.g. 0, 45, 90, 135 degrees for
+                    // numPatchesPerPixel == 4). Without this bias, all copies start out as
+                    // identical isotropic blobs and competitive learning has nothing to break
+                    // the tie on, so one copy wins every time and the others never specialize.
+                    double preferredAngle = (numPatchesPerPixel > 0) ? Math.PI * i / numPatchesPerPixel : 0;
 
                     for (int x = -half; x < half + 1; x++)
                         for (int y = -half; y < half + 1; y++)
@@ -215,8 +221,24 @@ public partial class ModuleVision2 : ModuleBase
                             float radial = (maxRadius > 0f) ? 1f - (r / maxRadius) : 1f;
                             if (radial < 0f) radial = 0f;
 
-                            // interpolate between minWeight and centerMaxWeight based on distance
-                            float maxWeight = minWeight + (centerMaxWeight - minWeight) * radial;
+                            // angular factor: elongates the receptive field along preferredAngle
+                            // and suppresses it perpendicular to that axis. cos^2 is naturally
+                            // symmetric under a 180-degree rotation, so it matches undirected
+                            // line orientation without any extra mod-180 handling.
+                            float orientationFactor = 1f;
+                            if (!(x == 0 && y == 0) && numPatchesPerPixel > 1)
+                            {
+                                double offsetAngle = Math.Atan2(dy, dx);
+                                double cosDiff = Math.Cos(offsetAngle - preferredAngle);
+                                orientationFactor = (float)(cosDiff * cosDiff);
+
+                                // keep a floor so off-axis connections are weakened, not severed
+                                const float minOrientationFactor = 0.15f;
+                                orientationFactor = minOrientationFactor + (1f - minOrientationFactor) * orientationFactor;
+                            }
+
+                            // interpolate between minWeight and centerMaxWeight based on distance and orientation
+                            float maxWeight = minWeight + (centerMaxWeight - minWeight) * radial * orientationFactor;
                             maxWeight *= .75f;  //reduces extraneous hits
 
                             //float maxWeight = minWeight + (1.5f - minWeight) * radial;
@@ -286,8 +308,8 @@ public partial class ModuleVision2 : ModuleBase
 
         //add relationships for nearly-collinear patches
         theUKS.GetOrAddThing("nearlyCollinearWith", "RelationshipType");
-        for (int patchX = 2; patchX < numPatchesX+2; patchX++)
-            for (int patchY = 2; patchY < numPatchesY+2; patchY++)
+        for (int patchX = 2; patchX < numPatchesX + 2; patchX++)
+            for (int patchY = 2; patchY < numPatchesY + 2; patchY++)
                 for (int i = 0; i < numPatchesPerPixel; i++)
                     for (int j = 0; j < numPatchesPerPixel; j++)
                     {
@@ -394,7 +416,8 @@ public partial class ModuleVision2 : ModuleBase
 
     void DrawLine(Point p1, Point p2)
     {
-        if (boundaryArray == null) {
+        if (boundaryArray == null)
+        {
             return;
         }
 
@@ -571,14 +594,14 @@ public partial class ModuleVision2 : ModuleBase
             {
                 int targetFiredCount = 0;
                 int lastX = -1; int lastY = -1;
-                foreach (Relationship r in item.t.Relationships.OrderBy(x=>x.target.Label).Where(x => x.relType.Label == "collinearWith"))
+                foreach (Relationship r in item.t.Relationships.OrderBy(x => x.target.Label).Where(x => x.relType.Label == "collinearWith"))
                 {
                     string[] parts = r.target.Label.Split("_");
                     int curX = int.Parse(parts[1]);
                     int curY = int.Parse(parts[2]);
                     if (curX == lastX && curY == lastY) continue;  //do not cuplicate count on the same point
                     // if (r.target.lastFiredTime > DateTime.Now - TimeSpan.FromSeconds(10))
-                    if (matchOrig.FindAll(x=>x.t == r.target).Count > 0)
+                    if (matchOrig.FindAll(x => x.t == r.target).Count > 0)
                     {
                         targetFiredCount++;
                         lastX = curX;
